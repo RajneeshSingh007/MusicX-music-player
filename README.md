@@ -59,6 +59,7 @@ Special Thanks to api provided by Last.fm (Artist Image) & https://api.vagalume.
         <a href="https://github.com/paolorotolo/AppIntro"><b>MaterialShowcaseView</b></a>
     </li>
  </ul>
+If forgot anyone other license author,free free to mail me @developerrajneeshsingh@gmail.com.
  </p>
  <p>Feel free to fork,bug fix.</p>
  <p>Also, Thanks To StackOverflow and Slack Developers.</p>
