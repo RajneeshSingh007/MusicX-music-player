@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/logolayout"
+    android:layout_width="match_parent"
+    android:layout_height="125dp"
+    android:background="@color/colorPrimary"
+    android:elevation="@dimen/toolbarelevation"
+    android:fitsSystemWindows="true">
+
+    <com.rks.musicx.misc.widgets.TextView
+        android:id="@+id/txtLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:elevation="@dimen/toolbarelevation"
+        android:gravity="center"
+        android:text="MusicX"
+        android:textColor="@color/white"
+        android:textSize="50sp"
+        app:textType="header"
+        android:shadowDx="30"
+        android:shadowDy="30"
+        android:shadowRadius="60"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+
+</RelativeLayout>

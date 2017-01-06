@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/item_view"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:background="?android:attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:gravity="center">
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/inputlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:counterEnabled="false"
+            app:counterOverflowTextAppearance="?android:textAppearanceSmall"
+            app:theme="?toolbar_popup_theme">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/lyricssong_name"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:maxLines="1"
+                android:hint="Song name"
+                android:textSize="16sp"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_marginTop="4dp">
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/inputlayout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:counterEnabled="false"
+            app:counterOverflowTextAppearance="?android:textAppearanceSmall"
+            app:theme="?toolbar_popup_theme">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/lyricsartist_name"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:maxLines="1"
+                android:hint="Artist name"
+                android:textSize="16sp"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

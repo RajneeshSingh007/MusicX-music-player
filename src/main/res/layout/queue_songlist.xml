@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/item_view"
+    android:background="?android:attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingBottom="8dp"
+    android:paddingLeft="4dp"
+    android:paddingRight="4dp"
+    android:paddingTop="8dp">
+
+    <ImageView
+        android:id="@+id/reorder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/reorder"
+        android:layout_marginStart="4dp"
+        android:tint="@android:color/white"
+        android:layout_marginEnd="4dp"/>
+
+    <TextView
+        android:id="@+id/number"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_weight="0"
+        android:gravity="center"
+        android:text="No."
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+         />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="2dp"
+        android:layout_weight="1"
+        android:id="@+id/queue_info"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/colorPrimaryText"
+            android:textSize="16sp"
+            android:text="SONG TITLE"/>
+
+        <TextView
+            android:id="@+id/artist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingTop="4dp"
+            android:textColor="@color/colorSecondaryText"
+            android:textSize="14sp"
+            android:alpha="0.7"
+            android:text="SONG ARTIST"/>
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/menu_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingRight="4dp"
+        android:paddingLeft="4dp"
+        android:layout_weight="0"
+        android:tint="@android:color/white"
+        android:background="@drawable/ripple"
+        app:srcCompat="@drawable/ic_menu" />
+
+</LinearLayout>

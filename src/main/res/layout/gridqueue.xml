@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/item_view"
+    android:foreground="?android:attr/selectableItemBackground"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.rks.musicx.misc.widgets.SquareImageView
+        android:src="@mipmap/ic_launcher"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:id="@+id/queue_artwork"
+        android:adjustViewBounds="true"
+        android:background="@color/default_artwork_bg"
+        android:scaleType="centerCrop"/>
+</FrameLayout>

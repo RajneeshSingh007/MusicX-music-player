@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="translucent_white_8p">#20ffffff</color>
+    <color name="bgcolor">#b4000000</color>
+    <color name="default_artwork_bg">#212121</color>
+    <color name="white">#ffffff</color>
+    <color name="colorPrimary">#c62828</color>
+    <color name="colorPrimaryLight">#c62828</color>
+    <color name="colorAccent">#f44336</color>
+    <color name="colorAccentDarkDefault">#20a9e9</color>
+    <color name="colorPrimaryDarkTheme">#263238</color>
+    <color name="colorPrimaryDarkDarkTheme">#263238</color>
+    <color name="colorAccentDarkTheme">#20a9e9</color>
+    <color name="colorPrimaryText">#212121</color>
+    <color name="colorSecondaryText">#616161</color>
+    <color name="darkthemeTextColor">#f5f5f5</color>
+    <color name="MaterialGrey">#212121</color>
+    <color name="shadowbg">#50000000</color>
+    <color name="lightBg">#fafafa</color>
+    <color name="darkBg">#1d1d1d</color>
+    <color name="text_transparent">#dcffffff</color>
+    <color name="text_transparent2">#beffffff</color>
+</resources>
+

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/item_view"
+    android:layout_marginStart="4dp"
+    android:layout_marginEnd="4dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.rks.musicx.misc.widgets.SquareImageView
+        android:src="@mipmap/ic_launcher"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
+        android:id="@+id/artwork"
+        android:background="@color/default_artwork_bg"
+        android:scaleType="centerCrop"/>
+
+    <LinearLayout
+        android:id="@+id/backgroundColor"
+        android:layout_width="fill_parent"
+        android:layout_below="@+id/artwork"
+        android:background="#e5e5e5"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:gravity="center"
+        android:layout_alignStart="@+id/artwork"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/artwork">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/album_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingStart="2dp"
+                android:textColor="@color/colorPrimaryText"
+                android:textSize="15sp"
+                android:text="SONG TITLE"/>
+
+            <TextView
+                android:id="@+id/artist_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingStart="2dp"
+                android:paddingTop="2dp"
+                android:textColor="@color/colorSecondaryText"
+                android:textSize="13sp"
+                android:alpha="0.8"
+                android:text="SONG ARTIST"/>
+
+        </LinearLayout>
+        <ImageButton
+            android:id="@+id/menu_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:tint="@android:color/white"
+            android:background="@drawable/ripple"
+            app:srcCompat="@drawable/ic_menu" />
+    </LinearLayout>
+</RelativeLayout>

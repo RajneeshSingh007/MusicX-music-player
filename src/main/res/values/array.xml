@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="blurChoice">
+        <item>20%</item>
+        <item>40%</item>
+        <item>60%</item>
+        <item>80%</item>
+        <item>100%</item>
+    </string-array>
+    <string-array name="selectedblur">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="playingChoice">
+        <item>PlayingView1</item>
+        <item>PlayingView2</item>
+    </string-array>
+    <string-array name="selectedPlayingView">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="fontChoice">
+        <item>RobotoLight</item>
+        <item>Raleway</item>
+        <item>Cormorant</item>
+        <item>CutiveMono</item>
+        <item>Timber</item>
+        <item>Snippet</item>
+        <item>Trench</item>
+        <item>Espacio</item>
+        <item>Rex</item>
+        <item>Exodus</item>
+        <item>Gogia</item>
+        <item>Maven</item>
+    </string-array>
+    <string-array name="selectedFont">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+    </string-array>
+    <string-array name="light_status_mode_entries">
+        <item>Off, status bar icons will be white</item>
+        <item>On, status bar icons will be black</item>
+        <item>Auto, status bar icons will be black if primary color is light</item>
+    </string-array>
+
+    <string-array name="light_toolbar_mode_entries">
+        <item>Off, toolbar text/icons will be white</item>
+        <item>On, toolbar text/icons will be black</item>
+        <item>Auto, toolbar text/icons will be black if primary color is light</item>
+    </string-array>
+
+    <string-array name="light_status_mode_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+</resources>

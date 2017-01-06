@@ -1,0 +1,117 @@
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical">
+
+
+            <RelativeLayout
+                android:id="@+id/songDetail"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:layout_marginTop="2dp"
+                android:elevation="16dp"
+                android:layout_alignParentBottom="true"
+                android:visibility="visible">
+
+
+                <com.rks.musicx.misc.widgets.ProgressBar
+                    android:id="@+id/songProgress"
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:padding="0dp"
+                    android:layout_alignParentTop="true"/>
+
+                <ImageView
+                    android:id="@+id/BackgroundArt"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="4dp"
+                    android:scaleType="centerCrop"
+                    android:adjustViewBounds="true"
+                    android:src="@mipmap/ic_launcher"/>
+
+                <LinearLayout
+                    android:id="@+id/dragPanel"
+                    android:background="@color/bgcolor"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="4dp"
+                    android:padding="2dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/song_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="marquee"
+                        android:maxLines="1"
+                        android:textSize="16sp"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:scrollHorizontally="true"
+                        android:textColor="@color/white"
+                        android:text="Song Title"/>
+
+                    <TextView
+                        android:id="@+id/song_artist"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="marquee"
+                        android:paddingTop="4dp"
+                        android:maxLines="1"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:textColor="@color/colorSecondaryText"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:scrollHorizontally="true"
+                        android:textSize="14sp"
+                        android:text="Song Artist"/>
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <FrameLayout
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="2dp"
+                android:layout_above="@+id/songDetail"/>
+        </RelativeLayout>
+
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/quick_play_pause_toggle"
+            style="@style/FabStyle"
+            app:borderWidth="0dp"
+            android:clickable="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/aw_ic_play"
+            android:tag="bg_tint_accent_color"
+            app:layout_anchor="@+id/container"
+            app:layout_anchorGravity="bottom|right|end" />
+    </android.support.design.widget.CoordinatorLayout>
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/navigation_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:menu="@menu/navigation" />
+
+</android.support.v4.widget.DrawerLayout>

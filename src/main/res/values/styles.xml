@@ -1,0 +1,66 @@
+<resources>
+
+    <attr format="reference" name="cardStyle"/>
+    <attr format="reference" name="accentColor"/>
+    <attr format="reference" name="iconColor"/>
+    <attr format="reference" name="windowBackground"/>
+    <attr format="reference" name="stateSelector" />
+    <attr name="toolbar_popup_theme" format="reference" />
+
+    <style name="ThemeBaseLight" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryLight</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="accentColor">@color/colorAccent</item>
+        <item name="iconColor">@android:color/black</item>
+        <item name="cardStyle">@style/CardView.Light</item>
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+        <item name="toolbar_popup_theme">?toolbar_popup_theme</item>
+        <item name="windowBackground">@color/lightBg</item>
+        <item name="android:windowBackground">@color/lightBg</item>
+        <item name="ate_key">light_theme</item>
+    </style>
+
+    <style name="ThemeBaseDark" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimaryDarkTheme</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkDarkTheme</item>
+        <item name="colorAccent">@color/colorAccentDarkTheme</item>
+        <item name="cardStyle">@style/CardView.Dark</item>
+        <item name="accentColor">@color/colorAccentDarkTheme</item>
+        <item name="iconColor">@android:color/white</item>
+        <item name="android:windowBackground">@color/darkBg</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="windowBackground">@color/darkBg</item>
+        <item name="toolbar_popup_theme">?toolbar_popup_theme</item>
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+        <item name="ate_key">dark_theme</item>
+    </style>
+
+    <style name="AppThemeLight" parent="ThemeBaseLight" />
+
+    <style name="AppThemeNormalLight" parent="ThemeBaseLight" />
+
+    <style name="AppThemeDark" parent="ThemeBaseDark">
+
+    </style>
+
+    <style name="AppThemeNormalDark" parent="ThemeBaseDark">
+
+    </style>
+
+    <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">true</item>
+        <item name="color">@android:color/white</item>
+    </style>
+
+    <style name="FabStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">16dp</item>
+        <item name="elevation">8dp</item>
+        <item name="pressedTranslationZ">12dp</item>
+        <item name="rippleColor">?attr/accentColor</item>
+    </style>
+
+</resources>

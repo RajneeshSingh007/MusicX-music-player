@@ -1,0 +1,117 @@
+apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
+
+android {
+    signingConfigs {
+        config {
+            keyAlias 'MyAndroidKey'
+            keyPassword 'myKeyPassword'
+            storeFile file('E:/AndroidDevelopment/MusicX.jks')
+            storePassword 'myStorePassword'
+        }
+    }
+    compileSdkVersion 25
+    buildToolsVersion "25.0.1"
+    defaultConfig {
+        applicationId "com.rks.musicx"
+        minSdkVersion 21
+        targetSdkVersion 25
+        versionCode 30
+        versionName '1.0'
+        vectorDrawables.useSupportLibrary = true
+        renderscriptTargetApi 19
+        renderscriptSupportModeEnabled true
+        signingConfig signingConfigs.config
+        multiDexEnabled true
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debuggable false
+            shrinkResources true
+            zipAlignEnabled true
+            signingConfig signingConfigs.config
+            proguardFile 'E:/AndroidDevelopment/AppDevelopment/appDev/MusicX/app/proguard-rules.pro'
+        }
+    }
+    dexOptions {
+        preDexLibraries = false
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    productFlavors {
+        MusicX {
+            minSdkVersion 21
+            proguardFile 'E:/AndroidDevelopment/AppDevelopment/appDev/MusicX/app/proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+    }
+
+}
+ext {
+    supportVersion = "25.1.0"
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':library')
+    compile project(':play_widget')
+
+    /*
+    Theming
+     */
+    compile('com.afollestad.material-dialogs:core:0.9.1.0@aar') {
+        transitive = true
+    }
+    compile('com.afollestad.material-dialogs:commons:0.9.1.0@aar') {
+        transitive = true
+    }
+    /*
+    Dialog
+     */
+    compile files('libs/jaudiotagger.jar')
+    /*
+    Google Package
+     */
+    compile "com.android.support:support-v4:${supportVersion}"
+    compile "com.android.support:support-vector-drawable:${supportVersion}"
+    compile "com.android.support:appcompat-v7:${supportVersion}"
+    compile "com.android.support:cardview-v7:${supportVersion}"
+    compile "com.android.support:recyclerview-v7:${supportVersion}"
+    compile "com.android.support:design:${supportVersion}"
+    compile "com.android.support:palette-v7:${supportVersion}"
+    compile "com.android.support:percent:${supportVersion}"
+    compile "com.android.support:preference-v14:${supportVersion}"
+
+    /*
+    ScrollView
+     */
+    compile 'com.simplecityapps:recyclerview-fastscroll:1.0.11'
+
+    /*
+    Intro
+     */
+    compile 'com.github.paolorotolo:appintro:4.0.0'
+
+    /*
+    Networking
+     */
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+    compile 'com.google.code.gson:gson:2.4'
+    /*
+    ImageLoader
+    */
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'jp.wasabeef:glide-transformations:2.0.1'
+    /*
+    Custom fonts
+     */
+    compile 'uk.co.chrisjenx:calligraphy:2.2.0'
+    compile 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.7.0'
+    compile 'com.github.deano2390:MaterialShowcaseView:1.1.0'
+    compile 'com.kbeanie:image-chooser-library:1.5.8@aar'
+}

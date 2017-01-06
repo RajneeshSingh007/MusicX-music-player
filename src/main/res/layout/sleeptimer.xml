@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:id="@+id/sleepView"
+    android:layout_height="match_parent"
+    android:layout_weight="1">
+
+    <com.rks.musicx.misc.widgets.CircularSeekBar
+        android:id="@+id/timer_circle"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        app:circle_color="@color/translucent_white_8p"
+        app:circle_progress_color="@color/translucent_white_8p"
+        app:circle_x_radius="@dimen/circular_radii"
+        app:circle_y_radius="@dimen/circular_radii"
+        app:max="100"
+        android:layout_gravity="center"
+        app:pointer_alpha_ontouch="100"
+        app:maintain_equal_circle="true"
+        app:pointer_color="@color/colorPrimary"
+        app:pointer_halo_border_width="2dp"
+        app:pointer_halo_color="@color/colorAccent"
+        app:pointer_halo_width="1dp"
+        app:circle_progress="30"
+        app:use_custom_radii="true" />
+
+    <TextView
+        android:id="@+id/timer_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="0"
+        android:gravity="center"
+        android:textColor="@color/colorPrimaryText"
+        android:textSize="30sp" />
+
+</FrameLayout>

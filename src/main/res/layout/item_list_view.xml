@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/item_view"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingBottom="10dp"
+    android:paddingLeft="5dp"
+    android:background="?android:attr/selectableItemBackground"
+    android:paddingRight="5dp"
+    android:paddingTop="10dp">
+
+
+    <com.rks.musicx.misc.widgets.CircleImageView
+        android:id="@+id/album_listartwork"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_weight="0"
+        app:border_color="@color/translucent_white_8p"
+        app:border_width="4dp"
+        android:transitionName="TransitionArtwork"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/album_artwork"
+        android:src="@mipmap/ic_launcher" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="5dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/listalbumname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/colorPrimaryText"
+            android:textSize="16sp"
+            android:text="SONG TITLE"/>
+
+        <TextView
+            android:id="@+id/listartistname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/colorSecondaryText"
+            android:textSize="14sp"
+            android:alpha="0.7"
+            android:text="SONG ARTIST"/>
+    </LinearLayout>
+
+
+</LinearLayout>
+

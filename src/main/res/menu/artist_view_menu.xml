@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        app:showAsAction="always"
+        android:icon="@drawable/abc_ic_search_api_mtrl_alpha"
+        android:id="@+id/artist_search"
+        android:orderInCategory="1"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        android:title="@string/search"
+        android:iconifiedByDefault="true"/>
+
+    <item
+        android:id="@+id/menu_sort_by"
+        android:title="@string/menu_sort_by"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/menu_sort_by_az"
+                android:title="@string/sort_order_entry_az" />
+            <item
+                android:id="@+id/menu_sort_by_za"
+                android:title="@string/sort_order_entry_za" />
+            <item
+                android:id="@+id/menu_sort_by_number_of_songs"
+                android:title="@string/sort_order_entry_number_of_songs" />
+            <item
+                android:id="@+id/menu_sort_by_number_of_albums"
+                android:title="@string/sort_order_entry_number_of_albums" />
+        </menu>
+    </item>
+</menu>

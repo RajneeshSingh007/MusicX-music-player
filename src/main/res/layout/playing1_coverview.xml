@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/coverView"
+        android:elevation="@dimen/toolbarelevation"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_gravity="center">
+
+        <com.rks.musicx.misc.widgets.CircularSeekBar
+            android:id="@+id/circular_seekbar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            app:circle_color="@color/translucent_white_8p"
+            app:circle_progress_color="@color/translucent_white_8p"
+            app:circle_x_radius="@dimen/circular_radii"
+            app:circle_y_radius="@dimen/circular_radii"
+            app:max="100"
+            app:pointer_alpha_ontouch="100"
+            app:maintain_equal_circle="true"
+            app:pointer_color="@color/colorPrimary"
+            app:pointer_halo_border_width="2dp"
+            app:pointer_halo_color="@color/colorAccent"
+            app:pointer_halo_width="1dp"
+            app:circle_progress="30"
+            app:use_custom_radii="true" />
+
+        <com.rks.musicx.misc.widgets.CircleImageView
+            android:id="@+id/album_cover"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:layout_margin="30dp"
+            app:border_color="@color/translucent_white_8p"
+            app:border_width="4dp" />
+
+        <FrameLayout
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:layout_gravity="center"
+            android:clickable="true">
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/play_pause_toggle"
+                style="@style/FabStyle"
+                app:borderWidth="0dp"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:scaleType="fitCenter"
+                android:src="@drawable/aw_ic_play"
+                android:tag="bg_tint_accent_color" />
+
+        </FrameLayout>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/currentDur"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:text="3.26"/>
+
+        <TextView
+            android:id="@+id/divider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:text="/"/>
+
+        <TextView
+            android:id="@+id/totalDur"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:text="3.67"/>
+
+    </LinearLayout>
+
+</LinearLayout>

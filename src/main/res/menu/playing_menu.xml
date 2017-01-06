@@ -1,0 +1,41 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.activities.MainActivity">
+
+    <item android:id="@+id/action_eq"
+        android:title="Equalizer"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_changeArt"
+        android:title="Change Artwork"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_lyrics"
+        android:title="Search Lyrics"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_playlist"
+        android:title="Add to Playlist"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_ringtone"
+        android:title="Set Ringtone"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_trackdetails"
+        android:title="Track Details"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_share"
+        android:actionProviderClass="android.widget.ShareActionProvider"
+        android:title="@string/action_share"
+        app:showAsAction="never" />
+
+</menu>

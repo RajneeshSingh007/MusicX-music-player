@@ -1,0 +1,47 @@
+<resources>
+    <dimen name="circular_radii">120dp</dimen>
+    <dimen name="aw_player_height">60dp</dimen>
+    <dimen name="aw_player_width">300dp</dimen>
+    <dimen name="aw_button_padding">7dp</dimen>
+    <dimen name="aw_prev_next_button_extra_padding">3dp</dimen>
+    <dimen name="aw_status_bar_height">48dp</dimen>
+    <dimen name="aw_expand_collapse_widget_padding">4dp</dimen>
+    <dimen name="aw_progress_stroke_width">4dp</dimen>
+    <dimen name="aw_cross_stroke_width">4dp</dimen>
+    <dimen name="aw_shadow_radius">5dp</dimen>
+    <dimen name="aw_shadow_dx">1dp</dimen>
+    <dimen name="aw_shadow_dy">1dp</dimen>
+    <dimen name="aw_bubbles_min_size">5dp</dimen>
+    <dimen name="aw_bubbles_max_size">10dp</dimen>
+    <dimen name="aw_navigation_bar_height">48dp</dimen>
+    <dimen name="aw_edge_offset_collapsed">-10dp</dimen>
+    <dimen name="aw_edge_offset_expanded">0dp</dimen>
+    <dimen name="toolbarelevation">16dp</dimen>
+
+    <dimen name="pw_small_diffuser_size">54dp</dimen>
+
+    <dimen name="pw_big_diffuser_shadow_width">30dp</dimen>
+    <dimen name="pw_medium_diffuser_shadow_width">25dp</dimen>
+    <dimen name="pw_small_diffuser_shadow_width">18dp</dimen>
+
+    <dimen name="pw_small_fab_default_elevation">6dp</dimen>
+
+    <dimen name="pw_play_button_margin_bottom">0dp</dimen>
+
+    <dimen name="pw_default_fab_size">56dp</dimen>
+
+    <dimen name="pw_default_diffusers_padding">10dp</dimen>
+    <dimen name="pw_default_progress_line_padding">10dp</dimen>
+
+    <dimen name="pw_progress_complete_line_stroke_width">5dp</dimen>
+    <dimen name="pw_progress_ball_radius">4dp</dimen>
+    <dimen name="pw_progress_line_stroke_width">3dp</dimen>
+
+    <dimen name="pw_image_item_margin">10dp</dimen>
+    <dimen name="pw_image_item_size">48dp</dimen>
+    <dimen name="pw_image_item_double_size">96dp</dimen>
+
+    <dimen name="pw_progress_line_view_touch_radius">16dp</dimen>
+    <dimen name="cover_size">60dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+</resources>
