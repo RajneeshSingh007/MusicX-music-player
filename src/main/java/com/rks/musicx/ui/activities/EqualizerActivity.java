@@ -34,6 +34,9 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 
+/**
+ * Created by Coolalien on 12/23/2016.
+ */
 
 public class EqualizerActivity extends BaseActivity implements ATEActivityThemeCustomizer {
 
@@ -137,9 +140,10 @@ public class EqualizerActivity extends BaseActivity implements ATEActivityThemeC
            bassBoost.setOnProgressChangedListener(new EqView.onProgressChangedListener() {
                @Override
                public void onProgressChanged(int progress) {
-                   short bassStrength = (short)  ((float) 1000/19 * (progress));
+                   short bassStrength = progress == 0 ? 0 : (short)  ((float) 1000/19 * (progress));
                    BassBoosts.setBassBoostStrength(bassStrength);
                }
+
            });
            bassBoost.setProgressColor(accentcolor);
            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)) {
@@ -165,7 +169,7 @@ public class EqualizerActivity extends BaseActivity implements ATEActivityThemeC
             virtualizerBoost.setOnProgressChangedListener(new EqView.onProgressChangedListener() {
                 @Override
                 public void onProgressChanged(int progress) {
-                    short virtualStrength = (short) (((float) 1000 / 19) * (progress));
+                    short virtualStrength = progress == 0 ? 0 : (short) (((float) 1000 / 19) * (progress));
                     Virtualizers.setVirtualizerStrength(virtualStrength);
                 }
             });
@@ -194,9 +198,10 @@ public class EqualizerActivity extends BaseActivity implements ATEActivityThemeC
             LoudnessBoost.setOnProgressChangedListener(new EqView.onProgressChangedListener() {
                 @Override
                 public void onProgressChanged(int progress) {
-                    short loudGain = (short) (((float) 1000 / 19) * (progress));
+                    short loudGain = progress == 0 ? 0 :  (short) (((float) 1000 / 19) * (progress));
                     Loud.setLoudnessEnhancerGain(loudGain);
                 }
+
             });
             LoudnessBoost.setProgressColor(accentcolor);
             if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)) {
@@ -321,6 +326,7 @@ public class EqualizerActivity extends BaseActivity implements ATEActivityThemeC
         this.onBackPressed();
         return super.onOptionsItemSelected(item);
     }
+
 
     @Override
     protected void attachBaseContext(Context newBase) {
