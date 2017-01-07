@@ -31,9 +31,6 @@ public class Virtualizers {
     public static void initVirtualizer(int audioID){
         EndVirtual();
         virtualizer = new Virtualizer(0,audioID);
-        if (virtualstr >0 && virtualstr <= Virtualizer_STRENGTH){
-            setVirtualizerStrength(virtualstr);
-        }
     }
 
     /**
@@ -43,7 +40,9 @@ public class Virtualizers {
     public static void setVirtualizerStrength(short strength) {
         if (virtualizer != null) {
             virtualstr = strength;
-            virtualizer.setStrength(strength);
+            if (virtualstr >0 && virtualstr <= Virtualizer_STRENGTH){
+                virtualizer.setStrength(virtualstr);
+            }
         }
 
     }
@@ -75,7 +74,8 @@ public class Virtualizers {
         }
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
         editor.putBoolean(VIRTUAL_ENABLED, virtualizer.getEnabled());
-        editor.putInt(VIRTUAL_BOOST, getVirtualStrength());
+        short str = getVirtualStrength() == 0 ? 0 : getVirtualStrength();
+        editor.putInt(VIRTUAL_BOOST, str);
         editor.apply();
     }
 

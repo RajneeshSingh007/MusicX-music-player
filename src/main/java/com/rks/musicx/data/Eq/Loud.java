@@ -31,9 +31,6 @@ public class Loud {
     public static void initLoudnessEnhancer(int audioSessionId){
         EndLoudnessEnhancer();
         loudnessEnhancer = new LoudnessEnhancer(audioSessionId);
-        if (Gain >=0 && Gain <= GAIN_MAX) {
-            loudnessEnhancer.setTargetGain(Gain);
-        }
     }
 
     /**
@@ -43,7 +40,9 @@ public class Loud {
     public static void setLoudnessEnhancerGain(int gain) {
         if (loudnessEnhancer != null) {
             Gain = gain;
-            loudnessEnhancer.setTargetGain(gain);
+            if (Gain >=0 && Gain <= GAIN_MAX) {
+                loudnessEnhancer.setTargetGain(Gain);
+            }
         }
 
     }
@@ -75,7 +74,9 @@ public class Loud {
         }
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
         editor.putBoolean(EQ_ENABLED,loudnessEnhancer.getEnabled());
-        editor.putInt(LOUD_BOOST, getGain());
+        int gain = getGain() == 0 ? 0 : getGain();
+
+        editor.putInt(LOUD_BOOST, gain);
         editor.apply();
     }
 

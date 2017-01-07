@@ -58,6 +58,7 @@ public class Equalizers {
             }
         }
         levelsSet = true;
+        enabled = true;
     }
 
     /**
@@ -230,7 +231,5 @@ public class Equalizers {
             equalizer.setEnabled(false);
         }
     }
-
-
 
 }

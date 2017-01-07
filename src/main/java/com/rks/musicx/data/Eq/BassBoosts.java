@@ -31,9 +31,6 @@ public class BassBoosts {
     public static void initBass(int audioID) {
         EndBass();
         bassBoost = new BassBoost(0, audioID);
-        if (str >0 && str <= BASSBOOST_STRENGTH){
-            setBassBoostStrength(str);
-        }
     }
 
     /**
@@ -53,7 +50,9 @@ public class BassBoosts {
     public static void setBassBoostStrength(short strength) {
         if (bassBoost != null) {
             str = strength;
-            bassBoost.setStrength(strength);
+            if (str >0 && str <= BASSBOOST_STRENGTH){
+                bassBoost.setStrength(str);
+            }
         }
     }
 
@@ -73,7 +72,8 @@ public class BassBoosts {
         }
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
         editor.putBoolean(BASS_ENABLED, bassBoost.getEnabled());
-        editor.putInt(BASS_BOOST, getStr());
+        short str = getStr() == 0 ? 0 : getStr();
+        editor.putInt(BASS_BOOST, str);
         editor.apply();
     }
 
