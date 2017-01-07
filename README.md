@@ -2,6 +2,8 @@
 <h3>Simple, Elegant ,Beautiful Material Music Player. </h3>
 
 <p><a href="https://play.google.com/store/apps/details?id=com.rks.musicx"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" height="60" data-canonical-src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" style="max-width:100%;"></a></p>
+
+# Screnshots
 <p>
 <img alt="" src="https://lh3.googleusercontent.com/CxbME-OuvCQTGHzTN1o6YiMP-VxbSUqmpDUxJkfmvk6HsBjuxkCdzXR3HsjgDYKliFTk=h900" style="max-width:100%;">
 </p>
@@ -20,7 +22,7 @@
 <p>
 Special Thanks to api provided by Last.fm (Artist Image) & https://api.vagalume.com.br/ (Lyrics )
 </p>
-<p>Licenses.
+<p> Licenses.
  <ul>
  <li>
        <a href="https://github.com/bumptech/glide"><b>Glide</b></a>
@@ -63,8 +65,7 @@ If forgot any other license author,feel free to mail me @developerrajneeshsingh@
  </p>
  <p>Feel free to fork,bug fix.</p>
  <p>Also, Thanks To StackOverflow and Slack Developers.</p>
- 
- # ©2017 Rajneesh Singh
+ <h3>©2017 Rajneesh Singh</h3>
 
 <pre>Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -74,4 +75,4 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
-limitations under the License.</p>
+limitations under the License.</pre>
