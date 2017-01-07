@@ -1,4 +1,4 @@
-# MusicX-Music-Player
+# MusicX Music Player
 <h3>Simple, Elegant ,Beautiful Material Music Player. </h3>
 
 <p><a href="https://play.google.com/store/apps/details?id=com.rks.musicx"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" height="60" data-canonical-src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" style="max-width:100%;"></a></p>
@@ -64,7 +64,7 @@ If forgot any other license author,feel free to mail me @developerrajneeshsingh@
  <p>Feel free to fork,bug fix.</p>
  <p>Also, Thanks To StackOverflow and Slack Developers.</p>
  
- <p><b><h4>Copyright 2017 Rajneesh Singh</h4></b></p>
+ # ©2017 Rajneesh Singh
 
 <pre>Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
