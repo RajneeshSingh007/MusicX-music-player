@@ -22,7 +22,7 @@
 <p>
 Special Thanks to api provided by Last.fm (Artist Image) & https://api.vagalume.com.br/ (Lyrics )
 </p>
-<p> Licenses.
+<p><h3> Licenses.</h3>
  <ul>
  <li>
        <a href="https://github.com/bumptech/glide"><b>Glide</b></a>
