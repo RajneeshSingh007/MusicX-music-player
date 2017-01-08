@@ -18,8 +18,10 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
 import com.palette.BitmapPalette;
 import com.palette.GlidePalette;
 import com.rks.musicx.R;
@@ -216,42 +218,58 @@ public class ArtworkUtils {
                         palettework.palettework(palette);
                     }
                 }))
-                .into(new SimpleTarget<Bitmap>() {
+                .into(new Target<Bitmap>() {
+                    @Override
+                    public void onLoadStarted(Drawable placeholder) {
+
+                    }
+
+                    @Override
+                    public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                        bitmapwork.bitmapfailed(drawableToBitmap(errorDrawable));
+                    }
+
                     @Override
                     public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                         bitmapwork.bitmapwork(resource);
                     }
+
+                    @Override
+                    public void onLoadCleared(Drawable placeholder) {
+
+                    }
+
+                    @Override
+                    public void getSize(SizeReadyCallback cb) {
+
+                    }
+
+                    @Override
+                    public void setRequest(Request request) {
+
+                    }
+
+                    @Override
+                    public Request getRequest() {
+                        return null;
+                    }
+
+                    @Override
+                    public void onStart() {
+
+                    }
+
+                    @Override
+                    public void onStop() {
+
+                    }
+
+                    @Override
+                    public void onDestroy() {
+
+                    }
                 });
     }
-
-
-    /**
-     * return Drawable to bitmap
-     * @param drawable
-     * @return
-     */
-    public  static Bitmap drawableToBitmap (Drawable drawable) {
-        Bitmap bitmap = null;
-
-        if (drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if(bitmapDrawable.getBitmap() != null) {
-                return bitmapDrawable.getBitmap();
-            }
-        }
-
-        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
-        } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        }
-
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        return bitmap;
-    }
-
     /**
      * ArtworkLoader as bitmap with palette
      * @param context
@@ -275,13 +293,86 @@ public class ArtworkUtils {
                         palettework.palettework(palette);
                     }
                 }))
-                .into(new SimpleTarget<Bitmap>() {
+                .into(new Target<Bitmap>() {
+                    @Override
+                    public void onLoadStarted(Drawable placeholder) {
+
+                    }
+
+                    @Override
+                    public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                        bitmapwork.bitmapfailed(drawableToBitmap(errorDrawable));
+                    }
+
                     @Override
                     public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                         bitmapwork.bitmapwork(resource);
                     }
+
+                    @Override
+                    public void onLoadCleared(Drawable placeholder) {
+
+                    }
+
+                    @Override
+                    public void getSize(SizeReadyCallback cb) {
+
+                    }
+
+                    @Override
+                    public void setRequest(Request request) {
+
+                    }
+
+                    @Override
+                    public Request getRequest() {
+                        return null;
+                    }
+
+                    @Override
+                    public void onStart() {
+
+                    }
+
+                    @Override
+                    public void onStop() {
+
+                    }
+
+                    @Override
+                    public void onDestroy() {
+
+                    }
                 });
     }
+
+    /**
+     * return Drawable to bitmap
+     * @param drawable
+     * @return
+     */
+    public static Bitmap drawableToBitmap (Drawable drawable) {
+        Bitmap bitmap = null;
+
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if(bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
+            }
+        }
+
+        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
     /**
      * Return async task blurring artwork
      * @param context

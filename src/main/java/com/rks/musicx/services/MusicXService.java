@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -25,7 +26,6 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.PermissionChecker;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -40,8 +40,10 @@ import com.afollestad.appthemeengine.Config;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
 import com.cleveroad.audiowidget.AudioWidget;
 import com.rks.musicx.R;
 import com.rks.musicx.data.Eq.AudioEffects;
@@ -417,27 +419,74 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     }
 
     private void widgetCover(Song song){
-        int size = getResources().getDimensionPixelSize(R.dimen.cover_size);
-        Glide.with(this)
-                .load(ArtworkUtils.uri(song.getAlbumId()))
-                .asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(size,size)
-                .transform(new CropCircleTransformation(this))
-                .into(new SimpleTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                        if (resource != null){
-                            audioWidget.controller().albumCoverBitmap(resource);
-                        }else {
-                            audioWidget.controller().albumCover(ContextCompat.getDrawable(getApplicationContext(),R.mipmap.ic_launcher));
-                        }
-                    }
-                });
+        new Runnable() {
+            @Override
+            public void run() {
+                int size = getResources().getDimensionPixelSize(R.dimen.cover_size);
+                Glide.with(MusicXService.this)
+                        .load(ArtworkUtils.uri(song.getAlbumId()))
+                        .asBitmap()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .centerCrop()
+                        .placeholder(R.mipmap.ic_launcher)
+                        .error(R.mipmap.ic_launcher)
+                        .format(DecodeFormat.PREFER_ARGB_8888)
+                        .override(size,size)
+                        .transform(new CropCircleTransformation(MusicXService.this))
+                        .into(new Target<Bitmap>() {
+                            @Override
+                            public void onStart() {
+
+                            }
+
+                            @Override
+                            public void onStop() {
+
+                            }
+
+                            @Override
+                            public void onDestroy() {
+
+                            }
+
+                            @Override
+                            public void onLoadStarted(Drawable placeholder) {
+
+                            }
+
+                            @Override
+                            public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                audioWidget.controller().albumCover(errorDrawable);
+
+                            }
+
+                            @Override
+                            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                audioWidget.controller().albumCoverBitmap(resource);
+                            }
+
+                            @Override
+                            public void onLoadCleared(Drawable placeholder) {
+
+                            }
+
+                            @Override
+                            public void getSize(SizeReadyCallback cb) {
+
+                            }
+
+                            @Override
+                            public void setRequest(Request request) {
+
+                            }
+
+                            @Override
+                            public Request getRequest() {
+                                return null;
+                            }
+                        });
+            }
+        }.run();
     }
 
     @Override
@@ -859,32 +908,29 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                             PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
                     .build());
         }
-
         if (update.equals(META_CHANGED)) {
             MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder()
                     .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, getsongArtistName())
                     .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, getsongAlbumName())
                     .putString(MediaMetadataCompat.METADATA_KEY_TITLE, getsongTitle())
                     .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, MediaPlayerSingleton.getInstance().getMediaPlayer().getDuration());
-            Glide.with(this)
-                    .load(ArtworkUtils.uri(getsongAlbumID()))
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .centerCrop()
-                    .placeholder(R.mipmap.ic_launcher)
-                    .error(R.mipmap.ic_launcher)
-                    .format(DecodeFormat.PREFER_ARGB_8888)
-                    .override(300,300)
-                    .into(new SimpleTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            if (resource != null){
-                                builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, resource);
-                            }else {
-                                builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, ArtworkUtils.getDefaultArtwork(getApplicationContext()));
-                            }
-                        }
-                    });
+
+            ArtworkUtils.ArtworkLoaderBitmapPalette(this, getsongAlbumID(), new palette() {
+                @Override
+                public void palettework(Palette palette) {
+                }
+            }, new bitmap() {
+                @Override
+                public void bitmapwork(Bitmap bitmap) {
+                    builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap);
+                }
+
+                @Override
+                public void bitmapfailed(Bitmap bitmap) {
+                    builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap);
+                }
+
+            });
             mediaSessionLockscreen.setMetadata(builder.build());
         }
     }
@@ -1209,11 +1255,12 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         }, new bitmap() {
             @Override
             public void bitmapwork(Bitmap bitmap) {
-                if (bitmap != null){
-                    builder.setLargeIcon(bitmap);
-                }else {
-                    builder.setLargeIcon(ArtworkUtils.getDefaultArtwork(getApplicationContext()));
-                }
+                builder.setLargeIcon(bitmap);
+            }
+
+            @Override
+            public void bitmapfailed(Bitmap bitmap) {
+                builder.setLargeIcon(bitmap);
             }
 
         });

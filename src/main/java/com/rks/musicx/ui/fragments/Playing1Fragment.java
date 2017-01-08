@@ -609,78 +609,6 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
     }
 
     /**
-     * Class to change albumCover
-     */
-    public class updateAlbumArt extends AsyncTask<Void,Void,Void> {
-
-        private Uri albumCover;
-        private ContentValues values;
-        private String path;
-
-        public updateAlbumArt(String path){
-            this.path = path;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            albumCover = Uri.parse("content://media/external/audio/albumart");
-            try {
-                getContext().getContentResolver().delete(ContentUris.withAppendedId(albumCover, musicXService.getsongAlbumID()), null, null);
-            }catch (Exception e){
-                Log.d("playing","error",e);
-            }
-            values = new ContentValues();
-            values.put("album_id", musicXService.getsongAlbumID());
-            values.put("_data", path);
-            return null;
-        }
-
-
-        @Override
-        protected void onPostExecute(Void v) {
-            super.onPostExecute(v);
-            Uri newUri = getContext().getContentResolver().insert(albumCover, values);
-            if (newUri != null) {
-                getContext().getContentResolver().insert(Uri.parse("content://media/external/audio/albumart"), values);
-                File file = new File("content://media/external/audio/albumart");
-                Toast.makeText(getContext(), "AlbumArt Changed", Toast.LENGTH_LONG).show();
-                Log.d("updateAlbumCover", "success hurray !!!");
-                getContext().getContentResolver().notifyChange(albumCover, null);
-                getContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
-                ArtworkUtils.ArtworkLoader(getContext(), path, mAlbumCoverView);
-                ArtworkUtils.ArtworkLoaderBitmapPalette(getContext(), path, new palette() {
-                    @Override
-                    public void palettework(Palette palette) {
-                        final int[] colors = Helper.getAvailableColor(getContext(),palette);
-                        Playing3view.setBackgroundColor(colors[0]);
-                        mAlbumCoverView.setBorderColor(colors[0]);
-                        if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("dark_theme", false)) {
-                            getActivity().getWindow().setStatusBarColor(colors[0]);
-                        }else {
-                            getActivity().getWindow().setStatusBarColor(colors[0]);
-                        }
-                        new Helper(getContext()).animateViews(Playing3view,colors[0]);
-                    }
-                }, new bitmap() {
-                    @Override
-                    public void bitmapwork(Bitmap bitmap) {
-                        if (bitmap != null){
-                            ArtworkUtils.blurPreferances(getContext(), bitmap, blur_artowrk);
-                        }else {
-                            mAlbumCoverView.setImageBitmap(ArtworkUtils.getDefaultArtwork(getContext()));
-                            Playing3view.setBackgroundColor(accentColor);
-                            new BlurArtwork(getContext(), 25, ArtworkUtils.getDefaultArtwork(getContext()), blur_artowrk).execute("BlurredArtwork");
-                        }
-                    }
-
-                });
-            } else {
-                Toast.makeText(getContext(), "AlbumArt Failed", Toast.LENGTH_LONG).show();
-                Log.d("updateAlbumCover", "failed lol !!!");
-            }
-        }
-    }
-    /**
      * Change Artwork
      */
     private void ChangeAlbumCover(String finalPath){
@@ -691,6 +619,9 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
         }
     }
 
+    /**
+     * CoverArtView
+     */
     private void coverArtView(){
         getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -712,14 +643,15 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
                 }, new bitmap() {
                     @Override
                     public void bitmapwork(Bitmap bitmap) {
-                        if (bitmap != null){
-                            blur_artowrk.setImageBitmap(bitmap);
-                            ArtworkUtils.blurPreferances(getContext(), bitmap, blur_artowrk);
-                        }else {
-                            mAlbumCoverView.setImageBitmap(ArtworkUtils.getDefaultArtwork(getContext()));
-                            Playing3view.setBackgroundColor(accentColor);
-                            new BlurArtwork(getContext(), 25, ArtworkUtils.getDefaultArtwork(getContext()), blur_artowrk).execute("BlurredArtwork");
-                        }
+                        blur_artowrk.setImageBitmap(bitmap);
+                        ArtworkUtils.blurPreferances(getContext(), bitmap, blur_artowrk);
+                    }
+
+                    @Override
+                    public void bitmapfailed(Bitmap bitmap) {
+                        mAlbumCoverView.setImageBitmap(bitmap);
+                        Playing3view.setBackgroundColor(accentColor);
+                        new BlurArtwork(getContext(), 25, bitmap, blur_artowrk).execute("BlurredArtwork");
                     }
                 });
             }
@@ -836,7 +768,6 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
     String finalPath;
     ChosenImage chosenImages;
 
-
     @Override
     public void onImageChosen(ChosenImage chosenImage) {
         chosenImages = chosenImage;
@@ -890,6 +821,80 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
             }
         }
         Log.d(getClass().getName(), "onActivityCreated: " + mediaPath + " T: " + chooserType);
+    }
+
+
+    /**
+     * Class to change albumCover
+     */
+    public class updateAlbumArt extends AsyncTask<Void,Void,Void> {
+
+        private Uri albumCover;
+        private ContentValues values;
+        private String path;
+
+        public updateAlbumArt(String path){
+            this.path = path;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            albumCover = Uri.parse("content://media/external/audio/albumart");
+            try {
+                getContext().getContentResolver().delete(ContentUris.withAppendedId(albumCover, musicXService.getsongAlbumID()), null, null);
+                values = new ContentValues();
+                values.put("album_id", musicXService.getsongAlbumID());
+                values.put("_data", path);
+            }catch (Exception e){
+                Log.d("playing","error",e);
+            }
+            return null;
+        }
+
+
+        @Override
+        protected void onPostExecute(Void v) {
+            super.onPostExecute(v);
+            Uri newUri = getContext().getContentResolver().insert(albumCover, values);
+            if (newUri != null) {
+                File file = new File("content://media/external/audio/albumart");
+                Toast.makeText(getContext(), "AlbumArt Changed", Toast.LENGTH_LONG).show();
+                Log.d("updateAlbumCover", "success hurray !!!");
+                getContext().getContentResolver().notifyChange(albumCover, null);
+                getContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+                ArtworkUtils.ArtworkLoader(getContext(), path, mAlbumCoverView);
+                ArtworkUtils.ArtworkLoaderBitmapPalette(getContext(), path, new palette() {
+                    @Override
+                    public void palettework(Palette palette) {
+                        final int[] colors = Helper.getAvailableColor(getContext(),palette);
+                        Playing3view.setBackgroundColor(colors[0]);
+                        mAlbumCoverView.setBorderColor(colors[0]);
+                        if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("dark_theme", false)) {
+                            getActivity().getWindow().setStatusBarColor(colors[0]);
+                        }else {
+                            getActivity().getWindow().setStatusBarColor(colors[0]);
+                        }
+                        new Helper(getContext()).animateViews(Playing3view,colors[0]);
+                    }
+                }, new bitmap() {
+                    @Override
+                    public void bitmapwork(Bitmap bitmap) {
+                        blur_artowrk.setImageBitmap(bitmap);
+                        ArtworkUtils.blurPreferances(getContext(), bitmap, blur_artowrk);
+                    }
+
+                    @Override
+                    public void bitmapfailed(Bitmap bitmap) {
+                        mAlbumCoverView.setImageBitmap(bitmap);
+                        Playing3view.setBackgroundColor(accentColor);
+                        new BlurArtwork(getContext(), 25, bitmap, blur_artowrk).execute("BlurredArtwork");
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "AlbumArt Failed", Toast.LENGTH_LONG).show();
+                Log.d("updateAlbumCover", "failed lol !!!");
+            }
+        }
     }
 }
 
