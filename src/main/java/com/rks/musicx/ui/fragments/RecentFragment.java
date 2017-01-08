@@ -77,7 +77,9 @@ public class RecentFragment extends Fragment {
      */
     private void recentlyPlayed() {
         RecentPlayedFragment recentPlayedFragment = new RecentPlayedFragment().newInstance(9,false);
-        getActivity().getSupportFragmentManager().beginTransaction().add(R.id.recentplayedfragment,recentPlayedFragment).commit();
+        if (recentPlayedFragment != null){
+            getActivity().getSupportFragmentManager().beginTransaction().add(R.id.recentplayedfragment,recentPlayedFragment).commit();
+        }
     }
 
     /**
