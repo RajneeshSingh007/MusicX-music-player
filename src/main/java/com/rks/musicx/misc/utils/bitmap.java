@@ -9,4 +9,6 @@ import android.graphics.Bitmap;
 public interface bitmap {
 
     void bitmapwork(Bitmap bitmap);
+
+    void bitmapfailed(Bitmap bitmap);
 }
