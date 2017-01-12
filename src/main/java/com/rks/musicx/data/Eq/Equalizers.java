@@ -22,9 +22,7 @@ public class Equalizers {
     private static boolean enabled;
     private static short preset;
     private static short[] bandLevels;
-    private static boolean levelsSet = false;
     private static boolean customPreset;
-    private static short numberOfBands;
 
     /**
      * Default Constructor
@@ -39,26 +37,17 @@ public class Equalizers {
     public static void initEq(int audioID){
         EndEq();
         equalizer = new Equalizer(0, audioID);
-        if (!customPreset) {
-            usePreset(preset);
-        }
-        numberOfBands = equalizer.getNumberOfBands();
-        if (!levelsSet) {
-            bandLevels = new short[numberOfBands];
-        }
-        for (short b = 0; b < numberOfBands; b++) {
-            if (!levelsSet) {
-                short level = (short) Extras.getInstance().saveEq().getInt(BAND_LEVEL + b, equalizer.getBandLevel(b));
-                bandLevels[b] = level;
-                if (customPreset) {
-                    setBandLevel(b,level);
-                }
-            } else {
-                setBandLevel(b,bandLevels[b]);
+        bandLevels = new short[equalizer.getNumberOfBands()];
+        for (short b = 0; b < equalizer.getNumberOfBands(); b++) {
+            short level = (short) Extras.getInstance().saveEq().getInt(BAND_LEVEL + b, equalizer.getBandLevel(b));
+            bandLevels[b] = level;
+            if (customPreset) {
+                setBandLevel(b,level);
             }
         }
-        levelsSet = true;
-        enabled = true;
+        if (preset == -1){
+            customPreset = true;
+        }
     }
 
     /**
@@ -89,7 +78,7 @@ public class Equalizers {
      */
     public static short getBandLevel(short band) {
         if (equalizer == null) {
-            if (levelsSet && bandLevels.length > band) {
+            if (bandLevels.length > band) {
                 return bandLevels[band];
             }
         }
@@ -118,7 +107,6 @@ public class Equalizers {
         if (equalizer != null) {
             equalizer.setBandLevel(band, level);
         }
-
     }
 
     /**
@@ -129,6 +117,8 @@ public class Equalizers {
         preset = (short) Extras.getInstance().saveEq().getInt(SAVE_PRESET, -1);
         if (preset == -1) {
             customPreset = true;
+        }else {
+            customPreset = false;
         }
     }
 
@@ -139,18 +129,13 @@ public class Equalizers {
      */
     public static String[] getEqualizerPresets(Context context) {
         if (equalizer == null) {
-            return new String[]{};
+            return null;
         }
-        short numberOfPresets = equalizer.getNumberOfPresets();
-
-        String[] presets = new String[numberOfPresets + 1];
-
+        String[] presets = new String[equalizer.getNumberOfPresets() + 1];
         presets[0] = context.getResources().getString(R.string.custom);
-
-        for (short n = 0; n < numberOfPresets; n++) {
+        for (short n = 0; n < equalizer.getNumberOfPresets(); n++) {
             presets[n + 1] = equalizer.getPresetName(n);
         }
-
         return presets;
     }
 
@@ -171,11 +156,10 @@ public class Equalizers {
      * @param preset
      */
     public static void usePreset(short preset) {
-        if (equalizer == null) {
-            return;
+        if (equalizer != null) {
+            customPreset = false;
+            equalizer.usePreset(preset);
         }
-        customPreset = false;
-        equalizer.usePreset(preset);
     }
 
     /**
@@ -183,10 +167,10 @@ public class Equalizers {
      * @return
      */
     public static short getNumberOfBands() {
-        if (equalizer == null) {
-            return 0;
+        if (equalizer != null) {
+           return equalizer.getNumberOfBands();
         }
-        return equalizer.getNumberOfBands();
+        return 0;
     }
 
     /**
@@ -195,10 +179,10 @@ public class Equalizers {
      * @return
      */
     public static int getCenterFreq(short band) {
-        if ( equalizer== null) {
-            return 0;
+        if ( equalizer != null) {
+            return equalizer.getCenterFreq(band);
         }
-        return equalizer.getCenterFreq(band);
+        return 0;
     }
 
     /**
@@ -209,7 +193,7 @@ public class Equalizers {
             return;
         }
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
-        short preset = customPreset ? -1 : equalizer.getCurrentPreset();
+        short preset = customPreset  ? -1 : equalizer.getCurrentPreset();
         editor.putInt(SAVE_PRESET, preset);
         short bands = equalizer.getNumberOfBands();
         for (short b = 0; b < bands; b++) {
