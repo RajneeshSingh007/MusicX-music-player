@@ -12,6 +12,7 @@ import com.rks.musicx.data.Eq.Virtualizers;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 
+
 public class MusicXApplication extends Application {
 
     private MusicXApplication instance;
