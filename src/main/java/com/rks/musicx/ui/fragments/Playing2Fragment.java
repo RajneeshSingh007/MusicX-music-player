@@ -384,16 +384,13 @@ public class Playing2Fragment extends BaseFragment implements SimpleItemTouchHel
     };
 
     private ImageChooserManager imageChooserManager;
-    private int chooserType;
     private String mediaPath;
 
     /**
      * pick artwork from gallery for selection to update coverart
      */
     private void pickNupdateArtwork(){
-        chooserType = ChooserType.REQUEST_PICK_PICTURE;
-        imageChooserManager = new ImageChooserManager(this,
-                ChooserType.REQUEST_PICK_PICTURE, true);
+        imageChooserManager = new ImageChooserManager(this, ChooserType.REQUEST_PICK_PICTURE, true);
         imageChooserManager.setImageChooserListener(this);
         try {
             mediaPath = imageChooserManager.choose();
@@ -648,7 +645,6 @@ public class Playing2Fragment extends BaseFragment implements SimpleItemTouchHel
     String finalPath;
     ChosenImage chosenImages;
 
-
     @Override
     public void onImageChosen(ChosenImage chosenImage) {
         chosenImages = chosenImage;
@@ -670,38 +666,6 @@ public class Playing2Fragment extends BaseFragment implements SimpleItemTouchHel
     @Override
     public void onImagesChosen(ChosenImages chosenImages) {
 
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (chooserType != 0) {
-            outState.putInt("chooser_type", chooserType);
-        }
-        if (mediaPath != null) {
-            outState.putString("media_path", mediaPath);
-        }
-        if (finalPath != null) {
-            outState.putString("final_path", finalPath);
-        }
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey("media_path")) {
-                mediaPath = savedInstanceState.getString("media_path");
-            }
-            if (savedInstanceState.containsKey("chooser_type")) {
-                chooserType = savedInstanceState.getInt("chooser_type");
-            }
-            if (savedInstanceState.containsKey("final_path")) {
-                finalPath = savedInstanceState.getString("final_path");
-                ChangeAlbumCover(finalPath);
-            }
-        }
-        Log.d(getClass().getName(), "onActivityCreated: " + mediaPath + " T: " + chooserType);
     }
 
     @Override
@@ -783,6 +747,7 @@ public class Playing2Fragment extends BaseFragment implements SimpleItemTouchHel
                         new BlurArtwork(getContext(),25,bitmap,blur_artowrk).execute("BlurredArtwork");
                     }
                 });
+                queueAdapter.notifyDataSetChanged();
             } else {
                 Toast.makeText(getContext(), "AlbumArt Failed", Toast.LENGTH_LONG).show();
                 Log.d("updateAlbumCover", "failed lol !!!");

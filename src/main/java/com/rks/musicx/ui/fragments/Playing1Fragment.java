@@ -95,8 +95,8 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
     private List<View> Playing3PagerDetails;
     private ItemTouchHelper mItemTouchHelper;
     private SlidingPaneLayout slidingpanelayout;
-    private boolean isalbumArtChanged;
     private List<Song> queueList;
+    private boolean isalbumArtChanged;
 
     /**
      * Runnable Seekbar
@@ -197,16 +197,13 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
     }
 
     private ImageChooserManager imageChooserManager;
-    private int chooserType;
     private String mediaPath;
 
     /**
      * pick artwork from gallery for selection to update coverart
      */
     private void pickNupdateArtwork(){
-        chooserType = ChooserType.REQUEST_PICK_PICTURE;
-        imageChooserManager = new ImageChooserManager(this,
-                ChooserType.REQUEST_PICK_PICTURE, true);
+        imageChooserManager = new ImageChooserManager(this, ChooserType.REQUEST_PICK_PICTURE, true);
         imageChooserManager.setImageChooserListener(this);
         try {
             mediaPath = imageChooserManager.choose();
@@ -433,6 +430,7 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
         sequence.addSequenceItem(slidingpanelayout, "slide left/tap to view QueueView", "GOT IT");
         sequence.addSequenceItem(Pager, "Slide right/left to view Lyrics/PlayingView", "GOT IT");
         sequence.addSequenceItem(coverView, "Swipe up/down to play Next/Prev song on PlayingView", "GOT IT");
+        sequence.addSequenceItem(queuerv, "Drag ,Drop to change queue, Slide right to remove song", "GOT IT");
         sequence.start();
         sequence.setOnItemDismissedListener(new MaterialShowcaseSequence.OnSequenceItemDismissedListener() {
             @Override
@@ -791,39 +789,6 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
 
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (chooserType != 0) {
-            outState.putInt("chooser_type", chooserType);
-        }
-        if (mediaPath != null) {
-            outState.putString("media_path", mediaPath);
-        }
-        if (finalPath != null) {
-            outState.putString("final_path", finalPath);
-        }
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey("media_path")) {
-                mediaPath = savedInstanceState.getString("media_path");
-            }
-            if (savedInstanceState.containsKey("chooser_type")) {
-                chooserType = savedInstanceState.getInt("chooser_type");
-            }
-            if (savedInstanceState.containsKey("final_path")) {
-                finalPath = savedInstanceState.getString("final_path");
-                ChangeAlbumCover(finalPath);
-            }
-        }
-        Log.d(getClass().getName(), "onActivityCreated: " + mediaPath + " T: " + chooserType);
-    }
-
-
     /**
      * Class to change albumCover
      */
@@ -890,6 +855,7 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
                         new BlurArtwork(getContext(), 25, bitmap, blur_artowrk).execute("BlurredArtwork");
                     }
                 });
+                queueAdapter.notifyDataSetChanged();
             } else {
                 Toast.makeText(getContext(), "AlbumArt Failed", Toast.LENGTH_LONG).show();
                 Log.d("updateAlbumCover", "failed lol !!!");
