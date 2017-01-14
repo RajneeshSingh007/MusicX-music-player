@@ -198,6 +198,25 @@
             app:ateKey_pref_checkBox="?ate_key" />
 
 
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="hide_notification"
+            android:persistent="true"
+            android:summary="@string/hide_notification"
+            android:title="@string/hide_notify"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key" />
+
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="hide_lockscreenMedia"
+            android:persistent="true"
+            android:summary="@string/hide_lockscreenMedia"
+            android:title="@string/hide_lockscreen"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key" />
+
     </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
     <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory android:title="@string/metadata"
         app:ateKey_prefCategory_textColor="?ate_key">

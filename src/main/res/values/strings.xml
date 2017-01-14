@@ -111,5 +111,15 @@
     <string name="network">Network</string>
     <string name="save_internet_summary">disable to auto download artist images,lyrics</string>
     <string name="save_internet">Save Internet Data</string>
-    <string name="appcr">©2016 MusicX.</string>
+    <string name="loudness">LOUDNESS</string>
+    <string name="Virtual">VIRTUAL</string>
+    <string name="Bass">BASS</string>
+    <string name="testerName">Aashish Shinde</string>
+    <string name="appcr">© 2017 MusicX.</string>
+    <string name="crash_toast_text">crash reported</string>
+    <string name="hide_notification">hide notification</string>
+    <string name="hide_notify">Notification</string>
+    <string name="hide_lockscreenMedia">hide lockscreen mediaplayer</string>
+    <string name="hide_lockscreen">Lockscreen</string>
+    <string name="Rate">Rate us</string>
 </resources>

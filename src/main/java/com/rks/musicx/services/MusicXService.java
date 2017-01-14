@@ -68,7 +68,6 @@ import java.util.TimerTask;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
-import static android.os.Build.VERSION_CODES.N;
 import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 import static com.rks.musicx.misc.utils.Constants.ACTION_CHANGE_STATE;
 import static com.rks.musicx.misc.utils.Constants.ACTION_CHOOSE_SONG;
@@ -140,6 +139,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     private String atkey;
     private String songTitle, songArtist;
     private long albumID, songID;
+
     /**
      * Oncreate method
      */
@@ -244,7 +244,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                 }
                 case ACTION_CHANGE_STATE: {
                     if (PermissionChecker.checkSelfPermission(this,Manifest.permission.SYSTEM_ALERT_WINDOW) == PermissionChecker.PERMISSION_GRANTED){
-                        if (!(Build.VERSION.SDK_INT >= N && !Settings.canDrawOverlays(this))) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
                             boolean show = intent.getBooleanExtra(EXTRA_CHANGE_STATE, false);
                             if (show) {
                                 if (Extras.getInstance().floatingWidget()){
@@ -322,8 +322,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                 audioWidget.controller().duration(MediaPlayerSingleton.getInstance().getMediaPlayer().getDuration());
                 trackingstart();
                 trackingstop();
-            }else {
-                audioWidget.hide();
             }
         }
     }
@@ -999,7 +997,9 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
      */
     @Override
     public void updateService(String updateservices) {
-        updatemediaLockscreen(updateservices);
+        if (!Extras.getInstance().hideLockscreen()){
+            updatemediaLockscreen(updateservices);
+        }
         saveState(QUEUE_CHANGED.equals(updateservices) || ITEM_ADDED.equals(updateservices) || ORDER_CHANGED.equals(updateservices));
         if (PLAYSTATE_CHANGED.equals(updateservices) || META_CHANGED.equals(updateservices)) {
             buildNotification();
@@ -1218,58 +1218,58 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
     @Override
     public void buildNotification() {
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setContentTitle(getsongTitle());
-        builder.setContentText(getsongArtistName());
-        builder.setAutoCancel(true);
-        PendingIntent nextIntent = PendingIntent.getService(this, 0, new Intent(this, MusicXService.class).setAction(ACTION_NEXT), 0);
-        PendingIntent previousIntent = PendingIntent.getService(this, 0, new Intent(this, MusicXService.class).setAction(ACTION_PREVIOUS), 0);
-        PendingIntent pauseIntent = PendingIntent.getService(this, 0, new Intent(this, MusicXService.class).setAction(ACTION_TOGGLE), 0);
-        PendingIntent playIntent = PendingIntent.getService(this, 0, new Intent(this, MusicXService.class).setAction(ACTION_TOGGLE), 0);
-        builder.addAction(R.drawable.aw_ic_prev, "", previousIntent);
-        if (isPlaying()){
-            builder.addAction(R.drawable.aw_ic_pause, "", pauseIntent);
-        }else {
-            builder.addAction(R.drawable.aw_ic_play, "", playIntent);
-        }
-        builder.addAction(R.drawable.aw_ic_next, "",nextIntent);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
-                    .setStyle(new NotificationCompat.MediaStyle()
-                            .setMediaSession(getMediaSession().getSessionToken())
-                            .setShowActionsInCompactView(0, 1, 2));
-        }
-        Intent intent = new Intent(this, PlayingActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendInt = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(pendInt);
-        builder.setShowWhen(false);
-        builder.setSmallIcon(R.mipmap.ic_launcher);
-        ArtworkUtils.ArtworkLoaderBitmapPalette(this, getsongAlbumID(), new palette() {
-            @Override
-            public void palettework(Palette palette) {
-                final int color[] = Helper.getAvailableColor(getApplicationContext(), palette);
-                builder.setColor(color[0]);
+        if (!Extras.getInstance().hideNotify()){
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+            builder.setContentTitle(getsongTitle());
+            builder.setContentText(getsongArtistName());
+            builder.setAutoCancel(true);
+            PendingIntent nextIntent = PendingIntent.getService(this, 0, new Intent(this, MusicXService.class).setAction(ACTION_NEXT), 0);
+            PendingIntent previousIntent = PendingIntent.getService(this, 0, new Intent(this, MusicXService.class).setAction(ACTION_PREVIOUS), 0);
+            PendingIntent pauseIntent = PendingIntent.getService(this, 0, new Intent(this, MusicXService.class).setAction(ACTION_PAUSE), 0);
+            PendingIntent playIntent = PendingIntent.getService(this, 0, new Intent(this, MusicXService.class).setAction(ACTION_PLAY), 0);
+            builder.addAction(R.drawable.aw_ic_prev, "", previousIntent);
+            if (isPlaying()){
+                builder.addAction(R.drawable.aw_ic_pause, "", pauseIntent);
+            }else {
+                builder.addAction(R.drawable.aw_ic_play, "", playIntent);
             }
-        }, new bitmap() {
-            @Override
-            public void bitmapwork(Bitmap bitmap) {
-                builder.setLargeIcon(bitmap);
+            builder.addAction(R.drawable.aw_ic_next, "",nextIntent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                builder.setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
+                        .setStyle(new NotificationCompat.MediaStyle()
+                                .setMediaSession(getMediaSession().getSessionToken())
+                                .setShowActionsInCompactView(0, 1, 2));
             }
+            Intent intent = new Intent(this, PlayingActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            PendingIntent pendInt = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            builder.setContentIntent(pendInt);
+            builder.setShowWhen(false);
+            builder.setSmallIcon(R.mipmap.ic_launcher);
+            ArtworkUtils.ArtworkLoaderBitmapPalette(this, getsongAlbumID(), new palette() {
+                @Override
+                public void palettework(Palette palette) {
+                    final int color[] = Helper.getAvailableColor(getApplicationContext(), palette);
+                    builder.setColor(color[0]);
+                }
+            }, new bitmap() {
+                @Override
+                public void bitmapwork(Bitmap bitmap) {
+                    builder.setLargeIcon(bitmap);
+                }
 
-            @Override
-            public void bitmapfailed(Bitmap bitmap) {
-                builder.setLargeIcon(bitmap);
+                @Override
+                public void bitmapfailed(Bitmap bitmap) {
+                    builder.setLargeIcon(bitmap);
+                }
+
+            });
+            android.app.Notification notification = builder.build();
+            if (isPlaying()) {
+                startForeground(notificationID, notification);
             }
-
-        });
-        android.app.Notification notification = builder.build();
-        if (isPlaying()) {
-            startForeground(notificationID, notification);
-        }else {
-            stopForeground(true);
         }
+
     }
 
 

@@ -17,10 +17,12 @@
     <string-array name="playingChoice">
         <item>PlayingView1</item>
         <item>PlayingView2</item>
+        <item>PlayingView3</item>
     </string-array>
     <string-array name="selectedPlayingView">
         <item>0</item>
         <item>1</item>
+        <item>2</item>
     </string-array>
     <string-array name="fontChoice">
         <item>RobotoLight</item>
@@ -35,6 +37,14 @@
         <item>Exodus</item>
         <item>Gogia</item>
         <item>Maven</item>
+        <item>Vetka</item>
+        <item>Lombok</item>
+        <item>Circled</item>
+        <item>Franks</item>
+        <item>Mountain</item>
+        <item>Jakarta</item>
+        <item>Abyssopelagic</item>
+        <item>Tesla</item>
     </string-array>
     <string-array name="selectedFont">
         <item>0</item>
@@ -49,6 +59,14 @@
         <item>9</item>
         <item>10</item>
         <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
     </string-array>
     <string-array name="light_status_mode_entries">
         <item>Off, status bar icons will be white</item>

@@ -15,6 +15,8 @@ import static com.rks.musicx.misc.utils.Constants.FloatingView;
 import static com.rks.musicx.misc.utils.Constants.GridViewAlbum;
 import static com.rks.musicx.misc.utils.Constants.GridViewArtist;
 import static com.rks.musicx.misc.utils.Constants.GridViewSong;
+import static com.rks.musicx.misc.utils.Constants.HIDE_LOCKSCREEEN;
+import static com.rks.musicx.misc.utils.Constants.HIDE_NOTIFY;
 import static com.rks.musicx.misc.utils.Constants.SAVE_DATA;
 import static com.rks.musicx.misc.utils.Constants.SAVE_EQ;
 import static com.rks.musicx.misc.utils.Constants.SONG_SORT_ORDER;
@@ -175,5 +177,20 @@ public class Extras {
         return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(SAVE_DATA, true);
     }
 
+    /**
+     * Hide Notification
+     * @return
+     */
+    public boolean hideNotify(){
+        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(HIDE_NOTIFY,false);
+    }
+
+    /**
+     * HideLockscreen
+     * @return
+     */
+    public boolean hideLockscreen(){
+        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(HIDE_LOCKSCREEEN,false);
+    }
 
 }
