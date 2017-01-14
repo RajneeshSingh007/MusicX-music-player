@@ -1,12 +1,15 @@
 package com.rks.musicx.misc.utils;
 
+import android.animation.Animator;
 import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -496,6 +499,17 @@ public class Helper {
 
         return false;
     }
+
+    /**
+     * Animation
+     * @param view
+     * @return
+     */
+    public static Animator[] getAnimator(View view){
+        return new Animator[]{
+                ObjectAnimator.ofFloat(view,"translationY", view.getMeasuredHeight(),0)
+        };
+    }
     /**
      * Save Tags
      * @param context
@@ -939,6 +953,38 @@ public class Helper {
         secs %= 60;
         final String durationFormat = context.getString(hours == 0 ? R.string.durationformatshort : R.string.durationformatlong);
         return String.format(durationFormat, hours, mins, secs);
+    }
+
+
+    /**
+     * Rate Dialog
+     */
+    public static void showRateDialog(final Context mContext) {
+        final MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext);
+        String appName = mContext.getString(R.string.app_name);
+        builder.title("Rate " + appName);
+        builder.content("If you enjoy using " + appName + ", please take a moment to rate it. Thanks for your support!");
+        builder.negativeText(mContext.getString(android.R.string.cancel));
+        builder.positiveText(mContext.getString(android.R.string.ok));
+        builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.rks.musicx")));
+            }
+        });
+        builder.onNegative(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                builder.autoDismiss(true);
+            }
+        });
+        builder.dismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                dialogInterface.dismiss();
+            }
+        });
+        builder.show();
     }
 }
 

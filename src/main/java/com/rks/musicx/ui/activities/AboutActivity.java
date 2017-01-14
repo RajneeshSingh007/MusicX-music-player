@@ -22,7 +22,7 @@ import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 
 public class AboutActivity extends BaseActivity implements ATEActivityThemeCustomizer {
 
-    TextView guide_detail,support,licenses,licenses_detail,about_app_title,about_app_disc,about_app_ver,developer,developer_name,contact_detail,changeslog;
+    TextView appcr,tester,testerName,guide_detail,support,licenses_detail,about_app_title,about_app_disc,about_app_ver,developer,developer_name,contact_detail,changeslog;
     CardView AboutApp,AboutDev;
 
     @Override
@@ -32,7 +32,6 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
 
     @Override
     protected void setUi() {
-        licenses = (TextView) findViewById(R.id.licenses);
         about_app_title = (TextView) findViewById(R.id.about_app_title);
         about_app_disc = (TextView) findViewById(R.id.about_app_disc);
         about_app_ver = (TextView) findViewById(R.id.about_app_ver);
@@ -45,6 +44,9 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
         changeslog  = (TextView) findViewById(R.id.changelogs_detail);
         support = (TextView) findViewById(R.id.Support);
         guide_detail = (TextView) findViewById(R.id.guide_detail);
+        testerName = (TextView) findViewById(R.id.testerName);
+        tester = (TextView) findViewById(R.id.tester);
+        appcr = (TextView) findViewById(R.id.appcr);
     }
 
     @Override
@@ -54,13 +56,13 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
         licenses_detail.setOnClickListener(v -> Helper.Licenses(AboutActivity.this));
         about_app_title.setText(getString(R.string.app_name));
         about_app_disc.setText("Elegant Material Music Player");
-        developer.setText("Developer : ");
         guide_detail.setOnClickListener(view -> Helper.GuidLines(AboutActivity.this));
-        contact_detail.setText(Html.fromHtml("<a href=\"mailto:developerrajneeshsingh@gmail.com\">Send Feedback</a>"));
+        contact_detail.setText(Html.fromHtml("<a href=\"mailto:developerrajneeshsingh@gmail.com\">Mail us</a>"));
         contact_detail.setMovementMethod(LinkMovementMethod.getInstance());
-        about_app_ver.setText("v 1.0");
+        about_app_ver.setText("v 1.0.2");
         developer_name.setText(DEVELOPER_NAME);
         licenses_detail.setText("Licenses");
+        testerName.setText(getString(R.string.testerName));
         changeslog.setOnClickListener(view -> Helper.Changelogs(AboutActivity.this));
         if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)) {
             about_app_title.setTextColor(Color.BLACK);
@@ -69,11 +71,13 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
             developer.setTextColor(Color.BLACK);
             developer_name.setTextColor(Color.BLACK);
             contact_detail.setTextColor(Color.BLACK);
-            licenses.setTextColor(Color.BLACK);
             licenses_detail.setTextColor(Color.BLACK);
             changeslog.setTextColor(Color.BLACK);
             support.setTextColor(Color.BLACK);
             guide_detail.setTextColor(Color.BLACK);
+            tester.setTextColor(Color.BLACK);
+            appcr.setTextColor(Color.BLACK);
+            testerName.setTextColor(Color.BLACK);
         }else {
             AboutDev.setCardBackgroundColor(ContextCompat.getColor(this,R.color.MaterialGrey));
             AboutApp.setCardBackgroundColor(ContextCompat.getColor(this,R.color.MaterialGrey));

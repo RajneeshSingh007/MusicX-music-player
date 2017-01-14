@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:diagonal="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/Playing3"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+
+        <com.rks.musicx.misc.widgets.DiagonalLayout
+            android:id="@+id/diagonalLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:elevation="@dimen/toolbarelevation"
+            diagonal:diagonal_angle="15"
+            diagonal:diagonal_gravity="right">
+
+
+            <ImageView
+                android:id="@+id/albumArt"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@mipmap/ic_launcher"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#96000000">
+
+                <LinearLayout
+                    android:id="@+id/song_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+
+                    <ImageButton
+                        android:id="@+id/action_favorite"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="4dp"
+                        android:paddingLeft="4dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_action_favorite_outline" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="marquee"
+                            android:maxLines="1"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:textColor="@color/white"
+                            android:textSize="22sp"
+                            android:text="Now Playing" />
+
+                    </LinearLayout>
+
+                    <ImageButton
+                        android:id="@+id/menu_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="4dp"
+                        android:paddingLeft="4dp"
+                        android:layout_weight="0"
+                        android:tint="@android:color/white"
+                        android:background="@drawable/ripple"
+                        app:srcCompat="@drawable/ic_menu" />
+
+                </LinearLayout>
+
+                <include
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    layout="@layout/playing3_controls"
+                    android:layout_below="@+id/song_info"/>
+
+            </RelativeLayout>
+
+        </com.rks.musicx.misc.widgets.DiagonalLayout>
+
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/commonrv"
+            android:fadeScrollbars="true"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_weight="3"/>
+
+    </LinearLayout>
+
+
+
+    <FrameLayout
+        android:id="@+id/bottomsheetLyrics"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        app:behavior_hideable="true"
+        app:layout_behavior="@string/bottom_sheet_behavior">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/lyrics"
+                android:textSize="16sp"
+                android:text="Loading..."
+                android:textAlignment="center"
+                android:padding="8dp"
+                android:textColor="@color/white"/>
+        </ScrollView>
+
+    </FrameLayout>
+
+</android.support.design.widget.CoordinatorLayout>

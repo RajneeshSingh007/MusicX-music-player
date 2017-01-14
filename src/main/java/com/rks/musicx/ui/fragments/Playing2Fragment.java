@@ -332,17 +332,16 @@ public class Playing2Fragment extends BaseFragment implements SimpleItemTouchHel
          */
         ShowcaseConfig config = new ShowcaseConfig();
         config.setDelay(500);
-        MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(getActivity(), "200");
+        MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(getActivity(), "400");
         sequence.setConfig(config);
-        sequence.addSequenceItem(mPlayLayout, "slide up/down to view QueueView", "GOT IT");
-        sequence.addSequenceItem(Pager, "Slide right/left to view Lyrics/PlayingView", "GOT IT");
-        sequence.start();
+        sequence.addSequenceItem(queuerv, "Slide right/left to view Lyrics/PlayingView", "GOT IT");
         sequence.setOnItemDismissedListener(new MaterialShowcaseSequence.OnSequenceItemDismissedListener() {
             @Override
             public void onDismiss(MaterialShowcaseView materialShowcaseView, int i) {
-                config.setDelay(1000);
+                materialShowcaseView.hide();
             }
         });
+        sequence.start();
     }
 
     private void startVisualiser() {
@@ -533,6 +532,8 @@ public class Playing2Fragment extends BaseFragment implements SimpleItemTouchHel
                 updateCurrentpos();
             }
             new Helper(getContext()).LoadLyrics(musicXService.getsongTitle(),musicXService.getsongArtistName(),lrcView);
+            mPlayLayout.setBigDiffuserColor(Helper.getColorWithAplha(accentColor,0.3f));
+            mPlayLayout.setMediumDiffuserColor(Helper.getColorWithAplha(accentColor,0.4f));
         }
     }
 

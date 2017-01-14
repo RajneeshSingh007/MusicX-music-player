@@ -1,6 +1,7 @@
 package com.rks.musicx.ui.activities;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -85,6 +86,9 @@ public class EqualizerActivity extends BaseActivity implements ATEActivityThemeC
         Loud.saveLoudnessEnhancer();
     }
 
+    /**
+     * Enabled/Disabled eq
+     */
     private void switchEq() {
         if (switchCompat != null) {
             switchCompat.setChecked(Equalizers.isEnabled());
@@ -103,6 +107,9 @@ public class EqualizerActivity extends BaseActivity implements ATEActivityThemeC
         }
     }
 
+    /**
+     * Load preset in spinner
+     */
     private void initPresets() {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, Equalizers.getEqualizerPresets(this));
         appCompatSpinner = (AppCompatSpinner) findViewById(R.id.presets_spinner);
@@ -135,96 +142,60 @@ public class EqualizerActivity extends BaseActivity implements ATEActivityThemeC
      * bassbost
      */
     private void initBassBoost() {
-       if (bassBoost != null){
-           bassBoost.setProgress(BassBoosts.getStr());
-           bassBoost.setOnProgressChangedListener(new EqView.onProgressChangedListener() {
-               @Override
-               public void onProgressChanged(int progress) {
-                   short bassStrength = progress == 0 ? 0 : (short)  ((float) 1000/19 * (progress));
-                   BassBoosts.setBassBoostStrength(bassStrength);
-               }
+        bassBoost.setOnProgressChangedListener(new EqView.onProgressChangedListener() {
+            @Override
+            public void onProgressChanged(int progress) {
+                short bassStrength = progress == 0 ? 0 : (short)  ((float) 1000/19 * (progress));
+                BassBoosts.setBassBoostStrength(bassStrength);
+            }
 
-           });
-           bassBoost.setProgressColor(accentcolor);
-           if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)) {
-               bassBoost.getTextPaint().setColor(ContextCompat.getColor(this,R.color.white));
-           }
-           bassBoost.setLabel("BASS");
-       }else {
-           bassBoost.setProgress(0);
-           bassBoost.setProgressColor(accentcolor);
-           if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)) {
-               bassBoost.getTextPaint().setColor(ContextCompat.getColor(this,R.color.white));
-           }
-           bassBoost.setLabel("BASS");
-       }
+        });
+        bassBoost.setProgress(BassBoosts.getStr());
+        bassBoost.setProgressColor(accentcolor);
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)) {
+            bassBoost.getTextPaint().setColor(ContextCompat.getColor(this,R.color.white));
+        }
+        bassBoost.setLabel(getString(R.string.Bass));
     }
 
     /**
      * virtual boost
      */
     private void initVirtualizerBoost() {
-        if (virtualizerBoost != null){
-            virtualizerBoost.setProgress(Virtualizers.getVirtualStrength());
-            virtualizerBoost.setOnProgressChangedListener(new EqView.onProgressChangedListener() {
-                @Override
-                public void onProgressChanged(int progress) {
-                    short virtualStrength = progress == 0 ? 0 : (short) (((float) 1000 / 19) * (progress));
-                    Virtualizers.setVirtualizerStrength(virtualStrength);
-                }
-            });
-            virtualizerBoost.setProgressColor(accentcolor);
-            virtualizerBoost.setLabel("Virtual");
-            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)) {
-                virtualizerBoost.getTextPaint().setColor(ContextCompat.getColor(this,R.color.white));
-            }
-        }else {
-            virtualizerBoost.setProgress(0);
-            virtualizerBoost.setProgressColor(accentcolor);
-            virtualizerBoost.setLabel("Virtual");
-            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)) {
-                virtualizerBoost.getTextPaint().setColor(ContextCompat.getColor(this,R.color.white));
-            }
+        virtualizerBoost.setProgressColor(accentcolor);
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)) {
+            virtualizerBoost.getTextPaint().setColor(ContextCompat.getColor(this,R.color.white));
         }
-
+        virtualizerBoost.setProgress(Virtualizers.getVirtualStrength());
+        virtualizerBoost.setOnProgressChangedListener(new EqView.onProgressChangedListener() {
+            @Override
+            public void onProgressChanged(int progress) {
+                short virtualStrength = progress == 0 ? 0 : (short) (((float) 1000 / 19) * (progress));
+                Virtualizers.setVirtualizerStrength(virtualStrength);
+            }
+        });
+        virtualizerBoost.setLabel(getString(R.string.Virtual));
     }
 
     /**
      * LoudnessBoost
      */
     private void initLoudnessBoost() {
-        if (LoudnessBoost != null){
-            LoudnessBoost.setProgress(Loud.getGain());
-            LoudnessBoost.setOnProgressChangedListener(new EqView.onProgressChangedListener() {
-                @Override
-                public void onProgressChanged(int progress) {
-                    short loudGain = progress == 0 ? 0 :  (short) (((float) 1000 / 19) * (progress));
-                    Loud.setLoudnessEnhancerGain(loudGain);
-                }
-
-            });
-            LoudnessBoost.setProgressColor(accentcolor);
-            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)) {
-                LoudnessBoost.getTextPaint().setColor(ContextCompat.getColor(this,R.color.white));
-            }
-            LoudnessBoost.setLabel("LOUDNESS");
-        }else {
-            LoudnessBoost.setProgress(0);
-            LoudnessBoost.setProgressColor(accentcolor);
-            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)) {
-                LoudnessBoost.getTextPaint().setColor(ContextCompat.getColor(this,R.color.white));
-            }
-            LoudnessBoost.setLabel("LOUDNESS");
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)) {
+            LoudnessBoost.getTextPaint().setColor(ContextCompat.getColor(this,R.color.white));
         }
+        LoudnessBoost.setProgressColor(accentcolor);
+        LoudnessBoost.setLabel(getString(R.string.loudness));
+        LoudnessBoost.setProgress(Loud.getGain());
+        LoudnessBoost.setOnProgressChangedListener(new EqView.onProgressChangedListener() {
+            @Override
+            public void onProgressChanged(int progress) {
+                short loudGain = progress == 0 ? 0 :  (short) (((float) 1000 / 19) * (progress));
+                Loud.setLoudnessEnhancerGain(loudGain);
+            }
 
-    }
+        });
 
-    @StyleRes
-    @Override
-    public int getActivityTheme() {
-        // Overrides what's set in the current ATE Config
-        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(DarkTheme, false) ?
-                R.style.AppThemeNormalDark : R.style.AppThemeNormalDark;
     }
 
     /**
@@ -267,10 +238,14 @@ public class EqualizerActivity extends BaseActivity implements ATEActivityThemeC
                         Drawable drawable = ContextCompat.getDrawable(EqualizerActivity.this,R.drawable.thumb);
                         drawable.setColorFilter(accentcolor, PorterDuff.Mode.SRC_ATOP);
                         seekBar.setThumb(drawable);
+                        seekBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
                         textView.setTextColor(Color.WHITE);
+                        seekBar.setProgressTintList(ColorStateList.valueOf(accentcolor));
                     }else {
                         Drawable drawable = ContextCompat.getDrawable(EqualizerActivity.this,R.drawable.thumb);
                         drawable.setColorFilter(accentcolor, PorterDuff.Mode.SRC_ATOP);
+                        seekBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
+                        seekBar.setProgressTintList(ColorStateList.valueOf(accentcolor));
                         seekBar.setThumb(drawable);
                         textView.setTextColor(Color.WHITE);
                     }
@@ -320,6 +295,14 @@ public class EqualizerActivity extends BaseActivity implements ATEActivityThemeC
 
     }
 
+
+    @StyleRes
+    @Override
+    public int getActivityTheme() {
+        // Overrides what's set in the current ATE Config
+        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(DarkTheme, false) ?
+                R.style.AppThemeNormalDark : R.style.AppThemeNormalDark;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

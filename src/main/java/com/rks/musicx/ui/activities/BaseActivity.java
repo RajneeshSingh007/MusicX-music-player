@@ -208,9 +208,72 @@ public abstract class BaseActivity extends ATEActivity {
                         .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
                         .build());
                 break;
-            default:
+            case "12":
                 CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
-                        .setDefaultFontPath("Rex.ttf")
+                        .setDefaultFontPath("Vetka.otf")
+                        .setFontAttrId(R.attr.fontPath)
+                        .addCustomStyle(AppCompatTextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(TextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
+                        .build());
+                break;
+            case "13":
+                CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                        .setDefaultFontPath("Lombok.otf")
+                        .setFontAttrId(R.attr.fontPath)
+                        .addCustomStyle(AppCompatTextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(TextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
+                        .build());
+                break;
+            case "14":
+                CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                        .setDefaultFontPath("Circled.ttf")
+                        .setFontAttrId(R.attr.fontPath)
+                        .addCustomStyle(AppCompatTextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(TextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
+                        .build());
+                break;
+            case "15":
+                CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                        .setDefaultFontPath("Franks.otf")
+                        .setFontAttrId(R.attr.fontPath)
+                        .addCustomStyle(AppCompatTextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(TextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
+                        .build());
+                break;
+            case "16":
+                CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                        .setDefaultFontPath("Mountain.otf")
+                        .setFontAttrId(R.attr.fontPath)
+                        .addCustomStyle(AppCompatTextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(TextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
+                        .build());
+                break;
+            case "17":
+                CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                        .setDefaultFontPath("Jakarta.ttf")
+                        .setFontAttrId(R.attr.fontPath)
+                        .addCustomStyle(AppCompatTextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(TextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
+                        .build());
+                break;
+            case "18":
+                CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                        .setDefaultFontPath("Abyssopelagic.otf")
+                        .setFontAttrId(R.attr.fontPath)
+                        .addCustomStyle(AppCompatTextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(TextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
+                        .build());
+                break;
+            case "19":
+                CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                        .setDefaultFontPath("Tesla.ttf")
                         .setFontAttrId(R.attr.fontPath)
                         .addCustomStyle(AppCompatTextView.class, android.R.attr.textViewStyle)
                         .addCustomStyle(TextView.class, android.R.attr.textViewStyle)
