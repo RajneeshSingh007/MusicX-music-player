@@ -110,6 +110,10 @@ public class Constants {
     public static final String ClearFav = "clear_favdb";
     public static final String ClearRecently = "clear_recentdb";
     public static final String SAVE_DATA = "save_internet";
+    public static final String HIDE_NOTIFY = "hide_notification";
+    public static final String HIDE_LOCKSCREEEN = "hide_lockscreenMedia";
+    public static final String REORDER_TAB = "tab_selection";
+    public static final String RESTORE_LASTTAB = "restore_lasttab";
 
     /*
     Choices
@@ -176,4 +180,5 @@ public class Constants {
      * Developer Properties
      */
     public static final String DEVELOPER_NAME= "Rajneesh Singh";
+
 }

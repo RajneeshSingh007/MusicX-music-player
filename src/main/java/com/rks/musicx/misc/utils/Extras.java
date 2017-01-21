@@ -17,12 +17,15 @@ import static com.rks.musicx.misc.utils.Constants.GridViewArtist;
 import static com.rks.musicx.misc.utils.Constants.GridViewSong;
 import static com.rks.musicx.misc.utils.Constants.HIDE_LOCKSCREEEN;
 import static com.rks.musicx.misc.utils.Constants.HIDE_NOTIFY;
+import static com.rks.musicx.misc.utils.Constants.REORDER_TAB;
+import static com.rks.musicx.misc.utils.Constants.RESTORE_LASTTAB;
 import static com.rks.musicx.misc.utils.Constants.SAVE_DATA;
 import static com.rks.musicx.misc.utils.Constants.SAVE_EQ;
 import static com.rks.musicx.misc.utils.Constants.SONG_SORT_ORDER;
 import static com.rks.musicx.misc.utils.Constants.SaveHeadset;
 import static com.rks.musicx.misc.utils.Constants.SaveLyrics;
 import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
+import static com.rks.musicx.misc.utils.Constants.TextFonts;
 import static com.rks.musicx.misc.utils.Constants.sInstance;
 
 /**
@@ -107,6 +110,24 @@ public class Extras {
     }
 
     /**
+     * setTabIndex
+     * @param index
+     */
+    public void setTabIndex(final int index) {
+        final SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putString(REORDER_TAB, String.valueOf(index));
+        editor.apply();
+    }
+
+    /**
+     * TabIndex
+     * @return
+     */
+    public String getTabIndex(){
+        return mPreferences.getString(REORDER_TAB, "0");
+    }
+
+    /**
      * save lyrics option
      * @return
      */
@@ -144,6 +165,21 @@ public class Extras {
      */
     public boolean floatingWidget(){
         return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(FloatingView,true);
+    }
+
+    /**
+     * Font Config
+     * @return
+     */
+    public String fontConfig(){
+        return PreferenceManager.getDefaultSharedPreferences(mcontext).getString(TextFonts, "11");
+    }
+    /**
+     * Font Config
+     * @return
+     */
+    public String tabConfig(){
+        return PreferenceManager.getDefaultSharedPreferences(mcontext).getString(REORDER_TAB, "4");
     }
 
     /**
@@ -191,6 +227,14 @@ public class Extras {
      */
     public boolean hideLockscreen(){
         return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(HIDE_LOCKSCREEEN,false);
+    }
+
+    /**
+     * Restore lastTab
+     * @return
+     */
+    public boolean restoreLastTab(){
+        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(RESTORE_LASTTAB,false);
     }
 
 }

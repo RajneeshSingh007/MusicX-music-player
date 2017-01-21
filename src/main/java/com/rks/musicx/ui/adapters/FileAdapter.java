@@ -9,10 +9,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.rks.musicx.R;
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
 import java.util.Collections;
@@ -23,9 +23,9 @@ import java.util.Comparator;
  * Created by Coolalien on 8/6/2016.
  */
 
-public class FileAdapter extends BaseRecyclerViewAdapter<File,FileAdapter.Fileviewholder> {
+public class FileAdapter extends BaseRecyclerViewAdapter<File,FileAdapter.Fileviewholder> implements FastScrollRecyclerView.SectionedAdapter {
 
-    FileModelComparator fileModelComparator = new FileModelComparator();
+    private FileModelComparator fileModelComparator = new FileModelComparator();
 
     public FileAdapter(@NonNull Context context) {
         super(context);
@@ -43,12 +43,10 @@ public class FileAdapter extends BaseRecyclerViewAdapter<File,FileAdapter.Filevi
         Collections.sort(data, fileModelComparator);
         if (file.isDirectory()) {
             holder.thumbnail.setImageResource(R.drawable.ic_folder);
-        }else {
-            holder.thumbnail.setImageResource(R.mipmap.ic_launcher);
-        }
-        holder.filename.setText(file.getName());
-        if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("dark_theme", false)) {
-            holder.filename.setTextColor(Color.WHITE);
+            holder.filename.setText(file.getName());
+            if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("dark_theme", false)) {
+                holder.filename.setTextColor(Color.WHITE);
+            }
         }
     }
 
@@ -57,20 +55,23 @@ public class FileAdapter extends BaseRecyclerViewAdapter<File,FileAdapter.Filevi
         return super.getItem(position);
     }
 
+    @NonNull
+    @Override
+    public String getSectionName(int position) {
+        return getItem(position).getName().substring(0,1);
+    }
+
     public class Fileviewholder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        ImageView thumbnail;
-        TextView filename;
-        LinearLayout folderView;
-
+        private ImageView thumbnail;
+        private TextView filename;
 
         public Fileviewholder(View itemView) {
             super(itemView);
             thumbnail = (ImageView) itemView.findViewById(R.id.thumbnail);
             filename = (TextView) itemView.findViewById(R.id.filename);
-            folderView = (LinearLayout) itemView.findViewById(R.id.folder_view);
             itemView.setOnClickListener(this);
-            folderView.setOnClickListener(this);
+            itemView.findViewById(R.id.folder_view).setOnClickListener(this);
         }
 
         @Override

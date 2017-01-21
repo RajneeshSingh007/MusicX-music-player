@@ -4,33 +4,43 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.util.Log;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
+import com.rks.musicx.data.loaders.TrackLoader;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.misc.utils.ATEUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
+import com.rks.musicx.misc.utils.FileExtensionFilter;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.BaseRecyclerViewAdapter;
 import com.rks.musicx.ui.adapters.FileAdapter;
+import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class FolderFragment extends Fragment {
+public class FolderFragment extends Fragment implements SearchView.OnQueryTextListener, LoaderManager.LoaderCallbacks<List<Song>> {
 
 
     private FastScrollRecyclerView folderrv;
@@ -39,8 +49,18 @@ public class FolderFragment extends Fragment {
     private final HashMap<String, Integer> mListPositioins = new HashMap<>();
     private String currentPath = "currentPath";
     private Intent intent;
+    private final int trackloader = -1;
+    private String folderName;
+    private Helper helper;
+    private SearchView searchView;
     private List<Song> songList;
+    private SongListAdapter songListAdapter;
+    private Toolbar toolbar;
 
+    /**
+     * instance of this class
+     * @return
+     */
     public static FolderFragment newInstance() {
         return new FolderFragment();
     }
@@ -52,11 +72,13 @@ public class FolderFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_folder, container, false);
         ui(rootView);
         function();
+        setHasOptionsMenu(true);
         return rootView;
     }
 
     private void ui(View rootView) {
         folderrv = (FastScrollRecyclerView) rootView.findViewById(R.id.folderrv);
+        toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
     }
 
     private void function() {
@@ -87,27 +109,39 @@ public class FolderFragment extends Fragment {
         folderrv.setAdapter(fileadapter);
         fileadapter.setOnItemClickListener(onClik);
         readDirectory(currentDir);
+        helper = new Helper(getContext());
+        songList = new ArrayList<>();
+        toolbar.setTitle(getString(R.string.folder));
     }
 
+    /**
+     * OnClick
+     */
     private BaseRecyclerViewAdapter.OnItemClickListener onClik = new BaseRecyclerViewAdapter.OnItemClickListener() {
 
         @Override
         public void onItemClick(int position, View view) {
             switch (view.getId()) {
                 case R.id.folder_view:
-                    File file = fileadapter.data.get(position);
-                    if (file.isDirectory()) {
-                        mListPositioins.put(file.getPath(), position);
-                        readDirectory(file);
-                    }else if (file.isFile() && currentPath.endsWith(".mp3")){
-                        ((MainActivity) getActivity()).onSongSelected(songList,position);
+                    if (fileadapter.data.size() > 0 ){
+                        File file = fileadapter.data.get(position);
+                        if (file.isDirectory()) {
+                            mListPositioins.put(file.getPath(), position);
+                            readDirectory(file);
+                        }else {
+                            Toast.makeText(getContext(),"Empty Directory",Toast.LENGTH_LONG).show();
+                        }
                     }
-                    folderrv.smoothScrollToPosition(position);
                     break;
             }
         }
     };
 
+
+    /**
+     * Read Directory with filter
+     * @param path
+     */
     public void readDirectory(File path) {
         fileadapter.data.clear();
         File[] files = path.listFiles(new FileExtensionFilter(true));
@@ -116,9 +150,33 @@ public class FolderFragment extends Fragment {
                 fileadapter.data.add(file);
                 fileadapter.notifyDataSetChanged();
                 currentPath = file.getAbsolutePath();
+                folderName = file.getParent();
+                if (file.isFile()) {
+                    songListAdapter = new SongListAdapter(getContext());
+                    songListAdapter.setOnItemClickListener(songOnClick);
+                    folderrv.setAdapter(songListAdapter);
+                    getLoaderManager().initLoader(trackloader, null, this);
+                }
             }
         }
     }
+
+    private BaseRecyclerViewAdapter.OnItemClickListener songOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position, View view) {
+            switch (view.getId()) {
+                case R.id.item_view:
+                    ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(),position);
+                    folderrv.smoothScrollToPosition(position);
+                    break;
+                case R.id.menu_button:
+                    helper.showMenu(trackloader,FolderFragment.this,FolderFragment.this,((MainActivity) getActivity()),position,view,getContext(),songListAdapter);
+                    break;
+
+            }
+        }
+    };
+
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -137,114 +195,54 @@ public class FolderFragment extends Fragment {
         ATEUtils.setStatusBarColor(getActivity(), atekey, Config.primaryColor(getActivity(), atekey));
     }
 
-    public class FileExtensionFilter implements FileFilter {
-
-        protected static final String TAG = "FileExtensionFilter";
-        /**
-         * allows Directories
-         */
-        private final boolean allowDirectories;
-
-        public FileExtensionFilter( boolean allowDirectories) {
-            this.allowDirectories = allowDirectories;
+    @Override
+    public Loader<List<Song>> onCreateLoader(int id, Bundle args) {
+        TrackLoader trackLoaders = new TrackLoader(getContext());
+        if (id == trackloader){
+            String[] selectargs = new String[]{
+                    "%"+folderName+"%"
+            }; //filter folders
+            String selection = MediaStore.Audio.Media.DATA + " like ? ";
+            trackLoaders.setSortOrder(MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+            trackLoaders.filteralbumsong(selection,selectargs);
+            return trackLoaders;
         }
-
-
-        @Override
-        public boolean accept(File f) {
-            if ( f.isHidden() || !f.canRead() ) {
-                return false;
-            }
-            if ( f.isDirectory() ) {
-                return checkDirectory( f );
-            }
-            return checkFileExtension( f );
-        }
-
-        private boolean checkFileExtension( File f ) {
-            String ext = getFileExtension(f);
-            if ( ext == null) return false;
-            try {
-                if ( SupportedFileFormat.valueOf(ext.toUpperCase()) != null ) {
-                    return true;
-                }
-            } catch(IllegalArgumentException e) {
-                //Not known enum value
-                return false;
-            }
-            return false;
-        }
-
-        private boolean checkDirectory( File dir ) {
-            if ( !allowDirectories ) {
-                return false;
-            } else {
-                final ArrayList<File> subDirs = new ArrayList<File>();
-                int songNumb = dir.listFiles( new FileFilter() {
-
-                    @Override
-                    public boolean accept(File file) {
-                        if ( file.isFile() ) {
-                            if ( file.getName().equals( ".nomedia" ) )
-                                return false;
-
-                            return checkFileExtension( file );
-                        } else if ( file.isDirectory() ){
-                            subDirs.add( file );
-                            return false;
-                        } else
-                            return false;
-                    }
-                } ).length;
-
-                if ( songNumb > 0 ) {
-                    Log.d(TAG, "checkDirectory: dir " + dir.toString() + " return true con songNumb -> " + songNumb );
-                    return true;
-                }
-
-                for( File subDir: subDirs ) {
-                    if ( checkDirectory( subDir ) ) {
-                        Log.d(TAG, "checkDirectory [for]: subDir " + subDir.toString() + " return true");
-                        return true;
-                    }
-                }
-                return false;
-            }
-        }
-
-
-        public String getFileExtension( File f ) {
-            return getFileExtension( f.getName() );
-        }
-
-        public String getFileExtension( String fileName ) {
-            int i = fileName.lastIndexOf('.');
-            if (i > 0) {
-                return fileName.substring(i + 1);
-            } else
-                return null;
-        }
-
-    }
-    /**
-     * Files formats currently supported by Library
-     */
-    public enum SupportedFileFormat {
-        M4A("m4a"),
-        MP3("mp3"),
-        WAV("wav"),
-        AAC("aac"),
-        OGG("ogg");
-
-        private String filesuffix;
-
-        SupportedFileFormat( String filesuffix ) {
-            this.filesuffix = filesuffix;
-        }
-
-        public String getFilesuffix() {
-            return filesuffix;
-        }
+        return null;
     }
 
+    @Override
+    public void onLoadFinished(Loader<List<Song>> loader, List<Song> data) {
+        if (data  == null){
+            return;
+        }
+        songList = data;
+        songListAdapter.addDataList(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<Song>> loader) {
+        loader.reset();
+        songListAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.search_menu,menu);
+        searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.folder_search));
+        searchView.setOnQueryTextListener(this);
+        searchView.setQueryHint("Search song");
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        final List<Song> filterlist = helper.filter(songList,newText);
+        songListAdapter.setFilter(filterlist);
+        return true;
+    }
 }
