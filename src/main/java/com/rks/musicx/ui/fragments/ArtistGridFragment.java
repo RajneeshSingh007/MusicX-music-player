@@ -16,7 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
@@ -67,7 +66,8 @@ public class ArtistGridFragment extends miniFragment implements LoaderManager.Lo
     }
 
 
-    public static ArtistGridFragment newInstance() {
+    public static ArtistGridFragment newInstance(int pos) {
+        Extras.getInstance().setTabIndex(pos);
         return new ArtistGridFragment();
     }
 
@@ -178,22 +178,9 @@ public class ArtistGridFragment extends miniFragment implements LoaderManager.Lo
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        final List<Artist> filterlist = filter(artistlist,newText);
+        final List<Artist> filterlist = Helper.filterArtist(artistlist,newText);
         artistListAdapter.setFilter(filterlist);
         return true;
     }
 
-    private List<Artist> filter(List<Artist> artistlist, String query) {
-        query = query.toLowerCase();
-        final List<Artist> filterartistlist = new ArrayList<>();
-        for (Artist artist : artistlist) {
-            final String text = artist.getName().toLowerCase();
-            if (text.contains(query)) {
-                filterartistlist.add(artist);
-            }else if (text.isEmpty()){
-                Toast.makeText(getContext(),"empty",Toast.LENGTH_LONG).show();
-            }
-        }
-        return filterartistlist;
-    }
 }

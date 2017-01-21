@@ -60,8 +60,12 @@ public class MainFragment extends miniFragment {
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.addDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
+        if (Extras.getInstance().restoreLastTab()){
+            mViewPager.setCurrentItem(Integer.valueOf(Extras.getInstance().getTabIndex()), false);
+        }
         return rootView;
     }
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -70,6 +74,12 @@ public class MainFragment extends miniFragment {
         } else {
             ATE.postApply(getActivity(), "light_theme");
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Extras.getInstance().setTabIndex(mViewPager.getCurrentItem());
     }
 
     @Override
@@ -108,27 +118,27 @@ public class MainFragment extends miniFragment {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return RecentFragment.newInstance();
+                    return RecentFragment.newInstance(0);
                 case 1:
                     if (!Extras.getInstance().songView()){
-                        return SongListFragment.newInstance();
+                        return SongListFragment.newInstance(1);
                     }else{
-                        return SongGridFragment.newInstance();
+                        return SongGridFragment.newInstance(2);
                     }
                 case 2:
                     if (Extras.getInstance().albumView()){
-                        return AlbumListFragment.newInstance();
+                        return AlbumListFragment.newInstance(2);
                     }else if (!Extras.getInstance().albumView()){
-                        return AlbumGridFragment.newInstance();
+                        return AlbumGridFragment.newInstance(2);
                     }
                 case 3:
                     if (Extras.getInstance().artistView()){
-                        return ArtistListFragment.newInstance();
+                        return ArtistListFragment.newInstance(3);
                     }else if (!Extras.getInstance().artistView()){
-                        return ArtistGridFragment.newInstance();
+                        return ArtistGridFragment.newInstance(3);
                     }
                 case 4:
-                    return PlaylistListFragment.newInstance();
+                    return PlaylistListFragment.newInstance(4);
             }
             return null;
         }

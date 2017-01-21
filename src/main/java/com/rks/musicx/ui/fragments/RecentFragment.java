@@ -13,6 +13,7 @@ import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.misc.utils.ATEUtils;
+import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.MainActivity;
 
@@ -28,7 +29,8 @@ public class RecentFragment extends Fragment {
      * Instances of this fragment
      * @return
      */
-    public static RecentFragment newInstance(){
+    public static RecentFragment newInstance(int pos){
+        Extras.getInstance().setTabIndex(pos);
         return new RecentFragment();
     }
 
@@ -67,8 +69,6 @@ public class RecentFragment extends Fragment {
             More.setTextColor(Color.BLACK);
             RecentlyAddedMore.setTextColor(Color.BLACK);
         }
-        recentlyPlayed();
-        recentlyAdded();
     }
 
 
@@ -78,7 +78,7 @@ public class RecentFragment extends Fragment {
     private void recentlyPlayed() {
         RecentPlayedFragment recentPlayedFragment = new RecentPlayedFragment().newInstance(9,false);
         if (recentPlayedFragment != null){
-            getActivity().getSupportFragmentManager().beginTransaction().add(R.id.recentplayedfragment,recentPlayedFragment).commit();
+            getActivity().getSupportFragmentManager().beginTransaction().add(R.id.recentplayedfragment,recentPlayedFragment).commitAllowingStateLoss();
         }
     }
 
@@ -105,5 +105,7 @@ public class RecentFragment extends Fragment {
         } else {
             ATE.postApply(getActivity(), "light_theme");
         }
+        recentlyPlayed();
+        recentlyAdded();
     }
 }

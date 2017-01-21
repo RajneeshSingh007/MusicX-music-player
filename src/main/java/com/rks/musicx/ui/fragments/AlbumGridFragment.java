@@ -16,7 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
@@ -67,7 +66,8 @@ public class AlbumGridFragment extends miniFragment implements LoaderManager.Loa
         Helper.setFragmentTransition(getActivity(),AlbumGridFragment.this,fragment, new Pair<View, String>(imageView,"TransitionArtwork"));
     }
 
-    public static AlbumGridFragment newInstance() {
+    public static AlbumGridFragment newInstance(int pos) {
+        Extras.getInstance().setTabIndex(pos);
         return new AlbumGridFragment();
     }
 
@@ -186,22 +186,9 @@ public class AlbumGridFragment extends miniFragment implements LoaderManager.Loa
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        final List<Album> filterlist = filter(albumList,newText);
+        final List<Album> filterlist = Helper.filterAlbum(albumList,newText);
         albumListAdapter.setFilter(filterlist);
         return true;
     }
 
-    private List<Album> filter(List<Album> albumList, String query) {
-        query = query.toLowerCase();
-        final List<Album> filteralbumlist = new ArrayList<>();
-        for (Album album : albumList) {
-            final String text = album.getAlbumName().toLowerCase();
-            if (text.contains(query)) {
-                filteralbumlist.add(album);
-            }else if (text.isEmpty()){
-                Toast.makeText(getContext(),"empty",Toast.LENGTH_LONG).show();
-            }
-        }
-        return filteralbumlist;
-    }
 }

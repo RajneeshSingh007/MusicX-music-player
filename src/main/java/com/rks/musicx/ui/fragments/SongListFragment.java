@@ -34,7 +34,6 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class SongListFragment extends miniFragment implements SearchView.OnQueryTextListener, LoaderManager.LoaderCallbacks<List<Song>>{
 
     private FastScrollRecyclerView rv;
@@ -61,9 +60,9 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
         }
     };
 
-    public static SongListFragment newInstance() {
-        SongListFragment fragment = new SongListFragment();
-        return fragment;
+    public static SongListFragment newInstance(int pos) {
+        Extras.getInstance().setTabIndex(pos);
+        return new SongListFragment();
     }
 
     @Override
@@ -175,22 +174,11 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        final List<Song> filterlist = filter(songList,newText);
+        final List<Song> filterlist = helper.filter(songList,newText);
         songListAdapter.setFilter(filterlist);
         return true;
     }
 
-    private List<Song> filter(List<Song> songList, String query) {
-        query = query.toLowerCase().trim();
-        final List<Song> filtersonglist = new ArrayList<>();
-        for (Song song : songList) {
-            final String text = song.getTitle().toLowerCase().trim();
-            if (text.contains(query)) {
-                filtersonglist.add(song);
-            }
-        }
-        return filtersonglist;
-    }
 
     @Override
     public Loader<List<Song>> onCreateLoader(int id, Bundle args) {

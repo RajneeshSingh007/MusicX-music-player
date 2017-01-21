@@ -105,6 +105,15 @@
             android:title="Playing BlurView"
             app:ateKey_pref_list="?ateKey_pref_list"/>
 
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="restore_lasttab"
+            android:persistent="true"
+            android:summary="@string/restore_lastTab"
+            android:title="@string/Tab"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key" />
+
     </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
 
     <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory

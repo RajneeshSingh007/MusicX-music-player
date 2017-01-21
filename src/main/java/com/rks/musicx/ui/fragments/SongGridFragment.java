@@ -47,6 +47,8 @@ public class SongGridFragment extends miniFragment implements SearchView.OnQuery
     private Helper helper;
     private SearchView searchView;
     private List<Song> songList;
+    private GridLayoutManager gridLayoutManager;
+    private GridSpacingItemDecoration gridSpacingItemDecoration;
 
     private BaseRecyclerViewAdapter.OnItemClickListener onClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
 
@@ -66,13 +68,11 @@ public class SongGridFragment extends miniFragment implements SearchView.OnQuery
         }
     };
 
-    public static SongGridFragment newInstance() {
+    public static SongGridFragment newInstance(int pos) {
+        Extras.getInstance().setTabIndex(pos);
         return new SongGridFragment();
     }
 
-    GridLayoutManager gridLayoutManager;
-    GridSpacingItemDecoration gridSpacingItemDecoration;
-    boolean gridview;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -215,21 +215,10 @@ public class SongGridFragment extends miniFragment implements SearchView.OnQuery
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        final List<Song> filterlist = filter(songList,newText);
+        final List<Song> filterlist = helper.filter(songList,newText);
         songListAdapter.setFilter(filterlist);
         return true;
     }
 
-    private List<Song> filter(List<Song> songList, String query) {
-        query = query.toLowerCase().trim();
-        final List<Song> filtersonglist = new ArrayList<>();
-        for (Song song : songList) {
-            final String text = song.getTitle().toLowerCase().trim();
-            if (text.contains(query)) {
-                filtersonglist.add(song);
-            }
-        }
-        return filtersonglist;
-    }
 
 }
