@@ -22,10 +22,12 @@ import static com.rks.musicx.misc.utils.Constants.RESTORE_LASTTAB;
 import static com.rks.musicx.misc.utils.Constants.SAVE_DATA;
 import static com.rks.musicx.misc.utils.Constants.SAVE_EQ;
 import static com.rks.musicx.misc.utils.Constants.SONG_SORT_ORDER;
+import static com.rks.musicx.misc.utils.Constants.STORAGE_SELECTION;
 import static com.rks.musicx.misc.utils.Constants.SaveHeadset;
 import static com.rks.musicx.misc.utils.Constants.SaveLyrics;
 import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
 import static com.rks.musicx.misc.utils.Constants.TextFonts;
+import static com.rks.musicx.misc.utils.Constants.Zero;
 import static com.rks.musicx.misc.utils.Constants.sInstance;
 
 /**
@@ -132,7 +134,7 @@ public class Extras {
      * @return
      */
     public boolean saveLyrics(){
-        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(SaveLyrics,true);
+        return mPreferences.getBoolean(SaveLyrics,true);
     }
 
     /**
@@ -140,7 +142,7 @@ public class Extras {
      * @return
      */
     public boolean songView(){
-        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(GridViewSong,false);
+        return mPreferences.getBoolean(GridViewSong,false);
     }
 
     /**
@@ -148,7 +150,7 @@ public class Extras {
      * @return
      */
     public boolean albumView(){
-        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(GridViewAlbum,false);
+        return mPreferences.getBoolean(GridViewAlbum,false);
     }
 
     /**
@@ -156,7 +158,7 @@ public class Extras {
      * @return
      */
     public boolean artistView(){
-        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(GridViewArtist,false);
+        return mPreferences.getBoolean(GridViewArtist,false);
     }
 
     /**
@@ -164,7 +166,7 @@ public class Extras {
      * @return
      */
     public boolean floatingWidget(){
-        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(FloatingView,true);
+        return mPreferences.getBoolean(FloatingView,true);
     }
 
     /**
@@ -172,14 +174,7 @@ public class Extras {
      * @return
      */
     public String fontConfig(){
-        return PreferenceManager.getDefaultSharedPreferences(mcontext).getString(TextFonts, "11");
-    }
-    /**
-     * Font Config
-     * @return
-     */
-    public String tabConfig(){
-        return PreferenceManager.getDefaultSharedPreferences(mcontext).getString(REORDER_TAB, "4");
+        return mPreferences.getString(TextFonts, "11");
     }
 
     /**
@@ -187,7 +182,7 @@ public class Extras {
      * @return
      */
     public boolean headsetConfig(){
-        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(SaveHeadset,true);
+        return mPreferences.getBoolean(SaveHeadset,true);
     }
 
     /**
@@ -195,7 +190,7 @@ public class Extras {
      * @return
      */
     public boolean phonecallConfig(){
-        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(SaveTelephony,true);
+        return mPreferences.getBoolean(SaveTelephony,true);
     }
 
     /**
@@ -210,7 +205,7 @@ public class Extras {
      * @return
      */
     public boolean saveData(){
-        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(SAVE_DATA, true);
+        return mPreferences.getBoolean(SAVE_DATA, true);
     }
 
     /**
@@ -218,7 +213,7 @@ public class Extras {
      * @return
      */
     public boolean hideNotify(){
-        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(HIDE_NOTIFY,false);
+        return mPreferences.getBoolean(HIDE_NOTIFY,false);
     }
 
     /**
@@ -226,7 +221,7 @@ public class Extras {
      * @return
      */
     public boolean hideLockscreen(){
-        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(HIDE_LOCKSCREEEN,false);
+        return mPreferences.getBoolean(HIDE_LOCKSCREEEN,false);
     }
 
     /**
@@ -234,7 +229,15 @@ public class Extras {
      * @return
      */
     public boolean restoreLastTab(){
-        return PreferenceManager.getDefaultSharedPreferences(mcontext).getBoolean(RESTORE_LASTTAB,false);
+        return mPreferences.getBoolean(RESTORE_LASTTAB,false);
+    }
+
+    /**
+     * Folder Storage selection
+     * @return
+     */
+    public String storageConfig(){
+        return mPreferences.getString(STORAGE_SELECTION, Zero);
     }
 
 }

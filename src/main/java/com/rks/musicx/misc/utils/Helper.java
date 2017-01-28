@@ -1,5 +1,6 @@
 package com.rks.musicx.misc.utils;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
@@ -29,6 +30,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.PermissionChecker;
 import android.support.v4.util.Pair;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.PopupMenu;
@@ -53,6 +55,8 @@ import com.afollestad.appthemeengine.Config;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.rks.musicx.R;
+import com.rks.musicx.data.model.Album;
+import com.rks.musicx.data.model.Artist;
 import com.rks.musicx.data.model.Playlist;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.LyricsData;
@@ -77,6 +81,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,18 +112,22 @@ public class Helper {
      * @param path
      */
     public static void setRingTone(Context context, String path) {
-        ContentValues cv = new ContentValues();
-        Uri uri = MediaStore.Audio.Media.getContentUriForPath(path);
-        Cursor cursor = context.getContentResolver().query(uri, null, MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
-        if (cursor != null && cursor.moveToFirst() && cursor.getCount() > 0) {
-            String _id = cursor.getString(0);
-            cv.put(MediaStore.Audio.Media.IS_RINGTONE, true);
-            context.getContentResolver().update(uri, cv, MediaStore.MediaColumns.DATA + "=?",new String[]{path});
-            Uri newUri = ContentUris.withAppendedId(uri, Long.valueOf(_id));
-            RingtoneManager.setActualDefaultRingtoneUri(context, RingtoneManager.TYPE_RINGTONE, newUri);
-        }else {
-            cursor.close();
-        }
+      if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.WRITE_SETTINGS) == PermissionChecker.PERMISSION_GRANTED){
+          ContentValues cv = new ContentValues();
+          Uri uri = MediaStore.Audio.Media.getContentUriForPath(path);
+          Cursor cursor = context.getContentResolver().query(uri, null, MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
+          if (cursor != null && cursor.moveToFirst() && cursor.getCount() > 0) {
+              String _id = cursor.getString(0);
+              cv.put(MediaStore.Audio.Media.IS_RINGTONE, true);
+              context.getContentResolver().update(uri, cv, MediaStore.MediaColumns.DATA + "=?",new String[]{path});
+              Uri newUri = ContentUris.withAppendedId(uri, Long.valueOf(_id));
+              RingtoneManager.setActualDefaultRingtoneUri(context, RingtoneManager.TYPE_RINGTONE, newUri);
+          }else {
+              cursor.close();
+          }
+      }else {
+          Toast.makeText(context, "Write Permission Not Granted", Toast.LENGTH_LONG).show();
+      }
     }
 
     /**
@@ -127,12 +136,20 @@ public class Helper {
      * @param context
      */
     public static void shareMusic(String path,Context context) {
-        File file = new File(path);
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("audio/*");
-        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share)));
+        if (path != null){
+            File file = new File(path);
+            if (file.exists()){
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("audio/*");
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(Intent.createChooser(intent, context.getString(R.string.share)));
+            }else {
+                Log.d("Helper", "path not found");
+            }
+        }else {
+            Log.d("Helper", "path not found");
+        }
     }
 
     /**
@@ -145,23 +162,48 @@ public class Helper {
      * @param context
      */
     @SuppressLint("StringFormatInvalid")
-    private void DeleteTrack(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders, Fragment fragment,String path, String name, Context context) {
+    private void DeleteTrack(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders, Fragment fragment,String name, String path, Context context) {
         MaterialDialog.Builder dialog = new MaterialDialog.Builder(context);
-        String title = name;
-        String msg = context.getString(R.string.delete_music, title);
-        dialog.title(title);
-        dialog.content(msg);
+        dialog.title(name);
+        dialog.content(context.getString(R.string.delete_music, name));
         dialog.positiveText(android.R.string.ok);
         dialog.onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                File fdelete = new File(path);
-                if (fdelete.exists()){
-                    if (fdelete.delete()){
-                        Log.e("-->", "file Deleted :" + fdelete.getAbsolutePath());
-                        Toast.makeText(context,"Song deleted",Toast.LENGTH_SHORT).show();
+                if (path != null){
+                    File file = new File(path);
+                    if (file.exists()) {
+                        if (file.delete()){
+                            Log.e("-->", "file Deleted :" + path);
+                            MediaScannerConnection.scanFile(context,
+                                    new String[] { file.toString() }, null,
+                                    new MediaScannerConnection.OnScanCompletedListener() {
+                                        public void onScanCompleted(String path, Uri uri) {
+                                            Log.i("ExternalStorage", "Scanned " + path + ":");
+                                            Log.i("ExternalStorage", "-> uri=" + uri);
+                                            fragment.getLoaderManager().restartLoader(id,null,songLoaders);
+                                        }
+                                    });
+                            fragment.getLoaderManager().restartLoader(id,null,songLoaders);
+                            Toast.makeText(context,"Track deleted",Toast.LENGTH_SHORT).show();
+                        }else {
+                            Log.e("-->", "file not Deleted :" + name);
+                            MediaScannerConnection.scanFile(context,
+                                    new String[] { file.toString()  }, null,
+                                    new MediaScannerConnection.OnScanCompletedListener() {
+                                        public void onScanCompleted(String path, Uri uri) {
+                                            Log.i("ExternalStorage", "Scanned " + path + ":");
+                                            Log.i("ExternalStorage", "-> uri=" + uri);
+                                            fragment.getLoaderManager().restartLoader(id,null,songLoaders);
+                                        }
+                                    });
+                            fragment.getLoaderManager().restartLoader(id,null,songLoaders);
+                            Toast.makeText(context,"failed to delete song",Toast.LENGTH_SHORT).show();
+                        }
+
+                    }else {
                         MediaScannerConnection.scanFile(context,
-                                new String[] { fdelete.toString() }, null,
+                                new String[] { Environment.getExternalStorageDirectory().toString() }, null,
                                 new MediaScannerConnection.OnScanCompletedListener() {
                                     public void onScanCompleted(String path, Uri uri) {
                                         Log.i("ExternalStorage", "Scanned " + path + ":");
@@ -169,21 +211,11 @@ public class Helper {
                                         fragment.getLoaderManager().restartLoader(id,null,songLoaders);
                                     }
                                 });
-                    }else {
-                        Log.e("-->", "file not Deleted :" + fdelete.getAbsolutePath());
-                        Toast.makeText(context,"failed to delete song",Toast.LENGTH_SHORT).show();
                     }
                 }else {
-                    MediaScannerConnection.scanFile(context,
-                            new String[] { fdelete.toString() }, null,
-                            new MediaScannerConnection.OnScanCompletedListener() {
-                                public void onScanCompleted(String path, Uri uri) {
-                                    Log.i("ExternalStorage", "Scanned " + path + ":");
-                                    Log.i("ExternalStorage", "-> uri=" + uri);
-                                    fragment.getLoaderManager().restartLoader(id,null,songLoaders);
-                                }
-                            });
+                    Log.d("Helper", "Path not found");
                 }
+
             }
         });
         dialog.negativeText(R.string.cancel);
@@ -200,32 +232,41 @@ public class Helper {
      * @param data
      */
     public static void detailMusic(Context context, String title, String album, String artist, int trackno, String data){
-        File file = new File(data);
-        float cal = (file.length() / 1024);
-        String content = context.getText(R.string.song_Name) +
-                title +
-                "\n\n" +
-                context.getText(R.string.album_name) +
-                album +
-                "\n\n" +
-                context.getString(R.string.artist_name) +
-                artist +
-                "\n\n" +
-                context.getText(R.string.trackno) +
-                trackno +
-                "\n\n" +
-                context.getText(R.string.file_path) +
-                data +
-                "\n\n" +
-                context.getText(file_size) +
-                String.valueOf(String.format("%.2f", cal / 1024)) +
-                " MB";
-        new MaterialDialog.Builder(context)
-                .title(R.string.action_details)
-                .content(content)
-                .positiveText(R.string.okay)
-                .onPositive((materialDialog, dialogAction) -> materialDialog.dismiss())
-                .show();
+        if (data != null){
+            File file = new File(data);
+           if (file.exists()){
+               float cal = (file.length() / 1024);
+               String content = context.getText(R.string.song_Name) +
+                       title +
+                       "\n\n" +
+                       context.getText(R.string.album_name) +
+                       album +
+                       "\n\n" +
+                       context.getString(R.string.artist_name) +
+                       artist +
+                       "\n\n" +
+                       context.getText(R.string.trackno) +
+                       trackno +
+                       "\n\n" +
+                       context.getText(R.string.file_path) +
+                       data +
+                       "\n\n" +
+                       context.getText(file_size) +
+                       String.valueOf(String.format("%.2f", cal / 1024)) +
+                       " MB";
+               new MaterialDialog.Builder(context)
+                       .title(R.string.action_details)
+                       .content(content)
+                       .positiveText(R.string.okay)
+                       .onPositive((materialDialog, dialogAction) -> materialDialog.dismiss())
+                       .show();
+           }else {
+               Toast.makeText(context,"File path not found", Toast.LENGTH_LONG).show();
+           }
+        }else {
+            Log.d("Helper", "path not found");
+        }
+
     }
 
 
@@ -859,6 +900,59 @@ public class Helper {
 
 
     /**
+     * Filter song list
+     * @param songList
+     * @param query
+     * @return
+     */
+    public List<Song> filter(List<Song> songList, String query) {
+        query = query.toLowerCase().trim();
+        final List<Song> filtersonglist = new ArrayList<>();
+        for (Song song : songList) {
+            final String text = song.getTitle().toLowerCase().trim();
+            if (text.contains(query)) {
+                filtersonglist.add(song);
+            }
+        }
+        return filtersonglist;
+    }
+
+    /**
+     * Filter Artist list
+     * @param artistlist
+     * @param query
+     * @return
+     */
+    public static List<Artist> filterArtist(List<Artist> artistlist, String query) {
+        query = query.toLowerCase();
+        final List<Artist> filterartistlist = new ArrayList<>();
+        for (Artist artist : artistlist) {
+            final String text = artist.getName().toLowerCase();
+            if (text.contains(query)) {
+                filterartistlist.add(artist);
+            }
+        }
+        return filterartistlist;
+    }
+
+    /**
+     *
+     * @param albumList
+     * @param query
+     * @return
+     */
+    public static List<Album> filterAlbum(List<Album> albumList, String query) {
+        query = query.toLowerCase();
+        final List<Album> filteralbumlist = new ArrayList<>();
+        for (Album album : albumList) {
+            final String text = album.getAlbumName().toLowerCase();
+            if (text.contains(query)) {
+                filteralbumlist.add(album);
+            }
+        }
+        return filteralbumlist;
+    }
+    /**
      * GuidLines
      * @param context
      */
@@ -986,5 +1080,71 @@ public class Helper {
         });
         builder.show();
     }
+
+    /**
+     * Delete Directory
+     * @param context
+     * @param file
+     */
+    public void deleteDir(Context context, File file){
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(context);
+        builder.title(file.getName());
+        builder.content("this will delete directory permanently");
+        builder.negativeText(android.R.string.cancel);
+        builder.positiveText(android.R.string.ok);
+        builder.onNegative(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                builder.autoDismiss(true);
+            }
+        });
+        builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                if (file.isDirectory()) {
+                    if (file.delete()){
+                        Log.e("-->", "Directory Deleted :" + file.getName());
+                        Toast.makeText(context,"Directory deleted",Toast.LENGTH_SHORT).show();
+                    }else {
+                        Log.e("-->", "Directory not Deleted :" + file.getName());
+                        Toast.makeText(context,"failed to delete Directory",Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            }
+        });
+        builder.build();
+        builder.show();
+    }
+
+
+    /**
+     *External Storage
+     * @return
+     */
+    public static File getExternalStorage(Context context) {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+            String paths[] = StorageUtil.getStorageDirectories(context);
+            for (String path : paths){
+                return new File(path);
+            }
+        }else {
+            return null;
+        }
+        return null;
+    }
+
+    /**
+     * Internal Storage
+     * @return
+     */
+    public static File getInternalStorage() {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+            return Environment.getExternalStorageDirectory();
+        }else {
+            return null;
+        }
+    }
+
 }
 
