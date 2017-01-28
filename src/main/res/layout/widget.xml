@@ -1,0 +1,100 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item_view"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:elevation="4dp"
+    android:layout_margin="8dp"
+    android:background="@color/white">
+
+    <ImageView
+        android:id="@+id/artwork"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="@null"
+        android:src="@mipmap/ic_launcher" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:textColor="@color/MaterialGrey"
+                    android:textSize="16sp"
+                    android:text="Hello"/>
+
+                <TextView
+                    android:id="@+id/artist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:paddingTop="4dp"
+                    android:textColor="@color/colorSecondaryText"
+                    android:textSize="13sp"
+                    android:text="Adele"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_marginTop="2dp"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/prev"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:layout_weight="1"
+                android:background="@drawable/ripple"
+                android:tint="#e6333333"
+                android:src="@drawable/aw_ic_prev"/>
+
+            <ImageView
+                android:id="@+id/toggle"
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ripple"
+                android:tint="#e6333333"
+                android:src="@drawable/aw_ic_pause"
+                android:layout_gravity="center"/>
+
+            <ImageView
+                android:id="@+id/next"
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ripple"
+                android:layout_gravity="right"
+                android:tint="#e6333333"
+                android:src="@drawable/aw_ic_next" />
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
