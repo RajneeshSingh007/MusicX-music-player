@@ -1,7 +1,6 @@
 package com.rks.musicx.ui.fragments;
 
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -140,10 +139,11 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
         }
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             ATE.postApply(getActivity(), "dark_theme");
         } else {
             ATE.postApply(getActivity(), "light_theme");

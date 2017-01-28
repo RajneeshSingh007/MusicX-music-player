@@ -24,6 +24,7 @@ import com.rks.musicx.data.model.Playlist;
 import com.rks.musicx.misc.utils.ATEUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
+import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.BaseRecyclerViewAdapter;
@@ -85,7 +86,8 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
         popup.show();
     }
 
-    public static PlaylistListFragment newInstance() {
+    public static PlaylistListFragment newInstance(int pos) {
+        Extras.getInstance().setTabIndex(pos);
         return new PlaylistListFragment();
     }
 

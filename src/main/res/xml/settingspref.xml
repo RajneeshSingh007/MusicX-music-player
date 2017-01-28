@@ -64,7 +64,7 @@
             android:defaultValue="false"
             android:key="gridlist_songview"
             android:persistent="true"
-            android:summary="Grid/List SongView"
+            android:summary="Grid SongView"
             android:title="Song View"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key" />
@@ -73,7 +73,7 @@
             android:defaultValue="false"
             android:key="gridlist_albumview"
             android:persistent="true"
-            android:summary="Grid/List AlbumView"
+            android:summary="List AlbumView"
             android:title="Album View"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key" />
@@ -82,8 +82,17 @@
             android:defaultValue="false"
             android:key="gridlist_artistview"
             android:persistent="true"
-            android:summary="Grid/List ArtistView"
+            android:summary="List ArtistView"
             android:title="Artist View"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key" />
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="restore_lasttab"
+            android:persistent="true"
+            android:summary="@string/restore_lastTab"
+            android:title="@string/Tab"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key" />
 
@@ -105,14 +114,14 @@
             android:title="Playing BlurView"
             app:ateKey_pref_list="?ateKey_pref_list"/>
 
-        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
-            android:defaultValue="false"
-            android:key="restore_lasttab"
-            android:persistent="true"
-            android:summary="@string/restore_lastTab"
-            android:title="@string/Tab"
-            android:widgetLayout="@layout/ate_preference_checkbox"
-            app:ateKey_pref_checkBox="?ate_key" />
+        <com.afollestad.appthemeengine.prefs.ATEListPreference
+            android:key="storage_selection"
+            android:defaultValue="0"
+            android:entries="@array/storageChoice"
+            android:entryValues="@array/selectedstorage"
+            android:summary="change default storage view"
+            android:title="Folder View"
+            app:ateKey_pref_list="?ateKey_pref_list"/>
 
     </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
 
@@ -189,7 +198,7 @@
         app:ateKey_prefCategory_textColor="?ate_key">
 
         <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="save_headset"
             android:persistent="true"
             android:summary="@string/save_headset_summary"
@@ -198,7 +207,7 @@
             app:ateKey_pref_checkBox="?ate_key" />
 
         <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="save_telephony"
             android:persistent="true"
             android:summary="@string/save_telephony_summary"
@@ -236,7 +245,7 @@
             android:positiveButtonText="Ok"
             android:negativeButtonText="Cancel"
             android:persistent="true"
-            android:title="@string/clear_favdb" />
+            android:title="@string/clear_favdb"/>
 
         <com.rks.musicx.misc.widgets.DailogPref
             android:key="clear_recentdb"
@@ -244,7 +253,7 @@
             android:positiveButtonText="Ok"
             android:negativeButtonText="Cancel"
             android:persistent="true"
-            android:title="@string/clear_recentplayeddb" />
+            android:title="@string/clear_recentplayeddb"/>
 
     </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
 </PreferenceScreen>

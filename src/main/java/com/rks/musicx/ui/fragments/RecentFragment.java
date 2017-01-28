@@ -58,7 +58,7 @@ public class RecentFragment extends Fragment {
             RecentPlayedFragment recentPlayedFragment = new RecentPlayedFragment().newInstance(-1,true);
             ((MainActivity) getActivity()).setFragment(recentPlayedFragment);
         });
-        if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             recentName.setTextColor(Color.WHITE);
             recentPlayed.setTextColor(Color.WHITE);
             More.setTextColor(Color.WHITE);
@@ -87,7 +87,9 @@ public class RecentFragment extends Fragment {
      */
     private void recentlyAdded(){
         RecentlyAddedFragment recentlyAddedFragment = new RecentlyAddedFragment().newInstance("%s limit 9",false);
-        getActivity().getSupportFragmentManager().beginTransaction().add(R.id.recentaddedfragment,recentlyAddedFragment).commit();
+        if (recentlyAddedFragment != null){
+            getActivity().getSupportFragmentManager().beginTransaction().add(R.id.recentaddedfragment,recentlyAddedFragment).commitAllowingStateLoss();
+        }
     }
 
     @Override
@@ -100,7 +102,7 @@ public class RecentFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             ATE.postApply(getActivity(), "dark_theme");
         } else {
             ATE.postApply(getActivity(), "light_theme");
