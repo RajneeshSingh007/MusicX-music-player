@@ -2,6 +2,7 @@ package com.rks.musicx.data.Eq;
 
 import android.content.SharedPreferences;
 import android.media.audiofx.BassBoost;
+import android.util.Log;
 
 import com.rks.musicx.misc.utils.Extras;
 
@@ -15,9 +16,9 @@ import static com.rks.musicx.misc.utils.Constants.BASS_ENABLED;
 
 public class BassBoosts {
 
-    private static BassBoost bassBoost;
+    private static BassBoost bassBoost = null;
     private static boolean enabled;
-    private static short str;
+    private static short str = -1;
 
     /**
      * Default Constructor
@@ -30,7 +31,11 @@ public class BassBoosts {
      */
     public static void initBass(int audioID) {
         EndBass();
-        bassBoost = new BassBoost(0, audioID);
+        try {
+            bassBoost = new BassBoost(0, audioID);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -48,11 +53,24 @@ public class BassBoosts {
      * @param strength
      */
     public static void setBassBoostStrength(short strength) {
-        if (bassBoost != null) {
-            str = strength;
-            if (str >0 && str <= BASSBOOST_STRENGTH){
-                bassBoost.setStrength(str);
+        str = strength;
+        if (bassBoost != null && bassBoost.getStrengthSupported()){
+            try {
+                if (str != -1 && str <= BASSBOOST_STRENGTH){
+                    bassBoost.setStrength(strength);
+                }else {
+                    bassBoost.setStrength((short) 0);
+                }
+            } catch (IllegalArgumentException e) {
+                Log.e("BassBoosts", "Bassboost effect not supported");
+            } catch (IllegalStateException e) {
+                Log.e("BassBoosts", "Bassboost cannot get strength supported");
+            } catch (UnsupportedOperationException e) {
+                Log.e("BassBoosts", "Bassboost library not loaded");
+            } catch (RuntimeException e) {
+                Log.e("BassBoosts", "Bassboost effect not found");
             }
+            saveBass();
         }
     }
 
@@ -77,7 +95,6 @@ public class BassBoosts {
         editor.apply();
     }
 
-
     /**
      * bass boost strength
      * @return
@@ -89,14 +106,17 @@ public class BassBoosts {
 
     public static void setEnabled(boolean enabled1) {
         enabled = enabled1;
-        if (enabled){
-            bassBoost.setEnabled(true);
-        }else {
-            bassBoost.setEnabled(false);
+        if (bassBoost != null){
+            bassBoost.setEnabled(enabled1);
         }
     }
 
+
+    /**
+     * isEnbaled
+     * @return
+     */
     public static boolean isEnabled() {
-       return enabled;
+        return enabled;
     }
 }

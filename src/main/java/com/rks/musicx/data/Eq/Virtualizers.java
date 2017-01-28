@@ -2,6 +2,7 @@ package com.rks.musicx.data.Eq;
 
 import android.content.SharedPreferences;
 import android.media.audiofx.Virtualizer;
+import android.util.Log;
 
 import com.rks.musicx.misc.utils.Extras;
 
@@ -15,7 +16,7 @@ import static com.rks.musicx.misc.utils.Constants.Virtualizer_STRENGTH;
 
 public class Virtualizers {
 
-    private static Virtualizer virtualizer;
+    private static Virtualizer virtualizer = null;
     private static boolean venabled;
     private static short virtualstr;
 
@@ -30,7 +31,11 @@ public class Virtualizers {
     */
     public static void initVirtualizer(int audioID){
         EndVirtual();
-        virtualizer = new Virtualizer(0,audioID);
+        try {
+            virtualizer = new Virtualizer(0,audioID);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -38,11 +43,24 @@ public class Virtualizers {
      * @param strength
      */
     public static void setVirtualizerStrength(short strength) {
-        if (virtualizer != null) {
-            virtualstr = strength;
-            if (virtualstr >0 && virtualstr <= Virtualizer_STRENGTH){
-                virtualizer.setStrength(virtualstr);
+        virtualstr = strength;
+        if (virtualizer != null && virtualizer.getStrengthSupported()) {
+            try {
+                if (virtualstr != -1 && virtualstr <= Virtualizer_STRENGTH){
+                    virtualizer.setStrength(strength);
+                }else {
+                    virtualizer.setStrength((short) 0);
+                }
+            }catch (IllegalArgumentException e) {
+                Log.e("Virtualizers", "Virtualizers effect not supported");
+            } catch (IllegalStateException e) {
+                Log.e("Virtualizers", "Virtualizers cannot get strength supported");
+            } catch (UnsupportedOperationException e) {
+                Log.e("Virtualizers", "Virtualizers library not loaded");
+            } catch (RuntimeException e) {
+                Log.e("Virtualizers", "Virtualizers effect not found");
             }
+            saveVirtual();
         }
 
     }
@@ -89,10 +107,8 @@ public class Virtualizers {
 
     public static void setEnabled(boolean enabled1) {
         venabled = enabled1;
-        if (venabled){
-            virtualizer.setEnabled(true);
-        }else {
-            virtualizer.setEnabled(false);
+        if (virtualizer != null){
+            virtualizer.setEnabled(enabled1);
         }
     }
 

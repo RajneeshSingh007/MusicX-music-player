@@ -18,7 +18,7 @@ import static com.rks.musicx.misc.utils.Constants.SAVE_PRESET;
 public class Equalizers {
 
 
-    private static Equalizer equalizer;
+    private static Equalizer equalizer = null;
     private static boolean enabled;
     private static short preset;
     private static short[] bandLevels;
@@ -35,18 +35,25 @@ public class Equalizers {
      * @param audioID
      */
     public static void initEq(int audioID){
-        EndEq();
-        equalizer = new Equalizer(0, audioID);
-        bandLevels = new short[equalizer.getNumberOfBands()];
-        for (short b = 0; b < equalizer.getNumberOfBands(); b++) {
-            short level = (short) Extras.getInstance().saveEq().getInt(BAND_LEVEL + b, equalizer.getBandLevel(b));
-            bandLevels[b] = level;
-            if (customPreset) {
-                setBandLevel(b,level);
+        try {
+            EndEq();
+            equalizer = new Equalizer(0, audioID);
+            bandLevels = new short[equalizer.getNumberOfBands()];
+            for (short b = 0; b < equalizer.getNumberOfBands(); b++) {
+                short level = (short) Extras.getInstance().saveEq().getInt(BAND_LEVEL + b, equalizer.getBandLevel(b));
+                bandLevels[b] = level;
+                if (customPreset) {
+                    setBandLevel(b,level);
+                }else {
+                    setBandLevel(b, level);
+                }
+
             }
-        }
-        if (preset == -1){
-            customPreset = true;
+            if (preset == -1){
+                customPreset = true;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -65,10 +72,27 @@ public class Equalizers {
      * @return
      */
     public static short[] getBandLevelRange() {
-        if (equalizer == null) {
-            return null;
+        if (equalizer != null) {
+            return equalizer.getBandLevelRange();
         }
-        return equalizer.getBandLevelRange();
+        return null;
+    }
+
+    /**
+     * Equalizer preset
+     * @param context
+     * @return
+     */
+    public static String[] getEqualizerPresets(Context context) {
+        if (equalizer == null) {
+            return new String[]{};
+        }
+        String[] presets = new String[equalizer.getNumberOfPresets() + 1];
+        presets[0] = context.getResources().getString(R.string.custom);
+        for (short n = 0; n < equalizer.getNumberOfPresets(); n++) {
+            presets[n + 1] = equalizer.getPresetName(n);
+        }
+        return presets;
     }
 
     /**
@@ -82,7 +106,7 @@ public class Equalizers {
                 return bandLevels[band];
             }
         }
-        return equalizer.getBandLevel(band);
+        return equalizer != null ? equalizer.getBandLevel(band) : 0;
     }
 
     /**
@@ -106,6 +130,7 @@ public class Equalizers {
         }
         if (equalizer != null) {
             equalizer.setBandLevel(band, level);
+            customPreset = false;
         }
     }
 
@@ -120,23 +145,6 @@ public class Equalizers {
         }else {
             customPreset = false;
         }
-    }
-
-    /**
-     * Preset
-     * @param context
-     * @return
-     */
-    public static String[] getEqualizerPresets(Context context) {
-        if (equalizer == null) {
-            return null;
-        }
-        String[] presets = new String[equalizer.getNumberOfPresets() + 1];
-        presets[0] = context.getResources().getString(R.string.custom);
-        for (short n = 0; n < equalizer.getNumberOfPresets(); n++) {
-            presets[n + 1] = equalizer.getPresetName(n);
-        }
-        return presets;
     }
 
     /**
@@ -209,10 +217,8 @@ public class Equalizers {
      */
     public static void setEnabled(boolean enabled1) {
         enabled = enabled1;
-        if (enabled){
-            equalizer.setEnabled(true);
-        }else {
-            equalizer.setEnabled(false);
+        if (equalizer != null) {
+            equalizer.setEnabled(enabled1);
         }
     }
 

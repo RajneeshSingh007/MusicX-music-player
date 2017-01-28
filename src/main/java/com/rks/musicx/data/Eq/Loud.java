@@ -2,6 +2,7 @@ package com.rks.musicx.data.Eq;
 
 import android.content.SharedPreferences;
 import android.media.audiofx.LoudnessEnhancer;
+import android.util.Log;
 
 import com.rks.musicx.misc.utils.Extras;
 
@@ -15,9 +16,9 @@ import static com.rks.musicx.misc.utils.Constants.LOUD_BOOST;
 
 public class Loud {
 
-    private static LoudnessEnhancer loudnessEnhancer;
+    private static LoudnessEnhancer loudnessEnhancer = null;
     private static boolean enabled;
-    private static int Gain;
+    private static int Gain = -1;
 
     /**
      * Default Consturctor
@@ -30,7 +31,11 @@ public class Loud {
     */
     public static void initLoudnessEnhancer(int audioSessionId){
         EndLoudnessEnhancer();
-        loudnessEnhancer = new LoudnessEnhancer(audioSessionId);
+        try {
+            loudnessEnhancer = new LoudnessEnhancer(audioSessionId);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -38,11 +43,24 @@ public class Loud {
      * @param gain
      */
     public static void setLoudnessEnhancerGain(int gain) {
+        Gain = gain;
         if (loudnessEnhancer != null) {
-            Gain = gain;
-            if (Gain >=0 && Gain <= GAIN_MAX) {
-                loudnessEnhancer.setTargetGain(Gain);
+            try {
+                if (Gain != -1 && Gain <= GAIN_MAX) {
+                    loudnessEnhancer.setTargetGain(Gain);
+                }else {
+                    loudnessEnhancer.setTargetGain(0);
+                }
+            }catch (IllegalArgumentException e) {
+                Log.e("Loud", "Loud effect not supported");
+            } catch (IllegalStateException e) {
+                Log.e("Loud", "Loud cannot get gain supported");
+            } catch (UnsupportedOperationException e) {
+                Log.e("Loud", "Loud library not loaded");
+            } catch (RuntimeException e) {
+                Log.e("Loud", "Loud effect not found");
             }
+            saveLoudnessEnhancer();
         }
 
     }
@@ -75,7 +93,6 @@ public class Loud {
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
         editor.putBoolean(EQ_ENABLED,loudnessEnhancer.getEnabled());
         int gain = getGain() == 0 ? 0 : getGain();
-
         editor.putInt(LOUD_BOOST, gain);
         editor.apply();
     }
@@ -90,10 +107,8 @@ public class Loud {
 
     public static void setEnabled(boolean enabled1) {
         enabled = enabled1;
-        if (enabled){
-            loudnessEnhancer.setEnabled(true);
-        }else {
-            loudnessEnhancer.setEnabled(false);
+        if (loudnessEnhancer != null){
+            loudnessEnhancer.setEnabled(enabled1);
         }
     }
 
