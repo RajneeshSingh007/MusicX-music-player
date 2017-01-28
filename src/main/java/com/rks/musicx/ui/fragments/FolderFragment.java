@@ -1,23 +1,15 @@
 package com.rks.musicx.ui.fragments;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
@@ -27,6 +19,7 @@ import com.rks.musicx.data.model.Song;
 import com.rks.musicx.misc.utils.ATEUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
+import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.FileExtensionFilter;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.MainActivity;
@@ -36,49 +29,49 @@ import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class FolderFragment extends Fragment implements SearchView.OnQueryTextListener, LoaderManager.LoaderCallbacks<List<Song>> {
+import static com.rks.musicx.misc.utils.Constants.One;
+import static com.rks.musicx.misc.utils.Constants.Zero;
+
+public class FolderFragment extends miniFragment implements LoaderManager.LoaderCallbacks<List<Song>> {
 
 
     private FastScrollRecyclerView folderrv;
     private File currentDir;
     private FileAdapter fileadapter;
-    private final HashMap<String, Integer> mListPositioins = new HashMap<>();
     private String currentPath = "currentPath";
+    private final HashMap<String, Integer> mListPositioins = new HashMap<>();
     private Intent intent;
     private final int trackloader = -1;
     private String folderName;
     private Helper helper;
-    private SearchView searchView;
-    private List<Song> songList;
     private SongListAdapter songListAdapter;
-    private Toolbar toolbar;
+    private File externalStorage;
 
     /**
      * instance of this class
      * @return
      */
-    public static FolderFragment newInstance() {
+    public static FolderFragment newInstance(int pos) {
+        Extras.getInstance().setTabIndex(pos);
         return new FolderFragment();
     }
+
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_folder, container, false);
+        View rootView= inflater.inflate(R.layout.common_rv, container, false);
         ui(rootView);
         function();
-        setHasOptionsMenu(true);
         return rootView;
     }
 
     private void ui(View rootView) {
-        folderrv = (FastScrollRecyclerView) rootView.findViewById(R.id.folderrv);
-        toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        folderrv = (FastScrollRecyclerView) rootView.findViewById(R.id.commonrv);
     }
 
     private void function() {
@@ -89,12 +82,9 @@ public class FolderFragment extends Fragment implements SearchView.OnQueryTextLi
                 File tmp = new File(startPath);
                 if (tmp.exists() && tmp.isDirectory()) {
                     currentDir = tmp;
+                    externalStorage = tmp;
                 }
             }
-        }
-        currentDir = new File("/");
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            currentDir = Environment.getExternalStorageDirectory();
         }
         CustomLayoutManager customLayoutManager = new CustomLayoutManager(getActivity());
         customLayoutManager.setSmoothScrollbarEnabled(true);
@@ -104,14 +94,18 @@ public class FolderFragment extends Fragment implements SearchView.OnQueryTextLi
         int colorAccent = Config.accentColor(getContext(),atekey);
         folderrv.setPopupBgColor(colorAccent);
         folderrv.setItemAnimator(new DefaultItemAnimator());
-        setHasOptionsMenu(true);
         fileadapter = new FileAdapter(getContext());
         folderrv.setAdapter(fileadapter);
         fileadapter.setOnItemClickListener(onClik);
-        readDirectory(currentDir);
         helper = new Helper(getContext());
-        songList = new ArrayList<>();
-        toolbar.setTitle(getString(R.string.folder));
+        if (Extras.getInstance().storageConfig().equals(Zero)){
+            currentDir = Helper.getInternalStorage();
+            scanDirectory(currentDir);
+        }else if (Extras.getInstance().storageConfig().equals(One)){
+            externalStorage = Helper.getExternalStorage(getContext());
+            scanDirectory(externalStorage);
+        }
+        setHasOptionsMenu(true);
     }
 
     /**
@@ -124,42 +118,17 @@ public class FolderFragment extends Fragment implements SearchView.OnQueryTextLi
             switch (view.getId()) {
                 case R.id.folder_view:
                     if (fileadapter.data.size() > 0 ){
-                        File file = fileadapter.data.get(position);
-                        if (file.isDirectory()) {
-                            mListPositioins.put(file.getPath(), position);
-                            readDirectory(file);
-                        }else {
-                            Toast.makeText(getContext(),"Empty Directory",Toast.LENGTH_LONG).show();
+                        String paths = fileadapter.getItem(position).getAbsolutePath();
+                        File file = new File(paths);
+                        mListPositioins.put(file.getPath(), position);
+                        if (file.isDirectory()){
+                            scanDirectory(file);
                         }
                     }
                     break;
             }
         }
     };
-
-
-    /**
-     * Read Directory with filter
-     * @param path
-     */
-    public void readDirectory(File path) {
-        fileadapter.data.clear();
-        File[] files = path.listFiles(new FileExtensionFilter(true));
-        if (files != null) {
-            for (File file : files) {
-                fileadapter.data.add(file);
-                fileadapter.notifyDataSetChanged();
-                currentPath = file.getAbsolutePath();
-                folderName = file.getParent();
-                if (file.isFile()) {
-                    songListAdapter = new SongListAdapter(getContext());
-                    songListAdapter.setOnItemClickListener(songOnClick);
-                    folderrv.setAdapter(songListAdapter);
-                    getLoaderManager().initLoader(trackloader, null, this);
-                }
-            }
-        }
-    }
 
     private BaseRecyclerViewAdapter.OnItemClickListener songOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
@@ -181,7 +150,8 @@ public class FolderFragment extends Fragment implements SearchView.OnQueryTextLi
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("dark_theme", false)) {
+
+        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             ATE.postApply(getActivity(), "dark_theme");
         } else {
             ATE.postApply(getActivity(), "light_theme");
@@ -215,7 +185,6 @@ public class FolderFragment extends Fragment implements SearchView.OnQueryTextLi
         if (data  == null){
             return;
         }
-        songList = data;
         songListAdapter.addDataList(data);
     }
 
@@ -225,24 +194,53 @@ public class FolderFragment extends Fragment implements SearchView.OnQueryTextLi
         songListAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.search_menu,menu);
-        searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.folder_search));
-        searchView.setOnQueryTextListener(this);
-        searchView.setQueryHint("Search song");
+    /**
+     * Read Directory with filter
+     *
+     */
+    public void scanDirectory(File dirpath) {
+        new AsyncTask<Void, Void, String>() {
+            File[] files;
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+            }
+
+            @Override
+            protected String doInBackground(Void... voids) {
+                fileadapter.data.clear();
+                files = dirpath.listFiles(new FileExtensionFilter(true));
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                try {
+                    if (files != null) {
+                        for (File file : files) {
+                            fileadapter.data.add(file);
+                            fileadapter.notifyDataSetChanged();
+                            currentPath = file.getAbsolutePath();
+                            folderName = file.getParent();
+                            if (file.isFile()) {
+                                songListAdapter = new SongListAdapter(getContext());
+                                songListAdapter.setOnItemClickListener(songOnClick);
+                                folderrv.setAdapter(songListAdapter);
+                                getLoaderManager().initLoader(trackloader, null, FolderFragment.this);
+                            }
+                        }
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }.execute();
     }
 
     @Override
-    public boolean onQueryTextSubmit(String query) {
-        return false;
+    public void load() {
+        getLoaderManager().restartLoader(trackloader,null, this);
     }
 
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        final List<Song> filterlist = helper.filter(songList,newText);
-        songListAdapter.setFilter(filterlist);
-        return true;
-    }
 }
