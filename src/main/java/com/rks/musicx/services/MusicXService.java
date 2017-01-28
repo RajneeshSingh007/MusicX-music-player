@@ -1,11 +1,12 @@
 package com.rks.musicx.services;
 
-import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
@@ -27,7 +28,6 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.PermissionChecker;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -49,6 +49,7 @@ import com.cleveroad.audiowidget.AudioWidget;
 import com.rks.musicx.R;
 import com.rks.musicx.data.Eq.AudioEffects;
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.database.FavHelper;
 import com.rks.musicx.database.Queue;
 import com.rks.musicx.database.RecentlyPlayed;
 import com.rks.musicx.misc.utils.ArtworkUtils;
@@ -56,7 +57,9 @@ import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.bitmap;
 import com.rks.musicx.misc.utils.palette;
+import com.rks.musicx.misc.utils.permissionManager;
 import com.rks.musicx.ui.activities.MainActivity;
+import com.rks.musicx.ui.activities.MusicxWidget;
 import com.rks.musicx.ui.activities.PlayingActivity;
 
 import java.io.IOException;
@@ -75,6 +78,7 @@ import static com.rks.musicx.misc.utils.Constants.ACTION_CHOOSE_SONG;
 import static com.rks.musicx.misc.utils.Constants.ACTION_NEXT;
 import static com.rks.musicx.misc.utils.Constants.ACTION_PAUSE;
 import static com.rks.musicx.misc.utils.Constants.ACTION_PLAY;
+import static com.rks.musicx.misc.utils.Constants.ACTION_PLAYINGVIEW;
 import static com.rks.musicx.misc.utils.Constants.ACTION_PREVIOUS;
 import static com.rks.musicx.misc.utils.Constants.ACTION_STOP;
 import static com.rks.musicx.misc.utils.Constants.ACTION_TOGGLE;
@@ -82,6 +86,7 @@ import static com.rks.musicx.misc.utils.Constants.AUDIO_ID;
 import static com.rks.musicx.misc.utils.Constants.CURRENTPOS;
 import static com.rks.musicx.misc.utils.Constants.EXTRA_CHANGE_STATE;
 import static com.rks.musicx.misc.utils.Constants.EXTRA_POSITION;
+import static com.rks.musicx.misc.utils.Constants.FAV;
 import static com.rks.musicx.misc.utils.Constants.ITEM_ADDED;
 import static com.rks.musicx.misc.utils.Constants.KEY_POSITION_X;
 import static com.rks.musicx.misc.utils.Constants.KEY_POSITION_Y;
@@ -113,8 +118,8 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
     private List<Song> playList = new ArrayList<>();
     private List<Song> ogList = new ArrayList<>();
-    private Song CurrentSong;
     private AudioWidget audioWidget;
+    private Song CurrentSong;
     private int playingIndex;
     private boolean paused;
     private Timer timer;
@@ -140,7 +145,8 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     private String atkey;
     private String songTitle, songArtist;
     private long albumID, songID;
-
+    private FavHelper favHelper;
+    private NotificationManager notificationManager;
     /**
      * Oncreate method
      */
@@ -192,10 +198,16 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         restoreState();
         atkey = Helper.getATEKey(this);
         coloraccent = Config.accentColor(this,atkey);
-        Intent i = new Intent(this, AudioEffects.class);
-        i.setAction(OPEN_EFFECTS);
-        i.putExtra(AUDIO_ID,  MediaPlayerSingleton.getInstance().getMediaPlayer().getAudioSessionId());
-        sendBroadcast(i);
+        if (permissionManager.isAudioRecordGranted(this)){
+            Intent i = new Intent(this, AudioEffects.class);
+            i.setAction(OPEN_EFFECTS);
+            i.putExtra(AUDIO_ID,  MediaPlayerSingleton.getInstance().getMediaPlayer().getAudioSessionId());
+            sendBroadcast(i);
+        }else {
+            Log.d(TAG, "Permission not granted");
+        }
+        favHelper = new FavHelper(this);
+        notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     private Handler msgDelayHandler = new Handler(new Handler.Callback() {
@@ -244,19 +256,38 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                     break;
                 }
                 case ACTION_CHANGE_STATE: {
-                    if (PermissionChecker.checkSelfPermission(this,Manifest.permission.SYSTEM_ALERT_WINDOW) == PermissionChecker.PERMISSION_GRANTED){
-                            boolean show = intent.getBooleanExtra(EXTRA_CHANGE_STATE, false);
-                            if (show) {
-                                if (!Extras.getInstance().floatingWidget()){
-                                    audioWidget.show(saveData.getInt(KEY_POSITION_X, 100), saveData.getInt(KEY_POSITION_Y, 100));
-                                }
-                            } else {
-                                if (Extras.getInstance().floatingWidget()){
-                                    audioWidget.hide();
-                                }
+                    if (permissionManager.isSystemAlertGranted(this)){
+                        boolean show = intent.getBooleanExtra(EXTRA_CHANGE_STATE, true);
+                        if (show) {
+                            if (!Extras.getInstance().floatingWidget()){
+                                audioWidget.show(saveData.getInt(KEY_POSITION_X, 100), saveData.getInt(KEY_POSITION_Y, 100));
+                            }else {
+                                audioWidget.hide();
                             }
+                        } else {
+                            if (!Extras.getInstance().floatingWidget()){
+                                audioWidget.show(saveData.getInt(KEY_POSITION_X, 100), saveData.getInt(KEY_POSITION_Y, 100));
+                            }else {
+                                audioWidget.hide();
+                            }
+                        }
+                    }else {
+                        Log.d(TAG,"Overlay not detected");
                     }
                     break;
+                }
+                case ACTION_PLAYINGVIEW: {
+                    intent = new Intent(this, PlayingActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    this.startActivity(intent);
+
+                }
+                case FAV: {
+                    if (favHelper.isFavorite(getsongAlbumID())){
+                        favHelper.removeFromFavorites(getsongAlbumID());
+                    }else {
+                        favHelper.addFavorite(getsongAlbumID());
+                    }
                 }
             }
         }
@@ -295,7 +326,13 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     public void onCompletion(MediaPlayer mp) {
         playnext(false);
         if (playingIndex == -1) {
-            audioWidget.controller().stop();
+            if (permissionManager.isSystemAlertGranted(this)){
+                if (!Extras.getInstance().floatingWidget()){
+                    audioWidget.controller().stop();
+                }
+            }else {
+                Log.d(TAG, "Overlay Permission failed");
+            }
         }
     }
     @Override
@@ -311,7 +348,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             play();
             fastplay = false;
         }
-        if (PermissionChecker.checkSelfPermission(this, Manifest.permission.SYSTEM_ALERT_WINDOW) == PermissionChecker.PERMISSION_GRANTED) {
+        if (permissionManager.isSystemAlertGranted(this)){
             if (!Extras.getInstance().floatingWidget()){
                 audioWidget.show(saveData.getInt(KEY_POSITION_X, 100), saveData.getInt(KEY_POSITION_Y, 100));
                 audioWidget.controller().start();
@@ -319,8 +356,13 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                 audioWidget.controller().duration(MediaPlayerSingleton.getInstance().getMediaPlayer().getDuration());
                 trackingstart();
                 trackingstop();
+            }else {
+                audioWidget.hide();
             }
+        }else {
+            Log.d(TAG, "Overlay Permission failed");
         }
+
     }
 
     @Override
@@ -382,6 +424,11 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         }
     }
 
+    /**
+     * Widget position
+     * @param cx center x
+     * @param cy center y
+     */
     @Override
     public void onWidgetPositionChanged(int cx, int cy) {
         saveData.edit()
@@ -390,29 +437,45 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                 .apply();
     }
 
+    /**
+     * Play
+     */
     @Override
     public void play() {
         int audiogain = audioManager.requestAudioFocus(audioListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         if (audiogain == AudioManager.AUDIOFOCUS_REQUEST_GRANTED){
-           MediaPlayerSingleton.getInstance().getMediaPlayer().start();
+            MediaPlayerSingleton.getInstance().getMediaPlayer().start();
             paused = false;
             isPlaying = true;
             updateService(PLAYSTATE_CHANGED);
-            if (PermissionChecker.checkSelfPermission(this,Manifest.permission.SYSTEM_ALERT_WINDOW) == PermissionChecker.PERMISSION_GRANTED){
+            if (permissionManager.isSystemAlertGranted(this)){
                 if (!Extras.getInstance().floatingWidget()){
-                    trackingstart();
-                    audioWidget.controller().start();
+                    if (CurrentSong != null){
+                        widgetCover(CurrentSong);
+                        trackingstart();
+                        audioWidget.controller().start();
+                    }else {
+                        Log.d(TAG, "Currentsong is null");
+                    }
                 }else {
                     audioWidget.hide();
                 }
+            }else {
+                Log.d(TAG, "Overlay Permission failed");
             }
             if (CurrentSong != null){
                 RecentlyPlayed recentlyPlayed = new RecentlyPlayed(this);
                 recentlyPlayed.add(CurrentSong);
+            }else {
+                Log.d(TAG, "Currentsong is null");
             }
         }
     }
 
+    /**
+     * Widget Cover
+     * @param song
+     */
     private void widgetCover(Song song){
         new Runnable() {
             @Override
@@ -490,49 +553,52 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         paused = true;
         isPlaying = false;
         updateService(PLAYSTATE_CHANGED);
-        if (PermissionChecker.checkSelfPermission(this,Manifest.permission.SYSTEM_ALERT_WINDOW) == PermissionChecker.PERMISSION_GRANTED){
+        if (permissionManager.isSystemAlertGranted(this)){
             if (!Extras.getInstance().floatingWidget()){
                 trackingstop();
                 audioWidget.controller().pause();
+            }else {
+                audioWidget.hide();
             }
+        }else {
+            Log.d(TAG, "Overlay Permission failed");
         }
+
     }
 
     @Override
     public int getnextPos(boolean yorn) {
-        returnpos();
         if (repeatMode == REPEAT_CURRENT && !yorn) {
-            return playingIndex;
+            return returnpos();
         }
-        if (playingIndex + 1 >= playList.size()) {
+        if (returnpos() + 1 > playList.size()) {
             if (repeatMode == REPEAT_ALL) {
                 return 0;
             }
 
             return -1;
         }
-        return playingIndex + 1;
+        return returnpos() + 1;
     }
 
     @Override
     public int getprevPos(boolean yorn) {
-        returnpos();
-        if ((repeatMode == REPEAT_CURRENT && !yorn) || (isPlaying() && MediaPlayerSingleton.getInstance().getMediaPlayer().getCurrentPosition() >= 1500)) {
-            return playingIndex;
+        if ((repeatMode == REPEAT_CURRENT && !yorn) || (isPlaying() && getPlayerPos() >= 1500)) {
+            return returnpos();
         }
-        if (playingIndex - 1 < 0) {
+        if (returnpos() - 1 < 0) {
             if (repeatMode == REPEAT_ALL) {
                 return playList.size() - 1;
             }
             return -1;
         }
-        return playingIndex - 1;
+        return returnpos() - 1;
     }
 
     @Override
     public void playnext(boolean torf) {
         int position = getnextPos(torf);
-        if (position >= 0 && position < playList.size()) {
+        if (position != -1 && position < playList.size()) {
             playingIndex = position;
             CurrentSong = playList.get(playingIndex);
             fastplay();
@@ -546,7 +612,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     @Override
     public void playprev(boolean torf) {
         int position = getprevPos(torf);
-        if (position >= 0 && position < playList.size()) {
+        if (position != -1 && position < playList.size()) {
             playingIndex = position;
             CurrentSong = playList.get(playingIndex);
             fastplay();
@@ -568,8 +634,8 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
     @Override
     public void setdataPos(int pos, boolean play) {
-        if (pos != -1){
-            playingIndex = pos;
+        playingIndex = pos;
+        if (playingIndex != -1){
             CurrentSong = playList.get(playingIndex);
             if (play){
                 fastplay();
@@ -577,20 +643,24 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                 startCurrentTrack(CurrentSong);
                 paused = true;
             }
-            if (PermissionChecker.checkSelfPermission(this, Manifest.permission.SYSTEM_ALERT_WINDOW) == PermissionChecker.PERMISSION_GRANTED) {
-                widgetCover(CurrentSong);
-            }
+        }else {
+            Log.d(TAG, "null value");
         }
     }
 
     @Override
     public int returnpos() {
-        if (playingIndex != -1){
-            return playList.indexOf(CurrentSong) != -1 ? playList.indexOf(CurrentSong) : -1;
-        }
-        return -1;
+        return playList.indexOf(CurrentSong) != -1 ? playList.indexOf(CurrentSong) : -1;
     }
 
+    @Override
+    public void refreshWidget() {
+        AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
+        int updateId[] = widgetManager.getAppWidgetIds(new ComponentName(this, MusicxWidget.class));
+        if (updateId.length != -1){
+            MusicxWidget.musicxWidget(updateId, MusicXService.this);
+        }
+    }
 
     public int getRepeatMode() {
         return repeatMode;
@@ -701,9 +771,9 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                AudioWidget widget = audioWidget;
-                if (widget != null && isPlaying()) {
-                    widget.controller().position(MediaPlayerSingleton.getInstance().getMediaPlayer().getCurrentPosition());
+                AudioWidget audioWidgets = audioWidget;
+                if (audioWidgets != null && isPlaying() && playingIndex != -1) {
+                    audioWidgets.controller().position(MediaPlayerSingleton.getInstance().getMediaPlayer().getCurrentPosition());
                 }
             }
         }, UPDATE_INTERVAL, UPDATE_INTERVAL);
@@ -721,10 +791,9 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
     @Override
     public void startCurrentTrack(Song song) {
-        int pos = playList.indexOf(CurrentSong);
-        if (playingIndex != -1 && pos != -1){
+        if (playingIndex != -1 && returnpos() != -1){
             Bundle extras = new Bundle();
-            extras.putInt(EXTRA_POSITION, pos);
+            extras.putInt(EXTRA_POSITION, returnpos());
             sendBroadcast(POSITION_CHANGED, extras);
         }
         MediaPlayerSingleton.getInstance().getMediaPlayer().reset();
@@ -736,7 +805,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
@@ -759,7 +827,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
     @Override
     public void addToQueue(Song song) {
-        if (playList != null) {
+        if (playList != null && playingIndex != -1) {
             ogList.add(song);
             playList.add(song);
             updateService(ITEM_ADDED);
@@ -768,7 +836,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
     @Override
     public void setAsNextTrack(Song song) {
-        if (playList != null) {
+        if (playList != null && playingIndex != -1) {
             ogList.add(song);
             playList.add(playingIndex + 1, song);
             updateService(ITEM_ADDED);
@@ -778,14 +846,25 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     @Override
     public void onDestroy() {
         super.onDestroy();
-        audioWidget.controller().onControlsClickListener(null);
-        audioWidget.controller().onWidgetStateChangedListener(null);
-        audioWidget.hide();
-        audioWidget = null;
+        if (permissionManager.isSystemAlertGranted(this)){
+            if (!Extras.getInstance().floatingWidget()){
+                audioWidget.controller().onControlsClickListener(null);
+                audioWidget.controller().onWidgetStateChangedListener(null);
+                audioWidget.hide();
+            }else {
+                audioWidget.controller().onControlsClickListener(null);
+                audioWidget.controller().onWidgetStateChangedListener(null);
+                audioWidget.hide();
+            }
+        }else {
+            Log.d(TAG, "Overlay Permission failed");
+        }
         if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
             MediaPlayerSingleton.getInstance().getMediaPlayer().stop();
         }
         MediaPlayerSingleton.getInstance().getMediaPlayer().reset();
+        this.stopForeground(true);
+        notificationManager.cancel(notificationID);
         //MediaPlayerSingleton.getInstance().getMediaPlayer().release();
         trackingstop();
         if (telephonyManager !=null){
@@ -882,8 +961,18 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     public void forceStop() {
         MediaPlayerSingleton.getInstance().getMediaPlayer().stop();
         isPlaying = false;
-        audioWidget.controller().stop();
-        trackingstop();
+        this.stopForeground(true);
+        notificationManager.cancel(notificationID);
+        if (permissionManager.isSystemAlertGranted(this)){
+            if (!Extras.getInstance().floatingWidget()){
+                audioWidget.controller().stop();
+                trackingstop();
+            }else {
+                audioWidget.hide();
+            }
+        }else {
+            Log.d(TAG, "Overlay permision not granted");
+        }
         updateService(PLAYSTATE_CHANGED);
     }
 
@@ -976,7 +1065,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             String songartist = saveData.getString(SONG_ARTIST,songArtist);
             long albumId = saveData.getLong(SONG_ALBUM_ID, albumID);
             long songId = saveData.getLong(SONG_ID,songID);
-            if (playingIndex != -1 && queueList.size() >0 || !isPlaying() && isPaused()) {
+            if (restorepos != -1 && queueList.size() >0 || !isPlaying() && isPaused()) {
                 smartplaylist(queueList);
                 setdataPos(restorepos, false);
                 setSongTitle(songname);
@@ -984,6 +1073,8 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                 setAlbumID(albumId);
                 setSongID(songId);
                 Log.d(TAG,"restoring data");
+            }else {
+                Log.d(TAG, "Failed to restore data");
             }
         }
     }
@@ -1023,6 +1114,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             i.putExtras(data);
         }
         sendBroadcast(i);
+        refreshWidget();
     }
 
     /**
@@ -1231,22 +1323,19 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                 builder.addAction(R.drawable.aw_ic_play, "", toggleIntent);
             }
             builder.addAction(R.drawable.aw_ic_next, "",nextIntent);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                builder.setVisibility(Notification.VISIBILITY_PUBLIC)
-                        .setWhen(System.currentTimeMillis())
-                        .setOngoing(true)
-                        .setCategory(Intent.CATEGORY_APP_MUSIC)
-                        .setAutoCancel(true)
-                        .setPriority(Notification.PRIORITY_DEFAULT)
-                        .setContentIntent(pendInt)
-                        .setShowWhen(false)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle(getsongTitle())
-                        .setContentText(getsongArtistName())
-                        .setStyle(new NotificationCompat.MediaStyle()
-                                .setMediaSession(getMediaSession().getSessionToken())
-                                .setShowActionsInCompactView(0, 1, 2).setCancelButtonIntent(stopIntent).setShowCancelButton(true));
-            }
+            builder
+                    .setWhen(System.currentTimeMillis())
+                    .setCategory(Intent.CATEGORY_APP_MUSIC)
+                    .setAutoCancel(true)
+                    .setPriority(Notification.PRIORITY_DEFAULT)
+                    .setContentIntent(pendInt)
+                    .setShowWhen(false)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle(getsongTitle())
+                    .setContentText(getsongArtistName())
+                    .setStyle(new NotificationCompat.MediaStyle()
+                            .setMediaSession(getMediaSession().getSessionToken())
+                            .setShowActionsInCompactView(0, 1, 2));
             ArtworkUtils.ArtworkLoaderBitmapPalette(this, getsongAlbumID(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
@@ -1265,15 +1354,16 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                 }
 
             });
-            if (CurrentSong == null){
-                NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.cancel(notificationID);
-            }else {
+
+            if (isPlaying()) {
                 startForeground(notificationID, builder.build());
+                builder.setOngoing(true);
+            } else {
+                builder.setOngoing(false);
+                notificationManager.notify(notificationID, builder.build());
             }
         }
 
     }
-
 
 }
