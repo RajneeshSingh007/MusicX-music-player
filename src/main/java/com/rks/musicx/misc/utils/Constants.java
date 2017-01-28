@@ -66,6 +66,8 @@ public class Constants {
     public static final String SHUFFLEMODE = "shuffle";
     public static final String PLAYINGSTATE = "playingState";
     public static final String CURRENTPOS = "position";
+    public static final String ACTION_PLAYINGVIEW = "PLAYING_VIEW";
+    public static final String FAV = "FAV";
 
     /*
     Sorting properties
@@ -98,6 +100,7 @@ public class Constants {
     Preferences
      */
     public static final String PlayingView = "playing_selection";
+    public static final String EQMODE = "equalizer_selection";
     public static final String FloatingView = "floating_view";
     public static final String TextFonts = "change_fonts";
     public static final String BlurView = "blur_view";
@@ -114,6 +117,7 @@ public class Constants {
     public static final String HIDE_LOCKSCREEEN = "hide_lockscreenMedia";
     public static final String REORDER_TAB = "tab_selection";
     public static final String RESTORE_LASTTAB = "restore_lasttab";
+    public static final String STORAGE_SELECTION = "storage_selection";
 
     /*
     Choices
@@ -164,17 +168,23 @@ public class Constants {
     public static final String SAVE_PRESET = "preset";
     public static final String EQ_ENABLED = "enabled";
     public static final String BASS_ENABLED = "enabled";
+    public static final String PRESET_ENABLED = "enabled";
     public static final String VIRTUAL_ENABLED = "enabled";
     public static final int GAIN_MAX = 1000;
     public static final String SAVE_EQ = "Equalizers";
     public static final String BASS_BOOST = "BassBoost";
     public static final String VIRTUAL_BOOST = "VirtualBoost";
     public static final String LOUD_BOOST = "Loud";
+    public static final String PRESET_BOOST = "PresetReverb";
     public static final short BASSBOOST_STRENGTH = 1000;
     public static final short Virtualizer_STRENGTH = 1000;
     public static final String AUDIO_ID = "audio_id";
     public static final String OPEN_EFFECTS = "open_effects";
     public static final String CLOSE_EFFECTS = "close_effects";
+    public static final String SAVEDBASS = "SavedBass";
+    public static final String SAVEDLOUD = "SavedLoud";
+    public static final String SAVEDVIRTUALIZER = "SavedVir";
+    public static final String SAVEDREVERB = "SavedReverb";
 
     /**
      * Developer Properties
