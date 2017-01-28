@@ -3,9 +3,29 @@
 
 <p><a href="https://play.google.com/store/apps/details?id=com.rks.musicx"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" height="60" data-canonical-src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" style="max-width:100%;"></a></p>
 
+# Features
+- Floating Widget Let you enjoy your music anywhere.
+- 3 Beautiful, Cool Playing View.
+- Lyrics support,Save lyrics for offline.
+- Powerful Equalizer with Bass,Virtualizer, Reverb and Loudness.
+- Folder View, Browse and Play music easily.
+- 20 Best,Cool,Beautiful Fonts.
+- App Theme Engine Support choose between Dark & Light.
+- Homescreen Widget 4x2.
+- Sort song by date,title, many more.
+- Browse by Album,Artist,Playlist,Recently Added,Recently Played.
+- ID3 tags editor.
+- SleepTimer
+- Create and Edit Playlists.
+- Automatically fetches artist images on last.fm.
+- Change Album Art.
+- Share,Delete and many more .... 
+
 # Screnshots
 <p>
-<img alt="" src="https://lh3.googleusercontent.com/CxbME-OuvCQTGHzTN1o6YiMP-VxbSUqmpDUxJkfmvk6HsBjuxkCdzXR3HsjgDYKliFTk=h900" style="max-width:100%;">
+<img alt ="" src = "https://lh3.googleusercontent.com/_f0CVeUMgdWu4Dj8UUJvZA0GmH0C0bc6B3pYBA9F6tEUyzJfDv8jD27DTdMkC7K1Uh4=h900" style="max-width:25%;">
+
+<img alt="" src="https://lh3.googleusercontent.com/CxbME-OuvCQTGHzTN1o6YiMP-VxbSUqmpDUxJkfmvk6HsBjuxkCdzXR3HsjgDYKliFTk=h900" style="max-width:25%;">
 </p>
 <p>
 <img alt="" src="https://lh3.googleusercontent.com/v3e3PbCuXFjtf7gOeOCCD5mMMNgEeETpSWnkNoiHoXEgfw3NvOXamnb8edw-CbktS8k=h900" style="max-width:25%;">
@@ -59,6 +79,9 @@ Special Thanks to api provided by Last.fm (Artist Image) & https://api.vagalume.
     </li>
     <li>
         <a href="https://github.com/paolorotolo/AppIntro"><b>MaterialShowcaseView</b></a>
+    </li>
+    <li>
+        <a href= "https://github.com/harjot-oberai/Croller"><b>Croller</b></a>
     </li>
  </ul>
 If forgot any other license author,feel free to mail me @developerrajneeshsingh@gmail.com.
