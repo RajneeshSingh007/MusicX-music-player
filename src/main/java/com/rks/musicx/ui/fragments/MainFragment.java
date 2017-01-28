@@ -2,7 +2,6 @@ package com.rks.musicx.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -69,7 +68,7 @@ public class MainFragment extends miniFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             ATE.postApply(getActivity(), "dark_theme");
         } else {
             ATE.postApply(getActivity(), "light_theme");
@@ -120,25 +119,27 @@ public class MainFragment extends miniFragment {
                 case 0:
                     return RecentFragment.newInstance(0);
                 case 1:
+                    return FolderFragment.newInstance(1);
+                case 2:
                     if (!Extras.getInstance().songView()){
-                        return SongListFragment.newInstance(1);
+                        return SongListFragment.newInstance(2);
                     }else{
                         return SongGridFragment.newInstance(2);
                     }
-                case 2:
-                    if (Extras.getInstance().albumView()){
-                        return AlbumListFragment.newInstance(2);
-                    }else if (!Extras.getInstance().albumView()){
-                        return AlbumGridFragment.newInstance(2);
-                    }
                 case 3:
-                    if (Extras.getInstance().artistView()){
-                        return ArtistListFragment.newInstance(3);
-                    }else if (!Extras.getInstance().artistView()){
-                        return ArtistGridFragment.newInstance(3);
+                    if (Extras.getInstance().albumView()){
+                        return AlbumListFragment.newInstance(3);
+                    }else if (!Extras.getInstance().albumView()){
+                        return AlbumGridFragment.newInstance(3);
                     }
                 case 4:
-                    return PlaylistListFragment.newInstance(4);
+                    if (Extras.getInstance().artistView()){
+                        return ArtistListFragment.newInstance(4);
+                    }else if (!Extras.getInstance().artistView()){
+                        return ArtistGridFragment.newInstance(4);
+                    }
+                case 5:
+                    return PlaylistListFragment.newInstance(5);
             }
             return null;
         }
@@ -157,7 +158,7 @@ public class MainFragment extends miniFragment {
 
         @Override
         public int getCount() {
-            return 5;
+            return 6;
         }
 
         @Override
@@ -167,12 +168,14 @@ public class MainFragment extends miniFragment {
                 case 0:
                     return getString(R.string.recentlists).toUpperCase(l);
                 case 1:
-                    return getString(R.string.titles).toUpperCase(l);
+                    return getString(R.string.folder).toUpperCase(l);
                 case 2:
-                    return getString(R.string.albums).toUpperCase(l);
+                    return getString(R.string.titles).toUpperCase(l);
                 case 3:
-                    return getString(R.string.artists).toUpperCase(l);
+                    return getString(R.string.albums).toUpperCase(l);
                 case 4:
+                    return getString(R.string.artists).toUpperCase(l);
+                case 5:
                     return getString(R.string.playlists).toUpperCase(l);
             }
             return null;
