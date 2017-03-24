@@ -1,27 +1,27 @@
 # MusicX Music Player
-<h3>Simple, Elegant ,Beautiful Material Music Player. </h3>
+<h3>Simple, Elegant, Beautiful Material Music Player.</h3>
 
 <p><a href="https://play.google.com/store/apps/details?id=com.rks.musicx"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" height="60" data-canonical-src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" style="max-width:100%;"></a></p>
 
 # Features
-- Floating Widget Let you enjoy your music anywhere.
-- 3 Beautiful, Cool Playing View.
-- Lyrics support,Save lyrics for offline.
-- Powerful Equalizer with Bass,Virtualizer, Reverb and Loudness.
-- Folder View, Browse and Play music easily.
-- 20 Best,Cool,Beautiful Fonts.
-- App Theme Engine Support choose between Dark & Light.
-- Homescreen Widget 4x2.
-- Sort song by date,title, many more.
-- Browse by Album,Artist,Playlist,Recently Added,Recently Played.
+- Floating widget let you enjoy your music anywhere.
+- 3 beautiful, cool playing views.
+- Lyrics support, save lyrics for offline.
+- Powerful equalizer with bass, virtualizer, reverb and loudness.
+- Folder view, browse and play music easily.
+- 20 awesome, cool and beautiful fonts.
+- App theme engine support choose between dark & light.
+- Homescreen widget 4x2.
+- Sort song by date, title and many more.
+- Browse by album, artist, playlist, recently added, recently played.
 - ID3 tags editor.
-- SleepTimer
-- Create and Edit Playlists.
-- Automatically fetches artist images on last.fm.
-- Change Album Art.
-- Share,Delete and many more .... 
+- SleepTimer.
+- Create and edit playlists.
+- Automatically fetches artist images by using last.fm.
+- Change album art.
+- Share, delete and many more .... 
 
-# Screnshots
+# Screenshots
 <p>
 <img alt ="" src = "https://lh3.googleusercontent.com/_f0CVeUMgdWu4Dj8UUJvZA0GmH0C0bc6B3pYBA9F6tEUyzJfDv8jD27DTdMkC7K1Uh4=h900" style="max-width:25%;">
 
@@ -40,7 +40,7 @@
 <img alt="" src="https://lh3.googleusercontent.com/s19CjGQQm8r_2U5qsGHZu5Klv1TscGjqSnddSiEUJrnrSJMF3nxTaJf9ovjhb5XT8g=h900" style="max-width:25%;">
 </p>
 <p>
-Special Thanks to api provided by Last.fm (Artist Image) & https://api.vagalume.com.br/ (Lyrics )
+Special thanks to api provided by Last.fm (Artist Image) & https://api.vagalume.com.br/ (Lyrics )
 </p>
 <p><h3> Licenses.</h3>
  <ul>
@@ -86,7 +86,7 @@ Special Thanks to api provided by Last.fm (Artist Image) & https://api.vagalume.
  </ul>
 If forgot any other license author,feel free to mail me @developerrajneeshsingh@gmail.com.
  </p>
- <p>Feel free to fork,bug fix.</p>
+ <p>Feel free to fork this project and fix bugs.</p>
  <p>Also, Thanks To StackOverflow and Slack Developers.</p>
  <h3>©2017 Rajneesh Singh</h3>
 
