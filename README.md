@@ -40,6 +40,10 @@
 <img alt="" src="https://lh3.googleusercontent.com/s19CjGQQm8r_2U5qsGHZu5Klv1TscGjqSnddSiEUJrnrSJMF3nxTaJf9ovjhb5XT8g=h900" style="max-width:25%;">
 </p>
 <p>
+<img alt="" src="https://lh3.googleusercontent.com/ms9XiYqPOK7aYQSDefxSbwnLyHF-EvoRvB-6vmO0rWj9t1c9O1CBgknbCY5TMZf61A=h900"
+style="max_width:25%;">
+</p>
+<p>
 Special thanks to api provided by Last.fm (Artist Image) & https://api.vagalume.com.br/ (Lyrics )
 </p>
 <p><h3> Licenses.</h3>
@@ -88,9 +92,9 @@ If forgot any other license author,feel free to mail me @developerrajneeshsingh@
  </p>
  <p>Feel free to fork this project and fix bugs.</p>
  <p>Also, Thanks To StackOverflow and Slack Developers.</p>
- <h3>©2017 Rajneesh Singh</h3>
 
-<pre>Licensed under the Apache License, Version 2.0 (the "License");
+<pre>©2017 Rajneesh Singh 
+Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
     http://www.apache.org/licenses/LICENSE-2.0
