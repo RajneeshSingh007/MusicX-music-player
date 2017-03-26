@@ -28,15 +28,16 @@ import java.util.concurrent.TimeUnit;
 
 import static com.rks.musicx.R.string.minutes;
 
-/**
- * Created by Coolalien on 3/26/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
+
 public class Sleeptimer {
 
+    public static boolean running;
     static CircularSeekBar mcircularSeekBar;
     static TextView mSeekArcProgress;
     private static ScheduledFuture mTask;
-    public static boolean running;
     private static boolean timer = false;
     static private CountDownTimer countDownTimer;
     private static String ateKey;
@@ -50,22 +51,23 @@ public class Sleeptimer {
         final String cancel = c.getString(R.string.cancel);
         ateKey = Helper.getATEKey(c);
         accentColor = Config.accentColor(c, ateKey);
-        int primary = Config.primaryColor(c,ateKey);
-        if (PreferenceManager.getDefaultSharedPreferences(c).getBoolean("dark_theme",false)){
+        int primary = Config.primaryColor(c, ateKey);
+        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             mcircularSeekBar.setPointerHaloColor(accentColor);
             mcircularSeekBar.setCircleProgressColor(accentColor);
-            mSeekArcProgress.setTextColor(ContextCompat.getColor(c,R.color.white));
-        }else {
+            mcircularSeekBar.setPointerHaloColor(accentColor);
+            mSeekArcProgress.setTextColor(ContextCompat.getColor(c, R.color.white));
+        } else {
             mcircularSeekBar.setPointerHaloColor(accentColor);
             mcircularSeekBar.setCircleProgressColor(accentColor);
-            mSeekArcProgress.setTextColor(ContextCompat.getColor(c,R.color.colorPrimaryText));
+            mSeekArcProgress.setTextColor(ContextCompat.getColor(c, R.color.colorPrimaryText));
             mcircularSeekBar.setCircleColor(primary);
         }
         mcircularSeekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
             @Override
             public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
                 String minute;
-                if (progress < 10){
+                if (progress < 10) {
                     minute = c.getString(R.string.minute);
                 } else {
                     minute = c.getString(minutes);
@@ -91,7 +93,7 @@ public class Sleeptimer {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 int mins = mcircularSeekBar.getProgress();
-                startTimer(view,mins,c);
+                startTimer(view, mins, c);
             }
         });
         sleeptimer.negativeText(cancel);
@@ -101,7 +103,7 @@ public class Sleeptimer {
                 sleeptimer.autoDismiss(true);
             }
         });
-        sleeptimer.customView(view,false);
+        sleeptimer.customView(view, false);
         sleeptimer.show();
     }
 
@@ -114,9 +116,9 @@ public class Sleeptimer {
         }
         View view = LayoutInflater.from(c).inflate(R.layout.timer_info, null);
         final TextView timeLeft = ((TextView) view.findViewById(R.id.time_left));
-        if (PreferenceManager.getDefaultSharedPreferences(c).getBoolean("dark_theme",false)){
+        if (PreferenceManager.getDefaultSharedPreferences(c).getBoolean("dark_theme", false)) {
             timeLeft.setTextColor(Color.WHITE);
-        }else {
+        } else {
             timeLeft.setTextColor(Color.BLACK);
         }
         final String stopTimer = c.getString(R.string.stop_timer);
@@ -135,18 +137,19 @@ public class Sleeptimer {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 Stop();
-                Toast.makeText(c,stopTimer,Toast.LENGTH_LONG).show();
+                Toast.makeText(c, stopTimer, Toast.LENGTH_LONG).show();
             }
         });
-        sleepdialog.customView(view,false);
+        sleepdialog.customView(view, false);
         new CountDownTimer(mTask.getDelay(TimeUnit.MILLISECONDS), 1000) {
             @SuppressLint("StringFormatInvalid")
             @Override
             public void onTick(long seconds) {
-                long miliseconds= seconds;
+                long miliseconds = seconds;
                 miliseconds = miliseconds / 1000;
                 timeLeft.setText(String.format(c.getString(R.string.timer_info), ((miliseconds % 3600) / 60), ((miliseconds % 3600) % 60)));
             }
+
             @Override
             public void onFinish() {
                 sleepdialog.autoDismiss(true);
@@ -154,10 +157,11 @@ public class Sleeptimer {
         }.start();
         sleepdialog.show();
     }
-    private static void startTimer(View v,final int minutes, Context c) {
+
+    private static void startTimer(View v, final int minutes, Context c) {
         final String impossible = c.getString(R.string.impossible);
         final String minute = c.getString(R.string.minute);
-        final String minutess= c.getString(R.string.minutes);
+        final String minutess = c.getString(R.string.minutes);
         final String stop = c.getString(R.string.stop);
         final String minuteTxt;
         final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -172,29 +176,16 @@ public class Sleeptimer {
             minuteTxt = minutess;
         }
         mTask = scheduler.schedule(new runner(c), delay, TimeUnit.MILLISECONDS);
-        Toast.makeText(c,stop + " " + minutes + " " + minuteTxt,Toast.LENGTH_LONG).show();
+        Toast.makeText(c, stop + " " + minutes + " " + minuteTxt, Toast.LENGTH_LONG).show();
         running = true;
         setState(true);
         reduceVolume(delay);
     }
 
-    public static void setState(boolean onOff){
+    public static void setState(boolean onOff) {
         timer = onOff;
     }
 
-    private static class  runner implements Runnable{
-        Context c;
-
-        public runner(Context c){
-            this.c=c;
-        }
-
-        @Override
-        public void run() {
-            ((AudioManager) c.getSystemService(Context.AUDIO_SERVICE)).requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-            stopTimer();
-        }
-    }
     public static void stopTimer() {
         if (running) mTask.cancel(true);
         running = false;
@@ -212,7 +203,7 @@ public class Sleeptimer {
 
     public static void reduceVolume(final int delay) {
 
-        final short minutes = (short) ( ( (delay / 1000) % 3600) / 60);
+        final short minutes = (short) (((delay / 1000) % 3600) / 60);
         final boolean tempsMinute = minutes > 10;
         int cycle;
         if (tempsMinute) {
@@ -223,60 +214,74 @@ public class Sleeptimer {
         countDownTimer = new CountDownTimer(delay, cycle) {
             @Override
             public void onTick(long mseconds) {
-                long temps1 = ((mTask.getDelay(TimeUnit.MILLISECONDS) / 1000) % 3600) / 60 ;
+                long temps1 = ((mTask.getDelay(TimeUnit.MILLISECONDS) / 1000) % 3600) / 60;
                 long temps2 = mTask.getDelay(TimeUnit.MILLISECONDS) / 1000;
                 if (tempsMinute) {
                     if (temps1 < 1) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.1f,0.1f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.1f, 0.1f);
                     } else if (temps1 < 2) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.2f,0.2f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.2f, 0.2f);
                     } else if (temps1 < 3) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.3f,0.3f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.3f, 0.3f);
                     } else if (temps1 < 4) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.4f,0.4f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.4f, 0.4f);
                     } else if (temps1 < 5) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.5f,0.5f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.5f, 0.5f);
                     } else if (temps1 < 6) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.6f,0.6f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.6f, 0.6f);
                     } else if (temps1 < 7) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.7f,0.7f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.7f, 0.7f);
                     } else if (temps1 < 8) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.8f,0.8f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.8f, 0.8f);
                     } else if (temps1 < 9) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.9f,0.9f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.9f, 0.9f);
                     } else if (temps1 < 10) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(1.0f,1.0f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(1.0f, 1.0f);
                     }
                 } else {
                     if (temps2 < 6) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.1f,0.1f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.1f, 0.1f);
                     } else if (temps2 < 12) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.2f,0.2f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.2f, 0.2f);
                     } else if (temps2 < 18) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.3f,0.3f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.3f, 0.3f);
                     } else if (temps2 < 24) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.4f,0.4f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.4f, 0.4f);
                     } else if (temps2 < 30) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.5f,0.5f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.5f, 0.5f);
                     } else if (temps2 < 36) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.6f,0.6f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.6f, 0.6f);
                     } else if (temps2 < 42) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.7f,0.7f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.7f, 0.7f);
                     } else if (temps2 < 48) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.8f,0.8f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.8f, 0.8f);
                     } else if (temps2 < 54) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.9f,0.9f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.9f, 0.9f);
                     } else if (temps2 < 60) {
-                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(1.0f,1.0f);
+                        MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(1.0f, 1.0f);
                     }
                 }
             }
 
             @Override
             public void onFinish() {
-                MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(1.0f,1.0f);
+                MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(1.0f, 1.0f);
             }
 
         }.start();
+    }
+
+    private static class runner implements Runnable {
+        Context c;
+
+        public runner(Context c) {
+            this.c = c;
+        }
+
+        @Override
+        public void run() {
+            ((AudioManager) c.getSystemService(Context.AUDIO_SERVICE)).requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+            stopTimer();
+        }
     }
 }

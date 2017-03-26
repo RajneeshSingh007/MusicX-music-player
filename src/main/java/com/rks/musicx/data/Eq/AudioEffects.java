@@ -1,4 +1,4 @@
-package com.rks.musicx.data.Eq;
+package com.rks.musicx.data.eq;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,25 +6,19 @@ import android.content.Intent;
 
 import com.rks.musicx.misc.utils.Constants;
 
-import static com.rks.musicx.misc.utils.Constants.AUDIO_ID;
-import static com.rks.musicx.misc.utils.Constants.CLOSE_EFFECTS;
-
-/**
- * Created by Coolalien on 12/23/2016.
+/*
+ * Created by Coolalien on 06/01/2017.
  */
 
-public class AudioEffects extends BroadcastReceiver{
+public class AudioEffects extends BroadcastReceiver {
 
-    /**
-     * Default Constructor
-     */
-    public AudioEffects(){
+    public AudioEffects() {
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String scan = intent.getAction();
-        int AudioID = intent.getIntExtra(AUDIO_ID, 0);
+        int AudioID = intent.getIntExtra(Constants.AUDIO_ID, 0);
         if (Constants.OPEN_EFFECTS.equals(scan)) {
             Equalizers.initEq(AudioID);
             BassBoosts.initBass(AudioID);

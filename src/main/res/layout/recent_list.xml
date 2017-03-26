@@ -1,32 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/item_view"
-    android:layout_marginStart="4dp"
-    android:layout_marginEnd="4dp"
-    android:foreground="?android:attr/selectableItemBackground"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/item_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:layout_marginStart="4dp"
+                android:foreground="?android:attr/selectableItemBackground">
 
     <com.rks.musicx.misc.widgets.SquareImageView
-        android:src="@mipmap/ic_launcher"
-        android:layout_width="110dp"
-        android:layout_height="110dp"
-        android:id="@+id/artwork"
+        android:id="@+id/album_artwork"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
         android:background="@color/default_artwork_bg"
-        android:scaleType="centerCrop"/>
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
+        android:src="@mipmap/ic_launcher"/>
 
     <LinearLayout
         android:id="@+id/backgroundColor"
         android:layout_width="fill_parent"
-        android:layout_below="@+id/artwork"
-        android:background="#e5e5e5"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:gravity="center"
-        android:layout_alignStart="@+id/artwork"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/artwork">
+        android:layout_alignEnd="@+id/album_artwork"
+        android:layout_alignStart="@+id/album_artwork"
+        android:layout_below="@+id/album_artwork"
+        android:background="#e5e5e5"
+        android:gravity="center"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -41,31 +42,32 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:paddingStart="2dp"
+                android:text="SONG TITLE"
                 android:textColor="@color/colorPrimaryText"
-                android:textSize="15sp"
-                android:text="SONG TITLE"/>
+                android:textSize="15sp"/>
 
             <TextView
                 android:id="@+id/artist_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:alpha="0.8"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:paddingStart="2dp"
                 android:paddingTop="2dp"
+                android:text="SONG ARTIST"
                 android:textColor="@color/colorSecondaryText"
-                android:textSize="13sp"
-                android:alpha="0.8"
-                android:text="SONG ARTIST"/>
+                android:textSize="13sp"/>
 
         </LinearLayout>
+
         <ImageButton
             android:id="@+id/menu_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:tint="@android:color/white"
             android:background="@drawable/ripple"
-            app:srcCompat="@drawable/ic_menu" />
+            android:tint="@android:color/white"
+            app:srcCompat="@drawable/ic_menu"/>
     </LinearLayout>
 </RelativeLayout>

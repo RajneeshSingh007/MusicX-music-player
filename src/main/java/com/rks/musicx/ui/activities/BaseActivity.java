@@ -1,6 +1,14 @@
 package com.rks.musicx.ui.activities;
 
-import android.content.SharedPreferences;
+import static com.rks.musicx.misc.utils.Constants.DarkTheme;
+import static com.rks.musicx.misc.utils.Constants.Four;
+import static com.rks.musicx.misc.utils.Constants.LightTheme;
+import static com.rks.musicx.misc.utils.Constants.One;
+import static com.rks.musicx.misc.utils.Constants.Three;
+import static com.rks.musicx.misc.utils.Constants.Two;
+import static com.rks.musicx.misc.utils.Constants.Zero;
+
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -11,22 +19,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.ATEActivity;
 import com.rks.musicx.R;
-
+import com.rks.musicx.misc.utils.Extras;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
-import static com.rks.musicx.misc.utils.Constants.DarkTheme;
-import static com.rks.musicx.misc.utils.Constants.Four;
-import static com.rks.musicx.misc.utils.Constants.LightTheme;
-import static com.rks.musicx.misc.utils.Constants.One;
-import static com.rks.musicx.misc.utils.Constants.TextFonts;
-import static com.rks.musicx.misc.utils.Constants.Three;
-import static com.rks.musicx.misc.utils.Constants.Two;
-import static com.rks.musicx.misc.utils.Constants.Zero;
 
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
 
 public abstract class BaseActivity extends ATEActivity {
 
@@ -36,7 +38,6 @@ public abstract class BaseActivity extends ATEActivity {
     private int ContainerId;
     private Fragment fragment;
     private long updateTime = -1;
-    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +72,7 @@ public abstract class BaseActivity extends ATEActivity {
     *@ui
     */
     protected abstract void setUi();
+
     /*
     *@function
     */
@@ -80,7 +82,7 @@ public abstract class BaseActivity extends ATEActivity {
     /*
     fragment Loader
     */
-    protected void fragmentLoader(int ContainerId, Fragment fragment){
+    protected void fragmentLoader(int ContainerId, Fragment fragment) {
         getSupportFragmentManager().beginTransaction().replace(ContainerId, fragment).commit();
     }
 
@@ -93,13 +95,8 @@ public abstract class BaseActivity extends ATEActivity {
     }
 
 
-    /**
-     * Font Config
-     */
-    private void fontConfig(){
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String userFontValue = sharedPreferences.getString(TextFonts, "11");
-        switch (userFontValue) {
+    private void fontConfig() {
+        switch (Extras.getInstance().fontConfig()) {
             case Zero:
                 CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
                         .setDefaultFontPath("RobotoLight.ttf")
@@ -280,6 +277,15 @@ public abstract class BaseActivity extends ATEActivity {
                         .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
                         .build());
                 break;
+          case "20":
+            CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath(Typeface.DEFAULT.toString())
+                .setFontAttrId(R.attr.fontPath)
+                .addCustomStyle(AppCompatTextView.class, android.R.attr.textViewStyle)
+                .addCustomStyle(TextView.class, android.R.attr.textViewStyle)
+                .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
+                .build());
+            break;
         }
     }
 
@@ -314,14 +320,11 @@ public abstract class BaseActivity extends ATEActivity {
         return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(DarkTheme, false) ? DarkTheme : LightTheme;
     }
 
-    public String returnAteKey(){
+    public String returnAteKey() {
         return getATEKey();
     }
 
-    /**
-     * Theme Config dark/light
-     */
-    private void themeConfig(){
+    private void themeConfig() {
         if (!ATE.config(this, LightTheme).isConfigured(4)) {
             ATE.config(this, LightTheme)
                     .activityTheme(R.style.AppThemeNormalLight)

@@ -1,8 +1,11 @@
-
 package com.rks.musicx.data.network.VagModel;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
 
 public class Art {
 
@@ -16,56 +19,26 @@ public class Art {
     @Expose
     private String url;
 
-    /**
-     * 
-     * @return
-     *     The id
-     */
     public String getId() {
         return id;
     }
 
-    /**
-     * 
-     * @param id
-     *     The id
-     */
     public void setId(String id) {
         this.id = id;
     }
 
-    /**
-     * 
-     * @return
-     *     The name
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * 
-     * @param name
-     *     The name
-     */
     public void setName(String name) {
         this.name = name;
     }
 
-    /**
-     * 
-     * @return
-     *     The url
-     */
     public String getUrl() {
         return url;
     }
 
-    /**
-     * 
-     * @param url
-     *     The url
-     */
     public void setUrl(String url) {
         this.url = url;
     }

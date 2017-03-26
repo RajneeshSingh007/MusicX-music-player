@@ -1,9 +1,9 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/playingview4"
-    android:fitsSystemWindows="true"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                 android:id="@+id/playingview4"
+                                                 android:layout_width="match_parent"
+                                                 android:layout_height="match_parent"
+                                                 android:fitsSystemWindows="true">
 
 
     <ImageView
@@ -13,12 +13,12 @@
         android:background="@color/default_artwork_bg"
         android:fitsSystemWindows="true"
         android:scaleType="centerCrop"
-        android:src="@mipmap/ic_launcher" />
+        android:src="@mipmap/ic_launcher"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:background="@color/bgcolor"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/bgcolor">
 
 
         <LinearLayout
@@ -33,11 +33,11 @@
                 android:id="@+id/action_favorite"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingRight="4dp"
-                android:paddingLeft="4dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@null"
-                android:src="@drawable/ic_action_favorite_outline" />
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:src="@drawable/ic_action_favorite_outline"/>
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -52,58 +52,58 @@
                     android:layout_gravity="center"
                     android:ellipsize="end"
                     android:maxLines="1"
+                    android:text="Sonu Nigam"
                     android:textColor="@color/white"
-                    android:textSize="18sp"
-                    android:text="Sonu Nigam" />
+                    android:textSize="18sp"/>
 
                 <TextView
                     android:id="@+id/song_artist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:alpha="0.8"
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:paddingTop="4dp"
+                    android:text="Agneepath"
                     android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:alpha="0.8"
-                    android:text="Agneepath" />
+                    android:textSize="16sp"/>
             </LinearLayout>
 
             <ImageButton
                 android:id="@+id/menu_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingRight="4dp"
-                android:paddingLeft="4dp"
                 android:layout_weight="0"
-                android:tint="@android:color/white"
                 android:background="@drawable/ripple"
-                app:srcCompat="@drawable/ic_menu" />
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:tint="@android:color/white"
+                app:srcCompat="@drawable/ic_menu"/>
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_marginTop="4dp"
+            android:layout_below="@+id/song_info"
             android:layout_marginBottom="4dp"
-            android:layout_below="@+id/song_info">
+            android:layout_marginTop="4dp"
+            android:orientation="vertical">
 
             <android.support.v4.view.ViewPager
                 android:id="@+id/pagerPlaying4"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_weight="1"/>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/commonrv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fadeScrollbars="true"
                 android:layout_marginTop="4dp"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+                android:fadeScrollbars="true"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
         </LinearLayout>
     </RelativeLayout>

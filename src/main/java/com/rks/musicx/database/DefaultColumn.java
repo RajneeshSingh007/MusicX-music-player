@@ -2,8 +2,8 @@ package com.rks.musicx.database;
 
 import android.provider.BaseColumns;
 
-/**
- * Created by Coolalien on 12/16/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public interface DefaultColumn extends BaseColumns {

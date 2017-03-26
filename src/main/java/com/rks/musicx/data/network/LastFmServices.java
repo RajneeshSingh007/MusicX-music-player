@@ -7,8 +7,8 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
-/**
- * Created by Coolalien on 8/29/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public interface LastFmServices {

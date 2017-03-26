@@ -20,8 +20,8 @@ import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.misc.utils.Helper;
 
-/**
- * Created by Coolalien on 9/8/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class ProgressBar extends android.widget.ProgressBar {
@@ -31,7 +31,7 @@ public class ProgressBar extends android.widget.ProgressBar {
     private final long DEFAULT_DURATION = 1000;
     private final int DEFAULT_CORNER_RADIUS = -1;
     private String atekey = Helper.getATEKey(getContext());
-    private int accent = Config.accentColor(getContext(),atekey);
+    private int accent = Config.accentColor(getContext(), atekey);
     private int DEFAULT_PROGRESS_COLOR = accent;
     private int DEFAULT_PROGRESS_BACKGROUND_COLOR = Color.TRANSPARENT;
 
@@ -153,14 +153,8 @@ public class ProgressBar extends android.widget.ProgressBar {
 
     }
 
-    /**
-     * Animation Progress
-     *
-     * @param progress animationEnd progress point
-     */
     public void setProgressWithAnim(int progress) {
         if (isAnimating) {
-            Log.w(TAG, "now is animating. cant override animator");
             return;
         }
         if (mProgressAnimator == null) {
@@ -200,11 +194,6 @@ public class ProgressBar extends android.widget.ProgressBar {
     }
 
 
-    /**
-     * Animation Progress
-     *
-     * @param max animationEnd max point
-     */
     public void setMaxWithAnim(int max) {
         if (isAnimating) {
             Log.w(TAG, "now is animating. cant override animator");
@@ -217,9 +206,6 @@ public class ProgressBar extends android.widget.ProgressBar {
         mMaxAnimator.start();
     }
 
-    /**
-     * cancelAnimation
-     */
     public void cancelAnimation() {
         if (!isAnimating) {
             Log.w(TAG, "now is no animating.");
@@ -265,6 +251,14 @@ public class ProgressBar extends android.widget.ProgressBar {
         this.mAnimateProgressListener = animateProgressListener;
     }
 
+    public void setDefaultProgressBackgroundColor(int defaultProgressBackgroundColor) {
+        DEFAULT_PROGRESS_BACKGROUND_COLOR = defaultProgressBackgroundColor;
+    }
+
+    public void setDefaultProgressColor(int defaultProgressColor) {
+        DEFAULT_PROGRESS_COLOR = defaultProgressColor;
+    }
+
     // interface progress animationListener
     public interface AnimateProgressListener {
         void onAnimationStart(int progress, int max);
@@ -288,13 +282,5 @@ public class ProgressBar extends android.widget.ProgressBar {
         public void onAnimationRepeat(Animator animation) {
 
         }
-    }
-
-    public void setDefaultProgressBackgroundColor(int defaultProgressBackgroundColor) {
-        DEFAULT_PROGRESS_BACKGROUND_COLOR = defaultProgressBackgroundColor;
-    }
-
-    public void setDefaultProgressColor(int defaultProgressColor) {
-        DEFAULT_PROGRESS_COLOR = defaultProgressColor;
     }
 }

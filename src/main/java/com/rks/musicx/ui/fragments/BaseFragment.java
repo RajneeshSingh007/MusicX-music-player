@@ -8,10 +8,10 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.view.View;
 
 import com.afollestad.appthemeengine.ATE;
+import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.services.MusicXService;
 import com.rks.musicx.services.PlayingRequestListerner;
 
@@ -22,21 +22,15 @@ import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.POSITION_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.QUEUE_CHANGED;
 
-/**
- * Created by Coolalien on 8/16/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public abstract class BaseFragment extends android.support.v4.app.Fragment {
 
-    private Intent mServiceIntent;
     public MusicXService musicXService;
+    private Intent mServiceIntent;
     private boolean mServiceBound;
-
-    protected abstract void reload();
-    protected abstract void playbackConfig();
-    protected abstract void metaConfig();
-    protected abstract void queueConfig(String action);
-
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -54,7 +48,6 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment {
             mServiceBound = false;
         }
     };
-
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
         @Override
@@ -78,6 +71,13 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment {
         }
     };
 
+    protected abstract void reload();
+
+    protected abstract void playbackConfig();
+
+    protected abstract void metaConfig();
+
+    protected abstract void queueConfig(String action);
 
     @Override
     public void onResume() {
@@ -115,7 +115,7 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             ATE.postApply(getActivity(), "dark_theme");
         } else {
             ATE.postApply(getActivity(), "light_theme");

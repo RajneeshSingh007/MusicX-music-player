@@ -9,8 +9,8 @@ import android.transition.ChangeTransform;
 import android.transition.TransitionSet;
 import android.util.AttributeSet;
 
-/**
- * Created by Coolalien on 10/10/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)

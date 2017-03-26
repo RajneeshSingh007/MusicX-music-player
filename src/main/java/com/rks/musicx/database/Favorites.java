@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.misc.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,14 +16,14 @@ import static com.rks.musicx.misc.utils.Constants.DbVersion;
 import static com.rks.musicx.misc.utils.Constants.DefaultColumn;
 import static com.rks.musicx.misc.utils.Constants.Fav_TableName;
 
-/**
- * Created by Coolalien on 12/16/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class Favorites extends SQLiteOpenHelper implements DefaultColumn {
 
-    public Favorites(Context context){
-        super(context,Fav_TableName,null,DbVersion);
+    public Favorites(Context context) {
+        super(context, Fav_TableName, null, DbVersion);
     }
 
     @Override
@@ -32,7 +33,7 @@ public class Favorites extends SQLiteOpenHelper implements DefaultColumn {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        sqLiteDatabase.execSQL(DefaultColumn(Fav_TableName));
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Constants.Fav_TableName);
         onCreate(sqLiteDatabase);
     }
 
@@ -51,7 +52,7 @@ public class Favorites extends SQLiteOpenHelper implements DefaultColumn {
         values.put(SongNumber, song.getTrackNumber());
         values.put(SongPath, song.getmSongPath());
         values.put(SongAlbumId, song.getAlbumId());
-        sqLiteDatabase.insert(Fav_TableName,null,values);
+        sqLiteDatabase.insert(Fav_TableName, null, values);
     }
 
     public void removeAll() {
@@ -80,7 +81,7 @@ public class Favorites extends SQLiteOpenHelper implements DefaultColumn {
         db.close();
     }
 
-    public List<Song> read (){
+    public List<Song> read() {
         return readLimit(-1);
     }
 
@@ -89,8 +90,8 @@ public class Favorites extends SQLiteOpenHelper implements DefaultColumn {
         List<Song> list = new ArrayList<>();
         String order = _ID + " DESC";
         Cursor cursor;
-        if (limit >0){
-            cursor = db.query(Fav_TableName,null, null, null, null, null,order,String.valueOf(limit));
+        if (limit > 0) {
+            cursor = db.query(Fav_TableName, null, null, null, null, null, order, String.valueOf(limit));
             if (cursor != null && cursor.moveToFirst()) {
 
                 int idCol = cursor.getColumnIndex(SongId);
@@ -129,8 +130,8 @@ public class Favorites extends SQLiteOpenHelper implements DefaultColumn {
             if (cursor != null) {
                 cursor.close();
             }
-        }else {
-            cursor = db.query(Fav_TableName,null, null, null, null, null,order);
+        } else {
+            cursor = db.query(Fav_TableName, null, null, null, null, null, order);
             if (cursor != null && cursor.moveToFirst()) {
 
                 int idCol = cursor.getColumnIndex(SongId);

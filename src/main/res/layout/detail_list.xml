@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/item_view"
-    android:foreground="?android:attr/selectableItemBackground"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingBottom="8dp"
-    android:paddingLeft="4dp"
-    android:paddingRight="4dp"
-    android:paddingTop="8dp">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:id="@+id/item_view"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:foreground="?android:attr/selectableItemBackground"
+              android:gravity="center_vertical"
+              android:orientation="horizontal"
+              android:paddingBottom="8dp"
+              android:paddingLeft="4dp"
+              android:paddingRight="4dp"
+              android:paddingTop="8dp">
 
     <TextView
         android:id="@+id/number"
@@ -37,19 +37,19 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textSize="16sp"
             android:textColor="@color/white"
+            android:textSize="16sp"
             />
 
         <TextView
             android:id="@+id/artist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:alpha="0.4"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/white"
-            android:textSize="14sp"
-            android:alpha="0.4"/>
+            android:textSize="14sp"/>
 
     </LinearLayout>
 
@@ -59,8 +59,8 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="4dp"
         android:layout_weight="0"
-        android:tint="@android:color/white"
         android:background="@drawable/ripple"
-        app:srcCompat="@drawable/ic_menu" />
+        android:tint="@android:color/white"
+        app:srcCompat="@drawable/ic_menu"/>
 
 </LinearLayout>

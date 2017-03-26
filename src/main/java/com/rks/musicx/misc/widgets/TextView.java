@@ -7,9 +7,10 @@ import android.util.AttributeSet;
 
 import com.rks.musicx.R;
 
-/**
- * Created by Coolalien on 6/25/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
+
 public class TextView extends android.widget.TextView {
 
     private static TextView instance;

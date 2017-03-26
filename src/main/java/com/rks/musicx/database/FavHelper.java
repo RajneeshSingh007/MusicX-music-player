@@ -6,8 +6,8 @@ import android.provider.MediaStore;
 
 import com.rks.musicx.data.loaders.DefaultSongLoader;
 
-/**
- * Created by Coolalien on 12/16/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class FavHelper {
@@ -15,8 +15,8 @@ public class FavHelper {
     Context context;
     private DefaultSongLoader defaultSongLoader;
 
-    public FavHelper(Context context){
-        this.context=context;
+    public FavHelper(Context context) {
+        this.context = context;
         defaultSongLoader = new DefaultSongLoader(context);
     }
 
@@ -27,7 +27,7 @@ public class FavHelper {
                 MediaStore.Audio.Media.ARTIST_ID, MediaStore.Audio.Media.TRACK,
                 MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.DATA,
         };
-        if (defaultSongLoader.isProvider()){
+        if (defaultSongLoader.isProvider()) {
             defaultSongLoader.setUri(Uri.parse(String.valueOf(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)));
             defaultSongLoader.setSortOrder(MediaStore.Audio.Media.TITLE);
             defaultSongLoader.setQueryTable2(new String[]{String.valueOf(songId)});

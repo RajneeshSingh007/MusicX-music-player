@@ -33,13 +33,17 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.List;
 
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
+
 public class PlaylistListFragment extends miniFragment implements LoaderCallbacks<List<Playlist>> {
 
     private FastScrollRecyclerView rv;
     private PlaylistListAdapter playlistListAdapter;
     private int playloader = -1;
 
-    private  BaseRecyclerViewAdapter.OnItemClickListener mOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
+    private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
             switch (view.getId()) {
@@ -48,13 +52,18 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
                     ((MainActivity) getActivity()).setFragment(fragment);
                     break;
                 case R.id.delete_playlist:
-                    showMenu(view,position);
+                    showMenu(view, position);
                     break;
             }
         }
     };
 
-    private void showMenu(View view , int pos){
+    public static PlaylistListFragment newInstance(int pos) {
+        Extras.getInstance().setTabIndex(pos);
+        return new PlaylistListFragment();
+    }
+
+    private void showMenu(View view, int pos) {
         PopupMenu popup = new PopupMenu(getActivity(), view);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.playlist_menu, popup.getMenu());
@@ -71,8 +80,8 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
                         builder.onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                new Helper(getContext()).deletePlaylist(getContext().getContentResolver(),playlistListAdapter.getItem(pos).getId());
-                                Toast.makeText(getContext(),"Playlist Deleted",Toast.LENGTH_LONG).show();
+                                new Helper(getContext()).deletePlaylist(getContext().getContentResolver(), playlistListAdapter.getItem(pos).getId());
+                                Toast.makeText(getContext(), "Playlist Deleted", Toast.LENGTH_LONG).show();
                                 load();
                             }
                         });
@@ -84,11 +93,6 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
             }
         });
         popup.show();
-    }
-
-    public static PlaylistListFragment newInstance(int pos) {
-        Extras.getInstance().setTabIndex(pos);
-        return new PlaylistListFragment();
     }
 
     @Override
@@ -114,11 +118,11 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
         CustomLayoutManager customlayout = new CustomLayoutManager(getContext());
         customlayout.setSmoothScrollbarEnabled(true);
         rv.setLayoutManager(customlayout);
-        rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75));
+        rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75, false));
         playlistListAdapter = new PlaylistListAdapter(getContext());
         playlistListAdapter.setOnItemClickListener(mOnClick);
         rv.setAdapter(playlistListAdapter);
-        getLoaderManager().initLoader(playloader,null,this);
+        getLoaderManager().initLoader(playloader, null, this);
     }
 
     @Override
@@ -157,7 +161,7 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
                 createplaylist.autoDismiss(true);
             }
         });
-        createplaylist.customView(layout,false);
+        createplaylist.customView(layout, false);
         createplaylist.show();
     }
 
@@ -172,7 +176,7 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
     @Override
     public Loader<List<Playlist>> onCreateLoader(int id, Bundle args) {
         CreatedPlaylistLoader playlistloader = new CreatedPlaylistLoader(getContext());
-        if (id == playloader){
+        if (id == playloader) {
             return playlistloader;
         }
         return null;
@@ -180,7 +184,7 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
 
     @Override
     public void onLoadFinished(Loader<List<Playlist>> loader, List<Playlist> data) {
-        if (data == null){
+        if (data == null) {
             return;
         }
         playlistListAdapter.addDataList(data);

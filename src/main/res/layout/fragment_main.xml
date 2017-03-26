@@ -1,70 +1,69 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:id="@+id/mainView"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                 xmlns:tools="http://schemas.android.com/tools"
+                                                 android:id="@+id/mainView"
+                                                 android:layout_width="match_parent"
+                                                 android:layout_height="match_parent"
+                                                 android:fitsSystemWindows="true">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/app_bar_layout"
+
+  <android.support.design.widget.AppBarLayout
+    android:id="@+id/app_bar_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:elevation="@dimen/toolbarelevation"
+    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+    <android.support.v7.widget.Toolbar
+      android:id="@+id/toolbar"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/actionBarSize"
+      android:layout_gravity="top"
+      app:contentInsetStart="16dp"
+      app:layout_scrollFlags="scroll|enterAlways|snap"
+      app:popupTheme="?toolbar_popup_theme">
+
+      <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="@dimen/toolbarelevation"
-        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:orientation="vertical">
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_gravity="top"
-                app:contentInsetStart="16dp"
-                app:layout_scrollFlags="scroll|enterAlways|snap"
-                app:popupTheme="?toolbar_popup_theme">
+        <com.rks.musicx.misc.widgets.TextView
+          android:id="@+id/library_title"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Library"
+          android:textColor="@color/white"
+          android:textSize="24sp"
+          app:textType="header"/>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <com.rks.musicx.misc.widgets.TextView
-                        android:id="@+id/library_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Library"
-                        android:textColor="@color/white"
-                        android:textSize="24sp"
-                        app:textType="header" />
-
-                </LinearLayout>
+      </LinearLayout>
 
 
-            </android.support.v7.widget.Toolbar>
+    </android.support.v7.widget.Toolbar>
 
-            <android.support.design.widget.TabLayout
-                android:id="@+id/tab_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:tag="tab_indicator_accent_color,bg_primary_color"
-                app:tabMaxWidth="0dp"
-                app:tabGravity="fill"
-                app:tabMode="scrollable"
-                app:tabPaddingStart="-1dp"
-                app:tabPaddingEnd="-1dp"
-                app:tabIndicatorHeight="2dp"
-                app:tabTextColor="@android:color/white" />
+    <android.support.design.widget.TabLayout
+      android:id="@+id/tab_layout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:tag="tab_indicator_accent_color,bg_primary_color"
+      app:tabGravity="fill"
+      app:tabIndicatorHeight="2dp"
+      app:tabMaxWidth="0dp"
+      app:tabMode="scrollable"
+      app:tabPaddingEnd="-1dp"
+      app:tabPaddingStart="-1dp"
+      app:tabTextColor="@android:color/white"/>
 
-    </android.support.design.widget.AppBarLayout>
+  </android.support.design.widget.AppBarLayout>
 
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/app_bar_layout"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context="com.fusionmusic.fragments.MainFragment">
-
-    </android.support.v4.view.ViewPager>
+  <android.support.v4.view.ViewPager
+    android:id="@+id/pager"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_below="@id/app_bar_layout"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.fusionmusic.fragments.MainFragment"/>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -4,8 +4,8 @@ import com.rks.musicx.data.model.Song;
 
 import java.util.List;
 
-/**
- * Created by Coolalien on 12/26/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public interface MetaDatas {
@@ -17,4 +17,5 @@ public interface MetaDatas {
     void addToQueue(Song song);
 
     void setAsNextTrack(Song song);
+
 }

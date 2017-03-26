@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:foreground="?android:attr/selectableItemBackground"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                 android:layout_width="match_parent"
+                                                 android:layout_height="match_parent"
+                                                 android:fitsSystemWindows="true"
+                                                 android:foreground="?android:attr/selectableItemBackground">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -37,7 +36,7 @@
                         android:text="Recently Played"
                         android:textColor="@color/white"
                         android:textSize="24sp"
-                        app:textType="header" />
+                        app:textType="header"/>
 
                 </LinearLayout>
 
@@ -47,18 +46,18 @@
 
         <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
             android:id="@+id/recentplayedrv"
-            android:layout_below="@+id/app_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_below="@+id/app_bar_layout"
+            android:fadeScrollbars="true"
             app:fastScrollAutoHide="true"
             app:fastScrollAutoHideDelay="1500"
             app:fastScrollPopupBackgroundSize="64dp"
-            android:fadeScrollbars="true"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
             app:fastScrollPopupBgColor="?attr/accentColor"
             app:fastScrollPopupTextColor="@android:color/primary_text_dark"
             app:fastScrollPopupTextSize="44sp"
-            app:fastScrollThumbColor="?attr/accentColor" />
+            app:fastScrollThumbColor="?attr/accentColor"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
     </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

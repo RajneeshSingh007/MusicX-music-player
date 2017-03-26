@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="translucent_white_8p">#20ffffff</color>
-    <color name="bgcolor">#b4000000</color>
+    <color name="bgcolor">#96000000</color>
     <color name="default_artwork_bg">#212121</color>
     <color name="white">#ffffff</color>
     <color name="colorPrimary">#c62828</color>
@@ -20,5 +20,11 @@
     <color name="darkBg">#1d1d1d</color>
     <color name="text_transparent">#dcffffff</color>
     <color name="text_transparent2">#beffffff</color>
+  <color name="colorPrimaryDark">#0f4574</color>
+    <color name="memory_status_color">#3fa19f</color>
+    <color name="memory_bar_color">#ff9c40</color>
+    <color name="new_folder_color">#c14b84</color>
+    <color name="select_color">#3fa16e</color>
+    <color name="cancel_color">#3fa19f</color>
 </resources>
 

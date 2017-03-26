@@ -8,28 +8,28 @@ import android.provider.MediaStore;
 
 import com.rks.musicx.data.model.Song;
 
-/**
- * Created by Coolalien on 12/6/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class DefaultSongLoader {
 
     Context context;
-    private String [] queryTable, queryTable2;
+    private String[] queryTable, queryTable2;
     private Song song = new Song();
     private Uri uri;
     private boolean provider = true;
     private SQLiteDatabase sqLiteDatabase;
     private String dbtable, groupby, having, SortOrder, selection;
     private Cursor cursor;
-    private String songId,songTitle,songArtist,songTrack,songAlbum,songAlbumId,songData;
+    private String songId, songTitle, songArtist, songTrack, songAlbum, songAlbumId, songData;
 
-    public DefaultSongLoader(Context context){
+    public DefaultSongLoader(Context context) {
         this.context = context;
     }
 
-    public Song getSongData(){
-        if (provider){
+    public Song getSongData() {
+        if (provider) {
             cursor = context.getContentResolver().query(uri, queryTable, selection, queryTable2, SortOrder);
             if (cursor != null && cursor.moveToFirst()) {
                 int idCol = cursor.getColumnIndex(MediaStore.Audio.Media._ID);
@@ -63,7 +63,7 @@ public class DefaultSongLoader {
                 cursor.close();
             }
 
-        }else {
+        } else {
             cursor = sqLiteDatabase.query(dbtable, queryTable, selection, queryTable2, groupby, having, SortOrder);
             if (cursor != null && cursor.moveToFirst()) {
                 int idCol = cursor.getColumnIndex(songId);
@@ -100,10 +100,10 @@ public class DefaultSongLoader {
         return song;
     }
 
-    /**
-     * getter && setter
-     * @return
-     */
+    public void setSongData(String songData) {
+        this.songData = songData;
+    }
+
     public String[] getQueryTable() {
         return queryTable;
     }
@@ -128,12 +128,12 @@ public class DefaultSongLoader {
         this.queryTable2 = queryTable2;
     }
 
-    public void setSortOrder(String sortOrder) {
-        SortOrder = sortOrder;
-    }
-
     public String getSortOrder() {
         return SortOrder;
+    }
+
+    public void setSortOrder(String sortOrder) {
+        SortOrder = sortOrder;
     }
 
     public Song getSong() {
@@ -184,12 +184,12 @@ public class DefaultSongLoader {
         return groupby;
     }
 
-    public String getHaving() {
-        return having;
-    }
-
     public void setGroupby(String groupby) {
         this.groupby = groupby;
+    }
+
+    public String getHaving() {
+        return having;
     }
 
     public void setHaving(String having) {
@@ -214,10 +214,6 @@ public class DefaultSongLoader {
 
     public void setSongArtist(String songArtist) {
         this.songArtist = songArtist;
-    }
-
-    public void setSongData(String songData) {
-        this.songData = songData;
     }
 
     public void setSongTitle(String songTitle) {

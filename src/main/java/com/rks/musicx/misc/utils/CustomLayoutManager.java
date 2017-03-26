@@ -7,9 +7,10 @@ import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 
-/**
- * Created by Coolalien on 6/30/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
+
 public class CustomLayoutManager extends LinearLayoutManager {
 
     private static final float MILLISECONDS_PER_INCH = 50f;
@@ -25,28 +26,30 @@ public class CustomLayoutManager extends LinearLayoutManager {
 
         LinearSmoothScroller smoothScroller = new LinearSmoothScroller(mContext) {
 
-                    //This controls the direction in which smoothScroll looks
-                    //for your view
-                    @Override
-                    public PointF computeScrollVectorForPosition(int targetPosition) {
-                        return CustomLayoutManager.this.computeScrollVectorForPosition(targetPosition);
-                    }
+            //This controls the direction in which smoothScroll looks
+            //for your view
+            @Override
+            public PointF computeScrollVectorForPosition(int targetPosition) {
+                return CustomLayoutManager.this.computeScrollVectorForPosition(targetPosition);
+            }
 
-                    //This returns the milliseconds it takes to
-                    //scroll one pixel.
-                    @Override
-                    protected float calculateSpeedPerPixel
-                    (DisplayMetrics displayMetrics) {
-                        return MILLISECONDS_PER_INCH/displayMetrics.densityDpi;
-                    }
-                };
+            //This returns the milliseconds it takes to
+            //scroll one pixel.
+            @Override
+            protected float calculateSpeedPerPixel
+            (DisplayMetrics displayMetrics) {
+                return MILLISECONDS_PER_INCH / displayMetrics.densityDpi;
+            }
+        };
 
         smoothScroller.setTargetPosition(position);
         startSmoothScroll(smoothScroller);
     }
+
     @Override
     public boolean supportsPredictiveItemAnimations() {
         return false;
     }
+
 }
 

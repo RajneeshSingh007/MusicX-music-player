@@ -13,6 +13,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
+
 public class ArtistLoader extends BaseAsyncTaskLoader<List<Artist>> {
 
 
@@ -27,8 +31,8 @@ public class ArtistLoader extends BaseAsyncTaskLoader<List<Artist>> {
 
         List<Artist> artistList = new ArrayList<>();
 
-        if (PermissionChecker.checkCallingOrSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED){
-            Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,null,null,null,sortorder);
+        if (PermissionChecker.checkCallingOrSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED) {
+            Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null, null, null, sortorder);
             if (cursor != null && cursor.moveToFirst()) {
                 int idCol = cursor.getColumnIndex(BaseColumns._ID);
                 int nameCol = cursor.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST);
@@ -47,7 +51,7 @@ public class ArtistLoader extends BaseAsyncTaskLoader<List<Artist>> {
                 return Collections.emptyList();
             }
             return artistList;
-        }else {
+        } else {
             return null;
         }
 

@@ -1,5 +1,7 @@
 package com.rks.musicx.ui.activities;
 
+import static com.rks.musicx.misc.utils.Constants.DarkTheme;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -7,17 +9,13 @@ import android.preference.PreferenceManager;
 import android.support.annotation.StyleRes;
 import android.support.v4.app.Fragment;
 import android.view.MenuItem;
-
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.rks.musicx.R;
 import com.rks.musicx.ui.fragments.EqFragment;
-
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-import static com.rks.musicx.misc.utils.Constants.DarkTheme;
-
-/**
- * Created by Coolalien on 12/23/2016.
+/*
+ * Created by Coolalien on 06/01/2017.
  */
 
 public class EqualizerActivity extends BaseActivity implements ATEActivityThemeCustomizer {
@@ -49,7 +47,7 @@ public class EqualizerActivity extends BaseActivity implements ATEActivityThemeC
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        Intent intent = new Intent(this,PlayingActivity.class);
+        Intent intent = new Intent(this, PlayingActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         overridePendingTransition(R.anim.fadein, R.anim.slide_out_down);
         startActivity(intent);

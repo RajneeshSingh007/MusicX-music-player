@@ -10,12 +10,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * Created by Coolalien on 9/12/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public abstract class BaseRecyclerViewAdapter<TData, TViewHolder extends RecyclerView.ViewHolder>
-        extends RecyclerView.Adapter<TViewHolder>  {
+        extends RecyclerView.Adapter<TViewHolder> {
 
     private final Context context;
     private final LayoutInflater inflater;
@@ -67,7 +67,7 @@ public abstract class BaseRecyclerViewAdapter<TData, TViewHolder extends Recycle
         return data.addAll(collection);
     }
 
-    public void addDataList(List<TData> tDataList){
+    public void addDataList(List<TData> tDataList) {
         data = tDataList;
         notifyDataSetChanged();
     }
@@ -79,6 +79,7 @@ public abstract class BaseRecyclerViewAdapter<TData, TViewHolder extends Recycle
     protected LayoutInflater getInflater() {
         return inflater;
     }
+
     public void setOnItemClickListener(OnItemClickListener listener) {
         mOnItemClickListener = listener;
     }

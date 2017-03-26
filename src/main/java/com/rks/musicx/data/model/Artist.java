@@ -2,8 +2,8 @@ package com.rks.musicx.data.model;
 
 import android.provider.MediaStore;
 
-/**
- * Created by Coolalien on 6/11/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class Artist {

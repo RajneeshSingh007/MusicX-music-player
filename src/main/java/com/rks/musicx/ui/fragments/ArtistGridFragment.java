@@ -33,11 +33,11 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Coolalien on 10/28/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
-public class ArtistGridFragment extends miniFragment implements LoaderManager.LoaderCallbacks<List<Artist>>,SearchView.OnQueryTextListener{
+public class ArtistGridFragment extends miniFragment implements LoaderManager.LoaderCallbacks<List<Artist>>, SearchView.OnQueryTextListener {
 
     private FastScrollRecyclerView rv;
     private ArtistListAdapter artistListAdapter;
@@ -60,15 +60,14 @@ public class ArtistGridFragment extends miniFragment implements LoaderManager.Lo
         }
     };
 
-    private void fragTransition(Fragment fragment, ImageView imageView){
-        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
-        Helper.setFragmentTransition(getActivity(),ArtistGridFragment.this,fragment, new Pair<View, String>(imageView,"TransitionArtwork"));
-    }
-
-
     public static ArtistGridFragment newInstance(int pos) {
         Extras.getInstance().setTabIndex(pos);
         return new ArtistGridFragment();
+    }
+
+    private void fragTransition(Fragment fragment, ImageView imageView) {
+        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
+        Helper.setFragmentTransition(getActivity(), ArtistGridFragment.this, fragment, new Pair<View, String>(imageView, "TransitionArtwork"));
     }
 
     @Override
@@ -81,11 +80,11 @@ public class ArtistGridFragment extends miniFragment implements LoaderManager.Lo
         GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
         rv.setLayoutManager(layoutManager);
         rv.setAdapter(new ArtistListAdapter(getContext()));
-        rv.addItemDecoration(new GridSpacingItemDecoration(2,Extras.px2Dp(2, getContext()), true));
+        rv.addItemDecoration(new GridSpacingItemDecoration(2, Extras.px2Dp(2, getContext()), true));
         rv.setHasFixedSize(true);
         rv.setAdapter(artistListAdapter);
         String ateKey = Helper.getATEKey(getContext());
-        int colorAccent = Config.accentColor(getContext(),ateKey);
+        int colorAccent = Config.accentColor(getContext(), ateKey);
         rv.setPopupBgColor(colorAccent);
         loadArtist();
         setHasOptionsMenu(true);
@@ -137,7 +136,7 @@ public class ArtistGridFragment extends miniFragment implements LoaderManager.Lo
     @Override
     public Loader<List<Artist>> onCreateLoader(int id, Bundle args) {
         ArtistLoader artistsLoader = new ArtistLoader(getActivity());
-        if (id == artistLoader){
+        if (id == artistLoader) {
             artistsLoader.setSortOrder(Extras.getInstance().getArtistSortOrder());
             return artistsLoader;
         }
@@ -146,7 +145,7 @@ public class ArtistGridFragment extends miniFragment implements LoaderManager.Lo
 
     @Override
     public void onLoadFinished(Loader<List<Artist>> loader, List<Artist> data) {
-        if (data == null){
+        if (data == null) {
             return;
         }
         artistlist = data;
@@ -178,7 +177,7 @@ public class ArtistGridFragment extends miniFragment implements LoaderManager.Lo
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        final List<Artist> filterlist = Helper.filterArtist(artistlist,newText);
+        final List<Artist> filterlist = Helper.filterArtist(artistlist, newText);
         artistListAdapter.setFilter(filterlist);
         return true;
     }

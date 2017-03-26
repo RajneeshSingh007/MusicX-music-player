@@ -30,29 +30,35 @@ import com.rks.musicx.misc.widgets.CircleImageView;
 
 import static com.rks.musicx.misc.utils.Constants.BlurView;
 
-/**
- * Created by Coolalien on 2/14/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
+
 public class ArtworkUtils {
 
 
-    /**
-     * Album Artwork
-     * @param key
-     * @return
-     */
-    public static Uri uri(long key){
+    private static ArtworkUtils sInstance;
+    private Context mcontext;
+
+    public ArtworkUtils(Context context) {
+        this.mcontext = context;
+    }
+
+    public static void init(Context context) {
+        sInstance = new ArtworkUtils(context);
+    }
+
+    public static ArtworkUtils getInstance() {
+        return sInstance;
+    }
+
+    public static Uri uri(long key) {
         Uri albumCover = Uri.parse("content://media/external/audio/albumart");
         return ContentUris.withAppendedId(albumCover, key);
     }
 
 
-    /**
-     * get EmbeddedPicture from mp3
-     * @param path
-     * @return
-     */
-    public static Bitmap getEmbedArtwork (String path) {
+    public static Bitmap getEmbedArtwork(String path) {
         MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
         byte[] art;
         Bitmap bitmap = null;
@@ -60,19 +66,13 @@ public class ArtworkUtils {
         try {
             art = mediaMetadataRetriever.getEmbeddedPicture();
             bitmap = BitmapFactory.decodeByteArray(art, 0, art.length);
-        }catch (Exception e){
-            Log.d("AlbumArtwork","oops Error Buddy",e);
+        } catch (Exception e) {
+            Log.d("AlbumArtwork", "oops Error Buddy", e);
         }
         return bitmap;
     }
-    /**
-     * Circular AlbumArtwork Loader
-     * @param context
-     * @param key
-     * @param imageView
-     */
-    public static void ArtworkLoader(Context context, long key, CircleImageView imageView){
 
+    public static void ArtworkLoader(Context context, String title, long key, CircleImageView imageView) {
         Glide.with(context)
                 .load(uri(key))
                 .asBitmap()
@@ -81,17 +81,11 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300,300)
+                .override(300, 300)
                 .into(imageView);
     }
 
-    /**
-     * ArtworkLoader with path
-     * @param context
-     * @param path
-     * @param imageView
-     */
-    public static void ArtworkLoader(Context context, String path, CircleImageView imageView){
+    public static void ArtworkLoader(Context context, String title, String path, CircleImageView imageView) {
 
         Glide.with(context)
                 .load(path)
@@ -101,16 +95,11 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300,300)
+                .override(300, 300)
                 .into(imageView);
     }
-    /**
-     * Circular Network ArtistArtwork Loader
-     * @param context
-     * @param key
-     * @param imageView
-     */
-    public static void ArtworkNetworkLoader(Context context, String key, CircleImageView imageView){
+
+    public static void ArtworkNetworkLoader(Context context, String title, String key, CircleImageView imageView) {
 
         Glide.with(context)
                 .load(key)
@@ -120,17 +109,11 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300,300)
+                .override(300, 300)
                 .into(imageView);
     }
 
-    /**
-     * AlbumArtwork Loader
-     * @param context
-     * @param key
-     * @param imageView
-     */
-    public static void ArtworkLoader(Context context, long key, ImageView imageView){
+    public static void ArtworkLoader(Context context, String title, long key, ImageView imageView) {
         Glide.with(context)
                 .load(uri(key))
                 .asBitmap()
@@ -139,18 +122,11 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300,300)
+                .override(300, 300)
                 .into(imageView);
     }
 
-    /**
-     * Artwork loader with palette
-     * @param context
-     * @param key
-     * @param imageView
-     * @param palettework
-     */
-    public static void ArtworkLoaderPalette(Context context,long key, ImageView imageView, palette palettework){
+    public static void ArtworkLoaderPalette(Context context, String title, long key, ImageView imageView, palette palettework) {
         Glide.with(context)
                 .load(uri(key))
                 .asBitmap()
@@ -159,7 +135,7 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300,300)
+                .override(300, 300)
                 .listener(GlidePalette.with(uri(key).toString()).intoCallBack(new BitmapPalette.CallBack() {
                     @Override
                     public void onPaletteLoaded(@Nullable Palette palette) {
@@ -169,14 +145,7 @@ public class ArtworkUtils {
                 .into(imageView);
     }
 
-    /**
-     * Artwork loader with palette
-     * @param context
-     * @param key
-     * @param imageView
-     * @param palettework
-     */
-    public static void ArtworkLoaderPalette(Context context,String key, ImageView imageView, palette palettework){
+    public static void ArtworkLoaderPalette(Context context, String title, String key, ImageView imageView, palette palettework) {
         Glide.with(context)
                 .load(key)
                 .asBitmap()
@@ -185,7 +154,7 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300,300)
+                .override(300, 300)
                 .listener(GlidePalette.with(key).intoCallBack(new BitmapPalette.CallBack() {
                     @Override
                     public void onPaletteLoaded(@Nullable Palette palette) {
@@ -195,14 +164,7 @@ public class ArtworkUtils {
                 .into(imageView);
     }
 
-    /**
-     * ArtworkLoader as bitmap with palette
-     * @param context
-     * @param key
-     * @param palettework
-     * @param bitmapwork
-     */
-    public static void ArtworkLoaderBitmapPalette(Context context,String key, palette palettework, bitmap bitmapwork){
+    public static void ArtworkLoaderBitmapPalette(Context context, String title, String key, palette palettework, bitmap bitmapwork) {
         Glide.with(context)
                 .load(key)
                 .asBitmap()
@@ -211,7 +173,7 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300,300)
+                .override(300, 300)
                 .listener(GlidePalette.with(key).intoCallBack(new BitmapPalette.CallBack() {
                     @Override
                     public void onPaletteLoaded(@Nullable Palette palette) {
@@ -270,14 +232,8 @@ public class ArtworkUtils {
                     }
                 });
     }
-    /**
-     * ArtworkLoader as bitmap with palette
-     * @param context
-     * @param key
-     * @param palettework
-     * @param bitmapwork
-     */
-    public static void ArtworkLoaderBitmapPalette(Context context,long key,palette palettework, bitmap bitmapwork){
+
+    public static void ArtworkLoaderBitmapPalette(Context context, String title, long key, palette palettework, bitmap bitmapwork) {
         Glide.with(context)
                 .load(uri(key))
                 .asBitmap()
@@ -286,7 +242,7 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300,300)
+                .override(300, 300)
                 .listener(GlidePalette.with(uri(key).toString()).intoCallBack(new BitmapPalette.CallBack() {
                     @Override
                     public void onPaletteLoaded(@Nullable Palette palette) {
@@ -320,13 +276,13 @@ public class ArtworkUtils {
                     }
 
                     @Override
-                    public void setRequest(Request request) {
-
+                    public Request getRequest() {
+                        return null;
                     }
 
                     @Override
-                    public Request getRequest() {
-                        return null;
+                    public void setRequest(Request request) {
+
                     }
 
                     @Override
@@ -346,22 +302,17 @@ public class ArtworkUtils {
                 });
     }
 
-    /**
-     * return Drawable to bitmap
-     * @param drawable
-     * @return
-     */
-    public static Bitmap drawableToBitmap (Drawable drawable) {
+    public static Bitmap drawableToBitmap(Drawable drawable) {
         Bitmap bitmap = null;
 
         if (drawable instanceof BitmapDrawable) {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if(bitmapDrawable.getBitmap() != null) {
+            if (bitmapDrawable.getBitmap() != null) {
                 return bitmapDrawable.getBitmap();
             }
         }
 
-        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
             bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
         } else {
             bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
@@ -373,25 +324,12 @@ public class ArtworkUtils {
         return bitmap;
     }
 
-    /**
-     * Return async task blurring artwork
-     * @param context
-     * @param radius
-     * @param bitmap
-     * @param imageView
-     * @return
-     */
-    private static AsyncTask<String, Void, String> getBlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView){
+    private static AsyncTask<String, Void, String> getBlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView) {
 
-        return new BlurArtwork(context,radius,bitmap,imageView).execute("BlurredArtwork");
+        return new BlurArtwork(context, radius, bitmap, imageView).execute("BlurredArtwork");
     }
-    /**
-     * blur bg based on preferances
-     * @param context
-     * @param blurBitmap
-     * @param imageView
-     */
-    public static void blurPreferances(Context context, Bitmap blurBitmap,ImageView imageView){
+
+    public static void blurPreferances(Context context, Bitmap blurBitmap, ImageView imageView) {
         String blurView = Extras.getInstance().getmPreferences().getString(BlurView, Constants.Zero);
         switch (blurView) {
             case Constants.Zero:
@@ -409,17 +347,13 @@ public class ArtworkUtils {
             case Constants.Four:
                 getBlurArtwork(context, 25, blurBitmap, imageView);
                 break;
-            default:getBlurArtwork(context,5,blurBitmap,imageView);
+            default:
+                getBlurArtwork(context, 5, blurBitmap, imageView);
         }
     }
 
-    /**
-     * Default artwork return as bitmap
-     * @param context
-     * @return
-     */
-    public static Bitmap getDefaultArtwork(Context context){
-        return BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_launcher);
+    public static Bitmap getDefaultArtwork(Context context) {
+        return BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
     }
 }
 

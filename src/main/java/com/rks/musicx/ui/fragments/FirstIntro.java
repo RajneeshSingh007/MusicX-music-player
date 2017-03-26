@@ -9,15 +9,16 @@ import android.view.ViewGroup;
 
 import com.rks.musicx.R;
 
-/**
- * Created by Coolalien on 7/7/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
+
 public class FirstIntro extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.intro1, container, false);
-        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getContext(),R.color.colorPrimaryDarkDarkTheme));
+        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryDarkDarkTheme));
         return v;
     }
 }

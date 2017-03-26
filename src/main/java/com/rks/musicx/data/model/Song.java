@@ -1,9 +1,9 @@
 package com.rks.musicx.data.model;
 
-/**
- * Created by Coolalien on 6/11/2016.
- */
 
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
 
 public class Song {
 
@@ -15,6 +15,8 @@ public class Song {
     private long albumId;
     private String genre;
     private String mSongPath;
+    private boolean isSelected = false;
+
     /*
     Getter
      */
@@ -22,68 +24,72 @@ public class Song {
         return id;
     }
 
-    public String getAlbum() {
-        return album;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getArtist() {
-        return artist;
-    }
-
-    public long getAlbumId() {
-        return albumId;
-    }
-
-    public int getTrackNumber() {
-        return trackNumber;
-    }
-
-    public String getGenre() {
-        return genre;
-    }
-
-    public String getmSongPath() {
-        return mSongPath;
-    }
-
-    /*
-    Setter
-     */
-
-    public void setmSongPath(String mSongPath) {
-        this.mSongPath = mSongPath;
-    }
-
-    public void setArtist(String artist) {
-        this.artist = artist;
-    }
-
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getAlbum() {
+        return album;
     }
 
     public void setAlbum(String album) {
         this.album = album;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
+    }
+
+    /*
+    Setter
+     */
+
+    public long getAlbumId() {
+        return albumId;
     }
 
     public void setAlbumId(long albumId) {
         this.albumId = albumId;
     }
 
-    public void setGenre(String genre) {
-        this.genre = genre;
+    public int getTrackNumber() {
+        return trackNumber;
     }
 
     public void setTrackNumber(int trackNumber) {
         this.trackNumber = trackNumber;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public String getmSongPath() {
+        return mSongPath;
+    }
+
+    public void setmSongPath(String mSongPath) {
+        this.mSongPath = mSongPath;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
     }
 }
 

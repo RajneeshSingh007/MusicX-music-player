@@ -34,7 +34,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class AlbumListFragment extends miniFragment implements LoaderCallbacks<List<Album>>,SearchView.OnQueryTextListener{
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
+
+public class AlbumListFragment extends miniFragment implements LoaderCallbacks<List<Album>>, SearchView.OnQueryTextListener {
 
     private AlbumListAdapter albumListAdapter;
     private FastScrollRecyclerView rv;
@@ -50,21 +54,21 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
                 case R.id.item_view:
                     Fragment fragments = AlbumFragment.newInstance(albumListAdapter.getItem(position));
                     ImageView Listartwork = (ImageView) view.findViewById(R.id.album_listartwork);
-                    fragTransition(fragments,Listartwork);
+                    fragTransition(fragments, Listartwork);
                     rv.smoothScrollToPosition(position);
                     break;
             }
         }
     };
 
-    private void fragTransition(Fragment fragment, ImageView imageView){
-        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
-        Helper.setFragmentTransition(getActivity(),AlbumListFragment.this,fragment, new Pair<View, String>(imageView,"TransitionArtwork"));
-    }
-
     public static AlbumListFragment newInstance(int pos) {
         Extras.getInstance().setTabIndex(pos);
         return new AlbumListFragment();
+    }
+
+    private void fragTransition(Fragment fragment, ImageView imageView) {
+        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
+        Helper.setFragmentTransition(getActivity(), AlbumListFragment.this, fragment, new Pair<View, String>(imageView, "TransitionArtwork"));
     }
 
     @Override
@@ -78,9 +82,9 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
         CustomLayoutManager custom = new CustomLayoutManager(getActivity());
         rv.setLayoutManager(custom);
         rv.setAdapter(new AlbumListAdapter(getActivity()));
-        rv.addItemDecoration(new DividerItemDecoration(getActivity(),75));
+        rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75, false));
         String ateKey = Helper.getATEKey(getContext());
-        int colorAccent = Config.accentColor(getContext(),ateKey);
+        int colorAccent = Config.accentColor(getContext(), ateKey);
         rv.setPopupBgColor(colorAccent);
         rv.setHasFixedSize(true);
         rv.setAdapter(albumListAdapter);
@@ -100,7 +104,7 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.album_view_menu,menu);
+        inflater.inflate(R.menu.album_view_menu, menu);
         searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.album_search));
         searchView.setOnQueryTextListener(this);
         searchView.setQueryHint("Search album");
@@ -138,7 +142,7 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
     public Loader<List<Album>> onCreateLoader(int id, Bundle args) {
 
         AlbumLoader albumsLoader = new AlbumLoader(getContext());
-        if (id == albumLoader){
+        if (id == albumLoader) {
             albumsLoader.setSortOrder(Extras.getInstance().getAlbumSortOrder());
             albumsLoader.filterartistsong(null, null);
             return albumsLoader;
@@ -148,7 +152,7 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
 
     @Override
     public void onLoadFinished(Loader<List<Album>> loader, List<Album> data) {
-        if (data ==null){
+        if (data == null) {
             return;
         }
         albumList = data;
@@ -163,8 +167,8 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
     /*
     load album
      */
-    private void initload(){
-        getLoaderManager().initLoader(albumLoader,null,this);
+    private void initload() {
+        getLoaderManager().initLoader(albumLoader, null, this);
     }
 
     /*
@@ -172,7 +176,7 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
      */
     @Override
     public void load() {
-        getLoaderManager().restartLoader(albumLoader,null,this);
+        getLoaderManager().restartLoader(albumLoader, null, this);
     }
 
 
@@ -183,7 +187,7 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        final List<Album> filterlist = Helper.filterAlbum(albumList,newText);
+        final List<Album> filterlist = Helper.filterAlbum(albumList, newText);
         albumListAdapter.setFilter(filterlist);
         return true;
     }

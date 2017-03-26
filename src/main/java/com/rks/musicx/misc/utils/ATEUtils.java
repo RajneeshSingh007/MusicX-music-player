@@ -18,9 +18,10 @@ import android.view.Window;
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.util.ATEUtil;
 
-/**
- * Created by Coolalien on 3/6/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
+
 public class ATEUtils {
 
     public static void setStatusBarColor(Activity activity, String key, int color) {

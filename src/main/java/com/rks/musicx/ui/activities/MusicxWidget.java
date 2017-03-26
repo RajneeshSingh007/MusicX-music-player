@@ -22,29 +22,25 @@ import static com.rks.musicx.misc.utils.Constants.ACTION_PLAYINGVIEW;
 import static com.rks.musicx.misc.utils.Constants.ACTION_PREVIOUS;
 import static com.rks.musicx.misc.utils.Constants.ACTION_TOGGLE;
 
-/**
- * Created by Coolalien on 1/25/2017.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class MusicxWidget extends AppWidgetProvider {
-    
-    /**
-     * Music Widget
-     * @param updatdeID
-     */
+
     public static void musicxWidget(int updatdeID[], MusicXService musicXService) {
-        if (musicXService == null){
+        if (musicXService == null) {
             return;
         }
         AppWidgetManager widgetManager = AppWidgetManager.getInstance(musicXService);
         RemoteViews remoteViews = new RemoteViews(musicXService.getPackageName(), R.layout.widget);
         remoteViews.setTextViewText(R.id.title, musicXService.getsongTitle());
         remoteViews.setTextViewText(R.id.artist, musicXService.getsongArtistName());
-        ArtworkUtils.ArtworkLoaderBitmapPalette(musicXService,  musicXService.getsongAlbumID(), new palette() {
+        ArtworkUtils.ArtworkLoaderBitmapPalette(musicXService, musicXService.getsongTitle(), musicXService.getsongAlbumID(), new palette() {
 
             @Override
             public void palettework(Palette palette) {
-                final int color [] = Helper.getAvailableColor(musicXService,palette);
+                final int color[] = Helper.getAvailableColor(musicXService, palette);
                 remoteViews.setInt(R.id.artist, "setTextColor", color[0]);
             }
 
@@ -61,10 +57,10 @@ public class MusicxWidget extends AppWidgetProvider {
             }
 
         });
-        remoteViews.setInt(R.id.item_view, "setBackgroundColor" , Color.WHITE);
-        if (musicXService.isPlaying()){
+        remoteViews.setInt(R.id.item_view, "setBackgroundColor", Color.WHITE);
+        if (musicXService.isPlaying()) {
             remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
-        }else {
+        } else {
             remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
         }
         controls(remoteViews, musicXService);
@@ -72,12 +68,7 @@ public class MusicxWidget extends AppWidgetProvider {
 
     }
 
-    /**
-     * Controls
-     * @param remoteViews
-     * @param context
-     */
-    private static void controls(RemoteViews remoteViews, Context context){
+    private static void controls(RemoteViews remoteViews, Context context) {
         PendingIntent clickedview = PendingIntent.getService(context, 0, new Intent(context, MusicXService.class).setAction(ACTION_PLAYINGVIEW), 0);
         PendingIntent nextIntent = PendingIntent.getService(context, 0, new Intent(context, MusicXService.class).setAction(ACTION_NEXT), 0);
         PendingIntent previousIntent = PendingIntent.getService(context, 0, new Intent(context, MusicXService.class).setAction(ACTION_PREVIOUS), 0);
@@ -89,13 +80,7 @@ public class MusicxWidget extends AppWidgetProvider {
         remoteViews.setOnClickPendingIntent(R.id.prev, previousIntent);
     }
 
-    /**
-     * Update Widget
-     * @param id
-     * @param widgetManager
-     * @param context
-     */
-    private void updateWidget(int id[], AppWidgetManager widgetManager, Context context){
+    private void updateWidget(int id[], AppWidgetManager widgetManager, Context context) {
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget);
         controls(remoteViews, context);
         widgetManager.updateAppWidget(id, remoteViews);

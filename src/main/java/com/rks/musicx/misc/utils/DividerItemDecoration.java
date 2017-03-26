@@ -12,8 +12,8 @@ import android.view.View;
 import com.rks.musicx.R;
 
 
-/**
- * Created by Coolalien on 2/2/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class DividerItemDecoration extends RecyclerView.ItemDecoration {
@@ -24,13 +24,17 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
     int size = 75;
     private Drawable mDivider;
 
-    public DividerItemDecoration(Context context, int paddingLeft) {
+    public DividerItemDecoration(Context context, int paddingLeft, boolean darks) {
         this.size = paddingLeft;
         final TypedArray a = context.obtainStyledAttributes(ATTRS);
         if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("dark_theme", false)) {
             mDivider = ContextCompat.getDrawable(context, R.drawable.divider_white);
         } else {
-            mDivider = ContextCompat.getDrawable(context, R.drawable.divider_black);
+            if (darks) {
+                mDivider = ContextCompat.getDrawable(context, R.drawable.divider_white);
+            } else {
+                mDivider = ContextCompat.getDrawable(context, R.drawable.divider_black);
+            }
         }
         a.recycle();
     }

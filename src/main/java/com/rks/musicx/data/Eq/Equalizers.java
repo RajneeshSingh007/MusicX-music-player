@@ -1,18 +1,17 @@
-package com.rks.musicx.data.Eq;
-
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.media.audiofx.Equalizer;
-
-import com.rks.musicx.R;
-import com.rks.musicx.misc.utils.Extras;
+package com.rks.musicx.data.eq;
 
 import static com.rks.musicx.misc.utils.Constants.BAND_LEVEL;
 import static com.rks.musicx.misc.utils.Constants.EQ_ENABLED;
 import static com.rks.musicx.misc.utils.Constants.SAVE_PRESET;
 
-/**
- * Created by Coolalien on 12/23/2016.
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.media.audiofx.Equalizer;
+import com.rks.musicx.R;
+import com.rks.musicx.misc.utils.Extras;
+
+/*
+ * Created by Coolalien on 06/01/2017.
  */
 
 public class Equalizers {
@@ -24,17 +23,10 @@ public class Equalizers {
     private static short[] bandLevels;
     private static boolean customPreset;
 
-    /**
-     * Default Constructor
-     */
-    public Equalizers(){
+    public Equalizers() {
     }
 
-    /**
-     * Init Equalizer
-     * @param audioID
-     */
-    public static void initEq(int audioID){
+    public static void initEq(int audioID) {
         try {
             EndEq();
             equalizer = new Equalizer(0, audioID);
@@ -43,34 +35,28 @@ public class Equalizers {
                 short level = (short) Extras.getInstance().saveEq().getInt(BAND_LEVEL + b, equalizer.getBandLevel(b));
                 bandLevels[b] = level;
                 if (customPreset) {
-                    setBandLevel(b,level);
-                }else {
+                    setBandLevel(b, level);
+                } else {
                     setBandLevel(b, level);
                 }
 
             }
-            if (preset == -1){
+            if (preset == -1) {
                 customPreset = true;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    /**
-     * Close Eq
-     */
-    public static void EndEq(){
-        if (equalizer != null){
+    public static void EndEq() {
+        if (equalizer != null) {
             equalizer.release();
             equalizer = null;
+            enabled = false;
         }
     }
 
-    /**
-     * Band Level Range
-     * @return
-     */
     public static short[] getBandLevelRange() {
         if (equalizer != null) {
             return equalizer.getBandLevelRange();
@@ -78,11 +64,6 @@ public class Equalizers {
         return null;
     }
 
-    /**
-     * Equalizer preset
-     * @param context
-     * @return
-     */
     public static String[] getEqualizerPresets(Context context) {
         if (equalizer == null) {
             return new String[]{};
@@ -95,11 +76,6 @@ public class Equalizers {
         return presets;
     }
 
-    /**
-     * Band Level
-     * @param band
-     * @return
-     */
     public static short getBandLevel(short band) {
         if (equalizer == null) {
             if (bandLevels.length > band) {
@@ -109,48 +85,35 @@ public class Equalizers {
         return equalizer != null ? equalizer.getBandLevel(band) : 0;
     }
 
-    /**
-     * check is eq enabled/disabled
-     * @return
-     */
     public static boolean isEnabled() {
         return enabled;
     }
 
-    /**
-     * set Band Level
-     * @param band
-     * @param level
-     */
+    public static void setEnabled(boolean enabled1) {
+        enabled = enabled1;
+        if (equalizer != null) {
+            equalizer.setEnabled(enabled);
+        }
+    }
+
     public static void setBandLevel(short band, short level) {
         customPreset = true;
-        if (bandLevels.length > band) {
-            preset = -1;
-            bandLevels[band] = level;
-        }
         if (equalizer != null) {
+            if (bandLevels.length > band) {
+              preset = -1;
+              bandLevels[band] = level;
+            }
             equalizer.setBandLevel(band, level);
             customPreset = false;
         }
     }
 
-    /**
-     * init default Values
-     */
     public static void initEqualizerValues() {
         enabled = Extras.getInstance().saveEq().getBoolean(EQ_ENABLED, false);
         preset = (short) Extras.getInstance().saveEq().getInt(SAVE_PRESET, -1);
-        if (preset == -1) {
-            customPreset = true;
-        }else {
-            customPreset = false;
-        }
+        customPreset = preset == -1;
     }
 
-    /**
-     * current preset
-     * @return
-     */
     public static int getCurrentPreset() {
         if (equalizer == null || customPreset) {
             return 0;
@@ -159,10 +122,6 @@ public class Equalizers {
         return equalizer.getCurrentPreset() + 1;
     }
 
-    /**
-     * working Preset
-     * @param preset
-     */
     public static void usePreset(short preset) {
         if (equalizer != null) {
             customPreset = false;
@@ -170,56 +129,32 @@ public class Equalizers {
         }
     }
 
-    /**
-     * no. of bands
-     * @return
-     */
     public static short getNumberOfBands() {
         if (equalizer != null) {
-           return equalizer.getNumberOfBands();
+            return equalizer.getNumberOfBands();
         }
         return 0;
     }
 
-    /**
-     * Center Freq
-     * @param band
-     * @return
-     */
     public static int getCenterFreq(short band) {
-        if ( equalizer != null) {
+        if (equalizer != null) {
             return equalizer.getCenterFreq(band);
         }
         return 0;
     }
 
-    /**
-     * save preset
-     */
     public static void savePrefs() {
-        if ( equalizer == null ) {
+        if (equalizer == null) {
             return;
         }
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
-        short preset = customPreset  ? -1 : equalizer.getCurrentPreset();
+        short preset = customPreset ? -1 : equalizer.getCurrentPreset();
         editor.putInt(SAVE_PRESET, preset);
         short bands = equalizer.getNumberOfBands();
         for (short b = 0; b < bands; b++) {
             editor.putInt(BAND_LEVEL + b, getBandLevel(b));
         }
-        editor.putBoolean(EQ_ENABLED, equalizer.getEnabled());
+        editor.putBoolean(EQ_ENABLED, isEnabled());
         editor.apply();
     }
-
-    /**
-     * Enabled and disabled eq
-     * @param enabled1
-     */
-    public static void setEnabled(boolean enabled1) {
-        enabled = enabled1;
-        if (equalizer != null) {
-            equalizer.setEnabled(enabled1);
-        }
-    }
-
 }

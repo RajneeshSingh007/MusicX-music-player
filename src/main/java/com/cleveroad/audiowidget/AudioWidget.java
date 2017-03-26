@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.RectF;
@@ -24,47 +23,23 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
-
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.misc.utils.Helper;
-
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
 
-/**
- * Audio widget implementation.
- */
 public class AudioWidget {
 
     private static final long VIBRATION_DURATION = 100;
-    /**
-     * Play/pause button view.
-     */
     private final PlayPauseButton playPauseButton;
 
-    /**
-     * Expanded widget style view.
-     */
     private final ExpandCollapseWidget expandCollapseWidget;
 
-    /**
-     * Remove widget view.
-     */
     private final RemoveWidgetView removeWidgetView;
-
-    /**
-     * Playback state.
-     */
-    private PlaybackState playbackState;
-
-    /**
-     * Widget controller.
-     */
     private final Controller controller;
-
     private final WindowManager windowManager;
     private final Vibrator vibrator;
     private final Handler handler;
@@ -74,32 +49,21 @@ public class AudioWidget {
     private final TouchManager expandedWidgetManager;
     private final TouchManager.BoundsChecker ppbToExpBoundsChecker;
     private final TouchManager.BoundsChecker expToPpbBoundsChecker;
-
     private final Map<Integer, WeakReference<Drawable>> albumCoverCache = new WeakHashMap<>();
-
-    /**
-     * Bounds of remove widget view. Used for checking if play/pause button is inside this bounds
-     * and ready for removing from screen.
-     */
     private final RectF removeBounds;
-
-    /**
-     * Remove widget view X, Y position (hidden).
-     */
     private final Point hiddenRemWidPos;
-
-    /**
-     * Remove widget view X, Y position (visible).
-     */
     private final Point visibleRemWidPos;
+    private final OnControlsClickListenerWrapper onControlsClickListener;
+    private PlaybackState playbackState;
     private int animatedRemBtnYPos = -1;
     private float widgetWidth, widgetHeight, radius;
-    private final OnControlsClickListenerWrapper onControlsClickListener;
     private boolean shown;
     private boolean released;
     private boolean removeWidgetShown;
     private OnWidgetStateChangedListener onWidgetStateChangedListener;
-
+    private int accentColor;
+    private int primaryColor;
+    private String ateKey;
     @SuppressWarnings("deprecation")
     private AudioWidget(@NonNull Builder builder) {
         this.context = builder.context.getApplicationContext();
@@ -111,12 +75,7 @@ public class AudioWidget {
         this.visibleRemWidPos = new Point();
         this.controller = newController();
         this.windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            windowManager.getDefaultDisplay().getSize(screenSize);
-        } else {
-            screenSize.x = windowManager.getDefaultDisplay().getWidth();
-            screenSize.y = windowManager.getDefaultDisplay().getHeight();
-        }
+        windowManager.getDefaultDisplay().getSize(screenSize);
         screenSize.y -= statusBarHeight() + navigationBarHeight();
 
         Configuration configuration = prepareConfiguration(builder);
@@ -173,15 +132,6 @@ public class AudioWidget {
                 builder.edgeOffsetYCollapsedSet ? builder.edgeOffsetYCollapsed : offsetCollapsed
         );
     }
-
-    /**
-     * Prepare configuration for widget.
-     * @param builder user defined settings
-     * @return new configuration for widget
-     */
-    private int accentColor;
-    private int primaryColor;
-    private String ateKey;
 
     private Configuration prepareConfiguration(@NonNull Builder builder) {
         /*int darkColor = builder.darkColorSet ? builder.darkColor : ContextCompat.getColor(context, R.color.colorPrimary);
@@ -248,37 +198,27 @@ public class AudioWidget {
                 .build();
     }
 
-    /**
-     * Get status bar height.
-     * @return status bar height.
-     */
     private int statusBarHeight() {
+        int result = 0;
         int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
         if (resourceId > 0) {
-            return context.getResources().getDimensionPixelSize(resourceId);
+            result = context.getResources().getDimensionPixelSize(resourceId);
         }
-        return context.getResources().getDimensionPixelSize(R.dimen.aw_status_bar_height);
+        return result;
     }
 
-    /**
-     * Get navigation bar height.
-     * @return navigation bar height
-     */
     private int navigationBarHeight() {
         if (hasNavigationBar()) {
+            int result = 0;
             int resourceId = context.getResources().getIdentifier("navigation_bar_height", "dimen", "android");
             if (resourceId > 0) {
-                return context.getResources().getDimensionPixelSize(resourceId);
+                result = context.getResources().getDimensionPixelSize(resourceId);
             }
-            return context.getResources().getDimensionPixelSize(R.dimen.aw_navigation_bar_height);
+            return result;
         }
         return 0;
     }
 
-    /**
-     * Check if device has navigation bar.
-     * @return true if device has navigation bar, false otherwise.
-     */
     private boolean hasNavigationBar() {
         boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
         boolean hasHomeKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_HOME);
@@ -286,11 +226,6 @@ public class AudioWidget {
         return !hasBackKey && !hasHomeKey || id > 0 && context.getResources().getBoolean(id);
     }
 
-    /**
-     * Create new controller.
-     *
-     * @return new controller
-     */
     @NonNull
     private Controller newController() {
         return new Controller() {
@@ -353,15 +288,14 @@ public class AudioWidget {
                     playPauseButton.albumCover(null);
                 } else {
                     WeakReference<Drawable> wrDrawable = albumCoverCache.get(bitmap.hashCode());
-                    if(wrDrawable != null) {
+                    if (wrDrawable != null) {
                         Drawable drawable = wrDrawable.get();
-                        if(drawable != null) {
+                        if (drawable != null) {
                             expandCollapseWidget.albumCover(drawable);
                             playPauseButton.albumCover(drawable);
                             return;
                         }
                     }
-
                     Drawable albumCover = new BitmapDrawable(context.getResources(), bitmap);
                     expandCollapseWidget.albumCover(albumCover);
                     playPauseButton.albumCover(albumCover);
@@ -371,20 +305,14 @@ public class AudioWidget {
         };
     }
 
-    /**
-     * Show widget at specified position.
-     *
-     * @param cx center x
-     * @param cy center y
-     */
     public void show(int cx, int cy) {
         if (shown) {
             return;
         }
         shown = true;
         float remWidX = screenSize.x / 2f - radius * RemoveWidgetView.SCALE_LARGE;
-        hiddenRemWidPos.set((int)remWidX, (int) (screenSize.y + widgetHeight + navigationBarHeight()));
-        visibleRemWidPos.set((int)remWidX, (int) (screenSize.y - radius - (hasNavigationBar() ? 0 : widgetHeight)));
+        hiddenRemWidPos.set((int) remWidX, (int) (screenSize.y + widgetHeight + navigationBarHeight()));
+        visibleRemWidPos.set((int) remWidX, (int) (screenSize.y - radius - (hasNavigationBar() ? 0 : widgetHeight)));
         try {
             show(removeWidgetView, hiddenRemWidPos.x, hiddenRemWidPos.y);
         } catch (IllegalArgumentException e) {
@@ -394,9 +322,6 @@ public class AudioWidget {
         playPauseButtonManager.animateToBounds();
     }
 
-    /**
-     * Hide widget.
-     */
     public void hide() {
         hideInternal(true);
     }
@@ -429,11 +354,6 @@ public class AudioWidget {
         }
     }
 
-    /**
-     * Get current visibility state.
-     *
-     * @return true if widget shown on screen, false otherwise.
-     */
     public boolean isShown() {
         return shown;
     }
@@ -449,7 +369,7 @@ public class AudioWidget {
 
         WindowManager.LayoutParams params = (WindowManager.LayoutParams) expandCollapseWidget.getLayoutParams();
         int cx = params.x + expandCollapseWidget.getWidth() / 2;
-        if(cx > screenSize.x / 2) {
+        if (cx > screenSize.x / 2) {
             expandCollapseWidget.expandDirection(ExpandCollapseWidget.DIRECTION_LEFT);
         } else {
             expandCollapseWidget.expandDirection(ExpandCollapseWidget.DIRECTION_RIGHT);
@@ -509,30 +429,102 @@ public class AudioWidget {
         });
     }
 
-    /**
-     * Get widget controller.
-     *
-     * @return widget controller
-     */
     @NonNull
     public Controller controller() {
         return controller;
     }
 
     private void show(View view, int left, int top) {
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                PixelFormat.TRANSLUCENT);
-        params.gravity = Gravity.START | Gravity.TOP;
-        params.x = left;
-        params.y = top;
-        windowManager.addView(view, params);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_TOAST,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                            | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                            | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    PixelFormat.TRANSLUCENT);
+            params.gravity = Gravity.START | Gravity.TOP;
+            params.x = left;
+            params.y = top;
+            windowManager.addView(view, params);
+        } else {
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_PHONE,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                            | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                            | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    PixelFormat.TRANSLUCENT);
+            params.gravity = Gravity.START | Gravity.TOP;
+            params.x = left;
+            params.y = top;
+            windowManager.addView(view, params);
+        }
+    }
+
+    public enum State {
+        COLLAPSED,
+        EXPANDED,
+        REMOVED
+    }
+
+    public interface Controller {
+
+        void start();
+
+        void pause();
+
+        void stop();
+
+        int duration();
+
+        void duration(int duration);
+
+        int position();
+
+        void position(int position);
+
+        void onControlsClickListener(@Nullable OnControlsClickListener onControlsClickListener);
+
+        void onWidgetStateChangedListener(@Nullable OnWidgetStateChangedListener onWidgetStateChangedListener);
+
+        void albumCover(@Nullable Drawable albumCover);
+
+        void albumCoverBitmap(@Nullable Bitmap albumCover);
+    }
+
+    public interface OnControlsClickListener {
+
+        boolean onPlaylistClicked();
+
+        void onPlaylistLongClicked();
+
+        void onPreviousClicked();
+
+        void onPreviousLongClicked();
+
+        boolean onPlayPauseClicked();
+
+        void onPlayPauseLongClicked();
+
+        void onNextClicked();
+
+        void onNextLongClicked();
+
+        void onAlbumClicked();
+
+        void onAlbumLongClicked();
+    }
+
+    public interface OnWidgetStateChangedListener {
+
+        void onWidgetStateChanged(@NonNull State state);
+
+        void onWidgetPositionChanged(int cx, int cy);
     }
 
     abstract static class BoundsCheckerWithOffset implements TouchManager.BoundsChecker {
@@ -565,14 +557,261 @@ public class AudioWidget {
         }
 
         protected abstract float stickyLeftSideImpl(float screenWidth);
+
         protected abstract float stickyRightSideImpl(float screenWidth);
+
         protected abstract float stickyTopSideImpl(float screenHeight);
+
         protected abstract float stickyBottomSideImpl(float screenHeight);
     }
 
-    /**
-     * Helper class for dealing with collapsed widget touch events.
-     */
+    public static class Builder {
+
+        private final Context context;
+
+        @ColorInt
+        private int darkColor;
+        @ColorInt
+        private int lightColor;
+        @ColorInt
+        private int progressColor;
+        @ColorInt
+        private int crossColor;
+        @ColorInt
+        private int crossOverlappedColor;
+        @ColorInt
+        private int shadowColor;
+        @ColorInt
+        private int expandWidgetColor;
+        private int buttonPadding;
+        private float crossStrokeWidth;
+        private float progressStrokeWidth;
+        private float shadowRadius;
+        private float shadowDx;
+        private float shadowDy;
+        private float bubblesMinSize;
+        private float bubblesMaxSize;
+        private Drawable playDrawable;
+        private Drawable prevDrawable;
+        private Drawable nextDrawable;
+        private Drawable playlistDrawable;
+        private Drawable defaultAlbumDrawable;
+        private Drawable pauseDrawable;
+        private boolean darkColorSet;
+        private boolean lightColorSet;
+        private boolean progressColorSet;
+        private boolean crossColorSet;
+        private boolean crossOverlappedColorSet;
+        private boolean shadowColorSet;
+        private boolean expandWidgetColorSet;
+        private boolean buttonPaddingSet;
+        private boolean crossStrokeWidthSet;
+        private boolean progressStrokeWidthSet;
+        private boolean shadowRadiusSet;
+        private boolean shadowDxSet;
+        private boolean shadowDySet;
+        private boolean bubblesMinSizeSet;
+        private boolean bubblesMaxSizeSet;
+        private int edgeOffsetXCollapsed;
+        private int edgeOffsetYCollapsed;
+        private int edgeOffsetXExpanded;
+        private int edgeOffsetYExpanded;
+        private boolean edgeOffsetXCollapsedSet;
+        private boolean edgeOffsetYCollapsedSet;
+        private boolean edgeOffsetXExpandedSet;
+        private boolean edgeOffsetYExpandedSet;
+
+        public Builder(@NonNull Context context) {
+            this.context = context;
+        }
+
+        public Builder darkColor(@ColorInt int darkColor) {
+            this.darkColor = darkColor;
+            darkColorSet = true;
+            return this;
+        }
+
+        public Builder lightColor(@ColorInt int lightColor) {
+            this.lightColor = lightColor;
+            lightColorSet = true;
+            return this;
+        }
+
+        public Builder progressColor(@ColorInt int progressColor) {
+            this.progressColor = progressColor;
+            progressColorSet = true;
+            return this;
+        }
+
+        public Builder crossColor(@ColorInt int crossColor) {
+            this.crossColor = crossColor;
+            crossColorSet = true;
+            return this;
+        }
+
+        public Builder crossOverlappedColor(@ColorInt int crossOverlappedColor) {
+            this.crossOverlappedColor = crossOverlappedColor;
+            crossOverlappedColorSet = true;
+            return this;
+        }
+
+        public Builder shadowColor(@ColorInt int shadowColor) {
+            this.shadowColor = shadowColor;
+            shadowColorSet = true;
+            return this;
+        }
+
+        public Builder expandWidgetColor(@ColorInt int expandWidgetColor) {
+            this.expandWidgetColor = expandWidgetColor;
+            expandWidgetColorSet = true;
+            return this;
+        }
+
+        public Builder buttonPadding(int buttonPadding) {
+            this.buttonPadding = buttonPadding;
+            buttonPaddingSet = true;
+            return this;
+        }
+
+        public Builder crossStrokeWidth(float crossStrokeWidth) {
+            this.crossStrokeWidth = crossStrokeWidth;
+            crossStrokeWidthSet = true;
+            return this;
+        }
+
+        public Builder progressStrokeWidth(float progressStrokeWidth) {
+            this.progressStrokeWidth = progressStrokeWidth;
+            progressStrokeWidthSet = true;
+            return this;
+        }
+
+        public Builder shadowRadius(float shadowRadius) {
+            this.shadowRadius = shadowRadius;
+            shadowRadiusSet = true;
+            return this;
+        }
+
+        public Builder shadowDx(float shadowDx) {
+            this.shadowDx = shadowDx;
+            shadowDxSet = true;
+            return this;
+        }
+
+        public Builder shadowDy(float shadowDy) {
+            this.shadowDy = shadowDy;
+            shadowDySet = true;
+            return this;
+        }
+
+        public Builder bubblesMinSize(float bubblesMinSize) {
+            this.bubblesMinSize = bubblesMinSize;
+            bubblesMinSizeSet = true;
+            return this;
+        }
+
+        public Builder bubblesMaxSize(float bubblesMaxSize) {
+            this.bubblesMaxSize = bubblesMaxSize;
+            bubblesMaxSizeSet = true;
+            return this;
+        }
+
+        public Builder playDrawable(@NonNull Drawable playDrawable) {
+            this.playDrawable = playDrawable;
+            return this;
+        }
+
+        public Builder prevTrackDrawale(@NonNull Drawable prevDrawable) {
+            this.prevDrawable = prevDrawable;
+            return this;
+        }
+
+        public Builder nextTrackDrawable(@NonNull Drawable nextDrawable) {
+            this.nextDrawable = nextDrawable;
+            return this;
+        }
+
+        public Builder playlistDrawable(@NonNull Drawable playlistDrawable) {
+            this.playlistDrawable = playlistDrawable;
+            return this;
+        }
+
+        public Builder defaultAlbumDrawable(@NonNull Drawable defaultAlbumCover) {
+            this.defaultAlbumDrawable = defaultAlbumCover;
+            return this;
+        }
+
+        public Builder pauseDrawable(@NonNull Drawable pauseDrawable) {
+            this.pauseDrawable = pauseDrawable;
+            return this;
+        }
+
+        public Builder edgeOffsetXCollapsed(int edgeOffsetX) {
+            this.edgeOffsetXCollapsed = edgeOffsetX;
+            edgeOffsetXCollapsedSet = true;
+            return this;
+        }
+
+        public Builder edgeOffsetYCollapsed(int edgeOffsetY) {
+            this.edgeOffsetYCollapsed = edgeOffsetY;
+            edgeOffsetYCollapsedSet = true;
+            return this;
+        }
+
+        public Builder edgeOffsetYExpanded(int edgeOffsetY) {
+            this.edgeOffsetYExpanded = edgeOffsetY;
+            edgeOffsetYExpandedSet = true;
+            return this;
+        }
+
+        public Builder edgeOffsetXExpanded(int edgeOffsetX) {
+            this.edgeOffsetXExpanded = edgeOffsetX;
+            edgeOffsetXExpandedSet = true;
+            return this;
+        }
+
+        public AudioWidget build() {
+            if (buttonPaddingSet) {
+                checkOrThrow(buttonPadding, "Button padding");
+            }
+            if (shadowRadiusSet) {
+                checkOrThrow(shadowRadius, "Shadow radius");
+            }
+            if (shadowDxSet) {
+                checkOrThrow(shadowDx, "Shadow dx");
+            }
+            if (shadowDySet) {
+                checkOrThrow(shadowDy, "Shadow dy");
+            }
+            if (bubblesMinSizeSet) {
+                checkOrThrow(bubblesMinSize, "Bubbles min size");
+            }
+            if (bubblesMaxSizeSet) {
+                checkOrThrow(bubblesMaxSize, "Bubbles max size");
+            }
+            if (bubblesMinSizeSet && bubblesMaxSizeSet && bubblesMaxSize < bubblesMinSize) {
+                throw new IllegalArgumentException("Bubbles max size must be greater than bubbles min size");
+            }
+            if (crossStrokeWidthSet) {
+                checkOrThrow(crossStrokeWidth, "Cross stroke width");
+            }
+            if (progressStrokeWidthSet) {
+                checkOrThrow(progressStrokeWidth, "Progress stroke width");
+            }
+            return new AudioWidget(this);
+        }
+
+        private void checkOrThrow(int number, String name) {
+            if (number < 0)
+                throw new IllegalArgumentException(name + " must be equals or greater zero.");
+        }
+
+        private void checkOrThrow(float number, String name) {
+            if (number < 0)
+                throw new IllegalArgumentException(name + " must be equals or greater zero.");
+        }
+
+    }
+
     private class PlayPauseButtonCallback extends TouchManager.SimpleCallback {
 
         private static final long REMOVE_BTN_ANIM_DURATION = 200;
@@ -584,7 +823,7 @@ public class AudioWidget {
                 if (!removeWidgetShown) {
                     return;
                 }
-                animatedRemBtnYPos = (int)((float) animation.getAnimatedValue());
+                animatedRemBtnYPos = (int) ((float) animation.getAnimatedValue());
                 updateRemoveBtnPosition();
             };
         }
@@ -634,7 +873,7 @@ public class AudioWidget {
         }
 
         private void updateRemoveBtnPosition() {
-            if(removeWidgetShown) {
+            if (removeWidgetShown) {
                 WindowManager.LayoutParams playPauseBtnParams = (WindowManager.LayoutParams) playPauseButton.getLayoutParams();
                 WindowManager.LayoutParams removeBtnParams = (WindowManager.LayoutParams) removeWidgetView.getLayoutParams();
 
@@ -719,12 +958,9 @@ public class AudioWidget {
         }
     }
 
-    /**
-     * Helper class for dealing with expanded widget touch events.
-     */
     private class ExpandCollapseWidgetCallback extends TouchManager.SimpleCallback {
 
-        @Override
+      @Override
         public void onTouched(float x, float y) {
             super.onTouched(x, y);
             expandCollapseWidget.onTouched(x, y);
@@ -750,7 +986,7 @@ public class AudioWidget {
 
         @Override
         public void onTouchOutside() {
-            if(!expandCollapseWidget.isAnimationInProgress()) {
+            if (!expandCollapseWidget.isAnimationInProgress()) {
                 collapse();
             }
         }
@@ -854,520 +1090,5 @@ public class AudioWidget {
                 onControlsClickListener.onAlbumLongClicked();
             }
         }
-    }
-
-    /**
-     * Builder class for {@link AudioWidget}.
-     */
-    public static class Builder {
-
-        private final Context context;
-
-        @ColorInt
-        private int darkColor;
-        @ColorInt
-        private int lightColor;
-        @ColorInt
-        private int progressColor;
-        @ColorInt
-        private int crossColor;
-        @ColorInt
-        private int crossOverlappedColor;
-        @ColorInt
-        private int shadowColor;
-        @ColorInt
-        private int expandWidgetColor;
-        private int buttonPadding;
-        private float crossStrokeWidth;
-        private float progressStrokeWidth;
-        private float shadowRadius;
-        private float shadowDx;
-        private float shadowDy;
-        private float bubblesMinSize;
-        private float bubblesMaxSize;
-        private Drawable playDrawable;
-        private Drawable prevDrawable;
-        private Drawable nextDrawable;
-        private Drawable playlistDrawable;
-        private Drawable defaultAlbumDrawable;
-        private Drawable pauseDrawable;
-        private boolean darkColorSet;
-        private boolean lightColorSet;
-        private boolean progressColorSet;
-        private boolean crossColorSet;
-        private boolean crossOverlappedColorSet;
-        private boolean shadowColorSet;
-        private boolean expandWidgetColorSet;
-        private boolean buttonPaddingSet;
-        private boolean crossStrokeWidthSet;
-        private boolean progressStrokeWidthSet;
-        private boolean shadowRadiusSet;
-        private boolean shadowDxSet;
-        private boolean shadowDySet;
-        private boolean bubblesMinSizeSet;
-        private boolean bubblesMaxSizeSet;
-        private int edgeOffsetXCollapsed;
-        private int edgeOffsetYCollapsed;
-        private int edgeOffsetXExpanded;
-        private int edgeOffsetYExpanded;
-        private boolean edgeOffsetXCollapsedSet;
-        private boolean edgeOffsetYCollapsedSet;
-        private boolean edgeOffsetXExpandedSet;
-        private boolean edgeOffsetYExpandedSet;
-
-        public Builder(@NonNull Context context) {
-            this.context = context;
-        }
-
-        /**
-         * Set dark color (playing state).
-         * @param darkColor dark color
-         */
-        public Builder darkColor(@ColorInt int darkColor) {
-            this.darkColor = darkColor;
-            darkColorSet = true;
-            return this;
-        }
-
-        /**
-         * Set light color (paused state).
-         * @param lightColor light color
-         */
-        public Builder lightColor(@ColorInt int lightColor) {
-            this.lightColor = lightColor;
-            lightColorSet = true;
-            return this;
-        }
-
-        /**
-         * Set progress bar color.
-         * @param progressColor progress bar color
-         */
-        public Builder progressColor(@ColorInt int progressColor) {
-            this.progressColor = progressColor;
-            progressColorSet = true;
-            return this;
-        }
-
-        /**
-         * Set remove widget cross color.
-         * @param crossColor cross color
-         */
-        public Builder crossColor(@ColorInt int crossColor) {
-            this.crossColor = crossColor;
-            crossColorSet = true;
-            return this;
-        }
-
-        /**
-         * Set remove widget cross color in overlapped state (audio widget overlapped remove widget).
-         * @param crossOverlappedColor cross color in overlapped state
-         */
-        public Builder crossOverlappedColor(@ColorInt int crossOverlappedColor) {
-            this.crossOverlappedColor = crossOverlappedColor;
-            crossOverlappedColorSet = true;
-            return this;
-        }
-
-        /**
-         * Set shadow color.
-         * @param shadowColor shadow color
-         */
-        public Builder shadowColor(@ColorInt int shadowColor) {
-            this.shadowColor = shadowColor;
-            shadowColorSet = true;
-            return this;
-        }
-
-        /**
-         * Set widget color in expanded state.
-         * @param expandWidgetColor widget color in expanded state
-         */
-        public Builder expandWidgetColor(@ColorInt int expandWidgetColor) {
-            this.expandWidgetColor = expandWidgetColor;
-            expandWidgetColorSet = true;
-            return this;
-        }
-
-        /**
-         * Set button padding in pixels. Default value: 10dp.
-         * @param buttonPadding button padding
-         */
-        public Builder buttonPadding(int buttonPadding) {
-            this.buttonPadding = buttonPadding;
-            buttonPaddingSet = true;
-            return this;
-        }
-
-        /**
-         * Set stroke width of remove widget. Default value: 4dp.
-         * @param crossStrokeWidth stroke width of remove widget
-         */
-        public Builder crossStrokeWidth(float crossStrokeWidth) {
-            this.crossStrokeWidth = crossStrokeWidth;
-            crossStrokeWidthSet = true;
-            return this;
-        }
-
-        /**
-         * Set stroke width of progress bar. Default value: 4dp.
-         * @param progressStrokeWidth stroke width of progress bar
-         */
-        public Builder progressStrokeWidth(float progressStrokeWidth) {
-            this.progressStrokeWidth = progressStrokeWidth;
-            progressStrokeWidthSet = true;
-            return this;
-        }
-
-        /**
-         * Set shadow radius. Default value: 5dp.
-         * @param shadowRadius shadow radius.
-         * @see Paint#setShadowLayer(float, float, float, int)
-         */
-        public Builder shadowRadius(float shadowRadius) {
-            this.shadowRadius = shadowRadius;
-            shadowRadiusSet = true;
-            return this;
-        }
-
-        /**
-         * Set shadow dx. Default value: 1dp.
-         * @param shadowDx shadow dx
-         * @see Paint#setShadowLayer(float, float, float, int)
-         */
-        public Builder shadowDx(float shadowDx) {
-            this.shadowDx = shadowDx;
-            shadowDxSet = true;
-            return this;
-        }
-
-        /**
-         * Set shadow dx. Default value: 1dp.
-         * @param shadowDy shadow dy
-         * @see Paint#setShadowLayer(float, float, float, int)
-         */
-        public Builder shadowDy(float shadowDy) {
-            this.shadowDy = shadowDy;
-            shadowDySet = true;
-            return this;
-        }
-
-        /**
-         * Set bubbles minimum size in pixels. Default value: 5dp.
-         * @param bubblesMinSize bubbles minimum size
-         */
-        public Builder bubblesMinSize(float bubblesMinSize) {
-            this.bubblesMinSize = bubblesMinSize;
-            bubblesMinSizeSet = true;
-            return this;
-        }
-
-        /**
-         * Set bubbles maximum size in pixels. Default value: 10dp.
-         * @param bubblesMaxSize bubbles maximum size
-         */
-        public Builder bubblesMaxSize(float bubblesMaxSize) {
-            this.bubblesMaxSize = bubblesMaxSize;
-            bubblesMaxSizeSet = true;
-            return this;
-        }
-
-        /**
-         * Set drawable for play button.
-         * @param playDrawable drawable for play button
-         */
-        public Builder playDrawable(@NonNull Drawable playDrawable) {
-            this.playDrawable = playDrawable;
-            return this;
-        }
-
-        /**
-         * Set drawable for previous track button.
-         * @param prevDrawable drawable for previous track button
-         */
-        public Builder prevTrackDrawale(@NonNull Drawable prevDrawable) {
-            this.prevDrawable = prevDrawable;
-            return this;
-        }
-
-        /**
-         * Set drawable for next track button.
-         * @param nextDrawable drawable for next track button.
-         */
-        public Builder nextTrackDrawable(@NonNull Drawable nextDrawable) {
-            this.nextDrawable = nextDrawable;
-            return this;
-        }
-
-        /**
-         * Set drawable for playlist button.
-         * @param playlistDrawable drawable for playlist button
-         */
-        public Builder playlistDrawable(@NonNull Drawable playlistDrawable) {
-            this.playlistDrawable = playlistDrawable;
-            return this;
-        }
-
-        /**
-         * Set drawable for default album icon.
-         * @param defaultAlbumCover drawable for default album icon
-         */
-        public Builder defaultAlbumDrawable(@NonNull Drawable defaultAlbumCover) {
-            this.defaultAlbumDrawable = defaultAlbumCover;
-            return this;
-        }
-
-        /**
-         * Set drawable for pause button.
-         * @param pauseDrawable drawable for pause button
-         */
-        public Builder pauseDrawable(@NonNull Drawable pauseDrawable) {
-            this.pauseDrawable = pauseDrawable;
-            return this;
-        }
-
-        /**
-         * Set widget edge offset on X axis
-         * @param edgeOffsetX widget edge offset on X axis
-         */
-        public Builder edgeOffsetXCollapsed(int edgeOffsetX) {
-            this.edgeOffsetXCollapsed = edgeOffsetX;
-            edgeOffsetXCollapsedSet = true;
-            return this;
-        }
-
-        /**
-         * Set widget edge offset on Y axis
-         * @param edgeOffsetY widget edge offset on Y axis
-         */
-        public Builder edgeOffsetYCollapsed(int edgeOffsetY) {
-            this.edgeOffsetYCollapsed = edgeOffsetY;
-            edgeOffsetYCollapsedSet = true;
-            return this;
-        }
-
-        public Builder edgeOffsetYExpanded(int edgeOffsetY) {
-            this.edgeOffsetYExpanded = edgeOffsetY;
-            edgeOffsetYExpandedSet = true;
-            return this;
-        }
-
-        public Builder edgeOffsetXExpanded(int edgeOffsetX) {
-            this.edgeOffsetXExpanded = edgeOffsetX;
-            edgeOffsetXExpandedSet = true;
-            return this;
-        }
-
-        /**
-         * Create new audio widget.
-         * @return new audio widget
-         * @throws IllegalStateException if size parameters have wrong values (less than zero).
-         */
-        public AudioWidget build() {
-            if (buttonPaddingSet) {
-                checkOrThrow(buttonPadding, "Button padding");
-            }
-            if (shadowRadiusSet) {
-                checkOrThrow(shadowRadius, "Shadow radius");
-            }
-            if (shadowDxSet) {
-                checkOrThrow(shadowDx, "Shadow dx");
-            }
-            if (shadowDySet) {
-                checkOrThrow(shadowDy, "Shadow dy");
-            }
-            if (bubblesMinSizeSet) {
-                checkOrThrow(bubblesMinSize, "Bubbles min size");
-            }
-            if (bubblesMaxSizeSet) {
-                checkOrThrow(bubblesMaxSize, "Bubbles max size");
-            }
-            if (bubblesMinSizeSet && bubblesMaxSizeSet && bubblesMaxSize < bubblesMinSize) {
-                throw new IllegalArgumentException("Bubbles max size must be greater than bubbles min size");
-            }
-            if (crossStrokeWidthSet) {
-                checkOrThrow(crossStrokeWidth, "Cross stroke width");
-            }
-            if (progressStrokeWidthSet) {
-                checkOrThrow(progressStrokeWidth, "Progress stroke width");
-            }
-            return new AudioWidget(this);
-        }
-
-        private void checkOrThrow(int number, String name) {
-            if (number < 0)
-                throw new IllegalArgumentException(name + " must be equals or greater zero.");
-        }
-
-        private void checkOrThrow(float number, String name) {
-            if (number < 0)
-                throw new IllegalArgumentException(name + " must be equals or greater zero.");
-        }
-
-    }
-
-    /**
-     * Audio widget controller.
-     */
-    public interface Controller {
-
-        /**
-         * Start playback.
-         */
-        void start();
-
-        /**
-         * Pause playback.
-         */
-        void pause();
-
-        /**
-         * Stop playback.
-         */
-        void stop();
-
-        /**
-         * Get track duration.
-         *
-         * @return track duration
-         */
-        int duration();
-
-        /**
-         * Set track duration.
-         *
-         * @param duration track duration
-         */
-        void duration(int duration);
-
-        /**
-         * Get track position.
-         *
-         * @return track position
-         */
-        int position();
-
-        /**
-         * Set track position.
-         *
-         * @param position track position
-         */
-        void position(int position);
-
-        /**
-         * Set controls click listener.
-         *
-         * @param onControlsClickListener controls click listener
-         */
-        void onControlsClickListener(@Nullable OnControlsClickListener onControlsClickListener);
-
-        /**
-         * Set widget state change listener.
-         *
-         * @param onWidgetStateChangedListener widget state change listener
-         */
-        void onWidgetStateChangedListener(@Nullable OnWidgetStateChangedListener onWidgetStateChangedListener);
-
-        /**
-         * Set album cover.
-         *
-         * @param albumCover album cover or null to set default one
-         */
-        void albumCover(@Nullable Drawable albumCover);
-
-        /**
-         * Set album cover.
-         *
-         * @param albumCover album cover or null to set default one
-         */
-        void albumCoverBitmap(@Nullable Bitmap albumCover);
-    }
-
-    /**
-     * Listener for control clicks.
-     */
-    public interface OnControlsClickListener {
-
-        /**
-         * Called when playlist button clicked.
-         * @return true if you consume the action, false to use default behavior (collapse widget)
-         */
-        boolean onPlaylistClicked();
-
-        /**
-         * Called when playlist button long clicked.
-         */
-        void onPlaylistLongClicked();
-
-        /**
-         * Called when previous track button clicked.
-         */
-        void onPreviousClicked();
-
-        /**
-         * Called when previous track button long clicked.
-         */
-        void onPreviousLongClicked();
-
-        /**
-         * Called when play/pause button clicked.
-         * @return true if you consume the action, false to use default behavior (change play/pause state)
-         */
-        boolean onPlayPauseClicked();
-
-        /**
-         * Called when play/pause button long clicked.
-         */
-        void onPlayPauseLongClicked();
-
-        /**
-         * Called when next track button clicked.
-         */
-        void onNextClicked();
-
-        /**
-         * Called when next track button long clicked.
-         */
-        void onNextLongClicked();
-
-        /**
-         * Called when album icon clicked.
-         */
-        void onAlbumClicked();
-
-        /**
-         * Called when album icon long clicked.
-         */
-        void onAlbumLongClicked();
-    }
-
-    /**
-     * Listener for widget state changes.
-     */
-    public interface OnWidgetStateChangedListener {
-
-        /**
-         * Called when widget state changed.
-         *
-         * @param state new widget state
-         */
-        void onWidgetStateChanged(@NonNull State state);
-
-        /**
-         * Called when position of widget is changed.
-         *
-         * @param cx center x
-         * @param cy center y
-         */
-        void onWidgetPositionChanged(int cx, int cy);
-    }
-
-    /**
-     * Widget state.
-     */
-    public enum State {
-        COLLAPSED,
-        EXPANDED,
-        REMOVED
     }
 }

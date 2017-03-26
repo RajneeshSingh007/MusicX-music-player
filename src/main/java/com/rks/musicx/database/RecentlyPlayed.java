@@ -1,29 +1,30 @@
 package com.rks.musicx.database;
 
+import static com.rks.musicx.misc.utils.Constants.DbVersion;
+import static com.rks.musicx.misc.utils.Constants.DefaultColumn;
+import static com.rks.musicx.misc.utils.Constants.RecentlyPlayed_TableName;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
 import com.rks.musicx.data.model.Song;
-
+import com.rks.musicx.misc.utils.Constants;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.rks.musicx.misc.utils.Constants.DbVersion;
-import static com.rks.musicx.misc.utils.Constants.DefaultColumn;
-import static com.rks.musicx.misc.utils.Constants.RecentlyPlayed_TableName;
-
-/**
- * Created by Coolalien on 12/16/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class RecentlyPlayed extends SQLiteOpenHelper implements DefaultColumn {
 
 
-    public RecentlyPlayed(Context context){
-        super(context,RecentlyPlayed_TableName,null,DbVersion);
+    private SQLiteDatabase sqLiteDatabase;
+  
+    public RecentlyPlayed(Context context) {
+        super(context, RecentlyPlayed_TableName, null, DbVersion);
 
     }
 
@@ -34,12 +35,12 @@ public class RecentlyPlayed extends SQLiteOpenHelper implements DefaultColumn {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        sqLiteDatabase.execSQL(DefaultColumn(RecentlyPlayed_TableName));
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Constants.RecentlyPlayed_TableName);
         onCreate(sqLiteDatabase);
     }
 
     public void add(Song song) {
-        SQLiteDatabase sqLiteDatabase = getWritableDatabase();
+        sqLiteDatabase = getWritableDatabase();
         addSongMetaData(sqLiteDatabase, song);
         sqLiteDatabase.close();
     }
@@ -53,46 +54,46 @@ public class RecentlyPlayed extends SQLiteOpenHelper implements DefaultColumn {
         values.put(SongNumber, song.getTrackNumber());
         values.put(SongPath, song.getmSongPath());
         values.put(SongAlbumId, song.getAlbumId());
-        sqLiteDatabase.insertWithOnConflict(RecentlyPlayed_TableName,null,values,SQLiteDatabase.CONFLICT_IGNORE);
+        sqLiteDatabase.insertWithOnConflict(RecentlyPlayed_TableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
     }
 
     public void removeAll() {
-        SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
+        sqLiteDatabase = getWritableDatabase();
+        sqLiteDatabase.beginTransaction();
         try {
-            db.delete(RecentlyPlayed_TableName, null, null);
-            db.setTransactionSuccessful();
+            sqLiteDatabase.delete(RecentlyPlayed_TableName, null, null);
+            sqLiteDatabase.setTransactionSuccessful();
         } finally {
-            db.endTransaction();
+            sqLiteDatabase.endTransaction();
         }
-        db.close();
+        sqLiteDatabase.close();
     }
 
     public void add(List<Song> songList) {
-        SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
+        sqLiteDatabase = getWritableDatabase();
+        sqLiteDatabase.beginTransaction();
         try {
             for (Song song : songList) {
-                addSongMetaData(db, song);
+                addSongMetaData(sqLiteDatabase, song);
             }
-            db.setTransactionSuccessful();
+            sqLiteDatabase.setTransactionSuccessful();
         } finally {
-            db.endTransaction();
+            sqLiteDatabase.endTransaction();
         }
-        db.close();
+        sqLiteDatabase.close();
     }
 
-    public List<Song> read (){
+    public List<Song> read() {
         return readLimit(-1);
     }
 
     public List<Song> readLimit(int limit) {
-        SQLiteDatabase db = getReadableDatabase();
+        sqLiteDatabase = getReadableDatabase();
         List<Song> list = new ArrayList<>();
         String order = _ID + " DESC";
         Cursor cursor;
-        if (limit >0){
-            cursor = db.query(RecentlyPlayed_TableName,null, null, null, null, null,order,String.valueOf(limit));
+        if (limit > 0) {
+            cursor = sqLiteDatabase.query(RecentlyPlayed_TableName, null, null, null, null, null, order, String.valueOf(limit));
             if (cursor != null && cursor.moveToFirst()) {
 
                 int idCol = cursor.getColumnIndex(SongId);
@@ -131,8 +132,8 @@ public class RecentlyPlayed extends SQLiteOpenHelper implements DefaultColumn {
             if (cursor != null) {
                 cursor.close();
             }
-        }else {
-            cursor = db.query(RecentlyPlayed_TableName,null, null, null, null, null,order);
+        } else {
+            cursor = sqLiteDatabase.query(RecentlyPlayed_TableName, null, null, null, null, null, order);
             if (cursor != null && cursor.moveToFirst()) {
 
                 int idCol = cursor.getColumnIndex(SongId);
@@ -175,14 +176,14 @@ public class RecentlyPlayed extends SQLiteOpenHelper implements DefaultColumn {
 
         }
 
-        db.close();
+        sqLiteDatabase.close();
         return list;
     }
 
     public boolean exists(long songId) {
-        SQLiteDatabase db = getReadableDatabase();
+        sqLiteDatabase = getReadableDatabase();
         boolean result = false;
-        Cursor cursor = db.query(RecentlyPlayed_TableName, null, SongId + "= ?", new String[]{String.valueOf(songId)}, null, null, null, "1");
+        Cursor cursor = sqLiteDatabase.query(RecentlyPlayed_TableName, null, SongId + "= ?", new String[]{String.valueOf(songId)}, null, null, null, "1");
         if (cursor != null && cursor.moveToFirst()) {
             result = true;
         }
@@ -193,9 +194,9 @@ public class RecentlyPlayed extends SQLiteOpenHelper implements DefaultColumn {
     }
 
     public void delete(long songId) {
-        SQLiteDatabase db = getWritableDatabase();
-        db.delete(RecentlyPlayed_TableName, SongId + "= ?", new String[]{String.valueOf(songId)});
-        db.close();
+        sqLiteDatabase = getWritableDatabase();
+        sqLiteDatabase.delete(RecentlyPlayed_TableName, SongId + "= ?", new String[]{String.valueOf(songId)});
+        sqLiteDatabase.close();
     }
 
 

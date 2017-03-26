@@ -7,6 +7,10 @@ package com.rks.musicx.data.loaders;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
+
 public abstract class BaseAsyncTaskLoader<T> extends AsyncTaskLoader<T> {
     protected T mData;
 
@@ -16,11 +20,6 @@ public abstract class BaseAsyncTaskLoader<T> extends AsyncTaskLoader<T> {
         super(context);
     }
 
-    /**
-     * Called when there is new data to deliver to the client.  The
-     * super class will take care of delivering it; the implementation
-     * here just adds a little more logic.
-     */
     @Override
     public void deliverResult(T data) {
         if (isReset()) {
@@ -47,9 +46,6 @@ public abstract class BaseAsyncTaskLoader<T> extends AsyncTaskLoader<T> {
         }
     }
 
-    /**
-     * Handles a request to start the Loader.
-     */
     @Override
     protected void onStartLoading() {
         if (mData != null) {
@@ -65,18 +61,12 @@ public abstract class BaseAsyncTaskLoader<T> extends AsyncTaskLoader<T> {
         }
     }
 
-    /**
-     * Handles a request to stop the Loader.
-     */
     @Override
     protected void onStopLoading() {
         // Attempt to cancel the current load task if possible.
         cancelLoad();
     }
 
-    /**
-     * Handles a request to cancel a load.
-     */
     @Override
     public void onCanceled(T data) {
         super.onCanceled(data);
@@ -86,9 +76,6 @@ public abstract class BaseAsyncTaskLoader<T> extends AsyncTaskLoader<T> {
         onReleaseResources(data);
     }
 
-    /**
-     * Handles a request to completely reset the Loader.
-     */
     @Override
     protected void onReset() {
         super.onReset();
@@ -104,10 +91,6 @@ public abstract class BaseAsyncTaskLoader<T> extends AsyncTaskLoader<T> {
         }
     }
 
-    /**
-     * Helper function to take care of releasing resources associated
-     * with an actively loaded data set.
-     */
     protected void onReleaseResources(T apps) {
         // For a simple List<> there is nothing to do.  For something
         // like a Cursor, we would close it here.

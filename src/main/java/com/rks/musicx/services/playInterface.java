@@ -4,8 +4,8 @@ import com.rks.musicx.data.model.Song;
 
 import java.util.List;
 
-/**
- * Created by Coolalien on 10/23/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public interface playInterface {
@@ -43,7 +43,7 @@ public interface playInterface {
 
     void trackingstop();
 
-    void startCurrentTrack();
+    void startCurrentTrack(Song song);
 
     void setPlaylistandShufle(List<Song> songList, boolean play);
 
@@ -51,7 +51,7 @@ public interface playInterface {
 
     void setAsNextTrack(Song song);
 
-    void fastplay();
+    void fastplay(boolean torf, Song song);
 
     int getnextPos(boolean yorno);
 
@@ -59,13 +59,11 @@ public interface playInterface {
 
     void checkTelephonyState();
 
-    void setAutoPauseEnabled(boolean yorn);
-
     void headsetState();
 
-    void mediaLockscreen();
+    void stopMediaplayer();
 
-    void forceStop();
+    void mediaLockscreen();
 
     void updatemediaLockscreen(String update);
 
@@ -79,6 +77,7 @@ public interface playInterface {
 
     int returnpos();
 
+    void refreshWidget();
 
     /*
     *@return song MetaData

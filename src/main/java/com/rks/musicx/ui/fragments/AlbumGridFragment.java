@@ -33,11 +33,11 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Coolalien on 10/28/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
-public class AlbumGridFragment extends miniFragment implements LoaderManager.LoaderCallbacks<List<Album>>,SearchView.OnQueryTextListener {
+public class AlbumGridFragment extends miniFragment implements LoaderManager.LoaderCallbacks<List<Album>>, SearchView.OnQueryTextListener {
 
 
     private AlbumListAdapter albumListAdapter;
@@ -54,21 +54,21 @@ public class AlbumGridFragment extends miniFragment implements LoaderManager.Loa
                 case R.id.item_view:
                     Fragment fragment = AlbumFragment.newInstance(albumListAdapter.getItem(position));
                     ImageView imageView = (ImageView) view.findViewById(R.id.album_artwork);
-                    fragTransition(fragment,imageView);
+                    fragTransition(fragment, imageView);
                     rv.smoothScrollToPosition(position);
                     break;
             }
         }
     };
 
-    private void fragTransition(Fragment fragment, ImageView imageView){
-        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
-        Helper.setFragmentTransition(getActivity(),AlbumGridFragment.this,fragment, new Pair<View, String>(imageView,"TransitionArtwork"));
-    }
-
     public static AlbumGridFragment newInstance(int pos) {
         Extras.getInstance().setTabIndex(pos);
         return new AlbumGridFragment();
+    }
+
+    private void fragTransition(Fragment fragment, ImageView imageView) {
+        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
+        Helper.setFragmentTransition(getActivity(), AlbumGridFragment.this, fragment, new Pair<View, String>(imageView, "TransitionArtwork"));
     }
 
     @Override
@@ -82,9 +82,9 @@ public class AlbumGridFragment extends miniFragment implements LoaderManager.Loa
         GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
         rv.setLayoutManager(layoutManager);
         rv.setAdapter(new AlbumListAdapter(getActivity()));
-        rv.addItemDecoration(new GridSpacingItemDecoration(2,Extras.px2Dp(2, getContext()), true));
+        rv.addItemDecoration(new GridSpacingItemDecoration(2, Extras.px2Dp(2, getContext()), true));
         String ateKey = Helper.getATEKey(getContext());
-        int colorAccent = Config.accentColor(getContext(),ateKey);
+        int colorAccent = Config.accentColor(getContext(), ateKey);
         rv.setPopupBgColor(colorAccent);
         rv.setHasFixedSize(true);
         rv.setAdapter(albumListAdapter);
@@ -104,7 +104,7 @@ public class AlbumGridFragment extends miniFragment implements LoaderManager.Loa
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.album_view_menu,menu);
+        inflater.inflate(R.menu.album_view_menu, menu);
         searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.album_search));
         searchView.setOnQueryTextListener(this);
         searchView.setQueryHint("Search album");
@@ -142,7 +142,7 @@ public class AlbumGridFragment extends miniFragment implements LoaderManager.Loa
     public Loader<List<Album>> onCreateLoader(int id, Bundle args) {
 
         AlbumLoader albumsLoader = new AlbumLoader(getContext());
-        if (id == albumLoader){
+        if (id == albumLoader) {
             albumsLoader.setSortOrder(Extras.getInstance().getAlbumSortOrder());
             albumsLoader.filterartistsong(null, null);
             return albumsLoader;
@@ -152,7 +152,7 @@ public class AlbumGridFragment extends miniFragment implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(Loader<List<Album>> loader, List<Album> data) {
-        if (data ==null){
+        if (data == null) {
             return;
         }
         albumList = data;
@@ -167,8 +167,8 @@ public class AlbumGridFragment extends miniFragment implements LoaderManager.Loa
     /*
     load album
      */
-    private void initload(){
-        getLoaderManager().initLoader(albumLoader,null,this);
+    private void initload() {
+        getLoaderManager().initLoader(albumLoader, null, this);
     }
 
     /*
@@ -176,7 +176,7 @@ public class AlbumGridFragment extends miniFragment implements LoaderManager.Loa
      */
     @Override
     public void load() {
-        getLoaderManager().restartLoader(albumLoader,null,this);
+        getLoaderManager().restartLoader(albumLoader, null, this);
     }
 
     @Override
@@ -186,7 +186,7 @@ public class AlbumGridFragment extends miniFragment implements LoaderManager.Loa
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        final List<Album> filterlist = Helper.filterAlbum(albumList,newText);
+        final List<Album> filterlist = Helper.filterAlbum(albumList, newText);
         albumListAdapter.setFilter(filterlist);
         return true;
     }

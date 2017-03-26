@@ -33,6 +33,10 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
+
 public class ArtistListFragment extends miniFragment implements LoaderManager.LoaderCallbacks<List<Artist>>, SearchView.OnQueryTextListener {
 
     private FastScrollRecyclerView rv;
@@ -56,15 +60,14 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
         }
     };
 
-    private void fragTransition(Fragment fragment, ImageView imageView){
-        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
-        Helper.setFragmentTransition(getActivity(),ArtistListFragment.this,fragment, new Pair<View, String>(imageView,"TransitionArtwork"));
-    }
-
-
     public static ArtistListFragment newInstance(int pos) {
         Extras.getInstance().setTabIndex(pos);
         return new ArtistListFragment();
+    }
+
+    private void fragTransition(Fragment fragment, ImageView imageView) {
+        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
+        Helper.setFragmentTransition(getActivity(), ArtistListFragment.this, fragment, new Pair<View, String>(imageView, "TransitionArtwork"));
     }
 
     @Override
@@ -77,10 +80,10 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
         CustomLayoutManager custom = new CustomLayoutManager(getActivity());
         rv.setLayoutManager(custom);
         rv.setAdapter(new ArtistListAdapter(getContext()));
-        rv.addItemDecoration(new DividerItemDecoration(getContext(),75));
+        rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
         rv.setHasFixedSize(true);
         String ateKey = Helper.getATEKey(getContext());
-        int colorAccent = Config.accentColor(getContext(),ateKey);
+        int colorAccent = Config.accentColor(getContext(), ateKey);
         rv.setPopupBgColor(colorAccent);
         rv.setAdapter(artistListAdapter);
         setHasOptionsMenu(true);
@@ -132,7 +135,7 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
     @Override
     public Loader<List<Artist>> onCreateLoader(int id, Bundle args) {
         ArtistLoader artistsLoader = new ArtistLoader(getActivity());
-        if (id == artistLoader){
+        if (id == artistLoader) {
             artistsLoader.setSortOrder(Extras.getInstance().getArtistSortOrder());
             return artistsLoader;
         }
@@ -141,7 +144,7 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
 
     @Override
     public void onLoadFinished(Loader<List<Artist>> loader, List<Artist> data) {
-        if (data == null){
+        if (data == null) {
             return;
         }
         artistlist = data;
@@ -153,9 +156,6 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
         artistListAdapter.notifyDataSetChanged();
     }
 
-    /**
-     * Load artist.
-     */
     private void loadArtist() {
         getLoaderManager().initLoader(artistLoader, null, this);
     }
@@ -166,7 +166,6 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
     }
 
 
-
     @Override
     public boolean onQueryTextSubmit(String query) {
         return false;
@@ -174,7 +173,7 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        final List<Artist> filterlist = Helper.filterArtist(artistlist,newText);
+        final List<Artist> filterlist = Helper.filterArtist(artistlist, newText);
         artistListAdapter.setFilter(filterlist);
         return true;
     }

@@ -13,35 +13,25 @@ import android.view.WindowManager;
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.misc.utils.Helper;
 
-/**
- * Created by Coolalien on 12/19/2016.
+/*
+ * Created by Coolalien on 06/01/2017.
  */
 
-public class EqView extends View{
+public class EqView extends View {
 
+    public Paint circlePaint2;
+    public Paint linePaint;
     float midx, midy;
     Paint textPaint;
     Paint circlePaint;
-    public Paint circlePaint2;
-    public Paint linePaint;
-    String angle,ateKey;
+    String angle, ateKey;
     float currdeg, deg = 3, downdeg;
-    float dimension,dimension2,caldimension;
+    float dimension, dimension2, caldimension;
     int progressColor, lineColor;
-    int accentColor;
-    int max;
-
+    int accentColor, max;
     onProgressChangedListener mListener;
-
     String label;
-
-    public interface onProgressChangedListener {
-        void onProgressChanged(int progress);
-    }
-
-    public void setOnProgressChangedListener(onProgressChangedListener listener) {
-        mListener = listener;
-    }
+    private boolean glowoff;
 
     public EqView(Context context) {
         super(context);
@@ -58,15 +48,19 @@ public class EqView extends View{
         init();
     }
 
+    public void setOnProgressChangedListener(onProgressChangedListener listener) {
+        mListener = listener;
+    }
+
     void init() {
         textPaint = new Paint();
         textPaint.setColor(Color.WHITE);
         textPaint.setStyle(Paint.Style.FILL);
         WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
-        dimension = (float)display.getHeight() / (float) 1920;
-        dimension2 = (float)display.getHeight() / (float) 1920;
-        caldimension = Math.min(dimension,dimension2);
+        dimension = (float) display.getHeight() / (float) 1920;
+        dimension2 = (float) display.getHeight() / (float) 1920;
+        caldimension = Math.min(dimension, dimension2);
         textPaint.setTextSize(33 * caldimension);
         textPaint.setFakeBoldText(true);
         textPaint.setTextAlign(Paint.Align.CENTER);
@@ -76,8 +70,12 @@ public class EqView extends View{
         circlePaint.setTextAlign(Paint.Align.CENTER);
         circlePaint2 = new Paint();
         ateKey = Helper.getATEKey(getContext());
-        accentColor = Config.accentColor(getContext(),ateKey);
-        circlePaint2.setColor(accentColor);
+        accentColor = Config.accentColor(getContext(), ateKey);
+        if (isGlowoff()) {
+            circlePaint2.setColor(Color.parseColor("#222222"));
+        } else {
+            circlePaint2.setColor(accentColor);
+        }
         circlePaint2.setStyle(Paint.Style.FILL_AND_STROKE);
         circlePaint2.setTextAlign(Paint.Align.CENTER);
         linePaint = new Paint();
@@ -112,7 +110,7 @@ public class EqView extends View{
             canvas.drawCircle(x, y, ((float) radius / 15), circlePaint2);
         }
 
-        float tmp2 = (float) deg / 24;
+        float tmp2 = deg / 24;
         float x1 = midx + (float) (radius * ((float) 2 / 5) * Math.sin(2 * Math.PI * (1.0 - tmp2)));
         float y1 = midy + (float) (radius * ((float) 2 / 5) * Math.cos(2 * Math.PI * (1.0 - tmp2)));
         float x2 = midx + (float) (radius * ((float) 3 / 5) * Math.sin(2 * Math.PI * (1.0 - tmp2)));
@@ -231,15 +229,35 @@ public class EqView extends View{
         return circlePaint;
     }
 
-    public Paint getCirclePaint2() {
-        return circlePaint2;
-    }
-
     public void setCirclePaint(Paint circlePaint) {
         this.circlePaint = circlePaint;
     }
 
+    public Paint getCirclePaint2() {
+        return circlePaint2;
+    }
+
     public void setCirclePaint2(Paint circlePaint2) {
         this.circlePaint2 = circlePaint2;
+    }
+
+    public boolean isGlowoff() {
+        return glowoff;
+    }
+
+    public void setGlowoff(boolean glowoff) {
+        this.glowoff = glowoff;
+    }
+
+    public float getDeg() {
+        return deg;
+    }
+
+    public void setDeg(float deg) {
+        this.deg = deg + 2;
+    }
+
+    public interface onProgressChangedListener {
+        void onProgressChanged(int progress);
     }
 }

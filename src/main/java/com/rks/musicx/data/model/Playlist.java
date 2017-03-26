@@ -1,7 +1,7 @@
 package com.rks.musicx.data.model;
 
-/**
- * Created by Coolalien on 6/11/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class Playlist {

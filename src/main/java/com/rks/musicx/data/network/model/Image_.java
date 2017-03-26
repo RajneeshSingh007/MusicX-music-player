@@ -1,9 +1,12 @@
-
 package com.rks.musicx.data.network.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
 
 public class Image_ {
 
@@ -14,38 +17,18 @@ public class Image_ {
     @Expose
     private String size;
 
-    /**
-     * 
-     * @return
-     *     The text
-     */
     public String getText() {
         return text;
     }
 
-    /**
-     * 
-     * @param text
-     *     The #text
-     */
     public void setText(String text) {
         this.text = text;
     }
 
-    /**
-     * 
-     * @return
-     *     The size
-     */
     public String getSize() {
         return size;
     }
 
-    /**
-     * 
-     * @param size
-     *     The size
-     */
     public void setSize(String size) {
         this.size = size;
     }

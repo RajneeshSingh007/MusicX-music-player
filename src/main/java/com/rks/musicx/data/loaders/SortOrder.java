@@ -2,22 +2,15 @@ package com.rks.musicx.data.loaders;
 
 import android.provider.MediaStore;
 
-/**
- * Holds all of the sort orders for each list type.
- *
- * @author Andrew Neal (andrewdneal@gmail.com)
+/*
+ * Created by Coolalien on 6/28/2016.
  */
+
 public final class SortOrder {
 
-    /**
-     * This class is never instantiated
-     */
     public SortOrder() {
     }
 
-    /**
-     * Artist sort order entries.
-     */
     public interface ArtistSortOrder {
         /* Artist sort order A-Z */
         String ARTIST_A_Z = MediaStore.Audio.Artists.DEFAULT_SORT_ORDER;
@@ -34,9 +27,6 @@ public final class SortOrder {
                 + " DESC";
     }
 
-    /**
-     * Album sort order entries.
-     */
     public interface AlbumSortOrder {
         /* Album sort order A-Z */
         String ALBUM_A_Z = MediaStore.Audio.Albums.DEFAULT_SORT_ORDER;
@@ -56,9 +46,6 @@ public final class SortOrder {
 
     }
 
-    /**
-     * Song sort order entries.
-     */
     public interface SongSortOrder {
         /* Song sort order A-Z */
         String SONG_A_Z = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
@@ -82,9 +69,6 @@ public final class SortOrder {
         String SONG_DATE = MediaStore.Audio.Media.DATE_ADDED + " DESC";
     }
 
-    /**
-     * Album song sort order entries.
-     */
     public interface AlbumSongSortOrder {
         /* Album song sort order A-Z */
         String SONG_A_Z = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
@@ -100,9 +84,6 @@ public final class SortOrder {
         String SONG_DURATION = SongSortOrder.SONG_DURATION;
     }
 
-    /**
-     * Artist song sort order entries.
-     */
     public interface ArtistSongSortOrder {
         /* Artist song sort order A-Z */
         String SONG_A_Z = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
@@ -123,9 +104,6 @@ public final class SortOrder {
         String SONG_DATE = MediaStore.Audio.Media.DATE_ADDED + " DESC";
     }
 
-    /**
-     * Artist album sort order entries.
-     */
     public interface ArtistAlbumSortOrder {
         /* Artist album sort order A-Z */
         String ALBUM_A_Z = MediaStore.Audio.Albums.DEFAULT_SORT_ORDER;

@@ -20,51 +20,31 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-/**
- * Created by Coolalien on 1/3/2017.
- */
-
 public abstract class BitmapPalette {
 
     private static final String TAG = "BitmapPalette";
-
-    public interface CallBack {
-        void onPaletteLoaded(@Nullable Palette palette);
-    }
-
-    public interface PaletteBuilderInterceptor {
-        @NonNull
-        Palette.Builder intercept(Palette.Builder builder);
-    }
-
-    @IntDef({Profile.VIBRANT, Profile.VIBRANT_DARK, Profile.VIBRANT_LIGHT,
-            Profile.MUTED, Profile.MUTED_DARK, Profile.MUTED_LIGHT})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Profile {
-        int VIBRANT = 0;
-        int VIBRANT_DARK = 1;
-        int VIBRANT_LIGHT = 2;
-        int MUTED = 3;
-        int MUTED_DARK = 4;
-        int MUTED_LIGHT = 5;
-    }
-
-    @IntDef({Swatch.RGB, Swatch.TITLE_TEXT_COLOR, Swatch.BODY_TEXT_COLOR})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Swatch {
-        int RGB = 0;
-        int TITLE_TEXT_COLOR = 1;
-        int BODY_TEXT_COLOR = 2;
-    }
-
     private static final LruCache<String, Palette> CACHE = new LruCache<>(40);
-
     protected String url;
-
     protected LinkedList<PaletteTarget> targets = new LinkedList<>();
     protected ArrayList<CallBack> callbacks = new ArrayList<>();
     private PaletteBuilderInterceptor interceptor;
     private boolean skipCache;
+
+    protected static int getColor(Palette.Swatch swatch, @Swatch int paletteSwatch) {
+        if (swatch != null) {
+            switch (paletteSwatch) {
+                case Swatch.RGB:
+                    return swatch.getRgb();
+                case Swatch.TITLE_TEXT_COLOR:
+                    return swatch.getTitleTextColor();
+                case Swatch.BODY_TEXT_COLOR:
+                    return swatch.getBodyTextColor();
+            }
+        } else {
+            Log.e(TAG, "error while generating Palette, null palette returned");
+        }
+        return 0;
+    }
 
     public BitmapPalette use(@Profile int paletteProfile) {
         this.targets.add(new PaletteTarget(paletteProfile));
@@ -198,22 +178,6 @@ public abstract class BitmapPalette {
         transitionDrawable.startTransition(target.targetCrossfadeSpeed);
     }
 
-    protected static int getColor(Palette.Swatch swatch, @Swatch int paletteSwatch) {
-        if (swatch != null) {
-            switch (paletteSwatch) {
-                case Swatch.RGB:
-                    return swatch.getRgb();
-                case Swatch.TITLE_TEXT_COLOR:
-                    return swatch.getTitleTextColor();
-                case Swatch.BODY_TEXT_COLOR:
-                    return swatch.getBodyTextColor();
-            }
-        } else {
-            Log.e(TAG, "error while generating Palette, null palette returned");
-        }
-        return 0;
-    }
-
     protected void start(@NonNull final Bitmap bitmap) {
         final boolean skipCache = this.skipCache;
         if (!skipCache) {
@@ -236,5 +200,34 @@ public abstract class BitmapPalette {
                 apply(palette, false);
             }
         });
+    }
+
+    public interface CallBack {
+        void onPaletteLoaded(@Nullable Palette palette);
+    }
+
+    public interface PaletteBuilderInterceptor {
+        @NonNull
+        Palette.Builder intercept(Palette.Builder builder);
+    }
+
+    @IntDef({Profile.VIBRANT, Profile.VIBRANT_DARK, Profile.VIBRANT_LIGHT,
+            Profile.MUTED, Profile.MUTED_DARK, Profile.MUTED_LIGHT})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Profile {
+        int VIBRANT = 0;
+        int VIBRANT_DARK = 1;
+        int VIBRANT_LIGHT = 2;
+        int MUTED = 3;
+        int MUTED_DARK = 4;
+        int MUTED_LIGHT = 5;
+    }
+
+    @IntDef({Swatch.RGB, Swatch.TITLE_TEXT_COLOR, Swatch.BODY_TEXT_COLOR})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Swatch {
+        int RGB = 0;
+        int TITLE_TEXT_COLOR = 1;
+        int BODY_TEXT_COLOR = 2;
     }
 }

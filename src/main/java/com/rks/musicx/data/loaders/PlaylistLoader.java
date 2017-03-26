@@ -13,6 +13,10 @@ import java.util.Collections;
 import java.util.List;
 
 
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
+
 public class PlaylistLoader extends BaseAsyncTaskLoader<List<Song>> {
 
     private static final String[] sProjection = {
@@ -34,8 +38,8 @@ public class PlaylistLoader extends BaseAsyncTaskLoader<List<Song>> {
     public List<Song> loadInBackground() {
         List<Song> playlist = new ArrayList<>();
         String sortorder = MediaStore.Audio.Playlists.Members.PLAY_ORDER;
-        if (PermissionChecker.checkCallingOrSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED){
-            Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylistId), sProjection, null,null, sortorder);
+        if (PermissionChecker.checkCallingOrSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED) {
+            Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylistId), sProjection, null, null, sortorder);
             if (cursor != null && cursor.moveToFirst()) {
                 int idCol = cursor
                         .getColumnIndex(MediaStore.Audio.Playlists.Members.AUDIO_ID);
@@ -76,11 +80,11 @@ public class PlaylistLoader extends BaseAsyncTaskLoader<List<Song>> {
                 } while (cursor.moveToNext());
                 cursor.close();
             }
-            if(cursor == null){
+            if (cursor == null) {
                 Collections.emptyList();
             }
             return playlist;
-        }else {
+        } else {
             return null;
         }
     }

@@ -22,9 +22,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Created by Coolalien on 6/16/2016.
- */
 public class SmallBang extends View {
 
     int[] colors = {0xFFDF4288, 0xFFCD8BF8, 0XFF2B9DF2, 0XFFA4EEB4, 0XFFE097CA, 0XFFCAACC6, 0XFFC5A5FC, 0XFFF5BC16, 0XFFF2DFC8, 0XFFE1BE8E, 0XFFC8C79D};
@@ -81,29 +78,14 @@ public class SmallBang extends View {
         circlePaint.setColor(Color.BLACK);
     }
 
-    /**
-     * listener for animation change time
-     *
-     * @param listener
-     */
     public void setmListener(SmallBangListener listener) {
         this.mListener = listener;
     }
 
-    /**
-     * set different colors for last dots
-     *
-     * @param newColors
-     */
     public void setColors(int[] newColors) {
         this.colors = Arrays.copyOf(newColors, newColors.length);
     }
 
-    /**
-     * set small dot number
-     *
-     * @param dotNumber
-     */
     public void setDotNumber(int dotNumber) {
         DOT_NUMBER = dotNumber;
     }
@@ -273,14 +255,8 @@ public class SmallBang extends View {
     }
 
     public interface SmallBangListener {
-        /**
-         * <p>Notifies the start of the animation.</p>
-         */
         void onAnimationStart();
 
-        /**
-         * <p>Notifies the end of the animation. </p>
-         */
         void onAnimationEnd();
     }
 

@@ -32,16 +32,16 @@ import com.rks.musicx.ui.adapters.PlaylistListAdapter;
 
 import java.util.List;
 
-/**
- * Created by Coolalien on 12/31/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class PlayListPicker extends DialogFragment implements LoaderManager.LoaderCallbacks<List<Playlist>> {
 
+    private final int playlistLoader = -1;
     private RecyclerView rv;
     private PlaylistListAdapter playlistListAdapter;
     private playlistPicked playlistPicked;
-    private final int playlistLoader = -1;
     private String ateKey;
     private int colorAccent;
     private Button CreatePlaylist;
@@ -51,6 +51,22 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
             case R.id.create_playlist:
                 showCreatePlaylistDialog();
                 break;
+        }
+    };
+    private BaseRecyclerViewAdapter.OnItemClickListener onClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position, View view) {
+            switch (view.getId()) {
+                case R.id.item_view:
+                    if (playlistPicked != null) {
+                        playlistPicked.onPlaylistPicked(playlistListAdapter.getItem(position));
+                    }
+                    dismiss();
+                    break;
+                case R.id.delete_playlist:
+                    showMenu(view, position);
+                    break;
+            }
         }
     };
 
@@ -64,7 +80,7 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 TextInputEditText editText = (TextInputEditText) layout.findViewById(R.id.playlist_name);
                 new Helper(getContext()).createPlaylist(getActivity().getContentResolver(), editText.getText().toString());
-                Toast.makeText(getContext(),"Playlist Created", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Playlist Created", Toast.LENGTH_LONG).show();
                 refresh();
             }
         });
@@ -75,28 +91,12 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
                 createplaylist.autoDismiss(true);
             }
         });
-        createplaylist.customView(layout,false);
+        createplaylist.customView(layout, false);
         createplaylist.show();
 
     }
-    private  BaseRecyclerViewAdapter.OnItemClickListener onClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
-        @Override
-        public void onItemClick(int position, View view) {
-            switch (view.getId()) {
-                case R.id.item_view:
-                    if (playlistPicked != null) {
-                        playlistPicked.onPlaylistPicked(playlistListAdapter.getItem(position));
-                    }
-                    dismiss();
-                    break;
-                case R.id.delete_playlist:
-                    showMenu(view,position);
-                    break;
-            }
-        }
-    };
 
-    private void showMenu(View view , int pos){
+    private void showMenu(View view, int pos) {
         PopupMenu popup = new PopupMenu(getActivity(), view);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.playlist_menu, popup.getMenu());
@@ -113,8 +113,8 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
                         builder.onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                new Helper(getContext()).deletePlaylist(getContext().getContentResolver(),playlistListAdapter.getItem(pos).getId());
-                                Toast.makeText(getContext(),"Playlist Deleted",Toast.LENGTH_LONG).show();
+                                new Helper(getContext()).deletePlaylist(getContext().getContentResolver(), playlistListAdapter.getItem(pos).getId());
+                                Toast.makeText(getContext(), "Playlist Deleted", Toast.LENGTH_LONG).show();
                                 refresh();
                             }
                         });
@@ -146,19 +146,18 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
         playlistListAdapter.setOnItemClickListener(onClick);
         CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
         customLayoutManager.setSmoothScrollbarEnabled(true);
-        rv.addItemDecoration(new DividerItemDecoration(getContext(),75));
+        rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
         rv.setLayoutManager(customLayoutManager);
         rv.setAdapter(playlistListAdapter);
         ateKey = Helper.getATEKey(getContext());
-        colorAccent = Config.accentColor(getContext(),ateKey);
+        colorAccent = Config.accentColor(getContext(), ateKey);
         CreatePlaylist = (Button) rootView.findViewById(R.id.create_playlist);
         CreatePlaylist.setOnClickListener(mOnClickListener);
         CreatePlaylist.setBackgroundColor(colorAccent);
-        pickDialog.customView(rootView,false);
+        pickDialog.customView(rootView, false);
         loadPlaylist();
         return pickDialog.show();
     }
-
 
 
     public void refresh() {
@@ -172,7 +171,7 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
     @Override
     public Loader<List<Playlist>> onCreateLoader(int id, Bundle args) {
         CreatedPlaylistLoader playlistloader = new CreatedPlaylistLoader(getContext());
-        if (id == playlistLoader){
+        if (id == playlistLoader) {
             return playlistloader;
         }
         return null;
@@ -180,7 +179,7 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
 
     @Override
     public void onLoadFinished(Loader<List<Playlist>> loader, List<Playlist> data) {
-        if (data == null){
+        if (data == null) {
             return;
         }
         playlistListAdapter.addDataList(data);
@@ -196,8 +195,8 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
     /*
     *Load Playlist
     */
-    private void loadPlaylist(){
-        getLoaderManager().initLoader(playlistLoader,null,this);
+    private void loadPlaylist() {
+        getLoaderManager().initLoader(playlistLoader, null, this);
     }
 
 }

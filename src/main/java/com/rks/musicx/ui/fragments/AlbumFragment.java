@@ -2,7 +2,6 @@ package com.rks.musicx.ui.fragments;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -23,6 +22,7 @@ import com.rks.musicx.data.model.Song;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
+import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.palette;
 import com.rks.musicx.ui.activities.MainActivity;
@@ -38,14 +38,18 @@ import static com.rks.musicx.misc.utils.Constants.ALBUM_NAME;
 import static com.rks.musicx.misc.utils.Constants.ALBUM_TRACK_COUNT;
 import static com.rks.musicx.misc.utils.Constants.ALBUM_YEAR;
 
-public class AlbumFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Song>>  {
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
+
+public class AlbumFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Song>> {
 
 
+    private final int trackLoader = 1;
     private ImageView artworkView;
     private Album mAlbum;
     private SongListAdapter songListAdapter;
     private FastScrollRecyclerView rv;
-    private final int trackLoader = 1;
     private Toolbar toolbar;
     private Helper helper;
     private FloatingActionButton shuffle;
@@ -67,7 +71,7 @@ public class AlbumFragment extends Fragment implements LoaderManager.LoaderCallb
                 ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
                 break;
             case R.id.menu_button:
-                helper.showMenu(trackLoader,this,AlbumFragment.this,((MainActivity) getActivity()),position,view,getContext(),songListAdapter);
+                helper.showMenu(trackLoader, this, AlbumFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
                 break;
         }
     };
@@ -128,7 +132,7 @@ public class AlbumFragment extends Fragment implements LoaderManager.LoaderCallb
         songListAdapter.setLayoutId(R.layout.detail_list);
         songListAdapter.setOnItemClickListener(mOnClick);
         rv.setAdapter(songListAdapter);
-        rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75));
+        rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75, false));
         rv.setHasFixedSize(true);
         shuffle.setOnClickListener(mOnClickListener);
         toolbar.setTitle(mAlbum.getAlbumName());
@@ -137,30 +141,27 @@ public class AlbumFragment extends Fragment implements LoaderManager.LoaderCallb
         loadTrak();
         helper = new Helper(getContext());
         String atekey = ((MainActivity) getActivity()).returnAteKey();
-        int colorAccent = Config.accentColor(getContext(),atekey);
+        int colorAccent = Config.accentColor(getContext(), atekey);
         rv.setPopupBgColor(colorAccent);
-        if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             getActivity().getWindow().setStatusBarColor(colorAccent);
             toolbar.setBackgroundColor(colorAccent);
-        }else {
+        } else {
             getActivity().getWindow().setStatusBarColor(colorAccent);
             toolbar.setBackgroundColor(colorAccent);
         }
     }
 
 
-    /**
-     * Album Loader
-     */
-    private void AlbumCover(){
-        ArtworkUtils.ArtworkLoaderPalette(getContext(), mAlbum.getId(), artworkView, new palette() {
+    private void AlbumCover() {
+        ArtworkUtils.ArtworkLoaderPalette(getContext(), mAlbum.getAlbumName(), mAlbum.getId(), artworkView, new palette() {
             @Override
             public void palettework(Palette palette) {
-                final int[] colors = Helper.getAvailableColor(getContext(),palette);
+                final int[] colors = Helper.getAvailableColor(getContext(), palette);
                 toolbar.setBackgroundColor(colors[0]);
-                if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("dark_theme", false)) {
+                if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
                     getActivity().getWindow().setStatusBarColor(colors[0]);
-                }else {
+                } else {
                     getActivity().getWindow().setStatusBarColor(colors[0]);
                 }
             }
@@ -171,13 +172,13 @@ public class AlbumFragment extends Fragment implements LoaderManager.LoaderCallb
     reload track
      */
     public void reload() {
-        getLoaderManager().restartLoader(trackLoader,null,this);
+        getLoaderManager().restartLoader(trackLoader, null, this);
     }
 
     @Override
     public Loader<List<Song>> onCreateLoader(int id, Bundle args) {
         TrackLoader tracksloader = new TrackLoader(getActivity());
-        if(id == trackLoader){
+        if (id == trackLoader) {
             tracksloader.filteralbumsong(MediaStore.Audio.Media.ALBUM_ID + "=?", new String[]{String.valueOf(mAlbum.getId())});
             tracksloader.setSortOrder(MediaStore.Audio.Media.TRACK);
             return tracksloader;
@@ -195,9 +196,6 @@ public class AlbumFragment extends Fragment implements LoaderManager.LoaderCallb
         songListAdapter.notifyDataSetChanged();
     }
 
-    /**
-     * Load track.
-     */
     private void loadTrak() {
         getLoaderManager().initLoader(trackLoader, null, this);
     }

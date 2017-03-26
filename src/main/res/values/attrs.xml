@@ -1,66 +1,66 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
-    <attr name="ate_key" format="string" />
+    <attr name="ate_key" format="string"/>
 
     <declare-styleable name="CircularSeekBar">
-        <attr name="circle_progress" format="integer" />
-        <attr name="max" format="integer" />
-        <attr name="move_outside_circle" format="boolean" />
-        <attr name="maintain_equal_circle" format="boolean" />
-        <attr name="use_custom_radii" format="boolean" />
-        <attr name="lock_enabled" format="boolean" />
-        <attr name="circle_x_radius" format="dimension" />
-        <attr name="circle_y_radius" format="dimension" />
-        <attr name="circle_stroke_width" format="dimension" />
-        <attr name="pointer_radius" format="dimension" />
-        <attr name="pointer_halo_width" format="dimension" />
-        <attr name="pointer_halo_border_width" format="dimension" />
-        <attr name="circle_color" format="color" />
-        <attr name="circle_progress_color" format="color" />
-        <attr name="pointer_color" format="color" />
-        <attr name="pointer_halo_color" format="color" />
-        <attr name="pointer_halo_color_ontouch" format="color" />
-        <attr name="pointer_alpha_ontouch" format="integer" />
-        <attr name="start_angle" format="float" />
-        <attr name="end_angle" format="float" />
-        <attr name="circle_fill" format="color" />
-    </declare-styleable>
-
-    <declare-styleable name="TimelyView">
-        <attr name="text_color" format="color" />
+        <attr name="circle_progress" format="integer"/>
+        <attr name="max" format="integer"/>
+        <attr name="move_outside_circle" format="boolean"/>
+        <attr name="maintain_equal_circle" format="boolean"/>
+        <attr name="use_custom_radii" format="boolean"/>
+        <attr name="lock_enabled" format="boolean"/>
+        <attr name="circle_x_radius" format="dimension"/>
+        <attr name="circle_y_radius" format="dimension"/>
+        <attr name="circle_stroke_width" format="dimension"/>
+        <attr name="pointer_radius" format="dimension"/>
+        <attr name="pointer_halo_width" format="dimension"/>
+        <attr name="pointer_halo_border_width" format="dimension"/>
+        <attr name="circle_color" format="color"/>
+        <attr name="circle_progress_color" format="color"/>
+        <attr name="pointer_color" format="color"/>
+        <attr name="pointer_halo_color" format="color"/>
+        <attr name="pointer_halo_color_ontouch" format="color"/>
+        <attr name="pointer_alpha_ontouch" format="integer"/>
+        <attr name="start_angle" format="float"/>
+        <attr name="end_angle" format="float"/>
+        <attr name="circle_fill" format="color"/>
     </declare-styleable>
 
     <declare-styleable name="TextView">
-        <attr name="textType" format="string" />
+        <attr name="textType" format="string"/>
     </declare-styleable>
 
     <declare-styleable name="CircleImageView">
-        <attr name="border_width" format="dimension" />
-        <attr name="border_color" format="color" />
-        <attr name="border_overlay" format="boolean" />
-        <attr name="fill_color" format="color" />
+        <attr name="border_width" format="dimension"/>
+        <attr name="border_color" format="color"/>
+        <attr name="border_overlay" format="boolean"/>
+        <attr name="fill_color" format="color"/>
     </declare-styleable>
 
     <declare-styleable name="CircularImageViewStyle">
-        <attr name="circularImageViewDefault" format="reference" />
+        <attr name="circularImageViewDefault" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="ProgressBar">
-        <attr name="ahp_progressColor" format="color|reference" />
-        <attr name="ahp_backgroundColor" format="color|reference" />
-        <attr name="ahp_cornerRadius" format="dimension|reference" />
+        <attr name="ahp_progressColor" format="color|reference"/>
+        <attr name="ahp_backgroundColor" format="color|reference"/>
+        <attr name="ahp_cornerRadius" format="dimension|reference"/>
     </declare-styleable>
+
     <declare-styleable name="DiagonalLayout">
-        <attr name="diagonal_angle" format="integer" />
+        <attr name="diagonal_angle" format="integer"/>
         <attr name="diagonal_handleMargins" format="boolean"/>
         <attr name="diagonal_gravity">
-            <flag name="left" value="1" />
-            <flag name="right" value="2" />
-            <flag name="bottom" value="4" />
+            <flag name="left" value="1"/>
+            <flag name="right" value="2"/>
+            <flag name="bottom" value="4"/>
             <flag name="top" value="8"/>
         </attr>
     </declare-styleable>
-    <declare-styleable name="CustomViewPager">
-        <attr name="swipe_orientation" format="integer" />
+  
+    <declare-styleable name="CircleVisualizerFFTView">
+        <attr name="cake_degree" format="integer"/>
+        <attr name="cake_color" format="color"/>
+        <attr name="padding_offset" format="dimension"/>
     </declare-styleable>
 </resources>

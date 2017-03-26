@@ -8,7 +8,11 @@ import com.rks.musicx.database.Favorites;
 import java.util.List;
 
 
-public class FavoritesLoader extends BaseAsyncTaskLoader<List<Song>>{
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
+
+public class FavoritesLoader extends BaseAsyncTaskLoader<List<Song>> {
 
     Favorites favorites;
 
@@ -24,7 +28,7 @@ public class FavoritesLoader extends BaseAsyncTaskLoader<List<Song>>{
         return songList;
     }
 
-    public void clearDb(){
+    public void clearDb() {
         favorites.removeAll();
     }
 }

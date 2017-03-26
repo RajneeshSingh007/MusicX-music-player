@@ -12,37 +12,36 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Created by Coolalien on 9/11/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class TrackLoader extends BaseAsyncTaskLoader<List<Song>> {
 
     private String Where;
     private String sortorder;
-    private String [] selectionargs;
+    private String[] selectionargs;
     private String mFilter;
-
-    public TrackLoader(Context context) {
-        super(context);
-    }
 
     private String[] datacol = {MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.ALBUM_ID,
             MediaStore.Audio.Media.ARTIST_ID, MediaStore.Audio.Media.TRACK,
-            MediaStore.Audio.Media.DATA,MediaStore.Audio.Media.DURATION,MediaStore.Audio.Media.YEAR,
+            MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.YEAR,
             MediaStore.Audio.Media.COMPOSER
     };
 
+    public TrackLoader(Context context) {
+        super(context);
+    }
 
     @Override
     public List<Song> loadInBackground() {
 
         List<Song> songList = new ArrayList<>();
 
-        if (PermissionChecker.checkCallingOrSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED){
-            Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,datacol,Where,selectionargs,sortorder);
+        if (PermissionChecker.checkCallingOrSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED) {
+            Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, datacol, Where, selectionargs, sortorder);
 
             if (cursor != null && cursor.moveToFirst()) {
                 int idCol = cursor.getColumnIndex(MediaStore.Audio.Media._ID);
@@ -79,7 +78,7 @@ public class TrackLoader extends BaseAsyncTaskLoader<List<Song>> {
                 return Collections.emptyList();
             }
             return songList;
-        }else {
+        } else {
             return null;
         }
     }
@@ -88,10 +87,11 @@ public class TrackLoader extends BaseAsyncTaskLoader<List<Song>> {
         sortorder = orderBy;
     }
 
-    public void filteralbumsong(String filter, String [] args){
+    public void filteralbumsong(String filter, String[] args) {
         Where = filter;
         selectionargs = args;
     }
+
     public String getFilter() {
         return mFilter;
     }

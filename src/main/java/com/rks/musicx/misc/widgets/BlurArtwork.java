@@ -9,19 +9,19 @@ import android.support.v8.renderscript.RenderScript;
 import android.support.v8.renderscript.ScriptIntrinsicBlur;
 import android.widget.ImageView;
 
-/**
- * Created by Coolalien on 10/21/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
-public class BlurArtwork extends AsyncTask<String,Void,String> {
+public class BlurArtwork extends AsyncTask<String, Void, String> {
 
-    Context context;
-    int radius;
-    Bitmap bitmap;
-    ImageView imageView;
-    Bitmap finalResult;
+    private Context context;
+    private int radius;
+    private Bitmap bitmap;
+    private ImageView imageView;
+    private Bitmap finalResult;
 
-    public BlurArtwork (Context context, int radius, Bitmap bitmap, ImageView imageView){
+    public BlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView) {
         this.context = context;
         this.radius = radius;
         this.bitmap = bitmap;
@@ -30,11 +30,11 @@ public class BlurArtwork extends AsyncTask<String,Void,String> {
 
     @Override
     protected String doInBackground(String... params) {
-        finalResult = Bitmap.createBitmap (bitmap.getWidth (), bitmap.getHeight (), Bitmap.Config.ARGB_8888);
+        finalResult = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         RenderScript renderScript = RenderScript.create(context); //rs initialized
         ScriptIntrinsicBlur scriptIntrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript)); //start blur
         Allocation allocationIn = Allocation.createFromBitmap(renderScript, bitmap); //blurred bitmap
-        Allocation allocationOut = Allocation.createFromBitmap(renderScript,finalResult); //output bitmap
+        Allocation allocationOut = Allocation.createFromBitmap(renderScript, finalResult); //output bitmap
         scriptIntrinsicBlur.setRadius(radius); //radius option from users
         scriptIntrinsicBlur.setInput(allocationIn);
         scriptIntrinsicBlur.forEach(allocationOut);

@@ -20,23 +20,32 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Created by Coolalien on 12/8/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class LyricsData extends AsyncTask<String, String, String> {
 
-    private String songName,songArtist;
+    private String songName, songArtist;
     private TextView setLyrics;
     private Call<Vag> vagCall;
     private Context context;
     private String finallyLoaded;
 
-    public LyricsData(Context context,String songName, String songArtist, TextView setLyrics){
+    public LyricsData(Context context, String songName, String songArtist, TextView setLyrics) {
         this.songName = songName;
         this.songArtist = songArtist;
         this.context = context;
         this.setLyrics = setLyrics;
+    }
+
+    private static String stringFilter(String str) {
+        if (str == null) {
+            return null;
+        }
+        Pattern lineMatcher = Pattern.compile("\\n[\\\\/:*?\\\"<>|]((\\[\\d\\d:\\d\\d\\.\\d\\d\\])+)(.+)");
+        Matcher m = lineMatcher.matcher(str);
+        return m.replaceAll("").trim();
     }
 
     @Override
@@ -44,7 +53,7 @@ public class LyricsData extends AsyncTask<String, String, String> {
 
         VagClient vagClient = new VagClient(context);
         VagServices vagServices = vagClient.createService(VagServices.class);
-        vagCall = vagServices.getLyrics(songArtist,songName);
+        vagCall = vagServices.getLyrics(songArtist, songName);
         return "Executed";
     }
 
@@ -60,12 +69,12 @@ public class LyricsData extends AsyncTask<String, String, String> {
                         List<Mu> lyricsdata = vag.getMus();
                         if (lyricsdata.size() > 0) {
                             finallyLoaded = lyricsdata.get(0).getText();
-                            if (Extras.getInstance().saveLyrics()){
-                                String path = new Helper(context).getDirLocation()+ new Helper(context).setFileName(songName);
-                                saveLyrics(path,finallyLoaded);
+                            if (Extras.getInstance().saveLyrics()) {
+                                String path = new Helper(context).loadLyrics(songName +".lrc");
+                                saveLyrics(path, finallyLoaded);
                             }
                             setLyrics.setText(finallyLoaded);
-                        }else {
+                        } else {
                             Log.d("ops ", "No lyrics found");
                             setLyrics.setText("No Lyrics Found");
                         }
@@ -81,11 +90,7 @@ public class LyricsData extends AsyncTask<String, String, String> {
             });
         }
     }
-    /**
-     * save Lyrics
-     * @param path
-     * @param content
-     */
+
     private void saveLyrics(String path, String content) {
         try {
             FileWriter writer = new FileWriter(path);
@@ -95,21 +100,6 @@ public class LyricsData extends AsyncTask<String, String, String> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-
-    /**
-     * filter
-     * @param str
-     * @return
-     */
-    private static String stringFilter(String str) {
-        if (str == null) {
-            return null;
-        }
-        Pattern lineMatcher = Pattern.compile("\\n[\\\\/:*?\\\"<>|]((\\[\\d\\d:\\d\\d\\.\\d\\d\\])+)(.+)");
-        Matcher m = lineMatcher.matcher(str);
-        return m.replaceAll("").trim();
     }
 
 }

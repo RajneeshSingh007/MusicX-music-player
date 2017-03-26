@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.misc.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,14 +16,14 @@ import static com.rks.musicx.misc.utils.Constants.DbVersion;
 import static com.rks.musicx.misc.utils.Constants.DefaultColumn;
 import static com.rks.musicx.misc.utils.Constants.Queue_TableName;
 
-/**
- * Created by Coolalien on 12/16/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class Queue extends SQLiteOpenHelper implements DefaultColumn {
 
-    public Queue(Context context){
-        super(context,Queue_TableName,null,DbVersion);
+    public Queue(Context context) {
+        super(context, Queue_TableName, null, DbVersion);
     }
 
     @Override
@@ -32,7 +33,7 @@ public class Queue extends SQLiteOpenHelper implements DefaultColumn {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        sqLiteDatabase.execSQL(DefaultColumn(Queue_TableName));
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Constants.Queue_TableName);
         onCreate(sqLiteDatabase);
     }
 
@@ -51,7 +52,7 @@ public class Queue extends SQLiteOpenHelper implements DefaultColumn {
         values.put(SongNumber, song.getTrackNumber());
         values.put(SongPath, song.getmSongPath());
         values.put(SongAlbumId, song.getAlbumId());
-        sqLiteDatabase.insertWithOnConflict(Queue_TableName,null,values,SQLiteDatabase.CONFLICT_IGNORE);
+        sqLiteDatabase.insertWithOnConflict(Queue_TableName, null, values, SQLiteDatabase.CONFLICT_IGNORE);
     }
 
     public void removeAll() {
@@ -83,7 +84,7 @@ public class Queue extends SQLiteOpenHelper implements DefaultColumn {
     public List<Song> read() {
         SQLiteDatabase db = getReadableDatabase();
         List<Song> list = new ArrayList<>();
-        Cursor cursor = db.query(Queue_TableName,null, null, null, null, null,null);
+        Cursor cursor = db.query(Queue_TableName, null, null, null, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
             int idCol = cursor.getColumnIndex(SongId);
             int titleCol = cursor.getColumnIndex(SongTitle);

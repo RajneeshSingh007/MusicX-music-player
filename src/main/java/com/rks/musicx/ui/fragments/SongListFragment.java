@@ -13,7 +13,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
@@ -29,11 +28,14 @@ import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.BaseRecyclerViewAdapter;
 import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class SongListFragment extends miniFragment implements SearchView.OnQueryTextListener, LoaderManager.LoaderCallbacks<List<Song>>{
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
+
+public class SongListFragment extends miniFragment implements SearchView.OnQueryTextListener, LoaderManager.LoaderCallbacks<List<Song>> {
 
     private FastScrollRecyclerView rv;
     private SongListAdapter songListAdapter;
@@ -48,11 +50,11 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
         public void onItemClick(int position, View view) {
             switch (view.getId()) {
                 case R.id.item_view:
-                    ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(),position);
+                    ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
                     rv.smoothScrollToPosition(position);
                     break;
                 case R.id.menu_button:
-                    helper.showMenu(trackloader,SongListFragment.this,SongListFragment.this,((MainActivity) getActivity()),position,view,getContext(),songListAdapter);
+                    helper.showMenu(trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
                     break;
 
             }
@@ -72,11 +74,11 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
         CustomLayoutManager customLayoutManager = new CustomLayoutManager(getActivity());
         customLayoutManager.setSmoothScrollbarEnabled(true);
         rv.setLayoutManager(customLayoutManager);
-        rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75));
+        rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75, false));
         songListAdapter = new SongListAdapter(getContext());
         songListAdapter.setOnItemClickListener(onClick);
         String ateKey = Helper.getATEKey(getContext());
-        int colorAccent = Config.accentColor(getContext(),ateKey);
+        int colorAccent = Config.accentColor(getContext(), ateKey);
         rv.setPopupBgColor(colorAccent);
         rv.setItemAnimator(new DefaultItemAnimator());
         loadTrak();
@@ -135,7 +137,6 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
                 extras.setSongSortOrder(SortOrder.SongSortOrder.SONG_DATE);
                 load();
                 break;
-
         }
         return super.onOptionsItemSelected(item);
     }
@@ -151,9 +152,6 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
     }
 
 
-    /**
-     * Load track.
-     */
     private void loadTrak() {
         getLoaderManager().initLoader(trackloader, null, this);
     }
@@ -174,7 +172,7 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        final List<Song> filterlist = helper.filter(songList,newText);
+        final List<Song> filterlist = helper.filter(songList, newText);
         songListAdapter.setFilter(filterlist);
         return true;
     }
@@ -183,8 +181,8 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
     @Override
     public Loader<List<Song>> onCreateLoader(int id, Bundle args) {
         TrackLoader tracksloader = new TrackLoader(getActivity());
-        if (id == trackloader){
-            tracksloader.filteralbumsong(MediaStore.Audio.Media.IS_MUSIC + " !=0",null);
+        if (id == trackloader) {
+            tracksloader.filteralbumsong(MediaStore.Audio.Media.IS_MUSIC + " !=0", null);
             tracksloader.setSortOrder(Extras.getInstance().getSongSortOrder());
             return tracksloader;
         }
@@ -193,7 +191,7 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
 
     @Override
     public void onLoadFinished(Loader<List<Song>> loader, List<Song> data) {
-        if (data == null){
+        if (data == null) {
             return;
         }
         songList = data;
@@ -205,4 +203,5 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
         loader.reset();
         songListAdapter.notifyDataSetChanged();
     }
+
 }

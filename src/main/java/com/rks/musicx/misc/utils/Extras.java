@@ -1,38 +1,41 @@
 package com.rks.musicx.misc.utils;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.preference.PreferenceManager;
-import android.util.DisplayMetrics;
-import android.view.WindowManager;
-
-import com.rks.musicx.data.loaders.SortOrder;
-
 import static com.rks.musicx.misc.utils.Constants.ALBUM_SORT_ORDER;
 import static com.rks.musicx.misc.utils.Constants.ARTIST_SORT_ORDER;
+import static com.rks.musicx.misc.utils.Constants.EQSWITCH;
+import static com.rks.musicx.misc.utils.Constants.FOLDERPATH;
 import static com.rks.musicx.misc.utils.Constants.FloatingView;
 import static com.rks.musicx.misc.utils.Constants.GridViewAlbum;
 import static com.rks.musicx.misc.utils.Constants.GridViewArtist;
 import static com.rks.musicx.misc.utils.Constants.GridViewSong;
 import static com.rks.musicx.misc.utils.Constants.HIDE_LOCKSCREEEN;
 import static com.rks.musicx.misc.utils.Constants.HIDE_NOTIFY;
+import static com.rks.musicx.misc.utils.Constants.HQ_ARTISTARTWORK;
+import static com.rks.musicx.misc.utils.Constants.KEY_POSITION_X;
+import static com.rks.musicx.misc.utils.Constants.KEY_POSITION_Y;
 import static com.rks.musicx.misc.utils.Constants.REORDER_TAB;
 import static com.rks.musicx.misc.utils.Constants.RESTORE_LASTTAB;
 import static com.rks.musicx.misc.utils.Constants.SAVE_DATA;
 import static com.rks.musicx.misc.utils.Constants.SAVE_EQ;
 import static com.rks.musicx.misc.utils.Constants.SONG_SORT_ORDER;
-import static com.rks.musicx.misc.utils.Constants.STORAGE_SELECTION;
 import static com.rks.musicx.misc.utils.Constants.SaveHeadset;
 import static com.rks.musicx.misc.utils.Constants.SaveLyrics;
 import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
+import static com.rks.musicx.misc.utils.Constants.TRACKFOLDER;
 import static com.rks.musicx.misc.utils.Constants.TextFonts;
-import static com.rks.musicx.misc.utils.Constants.Zero;
+import static com.rks.musicx.misc.utils.Constants.VIZCOLOR;
 import static com.rks.musicx.misc.utils.Constants.sInstance;
 
-/**
- * Created by Coolalien on 2/18/2016.
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
+import com.rks.musicx.data.loaders.SortOrder;
+
+/*
+ * Created by Coolalien on 6/28/2016.
  */
+
 public class Extras {
 
     public SharedPreferences mPreferences;
@@ -43,12 +46,6 @@ public class Extras {
         this.mcontext = context;
     }
 
-    public static int getScreenWidth(Context context) {
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        DisplayMetrics outMetrics = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(outMetrics);
-        return outMetrics.widthPixels;
-    }
 
     public static int px2Dp(int dp, Context c) {
         DisplayMetrics displayMetrics = c.getResources().getDisplayMetrics();
@@ -63,10 +60,6 @@ public class Extras {
         return sInstance;
     }
 
-    public void setOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
-        mPreferences.registerOnSharedPreferenceChangeListener(listener);
-    }
-
     public SharedPreferences getmPreferences() {
         return mPreferences;
     }
@@ -77,6 +70,8 @@ public class Extras {
         editor.apply();
     }
 
+
+    //////////////////// Sorting ////////////////////////
     public String getSongSortOrder() {
         return mPreferences.getString(SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_A_Z);
     }
@@ -101,143 +96,129 @@ public class Extras {
         putString(ALBUM_SORT_ORDER, value);
     }
 
-    public static int dp2px(Context context, float dpValue) {
-        float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (dpValue * scale + 0.5f);
+    ////////////////////////// Preferences /////////////////////////
+
+    public void setwidgetPosition(int pos) {
+        SharedPreferences.Editor sharededitor = mPreferences.edit();
+        sharededitor.putInt(KEY_POSITION_X, pos);
+        sharededitor.putInt(KEY_POSITION_Y, pos);
+        sharededitor.apply();
     }
 
-    public static int sp2px(Context context, float spValue) {
-        float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
-        return (int) (spValue * fontScale + 0.5f);
+    public int getwidgetPositionX() {
+        return mPreferences.getInt(KEY_POSITION_X, 100);
     }
 
-    /**
-     * setTabIndex
-     * @param index
-     */
+    public int getwidgetPositionY() {
+        return mPreferences.getInt(KEY_POSITION_Y, 100);
+    }
+
+    public String getTabIndex() {
+        return mPreferences.getString(REORDER_TAB, "0");
+    }
+
     public void setTabIndex(final int index) {
-        final SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = mPreferences.edit();
         editor.putString(REORDER_TAB, String.valueOf(index));
         editor.apply();
     }
 
-    /**
-     * TabIndex
-     * @return
-     */
-    public String getTabIndex(){
-        return mPreferences.getString(REORDER_TAB, "0");
+    public boolean saveLyrics() {
+        return mPreferences.getBoolean(SaveLyrics, true);
     }
 
-    /**
-     * save lyrics option
-     * @return
-     */
-    public boolean saveLyrics(){
-        return mPreferences.getBoolean(SaveLyrics,true);
+    public boolean songView() {
+        return mPreferences.getBoolean(GridViewSong, false);
     }
 
-    /**
-     * grid or list Song View
-     * @return
-     */
-    public boolean songView(){
-        return mPreferences.getBoolean(GridViewSong,false);
+    public boolean albumView() {
+        return mPreferences.getBoolean(GridViewAlbum, false);
     }
 
-    /**
-     * grid or list Album View
-     * @return
-     */
-    public boolean albumView(){
-        return mPreferences.getBoolean(GridViewAlbum,false);
+    public boolean artistView() {
+        return mPreferences.getBoolean(GridViewArtist, false);
     }
 
-    /**
-     * grid or list Artist View
-     * @return
-     */
-    public boolean artistView(){
-        return mPreferences.getBoolean(GridViewArtist,false);
+    public boolean floatingWidget() {
+        return mPreferences.getBoolean(FloatingView, false);
     }
 
-    /**
-     * hide or show Floating Widget
-     * @return
-     */
-    public boolean floatingWidget(){
-        return mPreferences.getBoolean(FloatingView,true);
-    }
-
-    /**
-     * Font Config
-     * @return
-     */
-    public String fontConfig(){
+    public String fontConfig() {
         return mPreferences.getString(TextFonts, "11");
     }
 
-    /**
-     * Headset Config
-     * @return
-     */
-    public boolean headsetConfig(){
-        return mPreferences.getBoolean(SaveHeadset,true);
+    public boolean headsetConfig() {
+        return mPreferences.getBoolean(SaveHeadset, true);
     }
 
-    /**
-     * Phonecall Config
-     * @return
-     */
-    public boolean phonecallConfig(){
-        return mPreferences.getBoolean(SaveTelephony,true);
+    public boolean phonecallConfig() {
+        return mPreferences.getBoolean(SaveTelephony, true);
     }
 
-    /**
-     * save Eq
-     */
-    public SharedPreferences saveEq(){
+    public SharedPreferences saveEq() {
         return mcontext.getSharedPreferences(SAVE_EQ, Context.MODE_PRIVATE);
     }
 
-    /**
-     * Save Data
-     * @return
-     */
-    public boolean saveData(){
+    public boolean saveData() {
         return mPreferences.getBoolean(SAVE_DATA, true);
     }
 
-    /**
-     * Hide Notification
-     * @return
-     */
-    public boolean hideNotify(){
-        return mPreferences.getBoolean(HIDE_NOTIFY,false);
+    public boolean hideNotify() {
+        return mPreferences.getBoolean(HIDE_NOTIFY, false);
     }
 
-    /**
-     * HideLockscreen
-     * @return
-     */
-    public boolean hideLockscreen(){
-        return mPreferences.getBoolean(HIDE_LOCKSCREEEN,false);
+    public boolean hideLockscreen() {
+        return mPreferences.getBoolean(HIDE_LOCKSCREEEN, false);
     }
 
-    /**
-     * Restore lastTab
-     * @return
-     */
-    public boolean restoreLastTab(){
-        return mPreferences.getBoolean(RESTORE_LASTTAB,false);
+    public boolean restoreLastTab() {
+        return mPreferences.getBoolean(RESTORE_LASTTAB, false);
     }
 
-    /**
-     * Folder Storage selection
-     * @return
-     */
-    public String storageConfig(){
-        return mPreferences.getString(STORAGE_SELECTION, Zero);
+    public boolean hqArtistArtwork() {
+        return mPreferences.getBoolean(HQ_ARTISTARTWORK, false);
+    }
+
+
+    public boolean vizColor() {
+        return mPreferences.getBoolean(VIZCOLOR, false);
+    }
+
+    ////////////////// folder pref //////////////////
+
+    public void saveFolderPath(String path){
+      SharedPreferences.Editor editor = mPreferences.edit();
+      editor.putString(FOLDERPATH, path);
+      editor.apply();
+    }
+
+
+    public String getFolderPath(){
+      return mPreferences.getString(FOLDERPATH, null);
+    }
+
+    public void trackFolderPath(boolean torf){
+      SharedPreferences.Editor editor = mPreferences.edit();
+      editor.putBoolean(TRACKFOLDER, torf);
+      editor.apply();
+    }
+
+    public boolean gettrackFolderpath(){
+      return mPreferences.getBoolean(TRACKFOLDER, false);
+    }
+
+
+    //////////////////// eq switch track //////////////////
+
+    public void eqSwitch(Boolean torf){
+      SharedPreferences.Editor editor = mPreferences.edit();
+      editor.putBoolean(EQSWITCH, torf);
+      editor.apply();
+    }
+
+
+    public boolean geteqSwitch(){
+      return mPreferences.getBoolean(EQSWITCH, false);
     }
 
 }

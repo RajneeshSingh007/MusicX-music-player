@@ -1,11 +1,15 @@
-
 package com.rks.musicx.data.network.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
+
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
 
 public class Tags {
 
@@ -13,20 +17,10 @@ public class Tags {
     @Expose
     private List<Tag> tag = new ArrayList<Tag>();
 
-    /**
-     * 
-     * @return
-     *     The tag
-     */
     public List<Tag> getTag() {
         return tag;
     }
 
-    /**
-     * 
-     * @param tag
-     *     The tag
-     */
     public void setTag(List<Tag> tag) {
         this.tag = tag;
     }

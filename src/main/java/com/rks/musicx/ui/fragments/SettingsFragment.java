@@ -1,14 +1,23 @@
 package com.rks.musicx.ui.fragments;
 
-import android.content.SharedPreferences;
+import static com.rks.musicx.misc.utils.Constants.BlurView;
+import static com.rks.musicx.misc.utils.Constants.ClearFav;
+import static com.rks.musicx.misc.utils.Constants.ClearRecently;
+import static com.rks.musicx.misc.utils.Constants.PlayingView;
+import static com.rks.musicx.misc.utils.Constants.SaveHeadset;
+import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
+import static com.rks.musicx.misc.utils.Constants.TextFonts;
+import static com.rks.musicx.misc.utils.Constants.Three;
+import static com.rks.musicx.misc.utils.Constants.Zero;
+
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
-
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.prefs.ATECheckBoxPreference;
@@ -16,43 +25,38 @@ import com.afollestad.appthemeengine.prefs.ATEColorPreference;
 import com.afollestad.appthemeengine.prefs.ATEListPreference;
 import com.afollestad.materialdialogs.color.ColorChooserDialog;
 import com.afollestad.materialdialogs.prefs.MaterialListPreference;
+import com.codekidlabs.storagechooser.StorageChooser;
+import com.codekidlabs.storagechooser.StorageChooserView;
 import com.rks.musicx.R;
 import com.rks.musicx.data.loaders.FavoritesLoader;
 import com.rks.musicx.data.loaders.RecentlyPlayedLoader;
 import com.rks.musicx.misc.utils.ATEUtils;
+import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.widgets.DailogPref;
 import com.rks.musicx.ui.activities.SettingsActivity;
 
-import static com.rks.musicx.misc.utils.Constants.BlurView;
-import static com.rks.musicx.misc.utils.Constants.ClearFav;
-import static com.rks.musicx.misc.utils.Constants.ClearRecently;
-import static com.rks.musicx.misc.utils.Constants.PlayingView;
-import static com.rks.musicx.misc.utils.Constants.TextFonts;
-import static com.rks.musicx.misc.utils.Constants.Three;
-import static com.rks.musicx.misc.utils.Constants.Zero;
 
-
-/**
- * Created by Coolalien on 3/6/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
-public class SettingsFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener,
-        Preference.OnPreferenceClickListener{
+
+public class SettingsFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
     private String mAteKey;
-    SharedPreferences sharedPreferences;
-    private ATEListPreference fontsPref,playingScreenPref,blurseek;
+    private ATEListPreference fontsPref, playingScreenPref, blurseek;
     private DailogPref dialogPreferenceFav, dailogPreferenceRecent;
     private FavoritesLoader favoritesLoader;
     private RecentlyPlayedLoader recentlyPlayedLoader;
+    private int accentcolor;
+    private ATECheckBoxPreference headsetConfig, phoneConfig;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.settingspref);
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences (getActivity());
         fontsPref = (ATEListPreference) findPreference(TextFonts);
-        if(fontsPref.getValue() == null)
+        if (fontsPref.getValue() == null)
             fontsPref.setValue(Zero);
         playingScreenPref = (ATEListPreference) findPreference(PlayingView);
         if (playingScreenPref.getValue() == null)
@@ -64,6 +68,11 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         dailogPreferenceRecent = (DailogPref) findPreference(ClearRecently);
         favoritesLoader = new FavoritesLoader(getActivity());
         recentlyPlayedLoader = new RecentlyPlayedLoader(getActivity(), -1);
+        headsetConfig = (ATECheckBoxPreference) findPreference(SaveHeadset);
+        headsetConfig.setChecked(true);
+        phoneConfig = (ATECheckBoxPreference) findPreference(SaveTelephony);
+        phoneConfig.setChecked(true);
+        accentcolor = Config.accentColor(getActivity(), Helper.getATEKey(getActivity()));
     }
 
     @Override
@@ -158,6 +167,33 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
             }
         });
 
+
+      findPreference("directory_picker").setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(Preference preference) {
+          StorageChooserView.setScSecondaryActionColor(accentcolor);
+          StorageChooser chooser = new StorageChooser.Builder()
+              .withActivity((SettingsActivity) getActivity())
+              .withFragmentManager(((SettingsActivity) getActivity()).getSupportFragmentManager())
+              .allowCustomPath(false)
+              .allowAddFolder(false)
+              .setDialogTitle("Directory Chooser")
+              .setType(StorageChooser.DIRECTORY_CHOOSER)
+              .skipOverview(true)
+              .showHidden(false)
+              .build();
+          chooser.show();
+          chooser.setOnSelectListener(new StorageChooser.OnSelectListener() {
+            @Override
+            public void onSelect(String path) {
+              Log.e("PATH", path);
+              Extras.getInstance().saveFolderPath(path);
+              Extras.getInstance().trackFolderPath(true);
+            }
+          });
+          return true;
+        }
+      });
         final ATECheckBoxPreference statusBarPref = (ATECheckBoxPreference) findPreference("colored_status_bar");
         final ATECheckBoxPreference navBarPref = (ATECheckBoxPreference) findPreference("colored_nav_bar");
 
@@ -191,6 +227,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
             navBarPref.setSummary(R.string.not_available_below_lollipop);
         }
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -199,7 +236,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
     }
 
 
-    @Override
+  @Override
     public boolean onPreferenceChange(Preference preference, Object o) {
         return false;
     }

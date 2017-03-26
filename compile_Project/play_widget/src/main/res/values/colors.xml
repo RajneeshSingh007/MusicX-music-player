@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="pw_circle_color">#a0000000</color>
+    <color name="pw_circle_color_translucent">#a0000000</color>
+
+    <color name="pw_shadow_start_color">#4D000000</color>
+    <color name="pw_shadow_mid_color">#1D000000</color>
+    <color name="pw_shadow_end_color">#00000000</color>
+
+    <color name="pw_shadow_start_color_hard">#4F000000</color>
+    <color name="pw_shadow_mid_color_hard">#1F000000</color>
+    <color name="pw_shadow_end_color_hard">#00000000</color>
+
+    <color name="pw_progress_line_color">#99ba0221</color>
+    <color name="pw_progress_ball_color">#be116784</color>
+    <color name="pw_progress_complete_color">#99FFFFFF</color>
+
+</resources>

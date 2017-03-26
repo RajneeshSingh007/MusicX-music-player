@@ -3,7 +3,6 @@ package com.rks.musicx.ui.adapters;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -16,10 +15,12 @@ import android.widget.TextView;
 
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Playlist;
+import com.rks.musicx.misc.utils.Extras;
 
-/**
- * Created by Andry on 29/10/15.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
+
 public class PlaylistListAdapter extends BaseRecyclerViewAdapter<Playlist, PlaylistListAdapter.PlaylistViewHolder> {
 
     public PlaylistListAdapter(@NonNull Context context) {
@@ -36,14 +37,14 @@ public class PlaylistListAdapter extends BaseRecyclerViewAdapter<Playlist, Playl
     public void onBindViewHolder(PlaylistViewHolder holder, int position) {
         Playlist playlist = getItem(position);
         holder.PlaylistName.setText(playlist.getName());
-        holder.deletePlaylist.setImageDrawable(ContextCompat.getDrawable(getContext(),R.drawable.ic_menu));
+        holder.deletePlaylist.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
         Drawable drawable = holder.deletePlaylist.getDrawable();
         drawable.mutate();
-        if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             drawable.setTint(Color.WHITE);
             holder.PlaylistName.setTextColor(Color.WHITE);
         } else {
-            drawable.setTint(ContextCompat.getColor(getContext(),R.color.MaterialGrey));
+            drawable.setTint(ContextCompat.getColor(getContext(), R.color.MaterialGrey));
         }
     }
 

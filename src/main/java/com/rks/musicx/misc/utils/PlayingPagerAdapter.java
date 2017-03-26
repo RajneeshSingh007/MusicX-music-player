@@ -6,15 +6,15 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-/**
- * Created by Coolalien on 11/25/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class PlayingPagerAdapter extends PagerAdapter {
 
     List<View> viewList;
 
-    public PlayingPagerAdapter(List<View> viewList){
+    public PlayingPagerAdapter(List<View> viewList) {
         this.viewList = viewList;
     }
 

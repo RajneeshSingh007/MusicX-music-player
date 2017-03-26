@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:id="@+id/tagView"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+              android:id="@+id/tagView"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
 
     <LinearLayout
@@ -21,14 +20,14 @@
             android:layout_weight="1"
             android:text="Track Title"
             android:textSize="14sp"
-             />
+            />
 
         <EditText
             android:id="@+id/title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:inputType="text" />
+            android:inputType="text"/>
     </LinearLayout>
 
     <LinearLayout
@@ -44,14 +43,14 @@
             android:layout_weight="1"
             android:text="Track Artist"
             android:textSize="14sp"
-             />
+            />
 
         <EditText
             android:id="@+id/artist"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:inputType="text" />
+            android:inputType="text"/>
     </LinearLayout>
 
     <LinearLayout
@@ -67,14 +66,14 @@
             android:layout_weight="1"
             android:text="Track Album"
             android:textSize="14sp"
-             />
+            />
 
         <EditText
             android:id="@+id/album"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:inputType="text" />
+            android:inputType="text"/>
     </LinearLayout>
 
     <LinearLayout
@@ -90,14 +89,14 @@
             android:layout_weight="1"
             android:text="Track Number"
             android:textSize="14sp"
-             />
+            />
 
         <EditText
             android:id="@+id/track_number"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:inputType="number" />
+            android:inputType="number"/>
     </LinearLayout>
 
 

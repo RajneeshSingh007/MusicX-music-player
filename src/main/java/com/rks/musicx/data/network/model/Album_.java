@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-/**
- * Created by Coolalien on 10/2/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
 public class Album_ {

@@ -10,10 +10,11 @@ import com.rks.musicx.ui.fragments.FourthIntro;
 import com.rks.musicx.ui.fragments.SecondIntro;
 import com.rks.musicx.ui.fragments.ThirdIntro;
 
-/**
- * Created by Coolalien on 7/7/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
-public class IntroActivity extends AppIntro{
+
+public class IntroActivity extends AppIntro {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,21 +30,22 @@ public class IntroActivity extends AppIntro{
         setFadeAnimation();
     }
 
-    private void loadMainActivity(){
+    private void loadMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
 
     @Override
     public void onSkipPressed() {
-        loadMainActivity();}
+        loadMainActivity();
+    }
 
     @Override
     public void onDonePressed() {
         loadMainActivity();
     }
 
-    public void getStarted(View v){
+    public void getStarted(View v) {
         loadMainActivity();
     }
 

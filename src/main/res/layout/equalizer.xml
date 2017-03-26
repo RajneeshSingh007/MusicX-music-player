@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,8 +14,8 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_weight="2">
+            android:layout_weight="2"
+            android:orientation="vertical">
 
             <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
                 android:layout_width="match_parent"
@@ -27,8 +27,13 @@
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:layout_marginTop="20dp"
+                    android:foregroundTint="?attr/accentColor"
+                    android:progressBackgroundTintMode="src_atop"
+                    android:progressTint="?attr/accentColor"
+                    android:progressTintMode="src_atop"
                     android:splitTrack="false"
                     android:thumb="@drawable/thumb"
+                    android:thumbTintMode="src_atop"
                     app:seekBarRotation="CW270"/>
             </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
 
@@ -36,19 +41,20 @@
                 android:id="@+id/level1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxLines="1"
-                app:textType="regular"
                 android:layout_gravity="center"
                 android:gravity="center"
+                android:maxLines="1"
+                android:text="level1"
                 android:textColor="@color/colorSecondaryText"
                 android:textSize="16sp"
-                android:text="level1"/>
+                app:textType="regular"/>
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_weight="2">
+            android:layout_weight="2"
+            android:orientation="vertical">
 
             <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
                 android:layout_width="match_parent"
@@ -60,28 +66,34 @@
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:layout_marginTop="20dp"
+                    android:foregroundTint="?attr/accentColor"
+                    android:progressBackgroundTintMode="src_atop"
+                    android:progressTint="?attr/accentColor"
+                    android:progressTintMode="src_atop"
                     android:splitTrack="false"
                     android:thumb="@drawable/thumb"
-                    app:seekBarRotation="CW270" />
+                    android:thumbTintMode="src_atop"
+                    app:seekBarRotation="CW270"/>
             </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
 
             <com.rks.musicx.misc.widgets.TextView
                 android:id="@+id/level2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxLines="1"
-                app:textType="regular"
                 android:layout_gravity="center"
                 android:gravity="center"
+                android:maxLines="1"
+                android:text="level1"
                 android:textColor="@color/colorSecondaryText"
                 android:textSize="16sp"
-                android:text="level1"/>
+                app:textType="regular"/>
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_weight="2">
+            android:layout_weight="2"
+            android:orientation="vertical">
 
             <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
                 android:layout_width="match_parent"
@@ -93,28 +105,34 @@
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:layout_marginTop="20dp"
-                    android:thumb="@drawable/thumb"
+                    android:foregroundTint="?attr/accentColor"
+                    android:progressBackgroundTintMode="src_atop"
+                    android:progressTint="?attr/accentColor"
+                    android:progressTintMode="src_atop"
                     android:splitTrack="false"
-                    app:seekBarRotation="CW270" />
+                    android:thumb="@drawable/thumb"
+                    android:thumbTintMode="src_atop"
+                    app:seekBarRotation="CW270"/>
             </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
 
             <com.rks.musicx.misc.widgets.TextView
                 android:id="@+id/level3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxLines="1"
-                app:textType="regular"
                 android:layout_gravity="center"
                 android:gravity="center"
+                android:maxLines="1"
+                android:text="level1"
                 android:textColor="@color/colorSecondaryText"
                 android:textSize="16sp"
-                android:text="level1"/>
+                app:textType="regular"/>
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_weight="2">
+            android:layout_weight="2"
+            android:orientation="vertical">
 
             <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
                 android:layout_width="match_parent"
@@ -126,27 +144,33 @@
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:layout_marginTop="20dp"
+                    android:foregroundTint="?attr/accentColor"
+                    android:progressBackgroundTintMode="src_atop"
+                    android:progressTint="?attr/accentColor"
+                    android:progressTintMode="src_atop"
                     android:splitTrack="false"
                     android:thumb="@drawable/thumb"
-                    app:seekBarRotation="CW270" />
+                    android:thumbTintMode="src_atop"
+                    app:seekBarRotation="CW270"/>
             </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
 
             <com.rks.musicx.misc.widgets.TextView
                 android:id="@+id/level4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxLines="1"
                 android:layout_gravity="center"
                 android:gravity="center"
-                app:textType="regular"
+                android:maxLines="1"
+                android:text="level1"
                 android:textColor="@color/colorSecondaryText"
                 android:textSize="16sp"
-                android:text="level1"/>
+                app:textType="regular"/>
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_weight="2"
             android:layout_height="match_parent"
+            android:layout_weight="2"
             android:orientation="vertical">
 
             <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
@@ -159,24 +183,28 @@
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:layout_marginTop="20dp"
+                    android:foregroundTint="?attr/accentColor"
+                    android:progressBackgroundTintMode="src_atop"
+                    android:progressTint="?attr/accentColor"
+                    android:progressTintMode="src_atop"
                     android:splitTrack="false"
                     android:thumb="@drawable/thumb"
-                    app:seekBarRotation="CW270" />
+                    android:thumbTintMode="src_atop"
+                    app:seekBarRotation="CW270"/>
             </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
 
             <com.rks.musicx.misc.widgets.TextView
                 android:id="@+id/level5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxLines="1"
                 android:layout_gravity="center"
                 android:gravity="center"
-                app:textType="regular"
+                android:maxLines="1"
+                android:text="level5"
                 android:textColor="@color/colorSecondaryText"
                 android:textSize="16sp"
-                android:text="level5"/>
+                app:textType="regular"/>
         </LinearLayout>
-
     </LinearLayout>
 
 </LinearLayout>

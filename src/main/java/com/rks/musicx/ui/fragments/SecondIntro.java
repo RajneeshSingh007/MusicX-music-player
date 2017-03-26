@@ -10,6 +10,10 @@ import android.view.ViewGroup;
 
 import com.rks.musicx.R;
 
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
+
 public class SecondIntro extends Fragment {
 
     @Override

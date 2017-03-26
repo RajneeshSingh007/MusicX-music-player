@@ -13,11 +13,11 @@ import com.kbeanie.imagechooser.api.ChosenImage;
 
 import java.io.File;
 
-/**
- * Created by Coolalien on 11/26/2016.
+/*
+ * Created by Coolalien on 6/28/2016.
  */
 
-public class updateAlbumCover extends AsyncTask<Void,Void,Void> {
+public class updateAlbumCover extends AsyncTask<Void, Void, Void> {
 
     private Uri albumCover;
     private ContentValues values;
@@ -26,7 +26,7 @@ public class updateAlbumCover extends AsyncTask<Void,Void,Void> {
     private ChosenImage path;
 
 
-    public updateAlbumCover(Context context,long albumId,ChosenImage path){
+    public updateAlbumCover(Context context, long albumId, ChosenImage path) {
         this.albumId = albumId;
         this.context = context;
         this.path = path;
@@ -47,17 +47,17 @@ public class updateAlbumCover extends AsyncTask<Void,Void,Void> {
     protected void onPostExecute(Void v) {
         super.onPostExecute(v);
         Uri newUri = context.getContentResolver().insert(albumCover, values);
-        if (newUri != null ){
+        if (newUri != null) {
             context.getContentResolver().insert(Uri.parse("content://media/external/audio/albumart"), values);
             File file = new File("content://media/external/audio/albumart");
-            Toast.makeText(context,"AlbumArt Changed", Toast.LENGTH_LONG).show();
-            Log.d("updateAlbumCover","success hurray !!!");
-            context.getContentResolver().notifyChange(albumCover,null);
+            Toast.makeText(context, "AlbumArt Changed", Toast.LENGTH_LONG).show();
+            Log.d("updateAlbumCover", "success hurray !!!");
+            context.getContentResolver().notifyChange(albumCover, null);
             context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
 
-        }else {
-           Toast.makeText(context,"AlbumArt Failed",Toast.LENGTH_LONG).show();
-            Log.d("updateAlbumCover","failed lol !!!");
+        } else {
+            Toast.makeText(context, "AlbumArt Failed", Toast.LENGTH_LONG).show();
+            Log.d("updateAlbumCover", "failed lol !!!");
         }
     }
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2" xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">MusicX</string>
     <string name="titles">Songs</string>
     <string name="albums">Albums</string>
@@ -99,9 +99,9 @@
     <string name="light_ui_modes">Light UI Modes</string>
     <string name="light_status_bar_mode">Light Status Bar Mode</string>
     <string name="light_toolbar_mode">Light Toolbar Mode</string>
-    <string name="save_headset_summary">Pause/Resume on headset plugged</string>
+    <string name="save_headset_summary">Pause on headset plugged</string>
     <string name="save_headset">Headset</string>
-    <string name="save_telephony_summary">Pause/Resume on PhoneCalls</string>
+    <string name="save_telephony_summary">Pause on PhoneCalls</string>
     <string name="save_telephony">PhoneCalls</string>
     <string name="metadata">MetaData</string>
     <string name="clear_favdb_summary">Clear Favorites Database</string>
@@ -109,7 +109,24 @@
     <string name="add_toFav">Add to fav</string>
     <string name="clear_recentplayeddb">Clear RecentPlayed Db</string>
     <string name="network">Network</string>
-    <string name="save_internet_summary">disable to auto download artist images,lyrics</string>
+    <string name="save_internet_summary">disable to auto download artist artwork,lyrics</string>
     <string name="save_internet">Save Internet Data</string>
-    <string name="appcr">©2016 MusicX.</string>
+    <string name="loudness">LOUDNESS</string>
+    <string name="Virtual">VIRTUAL</string>
+    <string name="Bass">BASS</string>
+    <string name="testerName">Aashish Shinde</string>
+    <string name="appcr">© 2017 MusicX.</string>
+    <string name="crash_toast_text">crash reported</string>
+    <string name="hide_notification">hide notification</string>
+    <string name="hide_notify">Notification</string>
+    <string name="hide_lockscreenMedia">hide lockscreen mediaplayer</string>
+    <string name="hide_lockscreen">Lockscreen</string>
+    <string name="Rate">Rate us</string>
+    <string name="restore_lastTab">Restore last Tab</string>
+    <string name="Tab">TabView</string>
+    <string name="folder">Folder</string>
+    <string name="reverb">Reverb</string>
+    <string name="hqartist_artwork">HQ ArtistArtwork</string>
+    <string name="hqartist_artwork_summary">enable to download high quality artist artwork</string>
+  <string name="writesetting">To write ringtone in settings</string>
 </resources>

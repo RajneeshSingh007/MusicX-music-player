@@ -1,5 +1,15 @@
 package com.rks.musicx.ui.activities;
 
+import static com.rks.musicx.misc.utils.Constants.DarkTheme;
+import static com.rks.musicx.misc.utils.Constants.ITEM_ADDED;
+import static com.rks.musicx.misc.utils.Constants.META_CHANGED;
+import static com.rks.musicx.misc.utils.Constants.ORDER_CHANGED;
+import static com.rks.musicx.misc.utils.Constants.OVERLAY_REQ;
+import static com.rks.musicx.misc.utils.Constants.PERMISSIONS_REQ;
+import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
+import static com.rks.musicx.misc.utils.Constants.POSITION_CHANGED;
+import static com.rks.musicx.misc.utils.Constants.WRITESETTINGS;
+
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -10,9 +20,12 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
 import android.support.design.widget.FloatingActionButton;
@@ -29,18 +42,21 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.misc.utils.ArtworkUtils;
+import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.MetaDatas;
 import com.rks.musicx.misc.utils.Sleeptimer;
 import com.rks.musicx.misc.utils.permissionManager;
@@ -50,20 +66,14 @@ import com.rks.musicx.services.MusicXService;
 import com.rks.musicx.services.PlayingRequestListerner;
 import com.rks.musicx.ui.fragments.FavFragment;
 import com.rks.musicx.ui.fragments.MainFragment;
-
 import java.util.List;
-
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-import static com.rks.musicx.misc.utils.Constants.DarkTheme;
-import static com.rks.musicx.misc.utils.Constants.ITEM_ADDED;
-import static com.rks.musicx.misc.utils.Constants.META_CHANGED;
-import static com.rks.musicx.misc.utils.Constants.ORDER_CHANGED;
-import static com.rks.musicx.misc.utils.Constants.PERMISSIONS_REQ;
-import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
-import static com.rks.musicx.misc.utils.Constants.POSITION_CHANGED;
+/*
+ * Created by Coolalien on 6/28/2016.
+ */
 
-public class MainActivity extends BaseActivity implements MetaDatas, ATEActivityThemeCustomizer, NavigationView.OnNavigationItemSelectedListener{
+public class MainActivity extends BaseActivity implements MetaDatas, ATEActivityThemeCustomizer, NavigationView.OnNavigationItemSelectedListener {
 
     private MusicXService musicXService;
     private int primarycolor, accentcolor;
@@ -80,8 +90,17 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     private TextView SongTitle, SongArtist;
     private RelativeLayout songDetail;
     private ImageView BackgroundArt;
-    RequestManager mRequestManager;
+    private RequestManager mRequestManager;
+    private Handler songProgressHandler = new Handler();
+    private Runnable mUpdateProgress = new Runnable() {
 
+        @Override
+        public void run() {
+            updateProgress();
+            songProgressHandler.postDelayed(mUpdateProgress, 1000);
+
+        }
+    };
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -100,7 +119,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
 
         }
     };
-
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
         @Override
@@ -117,28 +135,15 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         }
     };
 
-
-
-    /**
-     * Drawer Layout
-     * @return
-     */
     public DrawerLayout getDrawerLayout() {
         return mDrawerLayout;
     }
 
-    /**
-     * Layout
-     * @return
-     */
     @Override
     protected int setLayout() {
         return R.layout.activity_main;
     }
 
-    /**
-     * Ui
-     */
     @Override
     protected void setUi() {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -154,16 +159,14 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         BackgroundArt = (ImageView) findViewById(R.id.BackgroundArt);
     }
 
-    /**
-     * function
-     */
     @Override
     protected void function() {
-        fragmentLoader(setContainerId(),setFragment());
+        fragmentLoader(setContainerId(), setFragment());
         permissionManager.checkPermissions(MainActivity.this);
         permissionManager.widgetPermission(MainActivity.this);
+        permissionManager.settingPermission(MainActivity.this);
         ateKey = returnAteKey();
-        accentcolor = Config.accentColor(this,ateKey);
+        accentcolor = Config.accentColor(this, ateKey);
         primarycolor = Config.primaryColor(this, ateKey);
         if (mNavigationView != null) {
             mNavigationView.setNavigationItemSelectedListener(this);
@@ -186,57 +189,31 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         RelativeLayout logolayout = (RelativeLayout) mNavigationHeader.findViewById(R.id.logolayout);
         if (logolayout != null) {
             logolayout.setBackgroundColor(primarycolor);
-        }else {
+        } else {
             logolayout.setBackgroundColor(primarycolor);
         }
         mRequestManager = Glide.with(this);
     }
-
-    /**
-     * set fragment
-     * @return
-     */
     @Override
     protected Fragment setFragment() {
         return MainFragment.newInstance();
     }
 
-    /**
-     * ID
-     * @return
-     */
     @Override
     protected int setContainerId() {
         return R.id.container;
     }
 
-    /**
-     * Load Fragment
-     * @param ContainerId
-     * @param fragment
-     */
     @Override
     protected void fragmentLoader(int ContainerId, Fragment fragment) {
         super.fragmentLoader(ContainerId, fragment);
     }
 
-    /**
-     * Read Preferences
-     * @param spName
-     * @param key
-     * @return
-     */
     public int readSharedPreferenceInt(String spName, String key) {
         SharedPreferences sharedPreferences = getSharedPreferences(spName, Context.MODE_PRIVATE);
         return tempInt = sharedPreferences.getInt(key, 0);
     }
 
-    /**
-     * Write Prefernces
-     * @param ammount
-     * @param spName
-     * @param key
-     */
     public void writeSharedPreference(int ammount, String spName, String key) {
         SharedPreferences sharedPreferences = getSharedPreferences(spName, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -244,9 +221,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         editor.commit();
     }
 
-    /**
-     * Fav Fragment Loader
-     */
     public void showFavorites() {
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
         mNavigationView.getMenu().findItem(R.id.action_favorites).setChecked(true);
@@ -262,7 +236,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-       // getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -275,19 +248,13 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                 if (fm.getBackStackEntryCount() > 0) {
                     fm.popBackStack();
                 } else {
-                    fragmentLoader(setContainerId(),setFragment());
+                    fragmentLoader(setContainerId(), setFragment());
                 }
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-
-    /**
-     * Song Selection with metadata
-     * @param songList
-     * @param pos
-     */
     @Override
     public void onSongSelected(List<Song> songList, int pos) {
         if (musicXService == null) {
@@ -296,11 +263,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         musicXService.setPlaylist(songList, pos, true);
     }
 
-    /**
-     * On Shuffle Selection
-     * @param songList
-     * @param play
-     */
     @Override
     public void onShuffleRequested(List<Song> songList, boolean play) {
         if (musicXService == null) {
@@ -309,21 +271,13 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         musicXService.setPlaylistandShufle(songList, play);
     }
 
-    /**
-     * Add to Queue
-     * @param song
-     */
     @Override
     public void addToQueue(Song song) {
-        if (musicXService != null){
+        if (musicXService != null) {
             musicXService.addToQueue(song);
         }
     }
 
-    /**
-     * Set as Next Song
-     * @param song
-     */
     @Override
     public void setAsNextTrack(Song song) {
         if (musicXService != null) {
@@ -331,12 +285,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         }
     }
 
-    /**
-     * Permission Resultsa
-     * @param requestCode
-     * @param permissions
-     * @param grantResults
-     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -349,19 +297,36 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         }
     }
 
-    /**
-     * Update progress
-     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == OVERLAY_REQ) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (Settings.canDrawOverlays(this)) {
+                    Log.d("MainActivity", "Granted");
+                } else {
+                    Log.d("MainActivity", "Denied or Grant permission Manually");
+                }
+            }
+        }
+        if (requestCode == WRITESETTINGS){
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.System.canWrite(this)) {
+              Log.d("MainActivity", "Granted");
+            } else {
+              Log.d("MainActivity", "Denied or Grant permission Manually");
+            }
+          }
+        }
+    }
+
     private void updateProgress() {
-        if (musicXService !=null){
+        if (musicXService != null) {
             int pos = musicXService.getPlayerPos();
             songProgress.setProgressWithAnim(pos);
         }
     }
 
-    /**
-     * onPause
-     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -371,16 +336,11 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             mService = false;
             unregisterReceiver(broadcastReceiver);
         }
-        musicXService.setState(this,true);
     }
 
-    /**
-     * onResume
-     */
     @Override
     protected void onResume() {
         super.onResume();
-        musicXService.setState(this,true);
         if (!mService) {
             mServiceIntent = new Intent(this, MusicXService.class);
             bindService(mServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -391,7 +351,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             filter.addAction(POSITION_CHANGED);
             filter.addAction(ITEM_ADDED);
             filter.addAction(ORDER_CHANGED);
-            registerReceiver(broadcastReceiver,filter);
+            registerReceiver(broadcastReceiver, filter);
         } else {
             if (musicXService != null) {
                 MiniPlayerUpdate();
@@ -400,13 +360,11 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         Glide.get(this).clearMemory();
     }
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Glide.get(this).clearMemory();
     }
-
 
     @Override
     public String returnAteKey() {
@@ -421,13 +379,10 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                 R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
     }
 
-
-    /**
-     * Load Fragment
-     */
-    public void libraryLoader(){
-        fragmentLoader(setContainerId(),setFragment());
+    public void libraryLoader() {
+        fragmentLoader(setContainerId(), setFragment());
     }
+
     /*
      NavigationView Selection
      */
@@ -451,11 +406,8 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                             Sleeptimer.showTimerInfo(MainActivity.this);
                         }
                         break;
-                   // case R.id.action_folder:
-                   //     setFragment(FolderFragment.newInstance());
-                     //   break;
                     case R.id.action_eq:
-                        Intent intents = new Intent(MainActivity.this,EqualizerActivity.class);
+                        Intent intents = new Intent(MainActivity.this, EqualizerActivity.class);
                         startActivity(intents);
                         break;
                     case R.id.action_settings:
@@ -469,9 +421,12 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                     case R.id.shares:
                         Intent intent = new Intent(Intent.ACTION_SEND);
                         intent.setAction(Intent.ACTION_SEND);
-                        intent.putExtra(Intent.EXTRA_TEXT,"Hey check out my app at: https://play.google.com/store/apps/details?id=com.rks.musicx");
+                        intent.putExtra(Intent.EXTRA_TEXT, "Hey check out my app at: https://play.google.com/store/apps/details?id=com.rks.musicx");
                         intent.setType("text/plain");
-                        startActivity(Intent.createChooser(intent,getString(R.string.Shares)));
+                        startActivity(Intent.createChooser(intent, getString(R.string.Shares)));
+                        break;
+                    case R.id.rateus:
+                        Helper.showRateDialog(MainActivity.this);
                         break;
 
                 }
@@ -480,25 +435,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         return true;
     }
 
-    Handler songProgressHandler = new Handler();
-
-    /**
-     * UpdateProgress
-     */
-    private Runnable mUpdateProgress = new Runnable() {
-
-        @Override
-        public void run() {
-            updateProgress();
-            songProgressHandler.postDelayed(mUpdateProgress, 1000);
-
-        }
-    };
-
-    /**
-     * BackgroundArt
-     */
-    private void backgroundArt(){
+    private void backgroundArt() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -509,24 +446,62 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                         .placeholder(R.mipmap.ic_launcher)
                         .error(R.mipmap.ic_launcher)
                         .format(DecodeFormat.PREFER_ARGB_8888)
-                        .override(300,300)
-                        .into(new SimpleTarget<Bitmap>() {
+                        .override(300, 300)
+                        .into(new Target<Bitmap>() {
+                            @Override
+                            public void onStart() {
+
+                            }
+
+                            @Override
+                            public void onStop() {
+
+                            }
+
+                            @Override
+                            public void onDestroy() {
+
+                            }
+
+                            @Override
+                            public void onLoadStarted(Drawable placeholder) {
+
+                            }
+
+                            @Override
+                            public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                new BlurArtwork(MainActivity.this, 25, ArtworkUtils.drawableToBitmap(errorDrawable), BackgroundArt).execute("");
+                            }
+
                             @Override
                             public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                                if (resource != null){
-                                    ArtworkUtils.blurPreferances(MainActivity.this,resource,BackgroundArt);
-                                }else {
-                                    new BlurArtwork(MainActivity.this,25,ArtworkUtils.getDefaultArtwork(MainActivity.this),BackgroundArt).execute("");
-                                }
+                                ArtworkUtils.blurPreferances(MainActivity.this, resource, BackgroundArt);
+                            }
+
+                            @Override
+                            public void onLoadCleared(Drawable placeholder) {
+
+                            }
+
+                            @Override
+                            public void getSize(SizeReadyCallback cb) {
+
+                            }
+
+                            @Override
+                            public Request getRequest() {
+                                return null;
+                            }
+
+                            @Override
+                            public void setRequest(Request request) {
+
                             }
                         });
             }
         });
     }
 
-    /**
-     * MiniPlayer View
-     */
     private void miniplayerview() {
         if (musicXService != null) {
             String title = musicXService.getsongTitle();
@@ -541,12 +516,12 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                 updateProgress();
             }
             backgroundArt();
-            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)) {
+            if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
                 SongTitle.setTextColor(Color.WHITE);
-                SongArtist.setTextColor(ContextCompat.getColor(this,R.color.darkthemeTextColor));
+                SongArtist.setTextColor(ContextCompat.getColor(this, R.color.darkthemeTextColor));
                 songProgress.setDefaultProgressColor(accentcolor);
                 songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
-            }else {
+            } else {
                 SongTitle.setTextColor(Color.WHITE);
                 SongArtist.setTextColor(Color.LTGRAY);
                 songProgress.setDefaultProgressColor(accentcolor);
@@ -555,10 +530,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         }
     }
 
-    /**
-     * MiniPlayer Update
-     */
-    private  void MiniPlayerUpdate(){
+    private void MiniPlayerUpdate() {
         miniplayerview();
         playpausetoggle();
         if (musicXService.isPlaying()) {
@@ -566,29 +538,23 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         }
     }
 
-    /**
-     * play/pause FAB
-     */
     private void playpausetoggle() {
         if (musicXService != null) {
             if (musicXService.isPlaying()) {
-                playToggle.setImageDrawable(ContextCompat.getDrawable(MainActivity.this,R.drawable.aw_ic_pause));
+                playToggle.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.aw_ic_pause));
             } else {
-                playToggle.setImageDrawable(ContextCompat.getDrawable(MainActivity.this,R.drawable.aw_ic_play));
+                playToggle.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.aw_ic_play));
             }
         }
 
     }
 
 
-    /**
-     * update toggles,progress
-     */
-    private void updateconfig(){
+    private void updateconfig() {
         playpausetoggle();
         if (musicXService.isPlaying()) {
             songProgressHandler.post(mUpdateProgress);
-        }else {
+        } else {
             songProgressHandler.removeCallbacks(mUpdateProgress);
         }
     }
@@ -597,5 +563,4 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
-
 }
