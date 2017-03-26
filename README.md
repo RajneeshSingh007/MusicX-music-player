@@ -87,6 +87,15 @@ Special thanks to api provided by Last.fm (Artist Image) & https://api.vagalume.
     <li>
         <a href= "https://github.com/harjot-oberai/Croller"><b>Croller</b></a>
     </li>
+    <li>
+        <a href="https://github.com/HudsonAndroid/CircleVisualizerFFTView"><b>CircleVisualizerFFTView</b></a>
+    </li>
+    <li>
+        <a href="https://github.com/amitshekhariitbhu/Fast-Android-Networking"><b>Fast Networking</b></a>
+    </li>
+    <li>
+        <a href="https://github.com/codekidX/storage-chooser"><b>Directory Chooser</b></a>
+    </li>
  </ul>
 If forgot any other license author,feel free to mail me @developerrajneeshsingh@gmail.com.
  </p>
