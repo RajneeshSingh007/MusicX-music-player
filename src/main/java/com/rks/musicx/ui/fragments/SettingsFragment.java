@@ -175,11 +175,11 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
           StorageChooser chooser = new StorageChooser.Builder()
               .withActivity((SettingsActivity) getActivity())
               .withFragmentManager(((SettingsActivity) getActivity()).getSupportFragmentManager())
-              .allowCustomPath(false)
+              .allowCustomPath(true)
               .allowAddFolder(false)
               .setDialogTitle("Directory Chooser")
               .setType(StorageChooser.DIRECTORY_CHOOSER)
-              .skipOverview(true)
+              .skipOverview(false)
               .showHidden(false)
               .build();
           chooser.show();

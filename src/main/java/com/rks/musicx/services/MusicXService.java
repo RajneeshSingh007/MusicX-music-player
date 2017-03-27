@@ -66,6 +66,7 @@ import android.support.v7.graphics.Palette;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import com.afollestad.appthemeengine.Config;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -172,6 +173,13 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
           if (isPlaying()) {
             MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.1f, 0.1f);
+          }
+          if (!(audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION) == 0)){
+            if (isPlaying()) {
+              MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(0.1f, 0.1f);
+            }else {
+              MediaPlayerSingleton.getInstance().getMediaPlayer().setVolume(1.0f, 1.0f);
+            }
           }
           break;
         case AudioManager.AUDIOFOCUS_LOSS:
@@ -959,6 +967,25 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
       public void onSeekTo(long pos) {
         seekto((int) pos);
       }
+
+      @Override
+      public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
+        String action = mediaButtonEvent.getAction();
+        if (Intent.ACTION_MEDIA_BUTTON.equals(action)){
+          KeyEvent keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+          int keycode = keyEvent.getKeyCode();
+          if (keycode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE){
+              toggle();
+          }else if (keycode == KeyEvent.KEYCODE_MEDIA_NEXT){
+            playnext(true);
+          }else if (keycode == KeyEvent.KEYCODE_MEDIA_PREVIOUS){
+            playprev(true);
+          }else {
+            Log.d(TAG, "Error");
+          }
+        }
+        return true;
+      }
     });
   }
 
@@ -971,14 +998,14 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
     if (update.equals(PLAYSTATE_CHANGED)) {
 
-      int playState =
-          isPlaying() ? PlaybackStateCompat.STATE_PLAYING : PlaybackStateCompat.STATE_PAUSED;
+      int playState = isPlaying() ? PlaybackStateCompat.STATE_PLAYING : PlaybackStateCompat.STATE_PAUSED;
       mediaSessionLockscreen.setPlaybackState(new PlaybackStateCompat.Builder()
           .setState(playState, getPlayerPos(), 1.0F)
           .setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PAUSE
               | PlaybackStateCompat.ACTION_PLAY_PAUSE |
               PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
           .build());
+      mediaSessionLockscreen.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
     }
     if (update.equals(META_CHANGED)) {
       MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder()
@@ -1199,7 +1226,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
   public void setSongID(long songID) {
     this.songID = songID;
-  }
+  };
 
   public MediaSessionCompat getMediaSession() {
     return mediaSessionLockscreen;
@@ -1284,6 +1311,4 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
       return MusicXService.this;
     }
   }
-
-
 }
