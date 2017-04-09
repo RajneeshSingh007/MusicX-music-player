@@ -95,6 +95,7 @@ public class SongGridFragment extends miniFragment implements SearchView.OnQuery
         }
     };
 
+
     public static SongGridFragment newInstance(int pos) {
         Extras.getInstance().setTabIndex(pos);
         return new SongGridFragment();
@@ -172,7 +173,6 @@ public class SongGridFragment extends miniFragment implements SearchView.OnQuery
                 extras.setSongSortOrder(SortOrder.SongSortOrder.SONG_DATE);
                 load();
                 break;
-
 
         }
         return super.onOptionsItemSelected(item);

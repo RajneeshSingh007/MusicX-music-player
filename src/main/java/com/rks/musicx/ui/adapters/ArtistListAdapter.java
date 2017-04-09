@@ -9,7 +9,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,16 +20,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.afollestad.appthemeengine.Config;
-import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.common.Priority;
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.DownloadListener;
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Artist;
-import com.rks.musicx.data.network.LastFmClients;
-import com.rks.musicx.data.network.LastFmServices;
-import com.rks.musicx.data.network.model.Artist__;
-import com.rks.musicx.data.network.model.Image_;
+import com.rks.musicx.data.network.ArtistArtwork;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
@@ -39,14 +31,8 @@ import com.rks.musicx.misc.widgets.CircleImageView;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 
 /*
@@ -59,11 +45,6 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
     private Interpolator interpolator = new LinearInterpolator();
     private int lastpos = -1;
     private int duration = 300;
-    private Call<com.rks.musicx.data.network.model.Artist> artistCall;
-    private LastFmClients lastFmClients;
-    private LastFmServices lastFmServices;
-    private InputStream inputStream;
-    private OutputStream outputStream;
     private ValueAnimator colorAnimation;
 
     public ArtistListAdapter(@NonNull Context context) {
@@ -83,8 +64,6 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
     @Override
     public void onBindViewHolder(ArtistViewHolder holder, int position) {
         Artist artists = getItem(position);
-        lastFmClients = new LastFmClients(getContext());
-        lastFmServices = lastFmClients.createService(LastFmServices.class);
         if (layoutID == R.layout.item_grid_view) {
             int pos = holder.getAdapterPosition();
             if (lastpos < pos) {
@@ -96,76 +75,13 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
             holder.ArtistName.setText(getContext().getResources().getQuantityString(R.plurals.albums_count, artists.getAlbumCount(), artists.getAlbumCount()));
             holder.AlbumCount.setText(artists.getName());
             if (!Extras.getInstance().saveData()) {
-                artistCall = lastFmServices.getartist(artists.getName());
-                artistCall.enqueue(new Callback<com.rks.musicx.data.network.model.Artist>() {
-                    @Override
-                    public void onResponse(Call<com.rks.musicx.data.network.model.Artist> call, Response<com.rks.musicx.data.network.model.Artist> response) {
-                        com.rks.musicx.data.network.model.Artist getartist = response.body();
-                        if (response.isSuccessful() && getartist != null) {
-                            final Artist__ artist1 = getartist.getArtist();
-                            if (artist1 != null && artist1.getImage() != null && artist1.getImage().size() > 0) {
-                                String artistImagePath = new Helper(getContext()).loadArtistImage(artists.getName());
-                                File file = new File(artistImagePath);
-                                for (Image_ artistArtwork : artist1.getImage()) {
-                                    if (Extras.getInstance().hqArtistArtwork()) {
-                                        if (file.exists()) {
-                                            AndroidNetworking.delete(file.getAbsolutePath());
-                                        }
-                                        AndroidNetworking.download(artworkQuality(artistArtwork), new Helper(getContext()).getArtistArtworkLocation(), artists.getName() + ".jpeg")
-                                                .setTag("DownloadingArtistImage")
-                                                .setPriority(Priority.MEDIUM)
-                                                .build()
-                                                .startDownload(new DownloadListener() {
-                                                    @Override
-                                                    public void onDownloadComplete() {
-                                                        Log.d("Artist", "successfully downloaded");
-                                                    }
-
-                                                    @Override
-                                                    public void onError(ANError anError) {
-                                                        Log.d("Artist", "failed");
-                                                    }
-                                                });
-
-                                    } else {
-                                        if (file.exists()) {
-                                            AndroidNetworking.delete(file.getAbsolutePath());
-                                        }
-                                        AndroidNetworking.download(artworkQuality(artistArtwork), new Helper(getContext()).getArtistArtworkLocation(), artists.getName() + ".jpeg")
-                                                .setTag("DownloadingArtistImage")
-                                                .setPriority(Priority.MEDIUM)
-                                                .build()
-                                                .startDownload(new DownloadListener() {
-                                                    @Override
-                                                    public void onDownloadComplete() {
-                                                        Log.d("Artist", "successfully downloaded");
-                                                    }
-
-                                                    @Override
-                                                    public void onError(ANError anError) {
-                                                        Log.d("Artist", "failed");
-                                                    }
-                                                });
-                                    }
-                                }
-                            } else {
-                                Log.d("haha", "downloading failed");
-                            }
-                        } else {
-                            Log.d("haha", "downloading failed");
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<com.rks.musicx.data.network.model.Artist> call, Throwable t) {
-                        Log.d("ArtistAdapter", "error", t);
-                    }
-                });
+                ArtistArtwork artistArtwork = new ArtistArtwork(getContext(), artists.getName());
+                artistArtwork.execute();
             }
             String artistImagePath = new Helper(getContext()).loadArtistImage(artists.getName());
             File file = new File(artistImagePath);
             if (file.exists()) {
-                ArtworkUtils.ArtworkLoaderPalette(getContext(), artists.getName(), file.getAbsolutePath(), holder.ArtistsArtwork, new palette() {
+                ArtworkUtils.ArtworkLoaderPalette(getContext(), file.getAbsolutePath(), holder.ArtistsArtwork, new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         final int[] colors = getAvailableColor(palette);
@@ -184,71 +100,8 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
             holder.ArtistListName.setText(artists.getName());
             holder.ArtistListAlbumCount.setText(getContext().getResources().getQuantityString(R.plurals.albums_count, artists.getAlbumCount(), artists.getAlbumCount()));
             if (!Extras.getInstance().saveData()) {
-                artistCall = lastFmServices.getartist(artists.getName());
-                artistCall.enqueue(new Callback<com.rks.musicx.data.network.model.Artist>() {
-                    @Override
-                    public void onResponse(Call<com.rks.musicx.data.network.model.Artist> call, Response<com.rks.musicx.data.network.model.Artist> response) {
-                        com.rks.musicx.data.network.model.Artist getartist = response.body();
-                        if (response.isSuccessful() && getartist != null) {
-                            final Artist__ artist1 = getartist.getArtist();
-                            if (artist1 != null && artist1.getImage() != null && artist1.getImage().size() > 0) {
-                                String artistImagePath = new Helper(getContext()).loadArtistImage(artists.getName());
-                                File file = new File(artistImagePath);
-                                for (Image_ artistArtwork : artist1.getImage()) {
-                                    if (Extras.getInstance().hqArtistArtwork()) {
-                                        if (file.exists()) {
-                                            AndroidNetworking.delete(file.getAbsolutePath());
-                                        }
-                                        AndroidNetworking.download(artworkQuality(artistArtwork), new Helper(getContext()).getArtistArtworkLocation(), artists.getName() + ".jpeg")
-                                                .setTag("DownloadingArtistImage")
-                                                .setPriority(Priority.MEDIUM)
-                                                .build()
-                                                .startDownload(new DownloadListener() {
-                                                    @Override
-                                                    public void onDownloadComplete() {
-                                                        Log.d("Artist", "successfully downloaded");
-                                                    }
-
-                                                    @Override
-                                                    public void onError(ANError anError) {
-                                                        Log.d("Artist", "failed");
-                                                    }
-                                                });
-
-                                    } else {
-                                        if (file.exists()) {
-                                            AndroidNetworking.delete(file.getAbsolutePath());
-                                        }
-                                        AndroidNetworking.download(artworkQuality(artistArtwork), new Helper(getContext()).getArtistArtworkLocation(), artists.getName() + ".jpeg")
-                                                .setTag("DownloadingArtistImage")
-                                                .setPriority(Priority.MEDIUM)
-                                                .build()
-                                                .startDownload(new DownloadListener() {
-                                                    @Override
-                                                    public void onDownloadComplete() {
-                                                        Log.d("Artist", "successfully downloaded");
-                                                    }
-
-                                                    @Override
-                                                    public void onError(ANError anError) {
-                                                        Log.d("Artist", "failed");
-                                                    }
-                                                });
-                                    }
-                                }
-                            } else {
-                                Log.d("haha", "downloading failed");
-                            }
-                        } else {
-                            Log.d("haha", "downloading failed");
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<com.rks.musicx.data.network.model.Artist> call, Throwable t) {
-                        Log.d("ArtistAdapter", "error", t);
-                    }
-                });
+                ArtistArtwork artistArtwork = new ArtistArtwork(getContext(), artists.getName());
+                artistArtwork.execute();
             }
             String artistImagePath = new Helper(getContext()).loadArtistImage(artists.getName());
             File file = new File(artistImagePath);
@@ -263,21 +116,6 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
             }
         }
 
-    }
-
-    public String artworkQuality(Image_ artistArtwork) {
-        if (artistArtwork.getSize().equals("large")) {
-            return artistArtwork.getText();
-        } else if (artistArtwork.getSize().equals("mega")) {
-            return artistArtwork.getText();
-        } else {
-            return artistArtwork.getText();
-        }
-    }
-
-    @Override
-    public Artist getItem(int position) throws ArrayIndexOutOfBoundsException {
-        return super.getItem(position);
     }
 
     @NonNull
@@ -308,7 +146,6 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
 
     private ValueAnimator setAnimator(int colorFrom, int colorTo) {
         ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-        long duration = 800;
         colorAnimation.setDuration(duration);
         return colorAnimation;
     }

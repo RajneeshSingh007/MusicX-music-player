@@ -118,6 +118,8 @@ public final class SortOrder {
         /* Artist album sort order year */
         String ALBUM_YEAR = MediaStore.Audio.Artists.Albums.FIRST_YEAR
                 + " DESC";
+
+        String ALBUM_YEAR_LAST = MediaStore.Audio.Artists.Albums.LAST_YEAR + " ASC";
     }
 
 }

@@ -1,13 +1,13 @@
 package com.rks.musicx.data.eq;
 
-import static com.rks.musicx.misc.utils.Constants.VIRTUAL_BOOST;
-import static com.rks.musicx.misc.utils.Constants.VIRTUAL_ENABLED;
-import static com.rks.musicx.misc.utils.Constants.Virtualizer_STRENGTH;
-
 import android.content.SharedPreferences;
 import android.media.audiofx.Virtualizer;
 import android.util.Log;
+
 import com.rks.musicx.misc.utils.Extras;
+
+import static com.rks.musicx.misc.utils.Constants.VIRTUAL_BOOST;
+import static com.rks.musicx.misc.utils.Constants.Virtualizer_STRENGTH;
 
 /*
  * Created by Coolalien on 06/01/2017.
@@ -16,7 +16,6 @@ import com.rks.musicx.misc.utils.Extras;
 public class Virtualizers {
 
     private static Virtualizer virtualizer = null;
-    private static boolean venabled;
     private static short virtualstr;
 
     public Virtualizers() {
@@ -29,6 +28,10 @@ public class Virtualizers {
         EndVirtual();
         try {
             virtualizer = new Virtualizer(0, audioID);
+            short str = (short) Extras.getInstance().saveEq().getInt(VIRTUAL_BOOST, 0);
+            if (str != 0){
+                virtualizer.setStrength(str);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -61,12 +64,10 @@ public class Virtualizers {
         if (virtualizer != null) {
             virtualizer.release();
             virtualizer = null;
-            venabled = false;
         }
     }
 
     public static void initVirtualBoostValues() {
-        venabled = Extras.getInstance().saveEq().getBoolean(VIRTUAL_ENABLED, false);
         virtualstr = (short) Extras.getInstance().saveEq().getInt(VIRTUAL_BOOST, 0);
     }
 
@@ -75,9 +76,7 @@ public class Virtualizers {
             return;
         }
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
-        editor.putBoolean(VIRTUAL_ENABLED, isEnabled());
-        short str = getVirtualStrength() == 0 ? 0 : getVirtualStrength();
-        editor.putInt(VIRTUAL_BOOST, str);
+        editor.putInt(VIRTUAL_BOOST, virtualstr);
         editor.apply();
     }
 
@@ -85,14 +84,10 @@ public class Virtualizers {
         return virtualstr;
     }
 
-    public static boolean isEnabled() {
-        return venabled;
-    }
 
-    public static void setEnabled(boolean enabled1) {
-        venabled = enabled1;
+    public static void setEnabled(boolean enabled) {
         if (virtualizer != null) {
-            virtualizer.setEnabled(venabled);
+            virtualizer.setEnabled(enabled);
         }
     }
 }

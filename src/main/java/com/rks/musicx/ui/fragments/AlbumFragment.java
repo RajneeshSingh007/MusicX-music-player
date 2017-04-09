@@ -140,8 +140,7 @@ public class AlbumFragment extends Fragment implements LoaderManager.LoaderCallb
         AlbumCover();
         loadTrak();
         helper = new Helper(getContext());
-        String atekey = ((MainActivity) getActivity()).returnAteKey();
-        int colorAccent = Config.accentColor(getContext(), atekey);
+        int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
         rv.setPopupBgColor(colorAccent);
         if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             getActivity().getWindow().setStatusBarColor(colorAccent);

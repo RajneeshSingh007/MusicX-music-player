@@ -128,5 +128,5 @@
     <string name="reverb">Reverb</string>
     <string name="hqartist_artwork">HQ ArtistArtwork</string>
     <string name="hqartist_artwork_summary">enable to download high quality artist artwork</string>
-  <string name="writesetting">To write ringtone in settings</string>
+    <string name="writesetting">To write ringtone in settings</string>
 </resources>

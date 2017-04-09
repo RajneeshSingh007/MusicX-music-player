@@ -2,7 +2,7 @@
 <resources>
     <color name="translucent_white_8p">#20ffffff</color>
     <color name="bgcolor">#96000000</color>
-    <color name="default_artwork_bg">#212121</color>
+    <color name="default_artwork_bg">#00212121</color>
     <color name="white">#ffffff</color>
     <color name="colorPrimary">#c62828</color>
     <color name="colorPrimaryLight">#c62828</color>

@@ -3,6 +3,9 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context=".ui.activities.MainActivity">
 
+    <item android:id="@+id/clear_queue"
+        android:title="Clear Queue"/>
+
     <item
         android:id="@+id/action_eq"
         android:title="Equalizer"

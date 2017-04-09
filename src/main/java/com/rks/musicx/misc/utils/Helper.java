@@ -1,14 +1,5 @@
 package com.rks.musicx.misc.utils;
 
-import static com.rks.musicx.R.id.artist;
-import static com.rks.musicx.R.string.file_size;
-import static com.rks.musicx.misc.utils.Constants.DarkTheme;
-import static com.rks.musicx.misc.utils.Constants.LightTheme;
-import static com.rks.musicx.misc.utils.Constants.SONG_ALBUM;
-import static com.rks.musicx.misc.utils.Constants.SONG_ARTIST;
-import static com.rks.musicx.misc.utils.Constants.SONG_TITLE;
-import static com.rks.musicx.misc.utils.Constants.SONG_TRACK_NUMBER;
-
 import android.animation.Animator;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
@@ -21,11 +12,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.media.MediaScannerConnection;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -55,10 +48,10 @@ import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.webkit.WebView;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -73,25 +66,42 @@ import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.rks.musicx.ui.fragments.FavFragment;
 import com.rks.musicx.ui.fragments.PlayListPicker;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.rks.musicx.ui.fragments.TagEditorFragment;
+
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.CannotWriteException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.FieldDataInvalidException;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
+import org.jaudiotagger.tag.id3.ID3v24Tag;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static android.graphics.Paint.ANTI_ALIAS_FLAG;
+import static com.rks.musicx.R.string.file_size;
+import static com.rks.musicx.misc.utils.Constants.DarkTheme;
+import static com.rks.musicx.misc.utils.Constants.LightTheme;
+import static com.rks.musicx.misc.utils.Constants.SONG_ALBUM;
+import static com.rks.musicx.misc.utils.Constants.SONG_ARTIST;
+import static com.rks.musicx.misc.utils.Constants.SONG_TITLE;
+import static com.rks.musicx.misc.utils.Constants.SONG_TRACK_NUMBER;
+import static com.rks.musicx.misc.utils.Constants.SONG_YEAR;
 
 /*
  * Created by Coolalien on 24/03/2017.
@@ -99,7 +109,6 @@ import org.jaudiotagger.tag.TagException;
 
 public class Helper {
 
-  EditText mTitleEditText, mArtistEditText, mAlbumEditText, mTrackEditText;
   private Context context;
   private ValueAnimator colorAnimation;
 
@@ -269,17 +278,16 @@ public class Helper {
     String newTitle = tags.get(SONG_TITLE) == null ? song.getTitle() : tags.get(SONG_TITLE);
     String newArtist = tags.get(SONG_ARTIST) == null ? song.getArtist() : tags.get(SONG_ARTIST);
     String newAlbum = tags.get(SONG_ALBUM) == null ? song.getAlbum() : tags.get(SONG_ALBUM);
-    String newTrackNumber =
-        tags.get(SONG_TRACK_NUMBER) == null ? String.valueOf(song.getTrackNumber())
-            : tags.get(SONG_TRACK_NUMBER);
-    Uri songUri = ContentUris
-        .withAppendedId(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, song.getId());
+    String newTrackNumber = tags.get(SONG_TRACK_NUMBER) == null ? String.valueOf(song.getTrackNumber()) : tags.get(SONG_TRACK_NUMBER);
+    String newyear = tags.get(SONG_YEAR) == null ? null : tags.get(SONG_YEAR);
+    Uri songUri = ContentUris.withAppendedId(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, song.getId());
 
     File f = new File(getRealPathFromUri(context, songUri));
 
     AudioFile audioFile = new AudioFile();
     try {
       audioFile = AudioFileIO.read(f);
+      audioFile.setTag(new ID3v24Tag());
     } catch (CannotReadException e) {
       e.printStackTrace();
     } catch (IOException e) {
@@ -307,7 +315,8 @@ public class Helper {
       if (!song.getTitle().equals(newTitle)) {
         try {
           tag.setField(FieldKey.TITLE, newTitle);
-        } catch (FieldDataInvalidException e) {
+          audioFile.commit();
+        } catch (FieldDataInvalidException | CannotWriteException e) {
           e.printStackTrace();
         }
 
@@ -315,10 +324,23 @@ public class Helper {
         Log.d("tag", "title");
 
       }
+      if (!song.getYear().equals(newyear)) {
+        try {
+          tag.setField(FieldKey.YEAR, newyear);
+          audioFile.commit();
+        } catch (FieldDataInvalidException | CannotWriteException e) {
+          e.printStackTrace();
+        }
+        values.put(Media.YEAR, newyear);
+        Log.d("tag", "title");
+      }
       if (!song.getArtist().equals(newArtist)) {
         try {
           tag.setField(FieldKey.ARTIST, newArtist);
+          audioFile.commit();
         } catch (FieldDataInvalidException e) {
+          e.printStackTrace();
+        } catch (CannotWriteException e) {
           e.printStackTrace();
         }
 
@@ -329,15 +351,18 @@ public class Helper {
       if (!song.getAlbum().equals(newAlbum)) {
         try {
           tag.setField(FieldKey.ALBUM, newAlbum);
+          audioFile.commit();
         } catch (FieldDataInvalidException e) {
+          e.printStackTrace();
+        } catch (CannotWriteException e) {
           e.printStackTrace();
         }
 
         Cursor cursor = context.getContentResolver()
-            .query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, new String[]{BaseColumns._ID,
-                    MediaStore.Audio.AlbumColumns.ALBUM, MediaStore.Audio.AlbumColumns.ALBUM_KEY,
-                    MediaStore.Audio.AlbumColumns.ARTIST}, MediaStore.Audio.AlbumColumns.ALBUM + " = ?",
-                new String[]{newAlbum}, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+                .query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, new String[]{BaseColumns._ID,
+                                MediaStore.Audio.AlbumColumns.ALBUM, MediaStore.Audio.AlbumColumns.ALBUM_KEY,
+                                MediaStore.Audio.AlbumColumns.ARTIST}, MediaStore.Audio.AlbumColumns.ALBUM + " = ?",
+                        new String[]{newAlbum}, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
 
         if (cursor != null && cursor.moveToFirst()) {
 
@@ -362,7 +387,10 @@ public class Helper {
       if (!String.valueOf(song.getTrackNumber()).equals(newTrackNumber)) {
         try {
           tag.setField(FieldKey.TRACK, newTrackNumber);
+          audioFile.commit();
         } catch (FieldDataInvalidException e) {
+          e.printStackTrace();
+        } catch (CannotWriteException e) {
           e.printStackTrace();
         }
 
@@ -371,14 +399,13 @@ public class Helper {
       if (values.size() > 0) {
 
         context.getContentResolver().update(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values,
-            MediaStore.Audio.Media._ID + "=" + song.getId(), null);
+                MediaStore.Audio.Media._ID + "=" + song.getId(), null);
       }
       return true;
     }
 
     return false;
   }
-
   /**
    * Translation
    */
@@ -423,35 +450,37 @@ public class Helper {
   }
 
   /**
-   * Search lyrics
+   * String Filters
+   * @param str
+   * @return
    */
-  public static void searchLyrics(Context context, String title, String artist,
-      TextView setlyrics) {
-    View v = LayoutInflater.from(context).inflate(R.layout.search_lyrics, null);
-    MaterialDialog.Builder searchLyrics = new MaterialDialog.Builder(context);
-    searchLyrics.title("Search Lyrics");
-    searchLyrics.positiveText(android.R.string.ok);
-    TextInputEditText songeditText = (TextInputEditText) v.findViewById(R.id.lyricssong_name);
-    TextInputEditText artisteditText = (TextInputEditText) v.findViewById(R.id.lyricsartist_name);
-    songeditText.setText(title);
-    artisteditText.setText(artist);
-    searchLyrics.onPositive(new MaterialDialog.SingleButtonCallback() {
-      @Override
-      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-        new LyricsData(context, songeditText.getText().toString(),
-            artisteditText.getText().toString(), setlyrics).execute("Executed");
-      }
-    });
-    searchLyrics.negativeText(android.R.string.cancel);
-    searchLyrics.onNegative(new MaterialDialog.SingleButtonCallback() {
-      @Override
-      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-        searchLyrics.autoDismiss(true);
-      }
-    });
-    searchLyrics.customView(v, false);
-    searchLyrics.show();
+  public static String stringFilter(String str) {
+    if (str == null) {
+      return null;
+    }
+    Pattern lineMatcher = Pattern.compile("\\n[\\\\/:*?\\\"<>|]((\\[\\d\\d:\\d\\d\\.\\d\\d\\])+)(.+)");
+    Matcher m = lineMatcher.matcher(str);
+    return m.replaceAll("").trim();
   }
+
+  /**
+   * Save Lyrics
+   * @param path
+   * @param content
+   */
+  public static void saveLyrics(String path, String content) {
+    try {
+      if (!content.isEmpty() && !path.isEmpty() && content.length() >0 && path.length() > 0){
+        FileWriter writer = new FileWriter(path);
+        writer.flush();
+        writer.write(stringFilter(content));
+        writer.close();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
 
   /**
    * Create directory
@@ -759,9 +788,7 @@ public class Helper {
   /**
    * Show overflow menu
    */
-  public void showMenu(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders,
-      Fragment fragment, MainActivity activity, int position, View v, Context context,
-      SongListAdapter songListAdapter) {
+  public void showMenu(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders, Fragment fragment, MainActivity activity, int position, View v, Context context, SongListAdapter songListAdapter) {
     PopupMenu popup = new PopupMenu(context, v);
     MenuInflater inflater = popup.getMenuInflater();
     inflater.inflate(R.menu.song_list_item, popup.getMenu());
@@ -787,7 +814,8 @@ public class Helper {
             Toast.makeText(context, "Added to fav", Toast.LENGTH_LONG).show();
             break;
           case R.id.action_edit_tags:
-            showTagEditor(song, id, songLoaders, fragment, context);
+            Extras.getInstance().saveMetaData(song);
+            activity.setFragment(TagEditorFragment.getInstance());
             break;
           case R.id.action_set_ringtone:
             setRingTone(context, songListAdapter.getItem(position).getmSongPath());
@@ -822,67 +850,24 @@ public class Helper {
   }
 
   /**
-   * Show tag editor
+   * Convert text to bitmap
+   * @param text
+   * @param textSize
+   * @param textColor
+   * @return
    */
-  public void showTagEditor(Song song, int id,
-      LoaderManager.LoaderCallbacks<List<Song>> songLoaders, Fragment fragment, Context context) {
-
-    View rootView = LayoutInflater.from(context).inflate(R.layout.fragment_tageditor, null);
-
-    mTitleEditText = (EditText) rootView.findViewById(R.id.title);
-    mArtistEditText = (EditText) rootView.findViewById(artist);
-    mAlbumEditText = (EditText) rootView.findViewById(R.id.album);
-    mTrackEditText = (EditText) rootView.findViewById(R.id.track_number);
-
-    mTitleEditText.setText(song.getTitle());
-    mArtistEditText.setText(song.getArtist());
-    mAlbumEditText.setText(song.getAlbum());
-    mTrackEditText.setText(String.valueOf(song.getTrackNumber()));
-
-    MaterialDialog.Builder tag = new MaterialDialog.Builder(context);
-    tag.title("Tag Editor");
-    tag.positiveText(android.R.string.ok);
-    tag.negativeText(android.R.string.cancel);
-    tag.onPositive(new MaterialDialog.SingleButtonCallback() {
-      @Override
-      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-
-        new AsyncTask<Object, Object, Boolean>() {
-
-          @Override
-          protected Boolean doInBackground(Object... params) {
-            return saveTags(context, song);
-          }
-
-          @Override
-          protected void onPostExecute(Boolean b) {
-            super.onPostExecute(b);
-            if (b) {
-              Toast.makeText(context, "Tag Edit Success", Toast.LENGTH_SHORT).show();
-              fragment.getLoaderManager().restartLoader(id, null, songLoaders);
-
-            } else {
-              Toast.makeText(context, "Tag Edit Failed", Toast.LENGTH_SHORT).show();
-            }
-          }
-        }.execute();
-      }
-    });
-    tag.customView(rootView, false);
-    tag.build();
-    tag.show();
-  }
-
-  /**
-   * Save tags
-   */
-  public boolean saveTags(Context context, Song song) {
-    HashMap<String, String> tags = new HashMap<>();
-    tags.put(SONG_TITLE, mTitleEditText.getText().toString());
-    tags.put(SONG_ARTIST, mArtistEditText.getText().toString());
-    tags.put(SONG_ALBUM, mAlbumEditText.getText().toString());
-    tags.put(SONG_TRACK_NUMBER, mTrackEditText.getText().toString());
-    return editSongTags(context, song, tags);
+  public static Bitmap textAsBitmap(String text, float textSize, int textColor) {
+    Paint paint = new Paint(ANTI_ALIAS_FLAG);
+    paint.setTextSize(textSize); //text size
+    paint.setColor(textColor); //text color
+    paint.setTextAlign(Paint.Align.LEFT); //align center
+    float baseline = -paint.ascent(); // ascent() is negative
+    int width = (int) (paint.measureText(text) + 0.0f); // round
+    int height = (int) (baseline + paint.descent() + 0.0f);
+    Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    Canvas canvas = new Canvas(image);
+    canvas.drawText(text, 0, baseline, paint); //draw text
+    return image;
   }
 
   /**
@@ -955,29 +940,59 @@ public class Helper {
   }
 
   /**
+   * Search lyrics
+   */
+  public void searchLyrics(Context context, String title, String artist,TextView setlyrics) {
+    View v = LayoutInflater.from(context).inflate(R.layout.search_lyrics, null);
+    MaterialDialog.Builder searchLyrics = new MaterialDialog.Builder(context);
+    searchLyrics.title("Search Lyrics");
+    searchLyrics.positiveText(android.R.string.ok);
+    TextInputEditText songeditText = (TextInputEditText) v.findViewById(R.id.lyricssong_name);
+    TextInputEditText artisteditText = (TextInputEditText) v.findViewById(R.id.lyricsartist_name);
+    songeditText.setText(title);
+    artisteditText.setText(artist);
+    searchLyrics.onPositive(new MaterialDialog.SingleButtonCallback() {
+      @Override
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        new LyricsData(context, songeditText.getText().toString(), artisteditText.getText().toString(), setlyrics).execute("Executed");
+      }
+    });
+    searchLyrics.negativeText(android.R.string.cancel);
+    searchLyrics.onNegative(new MaterialDialog.SingleButtonCallback() {
+      @Override
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        searchLyrics.autoDismiss(true);
+      }
+    });
+    searchLyrics.customView(v, false);
+    searchLyrics.show();
+  }
+
+  /**
    * load lyrics
    */
   public void LoadLyrics(String title, String artist, TextView lrcView) {
     if (title != null && artist != null) {
       File file = new File(loadLyrics(title));
-      if (file.exists()) {
-        if (file.getName().equals(title)) {
-          readLyricsFromFile(file, lrcView);
-        } else {
-          Toast.makeText(context, "No Saved Lyrics Found", Toast.LENGTH_LONG).show();
+      if (file.exists()){
+        if (file.getName().equals(title)){
+          readLyricsFromFile(file,lrcView);
+        }else {
+          Log.d("Helper", "not same file ");
         }
-      } else {
+      }else {
         try {
           new LyricsData(context, title, artist, lrcView).execute("Executed");
-        } finally {
-          lrcView.setText("No Lyrics Found");
+        }catch (Exception e){
+          e.printStackTrace();
+        }finally {
+          lrcView.setText("Lyrics not found");
         }
       }
 
     } else {
       Log.d("Helper", "Title, Artist is null");
     }
-
   }
 
   /**
@@ -1070,7 +1085,7 @@ public class Helper {
    */
   private ValueAnimator setAnimator(int colorFrom, int colorTo) {
     ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-    long duration = 1000;
+    long duration = 300;
     colorAnimation.setDuration(duration);
     return colorAnimation;
   }

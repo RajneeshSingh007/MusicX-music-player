@@ -1,15 +1,5 @@
 package com.rks.musicx.ui.activities;
 
-import static com.rks.musicx.misc.utils.Constants.DarkTheme;
-import static com.rks.musicx.misc.utils.Constants.ITEM_ADDED;
-import static com.rks.musicx.misc.utils.Constants.META_CHANGED;
-import static com.rks.musicx.misc.utils.Constants.ORDER_CHANGED;
-import static com.rks.musicx.misc.utils.Constants.OVERLAY_REQ;
-import static com.rks.musicx.misc.utils.Constants.PERMISSIONS_REQ;
-import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
-import static com.rks.musicx.misc.utils.Constants.POSITION_CHANGED;
-import static com.rks.musicx.misc.utils.Constants.WRITESETTINGS;
-
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -18,15 +8,18 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.media.audiofx.AudioEffect;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StyleRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -34,14 +27,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.bumptech.glide.Glide;
@@ -52,6 +48,8 @@ import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
+import com.palette.BitmapPalette;
+import com.palette.GlidePalette;
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.misc.utils.ArtworkUtils;
@@ -62,12 +60,25 @@ import com.rks.musicx.misc.utils.Sleeptimer;
 import com.rks.musicx.misc.utils.permissionManager;
 import com.rks.musicx.misc.widgets.BlurArtwork;
 import com.rks.musicx.misc.widgets.ProgressBar;
+import com.rks.musicx.services.MediaPlayerSingleton;
 import com.rks.musicx.services.MusicXService;
-import com.rks.musicx.services.PlayingRequestListerner;
 import com.rks.musicx.ui.fragments.FavFragment;
 import com.rks.musicx.ui.fragments.MainFragment;
+
 import java.util.List;
+
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
+import static com.rks.musicx.misc.utils.Constants.DarkTheme;
+import static com.rks.musicx.misc.utils.Constants.EQ;
+import static com.rks.musicx.misc.utils.Constants.ITEM_ADDED;
+import static com.rks.musicx.misc.utils.Constants.META_CHANGED;
+import static com.rks.musicx.misc.utils.Constants.ORDER_CHANGED;
+import static com.rks.musicx.misc.utils.Constants.OVERLAY_REQ;
+import static com.rks.musicx.misc.utils.Constants.PERMISSIONS_REQ;
+import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
+import static com.rks.musicx.misc.utils.Constants.POSITION_CHANGED;
+import static com.rks.musicx.misc.utils.Constants.WRITESETTINGS;
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -107,7 +118,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             MusicXService.MusicXBinder binder = (MusicXService.MusicXBinder) service;
             musicXService = binder.getService();
             mService = true;
-            PlayingRequestListerner.sendRequests(musicXService);
             if (musicXService != null) {
                 MiniPlayerUpdate();
             }
@@ -123,15 +133,15 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (musicXService == null) {
-                return;
-            }
-            String action = intent.getAction();
-            if (action.equals(PLAYSTATE_CHANGED)) {
-                updateconfig();
-            } else if (action.equals(META_CHANGED)) {
-                miniplayerview();
-            }
+          if (musicXService == null) {
+            return;
+          }
+          String action = intent.getAction();
+          if (action.equals(PLAYSTATE_CHANGED)) {
+            updateconfig();
+          } else if (action.equals(META_CHANGED)) {
+            miniplayerview();
+          }
         }
     };
 
@@ -236,10 +246,12 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = new MenuInflater(MainActivity.this);
+        menuInflater.inflate(R.menu.main, menu);
         return true;
     }
 
-    @Override
+  @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
@@ -251,6 +263,11 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                     fragmentLoader(setContainerId(), setFragment());
                 }
                 return true;
+            case R.id.system_eq:
+                Intent intent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+                if (intent.resolveActivity(getPackageManager()) != null){
+                    startActivityForResult(intent, EQ);
+                }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -297,6 +314,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         }
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -305,6 +323,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                 if (Settings.canDrawOverlays(this)) {
                     Log.d("MainActivity", "Granted");
                 } else {
+                    permissionManager.isSystemAlertGranted(MainActivity.this);
                     Log.d("MainActivity", "Denied or Grant permission Manually");
                 }
             }
@@ -317,6 +336,16 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
               Log.d("MainActivity", "Denied or Grant permission Manually");
             }
           }
+        }
+        if (requestCode == EQ){
+            Intent intent = new Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
+            if (permissionManager.isAudioRecordGranted(this)){
+                intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, MediaPlayerSingleton.getInstance().getMediaPlayer().getAudioSessionId());
+                intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, this.getPackageName());
+                sendBroadcast(intent);
+            }else {
+                Log.d("MainActivity", "error");
+            }
         }
     }
 
@@ -447,6 +476,21 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                         .error(R.mipmap.ic_launcher)
                         .format(DecodeFormat.PREFER_ARGB_8888)
                         .override(300, 300)
+                        .listener(GlidePalette.with(ArtworkUtils.uri(musicXService.getsongAlbumID()).toString()).intoCallBack(new BitmapPalette.CallBack() {
+                            @Override
+                            public void onPaletteLoaded(@Nullable Palette palette) {
+                                int color[] = Helper.getAvailableColor(MainActivity.this, palette);
+                                if (Extras.getInstance().artworkColor()){
+                                    playToggle.setBackgroundTintList(ColorStateList.valueOf(color[0]));
+                                    songProgress.setDefaultProgressColor(color[0]);
+                                    songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
+                                }else {
+                                    playToggle.setBackgroundTintList(ColorStateList.valueOf(accentcolor));
+                                    songProgress.setDefaultProgressColor(accentcolor);
+                                    songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
+                                }
+                            }
+                        }))
                         .into(new Target<Bitmap>() {
                             @Override
                             public void onStart() {
@@ -519,13 +563,9 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
                 SongTitle.setTextColor(Color.WHITE);
                 SongArtist.setTextColor(ContextCompat.getColor(this, R.color.darkthemeTextColor));
-                songProgress.setDefaultProgressColor(accentcolor);
-                songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
             } else {
                 SongTitle.setTextColor(Color.WHITE);
                 SongArtist.setTextColor(Color.LTGRAY);
-                songProgress.setDefaultProgressColor(accentcolor);
-                songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
             }
         }
     }
@@ -563,4 +603,5 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
+
 }

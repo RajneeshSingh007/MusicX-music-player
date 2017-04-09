@@ -1,106 +1,125 @@
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                 android:layout_width="match_parent"
-                                                 android:layout_height="match_parent"
-                                                 android:fitsSystemWindows="true"
-                                                 android:foreground="?android:attr/selectableItemBackground">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:foreground="?android:attr/selectableItemBackground">
 
-    <android.support.percent.PercentRelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:padding="4dp"
+            android:id="@+id/added"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:layout_height="wrap_content">
 
-        <RelativeLayout
-            android:id="@+id/recentAdded_layout"
-            android:gravity="center"
-            app:layout_heightPercent="40%"
-            android:foreground="?android:attr/selectableItemBackground"
-            app:layout_widthPercent="100%">
 
-            <TextView
-                android:id="@+id/recentAdded"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="left|center"
-                android:ellipsize="end"
-                android:gravity="left|center"
-                android:maxLines="1"
-                android:padding="10dp"
-                android:text="Recently Added"
-                android:textColor="@color/colorPrimaryText"
-                android:textSize="16sp"/>
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/recentAddedMore"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_gravity="right"
-                android:ellipsize="end"
-                android:gravity="right"
-                android:maxLines="1"
-                android:padding="10dp"
-                android:text="More"
-                android:textColor="?attr/accentColor"
-                android:textSize="16sp"/>
+                <TextView
+                    android:id="@+id/recentAdded"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:ellipsize="end"
+                    android:layout_weight="1"
+                    android:gravity="left"
+                    android:maxLines="1"
+                    android:layout_marginStart="4dp"
+                    android:padding="4dp"
+                    android:text="Recently Added"
+                    android:textColor="@color/colorPrimaryText"
+                    android:textSize="16sp"/>
 
+                <TextView
+                    android:id="@+id/recentAddedMore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:layout_gravity="right"
+                    android:ellipsize="end"
+                    android:gravity="right"
+                    android:maxLines="1"
+                    android:padding="4dp"
+                    android:text="More"
+                    android:textColor="?attr/accentColor"
+                    android:textSize="16sp"/>
+            </LinearLayout>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recentadded"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/recentAddedMore"
-                android:scrollbars="none"
-                android:layout_marginTop="4dp"/>
+                android:layout_marginTop="4dp"
+                android:layout_height="wrap_content"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:scrollbars="none" />
 
-        </RelativeLayout>
+        </LinearLayout>
 
-
-        <RelativeLayout
-            android:layout_below="@+id/recentAdded_layout"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:id="@+id/played"
             android:layout_marginTop="4dp"
-            app:layout_heightPercent="40%"
-            android:foreground="?android:attr/selectableItemBackground"
-            app:layout_widthPercent="100%">
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:layout_below="@+id/added"
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/recentPlayed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_gravity="left|center"
-                android:ellipsize="end"
-                android:gravity="left|center"
-                android:maxLines="1"
-                android:padding="10dp"
-                android:text="Recently Played"
-                android:textColor="@color/colorPrimaryText"
-                android:textSize="16sp"/>
 
-            <TextView
-                android:id="@+id/recentPlayedMore"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_gravity="right|center"
-                android:ellipsize="end"
-                android:gravity="right|center"
-                android:maxLines="1"
-                android:padding="10dp"
-                android:text="More"
-                android:textColor="?attr/accentColor"
-                android:textSize="16sp"/>
+                android:padding="4dp"
+                android:orientation="horizontal">
+
+
+                <TextView
+                    android:id="@+id/recentPlayed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:ellipsize="end"
+                    android:gravity="left"
+                    android:maxLines="1"
+                    android:layout_marginStart="4dp"
+                    android:padding="4dp"
+                    android:layout_weight="1"
+                    android:text="Recently Played"
+                    android:textColor="@color/colorPrimaryText"
+                    android:textSize="16sp"/>
+
+                <TextView
+                    android:id="@+id/recentPlayedMore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:ellipsize="end"
+                    android:gravity="right"
+                    android:layout_weight="1"
+                    android:maxLines="1"
+                    android:layout_marginEnd="4dp"
+                    android:padding="4dp"
+                    android:text="More"
+                    android:textColor="?attr/accentColor"
+                    android:textSize="16sp"/>
+            </LinearLayout>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recentplaying"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scrollbars="none"
-                android:layout_below="@+id/recentPlayedMore"
-                android:layout_marginTop="4dp"/>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:scrollbars="none"/>
 
-        </RelativeLayout>
 
-    </android.support.percent.PercentRelativeLayout>
+        </LinearLayout>
+        <View
+            android:layout_below="@id/played"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-</android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>

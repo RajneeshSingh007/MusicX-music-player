@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -44,6 +45,7 @@ import com.kbeanie.imagechooser.api.ImageChooserManager;
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.database.FavHelper;
+import com.rks.musicx.database.Queue;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
@@ -64,6 +66,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
@@ -77,12 +83,13 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHelperCallback.OnStartDragListener, ImageChooserListener {
 
 
-    String finalPath;
-    ChosenImage chosenImages;
+    private String finalPath;
+    private ChosenImage chosenImages;
     private FloatingActionButton playpausebutton;
     private String ateKey;
     private int accentColor, position;
-    private TextView SongArtist, SongTitle, CurrentDur, TotalDur, Divider, lrcView;
+    private TextView SongArtist, SongTitle, CurrentDur, TotalDur, Divider;
+    private TextView lrcView;
     private CircleImageView mAlbumCoverView;
     private View Playing3view;
     private RecyclerView queuerv;
@@ -102,15 +109,18 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
     private boolean isalbumArtChanged;
     private View coverView;
     private Helper helper;
+    private ImageChooserManager imageChooserManager;
+    private String mediaPath;
+    private final ScheduledExecutorService mExecutorService = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> mScheduleFuture;
+
     private Runnable seekbarRunnable = new Runnable() {
         @Override
         public void run() {
             updateCircularSeekBar();
-            mHandler.postDelayed(seekbarRunnable, 200);
         }
     };
-    private ImageChooserManager imageChooserManager;
-    private String mediaPath;
+
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -127,7 +137,7 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
                     updateShuffleButton();
                     break;
                 case R.id.repeat_song:
-                    int mode = musicXService.getNextRepeatMode();
+                    int mode = musicXService.getNextrepeatMode();
                     musicXService.setRepeatMode(mode);
                     updateRepeatButton();
                     break;
@@ -182,6 +192,16 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
+                    case R.id.clear_queue:
+                        if (queueAdapter.getSnapshot().size() > 0){
+                            queueAdapter.clear();
+                            queueAdapter.notifyDataSetChanged();
+                            musicXService.clearQueue();
+                            Queue queue = new Queue(getContext());
+                            queue.removeAll();
+                            Toast.makeText(getContext(), "Cleared Queue", Toast.LENGTH_LONG).show();
+                        }
+                        break;
                     case R.id.action_changeArt:
                         pickNupdateArtwork();
                         isalbumArtChanged = false;
@@ -190,7 +210,7 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
                         new Helper(getContext()).PlaylistChooser(Playing1Fragment.this, getContext(), musicXService.getsongId());
                         break;
                     case R.id.action_lyrics:
-                        Helper.searchLyrics(getContext(), musicXService.getsongTitle(), musicXService.getsongArtistName(), lrcView);
+                        new Helper(getContext()).searchLyrics(getContext(), musicXService.getsongTitle(), musicXService.getsongArtistName(), lrcView);
                         break;
                     case R.id.action_ringtone:
                         Helper.setRingTone(getContext(), musicXService.getsongData());
@@ -237,13 +257,12 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
         Song queue = queueAdapter.getItem(position);
         popupMenu.getMenu().findItem(R.id.action_lyrics).setVisible(false);
         popupMenu.getMenu().findItem(R.id.action_eq).setVisible(false);
+        popupMenu.getMenu().findItem(R.id.clear_queue).setVisible(false);
+        popupMenu.getMenu().findItem(R.id.action_changeArt).setVisible(false);
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.action_changeArt:
-                        pickNupdateArtwork();
-                        break;
                     case R.id.action_playlist:
                         new Helper(getContext()).PlaylistChooser(Playing1Fragment.this, getContext(), queue.getId());
                         break;
@@ -466,7 +485,7 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
 
         queueAdapter.setSelection(position);
 
-        if (position >= 0 && position < queueAdapter.data.size()) {
+        if (position >= 0 && position < queueAdapter.getSnapshot().size()) {
             queuerv.scrollToPosition(position);
         }
 
@@ -474,7 +493,7 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
 
         newselection = position;
 
-        if (newselection >= 0 && position < queueAdapter.data.size()) {
+        if (newselection >= 0 && position < queueAdapter.getSnapshot().size()) {
             queueAdapter.notifyItemChanged(newselection);
             queueAdapter.notifyDataSetChanged();
         }
@@ -512,6 +531,9 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
     @Override
     protected void reload() {
         PlayingView();
+        setButtonDrawable();
+        updateShuffleButton();
+        updateRepeatButton();
         if (isalbumArtChanged) {
             coverArtView();
             isalbumArtChanged = false;
@@ -519,29 +541,22 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
             ChangeAlbumCover(finalPath);
             isalbumArtChanged = true;
         }
-        setButtonDrawable();
-        updateShuffleButton();
-        updateRepeatButton();
         if (musicXService.isPlaying()) {
-            mHandler.post(seekbarRunnable);
-            musicXService.getPlayerPos();
+            scheduleSeekbarUpdate();
         }
     }
 
     @Override
     protected void playbackConfig() {
         setButtonDrawable();
-        if (musicXService.isPlaying()) {
-            mHandler.post(seekbarRunnable);
-            musicXService.getPlayerPos();
-        } else {
-            mHandler.removeCallbacks(seekbarRunnable);
-        }
     }
 
     @Override
     protected void metaConfig() {
         PlayingView();
+        if (musicXService.isPlaying()) {
+            scheduleSeekbarUpdate();
+        }
         if (isalbumArtChanged) {
             coverArtView();
             isalbumArtChanged = false;
@@ -554,6 +569,10 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
     @Override
     protected void queueConfig(String action) {
         updateQueue(action);
+    }
+
+    @Override
+    protected void onPaused() {
     }
 
     private void ChangeAlbumCover(String finalPath) {
@@ -578,12 +597,17 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
                         final int[] colors = Helper.getAvailableColor(getContext(), palette);
                         Playing3view.setBackgroundColor(colors[0]);
                         mAlbumCoverView.setBorderColor(colors[0]);
+                        new Helper(getContext()).animateViews(Playing3view, colors[0]);
                         if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
                             getActivity().getWindow().setStatusBarColor(colors[0]);
                         } else {
                             getActivity().getWindow().setStatusBarColor(colors[0]);
                         }
-                        new Helper(getContext()).animateViews(Playing3view, colors[0]);
+                        if (Extras.getInstance().artworkColor()){
+                            colorMode(colors[0]);
+                        }else {
+                            colorMode(accentColor);
+                        }
                     }
                 }, new bitmap() {
                     @Override
@@ -615,37 +639,25 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
             mSeekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
-                    if (fromUser) {
+                    if (fromUser && musicXService != null && (musicXService.isPlaying() || musicXService.isPaused())) {
                         musicXService.seekto(circularSeekBar.getProgress());
                     }
                 }
 
                 @Override
                 public void onStopTrackingTouch(CircularSeekBar seekBar) {
-                    if (musicXService.isPlaying()) {
-                        mHandler.post(seekbarRunnable);
-                    }
+                    scheduleSeekbarUpdate();
                 }
 
                 @Override
                 public void onStartTrackingTouch(CircularSeekBar seekBar) {
-                    mHandler.removeCallbacks(seekbarRunnable);
+                    stopSeekbarUpdate();
                 }
             });
             int duration = musicXService.getDuration();
             if (duration != -1) {
                 mSeekBar.setMax(duration);
                 TotalDur.setText(durationCalculator(duration));
-                updateCircularSeekBar();
-            }
-            if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
-                mSeekBar.setCircleProgressColor(accentColor);
-                mSeekBar.setPointerColor(accentColor);
-                mSeekBar.setPointerHaloColor(accentColor);
-            } else {
-                mSeekBar.setCircleProgressColor(accentColor);
-                mSeekBar.setPointerColor(accentColor);
-                mSeekBar.setPointerHaloColor(accentColor);
             }
             if (favhelper.isFavorite(musicXService.getsongId())) {
                 if (favButton != null) {
@@ -656,9 +668,45 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
                     favButton.setImageResource(R.drawable.ic_action_favorite_outline);
                 }
             }
-            helper.LoadLyrics(title, artist, lrcView);
+            new Helper(getContext()).LoadLyrics(musicXService.getsongTitle(), musicXService.getsongArtistName(), lrcView);
             updateQueue("Executed");
         }
+    }
+
+    private void scheduleSeekbarUpdate() {
+        stopSeekbarUpdate();
+        if (!mExecutorService.isShutdown()) {
+            mScheduleFuture = mExecutorService.scheduleAtFixedRate(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            mHandler.post(seekbarRunnable);
+                        }
+                    }, 100,
+                    1000, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void stopSeekbarUpdate() {
+        if (mScheduleFuture != null) {
+            mScheduleFuture.cancel(false);
+        }
+    }
+    private void colorMode(int color){
+        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+            mSeekBar.setCircleProgressColor(color);
+            mSeekBar.setPointerColor(color);
+            mSeekBar.setPointerHaloColor(color);
+            getActivity().getWindow().setNavigationBarColor(color);
+            playpausebutton.setBackgroundTintList(ColorStateList.valueOf(color));
+        } else {
+            mSeekBar.setCircleProgressColor(color);
+            mSeekBar.setPointerColor(color);
+            mSeekBar.setPointerHaloColor(color);
+            getActivity().getWindow().setNavigationBarColor(color);
+            playpausebutton.setBackgroundTintList(ColorStateList.valueOf(color));
+        }
+
     }
 
     private void updateShuffleButton() {
@@ -672,11 +720,11 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
 
     private void updateRepeatButton() {
         int mode = musicXService.getRepeatMode();
-        if (mode == musicXService.getNO_REPEAT()) {
+        if (mode == musicXService.getNoRepeat()){
             repeatButton.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_no));
-        } else if (mode == musicXService.getREPEAT_ALL()) {
+        }else if (mode == musicXService.getRepeatCurrent()){
             repeatButton.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_all));
-        } else if (mode == musicXService.getREPEAT_CURRENT()) {
+        }else if (mode == musicXService.getRepeatAll()){
             repeatButton.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_one));
         }
     }
@@ -765,12 +813,17 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
                         final int[] colors = Helper.getAvailableColor(getContext(), palette);
                         Playing3view.setBackgroundColor(colors[0]);
                         mAlbumCoverView.setBorderColor(colors[0]);
+                        new Helper(getContext()).animateViews(Playing3view, colors[0]);
                         if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
                             getActivity().getWindow().setStatusBarColor(colors[0]);
                         } else {
                             getActivity().getWindow().setStatusBarColor(colors[0]);
                         }
-                        new Helper(getContext()).animateViews(Playing3view, colors[0]);
+                        if (Extras.getInstance().artworkColor()){
+                            colorMode(colors[0]);
+                        }else {
+                            colorMode(accentColor);
+                        }
                     }
                 }, new bitmap() {
                     @Override

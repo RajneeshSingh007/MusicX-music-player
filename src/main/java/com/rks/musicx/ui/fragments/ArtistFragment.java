@@ -8,47 +8,57 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.database.DatabaseUtilsCompat;
+import android.support.v4.util.Pair;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
-import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.common.Priority;
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.DownloadListener;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.palette.BitmapPalette;
 import com.palette.GlidePalette;
 import com.rks.musicx.R;
+import com.rks.musicx.data.loaders.AlbumLoader;
+import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.loaders.TrackLoader;
 import com.rks.musicx.data.model.Artist;
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.data.network.ArtistArtwork;
 import com.rks.musicx.data.network.LastFmClients;
 import com.rks.musicx.data.network.LastFmServices;
 import com.rks.musicx.data.network.model.Artist__;
-import com.rks.musicx.data.network.model.Image_;
+import com.rks.musicx.misc.utils.ATEUtils;
 import com.rks.musicx.misc.utils.Constants;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.MainActivity;
+import com.rks.musicx.ui.adapters.AlbumListAdapter;
 import com.rks.musicx.ui.adapters.BaseRecyclerViewAdapter;
 import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+
 import java.io.File;
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -74,17 +84,41 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
     private FrameLayout bioView;
     private TextView artistBio;
     private boolean bio;
+    private RecyclerView albumrv;
+    private final int albumLoaders = 2;
+    private AlbumListAdapter albumListAdapter;
 
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = (position, view) -> {
         switch (view.getId()) {
             case R.id.item_view:
                 ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
+                rv.smoothScrollToPosition(position);
                 break;
             case R.id.menu_button:
                 helper.showMenu(trackLoader, this, ArtistFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
                 break;
         }
     };
+
+    private BaseRecyclerViewAdapter.OnItemClickListener mOnClickAlbum = new BaseRecyclerViewAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position, View view) {
+            switch (view.getId()) {
+                case R.id.album_artwork:
+                case R.id.item_view:
+                    Fragment fragments = AlbumFragment.newInstance(albumListAdapter.getItem(position));
+                    ImageView Listartwork = (ImageView) view.findViewById(R.id.album_artwork);
+                    fragTransition(fragments, Listartwork);
+                    rv.smoothScrollToPosition(position);
+                    break;
+            }
+        }
+    };
+
+    private void fragTransition(Fragment fragment, ImageView imageView) {
+        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
+        Helper.setFragmentTransition(getActivity(), ArtistFragment.this, fragment, new Pair<View, String>(imageView, "TransitionArtwork"));
+    }
 
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
@@ -120,6 +154,7 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
             int trackCount = args.getInt(Constants.ARTIST_TRACK_COUNT);
             artist = new Artist(id, name, albumCount, trackCount);
         }
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -137,25 +172,44 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
         toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         artistBio = (TextView) rootView.findViewById(R.id.artist_bio);
         bioView = (FrameLayout) rootView.findViewById(R.id.artistview_bio);
+        albumrv = (RecyclerView) rootView.findViewById(R.id.artist_albumrv);
     }
 
     private void funtion() {
+        String ateKey = Helper.getATEKey(getContext());
+        int colorAccent = Config.accentColor(getContext(), ateKey);
+
         CustomLayoutManager c = new CustomLayoutManager(getContext());
         c.setSmoothScrollbarEnabled(true);
-        rv.setLayoutManager(c);
         songListAdapter = new SongListAdapter(getContext());
         songListAdapter.setLayoutId(R.layout.song_list);
         songListAdapter.setOnItemClickListener(mOnClick);
         rv.setAdapter(songListAdapter);
         rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75, false));
+        rv.setLayoutManager(c);
+        rv.setHasFixedSize(true);
+        rv.setPopupBgColor(colorAccent);
+
+
+        CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
+        customLayoutManager.setSmoothScrollbarEnabled(true);
+        customLayoutManager.setOrientation(CustomLayoutManager.HORIZONTAL);
+        albumListAdapter = new AlbumListAdapter(getContext());
+        albumListAdapter.setLayoutID(R.layout.recent_list);
+        albumListAdapter.setOnItemClickListener(mOnClickAlbum);
+        albumrv.setAdapter(albumListAdapter);
+        albumrv.setLayoutManager(customLayoutManager);
+        albumrv.setHasFixedSize(true);
+        albumrv.setNestedScrollingEnabled(false);
+        albumrv.setVerticalScrollBarEnabled(false);
+        albumrv.setHorizontalScrollBarEnabled(false);
+        albumrv.setScrollBarSize(0);
+
         fab.setOnClickListener(mOnClickListener);
         toolbar.setTitle(artist.getName());
         toolbar.setTitleTextColor(Color.WHITE);
         helper = new Helper(getContext());
         loadTrak();
-        String ateKey = Helper.getATEKey(getContext());
-        int colorAccent = Config.accentColor(getContext(), ateKey);
-        rv.setPopupBgColor(colorAccent);
         if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             getActivity().getWindow().setStatusBarColor(colorAccent);
             toolbar.setBackgroundColor(colorAccent);
@@ -168,13 +222,11 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
         File file = new File(artistImagePath);
         if (file.exists()) {
             mRequestManager.load(file.getAbsolutePath())
-                    .asBitmap()
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .centerCrop()
+                    .dontTransform()
                     .placeholder(R.mipmap.ic_launcher)
                     .error(R.mipmap.ic_launcher)
-                    .format(DecodeFormat.PREFER_ARGB_8888)
-                    .override(300, 300)
+                    .crossFade()
                     .listener(GlidePalette.with(file.getAbsolutePath()).intoCallBack(new BitmapPalette.CallBack() {
                         @Override
                         public void onPaletteLoaded(@Nullable Palette palette) {
@@ -259,6 +311,14 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
           materialShowcaseView.hide();
         }
       });
+        toolbar.showOverflowMenu();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        String ateKey = Helper.getATEKey(getContext());
+        ATEUtils.setStatusBarColor(getActivity(), ateKey, Config.primaryColor(getActivity(), ateKey));
     }
 
     @Override
@@ -271,6 +331,11 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
                 ArtistCover();
             }
         }
+        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+            ATE.postApply(getActivity(), "dark_theme");
+        } else {
+            ATE.postApply(getActivity(), "light_theme");
+        }
     }
 
     /*
@@ -278,73 +343,8 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
     * ArtistCover
     */
     private void ArtistCover() {
-        LastFmClients last = new LastFmClients(getContext());
-        LastFmServices lastFmServices = last.createService(LastFmServices.class);
-        Call<com.rks.musicx.data.network.model.Artist> artistCall = lastFmServices.getartist(artist.getName());
-        artistCall.enqueue(new Callback<com.rks.musicx.data.network.model.Artist>() {
-            @Override
-            public void onResponse(Call<com.rks.musicx.data.network.model.Artist> call, Response<com.rks.musicx.data.network.model.Artist> response) {
-                com.rks.musicx.data.network.model.Artist getartist = response.body();
-                if (response.isSuccessful() && getartist != null) {
-                    final Artist__ artist1 = getartist.getArtist();
-                    if (artist1 != null && artist1.getImage() != null && artist1.getImage().size() > 0) {
-                        String artistImagePath = new Helper(getContext()).loadArtistImage(artist.getName());
-                        File file = new File(artistImagePath);
-                        for (Image_ artistArtwork : artist1.getImage()) {
-                            if (Extras.getInstance().hqArtistArtwork()) {
-                                if (file.exists()) {
-                                    AndroidNetworking.delete(file.getAbsolutePath());
-                                }
-                                AndroidNetworking.download(artworkQuality(artistArtwork), new Helper(getContext()).getArtistArtworkLocation(), artist.getName() + ".jpeg")
-                                        .setTag("DownloadingArtistImage")
-                                        .setPriority(Priority.MEDIUM)
-                                        .build()
-                                        .startDownload(new DownloadListener() {
-                                            @Override
-                                            public void onDownloadComplete() {
-                                                Log.d("Artist", "successfully downloaded");
-                                            }
-
-                                            @Override
-                                            public void onError(ANError anError) {
-                                                Log.d("Artist", "failed");
-                                            }
-                                        });
-
-                            } else {
-                                if (file.exists()) {
-                                    AndroidNetworking.delete(file.getAbsolutePath());
-                                }
-                                AndroidNetworking.download(artworkQuality(artistArtwork), new Helper(getContext()).getArtistArtworkLocation(), artist.getName() + ".jpeg")
-                                        .setTag("DownloadingArtistImage")
-                                        .setPriority(Priority.MEDIUM)
-                                        .build()
-                                        .startDownload(new DownloadListener() {
-                                            @Override
-                                            public void onDownloadComplete() {
-                                                Log.d("Artist", "successfully downloaded");
-                                            }
-
-                                            @Override
-                                            public void onError(ANError anError) {
-                                                Log.d("Artist", "failed");
-                                            }
-                                        });
-                            }
-                        }
-                    } else {
-                        Log.d("haha", "downloading failed");
-                    }
-                } else {
-                    Log.d("haha", "downloading failed");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<com.rks.musicx.data.network.model.Artist> call, Throwable t) {
-                Log.d("ArtistFrag", "error", t);
-            }
-        });
+        ArtistArtwork artistArtwork = new ArtistArtwork(getContext(), artist.getName());
+        artistArtwork.execute();
     }
 
     private void artistBio(){
@@ -375,26 +375,13 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
       });
     }
 
-  /**
-   * Artwork quality
-   * @param artistArtwork
-   * @return
-   */
-    public String artworkQuality(Image_ artistArtwork) {
-        if (artistArtwork.getSize().equals("large")) {
-            return artistArtwork.getText();
-        } else if (artistArtwork.getSize().equals("mega")) {
-            return artistArtwork.getText();
-        } else {
-            return artistArtwork.getText();
-        }
-    }
 
     /*
-    reload track
+    * reload track,album
    */
     public void reload() {
         getLoaderManager().restartLoader(trackLoader, null, this);
+        getLoaderManager().restartLoader(albumLoaders, null,albumLoadersCallbacks);
     }
 
     @Override
@@ -420,7 +407,88 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
 
     private void loadTrak() {
         getLoaderManager().initLoader(trackLoader, null, this);
+        getLoaderManager().initLoader(albumLoaders, null, albumLoadersCallbacks);
     }
 
+    private String[] selectionArgs;
+
+    public String[] getSelectionArgs() {
+        return selectionArgs;
+    }
+
+    public String selection;
+
+    public String getSelection() {
+        return selection;
+    }
+
+    private LoaderManager.LoaderCallbacks<List<com.rks.musicx.data.model.Album>> albumLoadersCallbacks = new LoaderManager.LoaderCallbacks<List<com.rks.musicx.data.model.Album>>() {
+
+        @Override
+        public Loader<List<com.rks.musicx.data.model.Album>> onCreateLoader(int id, Bundle args) {
+            AlbumLoader albumLoader = new AlbumLoader(getContext());
+            if (id == albumLoaders) {
+                String[] selectargs = getSelectionArgs();
+                String selection = getSelection();
+                if (artist.getName() != null){
+                    selection = DatabaseUtilsCompat.concatenateWhere(selection, MediaStore.Audio.Albums.ARTIST + " = ?");
+                    selectargs = DatabaseUtilsCompat.appendSelectionArgs(selectargs, new String[]{artist.getName()});
+                }
+                albumLoader.setSortOrder(MediaStore.Audio.Albums.FIRST_YEAR);
+                albumLoader.filterartistsong(selection, selectargs);
+                return albumLoader;
+            }
+            return null;
+        }
+
+        @Override
+        public void onLoadFinished(Loader<List<com.rks.musicx.data.model.Album>> loader, List<com.rks.musicx.data.model.Album> data) {
+            if (data == null) {
+                return;
+            }
+            albumListAdapter.addDataList(data);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<com.rks.musicx.data.model.Album>> loader) {
+            loader.reset();
+            albumListAdapter.notifyDataSetChanged();
+        }
+
+    };
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.artistdetail_view_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Extras extras = Extras.getInstance();
+        switch (item.getItemId()) {
+            case R.id.a_to_z:
+                extras.setArtistAlbumSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_A_Z);
+                reload();
+                break;
+            case R.id.z_to_a:
+                extras.setAlbumSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_Z_A);
+                reload();
+                break;
+            case R.id.album_no_songs:
+                extras.setAlbumSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_NUMBER_OF_SONGS);
+                reload();
+                break;
+            case R.id.album_year:
+                extras.setAlbumSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_YEAR);
+                reload();
+                break;
+            case R.id.last_year:
+                extras.setAlbumSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_YEAR_LAST);
+                reload();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
 }

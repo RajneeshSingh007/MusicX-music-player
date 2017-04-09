@@ -61,11 +61,11 @@ public class MusicXApplication extends Application {
         ArtworkUtils.init(this);
         instance = this;
         createDirectory();
-        totalEqDefaulValue();
         ACRA.init(this);
         AndroidNetworking.initialize(getApplicationContext());
-        Extras.getInstance().eqSwitch(false);
         Extras.getInstance().setwidgetPosition(100);
+        totalEqDefaulValue();
+        Extras.getInstance().eqSwitch(false);
     }
 
   /**
@@ -77,17 +77,17 @@ public class MusicXApplication extends Application {
         } else {
             Log.d("oops error", "Failed to create directory");
         }
-    }
+  }
 
-  /**
-   * Default init
-   */
-  private void totalEqDefaulValue() {
+    /**
+     * Default init
+     */
+    private void totalEqDefaulValue() {
         Equalizers.initEqualizerValues();
         BassBoosts.initBassBoostValues();
         Virtualizers.initVirtualBoostValues();
         Loud.initLoudnessEnhancerValues();
         Reverb.initpresetReverbValues();
-  }
+    }
 
 }

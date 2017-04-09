@@ -10,11 +10,7 @@ import com.rks.musicx.data.network.VagModel.Vag;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,21 +28,14 @@ public class LyricsData extends AsyncTask<String, String, String> {
     private Context context;
     private String finallyLoaded;
 
-    public LyricsData(Context context, String songName, String songArtist, TextView setLyrics) {
+
+    public LyricsData(Context context, String songName, String songArtist,TextView setLyrics) {
         this.songName = songName;
         this.songArtist = songArtist;
         this.context = context;
         this.setLyrics = setLyrics;
     }
 
-    private static String stringFilter(String str) {
-        if (str == null) {
-            return null;
-        }
-        Pattern lineMatcher = Pattern.compile("\\n[\\\\/:*?\\\"<>|]((\\[\\d\\d:\\d\\d\\.\\d\\d\\])+)(.+)");
-        Matcher m = lineMatcher.matcher(str);
-        return m.replaceAll("").trim();
-    }
 
     @Override
     protected String doInBackground(String... strings) {
@@ -70,13 +59,13 @@ public class LyricsData extends AsyncTask<String, String, String> {
                         if (lyricsdata.size() > 0) {
                             finallyLoaded = lyricsdata.get(0).getText();
                             if (Extras.getInstance().saveLyrics()) {
-                                String path = new Helper(context).loadLyrics(songName +".lrc");
-                                saveLyrics(path, finallyLoaded);
+                                String path = new Helper(context).loadLyrics(songName);
+                                Helper.saveLyrics(path, finallyLoaded);
                             }
                             setLyrics.setText(finallyLoaded);
                         } else {
+                           setLyrics.setText("No Lyrics Found");
                             Log.d("ops ", "No lyrics found");
-                            setLyrics.setText("No Lyrics Found");
                         }
                     } else {
                         Log.d("r u kidding me ?", "connect your phone to internet");
@@ -91,15 +80,5 @@ public class LyricsData extends AsyncTask<String, String, String> {
         }
     }
 
-    private void saveLyrics(String path, String content) {
-        try {
-            FileWriter writer = new FileWriter(path);
-            writer.flush();
-            writer.write(stringFilter(content));
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 }

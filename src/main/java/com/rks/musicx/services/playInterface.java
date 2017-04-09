@@ -71,13 +71,19 @@ public interface playInterface {
 
     void buildNotification();
 
-    int getNextRepeatMode();
+    int getNextrepeatMode();
 
     void setdataPos(int pos, boolean play);
 
     int returnpos();
 
     void refreshWidget();
+
+    boolean getAudioFocus();
+
+    void abandonAudioFocus();
+
+    void clearQueue();
 
     /*
     *@return song MetaData

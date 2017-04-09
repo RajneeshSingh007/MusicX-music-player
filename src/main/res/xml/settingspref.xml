@@ -106,6 +106,15 @@
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
 
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="artwork_adaptive"
+            android:persistent="true"
+            android:summary="change color from albumart in PlayingViews"
+            android:title="Color Adaptive"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
         <com.afollestad.appthemeengine.prefs.ATEListPreference
             android:defaultValue="11"
             android:entries="@array/fontChoice"
@@ -255,6 +264,7 @@
             android:title="@string/hide_lockscreen"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
+
 
     </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
     <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory

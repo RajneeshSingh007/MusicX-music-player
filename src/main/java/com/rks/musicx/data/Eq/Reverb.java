@@ -1,12 +1,12 @@
 package com.rks.musicx.data.eq;
 
-import static com.rks.musicx.misc.utils.Constants.PRESET_BOOST;
-import static com.rks.musicx.misc.utils.Constants.PRESET_ENABLED;
-
 import android.content.SharedPreferences;
 import android.media.audiofx.PresetReverb;
 import android.util.Log;
+
 import com.rks.musicx.misc.utils.Extras;
+
+import static com.rks.musicx.misc.utils.Constants.PRESET_BOOST;
 
 /*
  * Created by Coolalien on 06/01/2017.
@@ -15,7 +15,6 @@ import com.rks.musicx.misc.utils.Extras;
 public class Reverb {
 
     private static PresetReverb presetReverb = null;
-    private static boolean enabled;
     private static short str = -1;
 
     public Reverb() {
@@ -25,6 +24,10 @@ public class Reverb {
         EndReverb();
         try {
             presetReverb = new PresetReverb(0, audioID);
+            short str = (short) Extras.getInstance().saveEq().getInt(PRESET_BOOST, 0);
+            if (str != 0){
+                presetReverb.setPreset(str);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -34,7 +37,6 @@ public class Reverb {
         if (presetReverb != null) {
             presetReverb.release();
             presetReverb = null;
-            enabled = false;
         }
     }
 
@@ -61,7 +63,6 @@ public class Reverb {
     }
 
     public static void initpresetReverbValues() {
-        enabled = Extras.getInstance().saveEq().getBoolean(PRESET_ENABLED, false);
         str = (short) Extras.getInstance().saveEq().getInt(PRESET_BOOST, 0);
     }
 
@@ -70,8 +71,6 @@ public class Reverb {
             return;
         }
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
-        editor.putBoolean(PRESET_ENABLED, isEnabled());
-        short str = getStr() == 0 ? 0 : getStr();
         editor.putInt(PRESET_BOOST, str);
         editor.apply();
     }
@@ -80,12 +79,8 @@ public class Reverb {
         return str;
     }
 
-    public static boolean isEnabled() {
-        return enabled;
-    }
 
-    public static void setEnabled(boolean enabled1) {
-        enabled = enabled1;
+    public static void setEnabled(boolean enabled) {
         if (presetReverb != null) {
             presetReverb.setEnabled(enabled);
         }

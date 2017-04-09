@@ -43,7 +43,7 @@ public abstract class BaseRecyclerViewAdapter<TData, TViewHolder extends Recycle
         return data.size();
     }
 
-    public TData getItem(final int position) throws ArrayIndexOutOfBoundsException {
+    public TData getItem(int position) throws ArrayIndexOutOfBoundsException {
         return data.get(position);
     }
 

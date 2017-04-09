@@ -16,6 +16,7 @@ public class Constants {
     public static final int PERMISSIONS_REQ = 10;
     public static final int OVERLAY_REQ = 1;
     public static final int WRITESETTINGS = 2;
+    public static final int EQ = 3445;
 
     /*
     album properties
@@ -42,6 +43,7 @@ public class Constants {
     public static final String SONG_ALBUM_ID = "song_album_id";
     public static final String SONG_TRACK_NUMBER = "song_track_number";
     public static final String SONG_PATH = "song_path";
+    public static final String SONG_YEAR = "song_year";
     /*
     playing propertiess
      */
@@ -66,6 +68,7 @@ public class Constants {
     public static final String PLAYINGSTATE = "playingState";
     public static final String CURRENTPOS = "position";
     public static final String ACTION_PLAYINGVIEW = "PLAYING_VIEW";
+    public static final String ACTION_BUTTON = "ACTION_BUTTON";
 
     /*
     Sorting properties
@@ -73,13 +76,14 @@ public class Constants {
     public static final String ARTIST_SORT_ORDER = "artist_sort_order";
     public static final String ALBUM_SORT_ORDER = "album_sort_order";
     public static final String SONG_SORT_ORDER = "song_sort_order";
-    public static final String PARAM_PLAYLIST_ID = "playlist_id";
+    public static final String ARTIST_ALBUM_SORT = "artist_album_sort";
 
     /*
     Playlist  & fav. properties
      */
     public static final String PARAM_PLAYLIST_NAME = "playlist_name";
     public static final String PARAM_PLAYLIST_FAVORITES = "favorites";
+    public static final String PARAM_PLAYLIST_ID = "playlist_id";
     /*
     Floating Widget properties
      */
@@ -109,7 +113,8 @@ public class Constants {
     public static final String VIZCOLOR = "vizualizer_color";
     public static final String TRACKFOLDER = "trackfolder";
     public static final String EQSWITCH = "eqswitch";
-
+    public static final String ARTWORKCOLOR = "artwork_adaptive";
+    public static final String FOLDERPATH = "folderpath";
     /*
     Choices
      */
@@ -136,10 +141,6 @@ public class Constants {
      */
     public static final String BAND_LEVEL = "level";
     public static final String SAVE_PRESET = "preset";
-    public static final String EQ_ENABLED = "enabled";
-    public static final String BASS_ENABLED = "enabled";
-    public static final String PRESET_ENABLED = "enabled";
-    public static final String VIRTUAL_ENABLED = "enabled";
     public static final int GAIN_MAX = 1000;
     public static final String SAVE_EQ = "Equalizers";
     public static final String BASS_BOOST = "BassBoost";
@@ -151,12 +152,7 @@ public class Constants {
     public static final String AUDIO_ID = "audio_id";
     public static final String OPEN_EFFECTS = "open_effects";
     public static final String CLOSE_EFFECTS = "close_effects";
-    public static final String SAVEDBASS = "SavedBass";
-    public static final String SAVEDLOUD = "SavedLoud";
-    public static final String SAVEDVIRTUALIZER = "SavedVir";
-    public static final String SAVEDREVERB = "SavedReverb";
-    public static final String FOLDERPATH = "folderpath";
-
+    public static final String PRESETPOS = "preset_pos";
 
     /**
      * permission array

@@ -51,6 +51,7 @@ public class TrackLoader extends BaseAsyncTaskLoader<List<Song>> {
                 int albumIdCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
                 int trackCol = cursor.getColumnIndex(MediaStore.Audio.Media.TRACK);
                 int datacol = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+                int yearCol = cursor.getColumnIndex(MediaStore.Audio.Media.YEAR);
                 do {
                     long id = cursor.getLong(idCol);
                     String title = cursor.getString(titleCol);
@@ -59,6 +60,8 @@ public class TrackLoader extends BaseAsyncTaskLoader<List<Song>> {
                     long albumId = cursor.getLong(albumIdCol);
                     int track = cursor.getInt(trackCol);
                     String mSongPath = cursor.getString(datacol);
+                    String year = cursor.getString(yearCol);
+
                     Song song = new Song();
                     /*
                     Setup metadata of songs
@@ -70,6 +73,7 @@ public class TrackLoader extends BaseAsyncTaskLoader<List<Song>> {
                     song.setAlbumId(albumId);
                     song.setTrackNumber(track);
                     song.setTitle(title);
+                    song.setYear(year);
                     songList.add(song);
                 } while (cursor.moveToNext());
                 cursor.close();

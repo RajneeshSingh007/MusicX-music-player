@@ -434,6 +434,9 @@ public class AudioWidget {
     }
 
     private void show(View view, int left, int top) {
+        if (view.getParent() != null || view.getWindowToken() != null){
+            windowManager.removeView(view);
+        }
       WindowManager.LayoutParams params = new WindowManager.LayoutParams(
           WindowManager.LayoutParams.WRAP_CONTENT,
           WindowManager.LayoutParams.WRAP_CONTENT,

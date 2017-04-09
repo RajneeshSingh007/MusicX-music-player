@@ -1,7 +1,5 @@
 package com.rks.musicx.ui.adapters;
 
-import static com.rks.musicx.misc.utils.Helper.getAnimator;
-
 import android.animation.Animator;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
@@ -21,6 +19,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Song;
@@ -30,8 +29,11 @@ import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.palette;
 import com.rks.musicx.misc.widgets.CircleImageView;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.rks.musicx.misc.utils.Helper.getAnimator;
 
 
 /*
@@ -41,7 +43,7 @@ import java.util.List;
 public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapter.SongViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
     private int layout = R.layout.song_list;
-    private int duration = 500;
+    private int duration = 300;
     private Interpolator interpolator = new LinearInterpolator();
     private int lastpos = -1;
     private ValueAnimator colorAnimation;
@@ -154,11 +156,6 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
     }
 
     @Override
-    public Song getItem(int position) throws ArrayIndexOutOfBoundsException {
-        return super.getItem(position);
-    }
-
-    @Override
     public List<Song> getSnapshot() {
         return super.getSnapshot();
     }
@@ -191,7 +188,6 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
 
     private ValueAnimator setAnimator(int colorFrom, int colorTo) {
         ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-        long duration = 800;
         colorAnimation.setDuration(duration);
         return colorAnimation;
     }

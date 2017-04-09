@@ -1,14 +1,14 @@
 package com.rks.musicx.data.eq;
 
-import static com.rks.musicx.misc.utils.Constants.BAND_LEVEL;
-import static com.rks.musicx.misc.utils.Constants.EQ_ENABLED;
-import static com.rks.musicx.misc.utils.Constants.SAVE_PRESET;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.audiofx.Equalizer;
+
 import com.rks.musicx.R;
 import com.rks.musicx.misc.utils.Extras;
+
+import static com.rks.musicx.misc.utils.Constants.BAND_LEVEL;
+import static com.rks.musicx.misc.utils.Constants.SAVE_PRESET;
 
 /*
  * Created by Coolalien on 06/01/2017.
@@ -18,10 +18,8 @@ public class Equalizers {
 
 
     private static Equalizer equalizer = null;
-    private static boolean enabled;
     private static short preset;
     private static short[] bandLevels;
-    private static boolean customPreset;
 
     public Equalizers() {
     }
@@ -32,17 +30,20 @@ public class Equalizers {
             equalizer = new Equalizer(0, audioID);
             bandLevels = new short[equalizer.getNumberOfBands()];
             for (short b = 0; b < equalizer.getNumberOfBands(); b++) {
-                short level = (short) Extras.getInstance().saveEq().getInt(BAND_LEVEL + b, equalizer.getBandLevel(b));
-                bandLevels[b] = level;
-                if (customPreset) {
-                    setBandLevel(b, level);
-                } else {
-                    setBandLevel(b, level);
+                bandLevels[b] = equalizer.getBandLevel(b);
+                short level = (short) Extras.getInstance().saveEq().getInt(BAND_LEVEL+b, 0);
+               if (level != 0){
+                   setBandLevel(b, level);
+               }
+               short preset = (short) Extras.getInstance().saveEq().getInt(SAVE_PRESET, 0);
+                if (preset != -1){
+                    usePreset(preset);
                 }
-
             }
-            if (preset == -1) {
-                customPreset = true;
+            try {
+                preset = equalizer.getCurrentPreset();
+            }catch (Exception e){
+                preset = -1;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -53,7 +54,6 @@ public class Equalizers {
         if (equalizer != null) {
             equalizer.release();
             equalizer = null;
-            enabled = false;
         }
     }
 
@@ -76,55 +76,43 @@ public class Equalizers {
         return presets;
     }
 
+
     public static short getBandLevel(short band) {
         if (equalizer == null) {
-            if (bandLevels.length > band) {
-                return bandLevels[band];
-            }
+           return 0;
         }
-        return equalizer != null ? equalizer.getBandLevel(band) : 0;
+        return equalizer.getBandLevel(band);
     }
 
-    public static boolean isEnabled() {
-        return enabled;
-    }
-
-    public static void setEnabled(boolean enabled1) {
-        enabled = enabled1;
+    public static void setEnabled(boolean enabled) {
         if (equalizer != null) {
             equalizer.setEnabled(enabled);
         }
     }
 
     public static void setBandLevel(short band, short level) {
-        customPreset = true;
         if (equalizer != null) {
-            if (bandLevels.length > band) {
-              preset = -1;
-              bandLevels[band] = level;
-            }
             equalizer.setBandLevel(band, level);
-            customPreset = false;
         }
     }
 
     public static void initEqualizerValues() {
-        enabled = Extras.getInstance().saveEq().getBoolean(EQ_ENABLED, false);
-        preset = (short) Extras.getInstance().saveEq().getInt(SAVE_PRESET, -1);
-        customPreset = preset == -1;
+        preset = (short) Extras.getInstance().saveEq().getInt(SAVE_PRESET, 0);
     }
 
     public static int getCurrentPreset() {
-        if (equalizer == null || customPreset) {
+        if (equalizer == null) {
             return 0;
         }
-
         return equalizer.getCurrentPreset() + 1;
     }
 
-    public static void usePreset(short preset) {
-        if (equalizer != null) {
-            customPreset = false;
+    public static void usePreset(short presets) {
+        if (equalizer == null){
+            return;
+        }
+        preset = presets;
+        if (preset >= 0 && preset < equalizer.getNumberOfPresets()){
             equalizer.usePreset(preset);
         }
     }
@@ -143,18 +131,16 @@ public class Equalizers {
         return 0;
     }
 
-    public static void savePrefs() {
+    public static void savePrefs(int preset, int bandlevel) {
         if (equalizer == null) {
             return;
         }
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
-        short preset = customPreset ? -1 : equalizer.getCurrentPreset();
         editor.putInt(SAVE_PRESET, preset);
         short bands = equalizer.getNumberOfBands();
         for (short b = 0; b < bands; b++) {
-            editor.putInt(BAND_LEVEL + b, getBandLevel(b));
+            editor.putInt(BAND_LEVEL + b, bandlevel);
         }
-        editor.putBoolean(EQ_ENABLED, isEnabled());
-        editor.apply();
+        editor.commit();
     }
 }

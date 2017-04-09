@@ -61,6 +61,7 @@ public class MainFragment extends miniFragment {
     if (Extras.getInstance().restoreLastTab()) {
       mViewPager.setCurrentItem(Integer.valueOf(Extras.getInstance().getTabIndex()), true);
     }
+    toolbar.setTitle("");
     mViewPager.setOffscreenPageLimit(6);
     toolbar.showOverflowMenu();
     DrawerLayout mDrawerLayout = ((MainActivity) getActivity()).getDrawerLayout();

@@ -19,7 +19,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Album;
 import com.rks.musicx.misc.utils.ArtworkUtils;
@@ -40,7 +39,7 @@ import java.util.List;
 public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAdapter.AlbumViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
     private int layoutID;
-    private int duration = 500;
+    private int duration = 300;
     private Interpolator interpolator = new LinearInterpolator();
     private int lastpos = -1;
     private ValueAnimator colorAnimation;
@@ -62,7 +61,7 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
     @Override
     public void onBindViewHolder(AlbumListAdapter.AlbumViewHolder holder, int position) {
         Album albums = getItem(position);
-        if (layoutID == R.layout.item_grid_view) {
+        if (layoutID == R.layout.item_grid_view || layoutID == R.layout.recent_list) {
             int pos = holder.getAdapterPosition();
             if (lastpos < pos) {
                 for (Animator animator : Helper.getAnimator(holder.backgroundColor)) {
@@ -76,7 +75,7 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
             ArtworkUtils.ArtworkLoaderPalette(getContext(), albums.getAlbumName(), albums.getId(), holder.AlbumArtwork, new palette() {
                 @Override
                 public void palettework(Palette palette) {
-                    final int[] colors = getAvailableColor(palette);
+                    final int[] colors = Helper.getAvailableColor(getContext(),palette);
                     holder.backgroundColor.setBackgroundColor(colors[0]);
                     holder.AlbumName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
                     holder.ArtistName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
@@ -129,41 +128,8 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
 
     private ValueAnimator setAnimator(int colorFrom, int colorTo) {
         ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-        long duration = 800;
         colorAnimation.setDuration(duration);
         return colorAnimation;
-    }
-
-    private int[] getAvailableColor(Palette palette) {
-        int[] temp = new int[3]; //array with size 3
-        if (palette.getDarkVibrantSwatch() != null) {
-            temp[0] = palette.getDarkVibrantSwatch().getRgb();
-            temp[1] = palette.getDarkVibrantSwatch().getTitleTextColor();
-            temp[2] = palette.getDarkVibrantSwatch().getBodyTextColor();
-        } else if (palette.getDarkMutedSwatch() != null) {
-            temp[0] = palette.getDarkMutedSwatch().getRgb();
-            temp[1] = palette.getDarkMutedSwatch().getTitleTextColor();
-            temp[2] = palette.getDarkMutedSwatch().getBodyTextColor();
-        } else if (palette.getVibrantSwatch() != null) {
-            temp[0] = palette.getVibrantSwatch().getRgb();
-            temp[1] = palette.getVibrantSwatch().getTitleTextColor();
-            temp[2] = palette.getVibrantSwatch().getBodyTextColor();
-        } else if (palette.getDominantSwatch() != null) {
-            temp[0] = palette.getDominantSwatch().getRgb();
-            temp[1] = palette.getDominantSwatch().getTitleTextColor();
-            temp[2] = palette.getDominantSwatch().getBodyTextColor();
-        } else if (palette.getMutedSwatch() != null) {
-            temp[0] = palette.getMutedSwatch().getRgb();
-            temp[1] = palette.getMutedSwatch().getTitleTextColor();
-            temp[2] = palette.getMutedSwatch().getBodyTextColor();
-        } else {
-            String atkey = Helper.getATEKey(getContext());
-            int accent = Config.accentColor(getContext(), atkey);
-            temp[0] = accent;
-            temp[1] = 0xffe5e5e5;
-            temp[2] = accent;
-        }
-        return temp;
     }
 
     public class AlbumViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -177,7 +143,7 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
         public AlbumViewHolder(View itemView) {
             super(itemView);
 
-            if (layoutID == R.layout.item_grid_view) {
+            if (layoutID == R.layout.item_grid_view || layoutID == R.layout.recent_list) {
                 AlbumArtwork = (ImageView) itemView.findViewById(R.id.album_artwork);
                 AlbumName = (TextView) itemView.findViewById(R.id.album_name);
                 ArtistName = (TextView) itemView.findViewById(R.id.artist_name);

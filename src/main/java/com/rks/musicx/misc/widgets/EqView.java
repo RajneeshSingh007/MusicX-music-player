@@ -71,7 +71,7 @@ public class EqView extends View {
         circlePaint2 = new Paint();
         ateKey = Helper.getATEKey(getContext());
         accentColor = Config.accentColor(getContext(), ateKey);
-        if (isGlowoff()) {
+        if (glowoff) {
             circlePaint2.setColor(Color.parseColor("#222222"));
         } else {
             circlePaint2.setColor(accentColor);
@@ -129,7 +129,7 @@ public class EqView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent e) {
 
-        mListener.onProgressChanged((int) (deg - 2));
+        mListener.onProgressChanged(getProgress());
 
         if (e.getAction() == MotionEvent.ACTION_DOWN) {
             float dx = e.getX() - midx;

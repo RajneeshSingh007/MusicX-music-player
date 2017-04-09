@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
@@ -28,6 +29,7 @@ import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.BaseRecyclerViewAdapter;
 import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +62,7 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
             }
         }
     };
+
 
     public static SongListFragment newInstance(int pos) {
         Extras.getInstance().setTabIndex(pos);

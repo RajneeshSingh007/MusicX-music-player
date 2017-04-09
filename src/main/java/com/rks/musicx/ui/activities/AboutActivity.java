@@ -1,8 +1,5 @@
 package com.rks.musicx.ui.activities;
 
-import static com.rks.musicx.misc.utils.Constants.DEVELOPER_NAME;
-import static com.rks.musicx.misc.utils.Constants.DarkTheme;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
@@ -13,12 +10,17 @@ import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
 import android.widget.TextView;
+
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.rks.musicx.R;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
+
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
+import static com.rks.musicx.misc.utils.Constants.DEVELOPER_NAME;
+import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -66,7 +68,7 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
         guide_detail.setOnClickListener(view -> Helper.GuidLines(AboutActivity.this));
         contact_detail.setText(Html.fromHtml("<a href=\"mailto:developerrajneeshsingh@gmail.com\">Mail us</a>"));
         contact_detail.setMovementMethod(LinkMovementMethod.getInstance());
-        about_app_ver.setText("v 1.2.7");
+        about_app_ver.setText("v 1.3.1");
         developer_name.setText(DEVELOPER_NAME);
         licenses_detail.setText("Licenses");
         testerName.setText(getString(R.string.testerName));

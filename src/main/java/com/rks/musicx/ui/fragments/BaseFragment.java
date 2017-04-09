@@ -13,7 +13,6 @@ import android.view.View;
 import com.afollestad.appthemeengine.ATE;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.services.MusicXService;
-import com.rks.musicx.services.PlayingRequestListerner;
 
 import static com.rks.musicx.misc.utils.Constants.ITEM_ADDED;
 import static com.rks.musicx.misc.utils.Constants.META_CHANGED;
@@ -31,12 +30,12 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment {
     public MusicXService musicXService;
     private Intent mServiceIntent;
     private boolean mServiceBound;
+
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             MusicXService.MusicXBinder binder = (MusicXService.MusicXBinder) service;
             musicXService = binder.getService();
-            PlayingRequestListerner.sendRequests(musicXService);
             mServiceBound = true;
             if (musicXService != null) {
                 reload();
@@ -48,6 +47,7 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment {
             mServiceBound = false;
         }
     };
+
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
         @Override
@@ -56,17 +56,19 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment {
                 return;
             }
             String action = intent.getAction();
-            if (action.equals(PLAYSTATE_CHANGED)) {
-
-                playbackConfig();
-
-            } else if (action.equals(META_CHANGED)) {
-
-                metaConfig();
-
-            } else if (action.equals(QUEUE_CHANGED) || action.equals(POSITION_CHANGED) || action.equals(ITEM_ADDED) || action.equals(ORDER_CHANGED)) {
-
-                queueConfig(action);
+            switch (action) {
+                case PLAYSTATE_CHANGED:
+                    playbackConfig();
+                    break;
+                case META_CHANGED:
+                    metaConfig();
+                    break;
+                case QUEUE_CHANGED:
+                case POSITION_CHANGED:
+                case ITEM_ADDED:
+                case ORDER_CHANGED:
+                    queueConfig(action);
+                    break;
             }
         }
     };
@@ -79,9 +81,14 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment {
 
     protected abstract void queueConfig(String action);
 
+    protected abstract void onPaused();
+
     @Override
     public void onResume() {
         super.onResume();
+        if (getActivity() == null){
+            return;
+        }
         if (!mServiceBound) {
             mServiceIntent = new Intent(getActivity(), MusicXService.class);
             getActivity().bindService(mServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -92,7 +99,11 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment {
             filter.addAction(POSITION_CHANGED);
             filter.addAction(ITEM_ADDED);
             filter.addAction(ORDER_CHANGED);
-            getActivity().registerReceiver(broadcastReceiver, filter);
+            try {
+                getActivity().registerReceiver(broadcastReceiver, filter);
+            }catch (Exception e) {
+                // already registered
+            }
         } else {
             if (musicXService != null) {
                 reload();
@@ -103,14 +114,21 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        if (getActivity() == null){
+            return;
+        }
         musicXService = null;
         if (mServiceBound) {
             getActivity().unbindService(serviceConnection);
-            getActivity().unregisterReceiver(broadcastReceiver);
             mServiceBound = false;
+            try {
+                getActivity().unregisterReceiver(broadcastReceiver);
+            }catch (Exception e) {
+                // already unregistered
+            }
         }
+        onPaused();
     }
-
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {

@@ -57,10 +57,14 @@
             <flag name="top" value="8"/>
         </attr>
     </declare-styleable>
-  
+
+    <declare-styleable name="VisualizerView">
+        <attr name="popbollcolor" format="color|reference"/>
+    </declare-styleable>
     <declare-styleable name="CircleVisualizerFFTView">
         <attr name="cake_degree" format="integer"/>
         <attr name="cake_color" format="color"/>
         <attr name="padding_offset" format="dimension"/>
     </declare-styleable>
+
 </resources>

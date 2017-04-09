@@ -16,6 +16,7 @@ public class Song {
     private String genre;
     private String mSongPath;
     private boolean isSelected = false;
+    private String year;
 
     /*
     Getter
@@ -51,6 +52,15 @@ public class Song {
     public void setArtist(String artist) {
         this.artist = artist;
     }
+
+    public String getYear() {
+        return year;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
 
     /*
     Setter
@@ -88,8 +98,12 @@ public class Song {
         this.mSongPath = mSongPath;
     }
 
-    public boolean isSelected() {
-        return isSelected;
+    public void setSelected(boolean selected) {
+        isSelected = selected;
+    }
+
+    public void setYear(String year) {
+        this.year = year;
     }
 }
 

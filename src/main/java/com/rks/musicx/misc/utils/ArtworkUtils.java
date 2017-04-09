@@ -81,7 +81,6 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300, 300)
                 .into(imageView);
     }
 
@@ -95,7 +94,6 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300, 300)
                 .into(imageView);
     }
 
@@ -109,7 +107,6 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300, 300)
                 .into(imageView);
     }
 
@@ -122,7 +119,6 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300, 300)
                 .into(imageView);
     }
 
@@ -135,7 +131,7 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300, 300)
+                .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
                 .listener(GlidePalette.with(uri(key).toString()).intoCallBack(new BitmapPalette.CallBack() {
                     @Override
                     public void onPaletteLoaded(@Nullable Palette palette) {
@@ -145,16 +141,14 @@ public class ArtworkUtils {
                 .into(imageView);
     }
 
-    public static void ArtworkLoaderPalette(Context context, String title, String key, ImageView imageView, palette palettework) {
+    public static void ArtworkLoaderPalette(Context context, String key, ImageView imageView, palette palettework) {
         Glide.with(context)
                 .load(key)
-                .asBitmap()
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
+                .dontTransform()
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
-                .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300, 300)
+                .crossFade()
                 .listener(GlidePalette.with(key).intoCallBack(new BitmapPalette.CallBack() {
                     @Override
                     public void onPaletteLoaded(@Nullable Palette palette) {
@@ -173,7 +167,7 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300, 300)
+                .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
                 .listener(GlidePalette.with(key).intoCallBack(new BitmapPalette.CallBack() {
                     @Override
                     public void onPaletteLoaded(@Nullable Palette palette) {
@@ -242,7 +236,7 @@ public class ArtworkUtils {
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(300, 300)
+                .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
                 .listener(GlidePalette.with(uri(key).toString()).intoCallBack(new BitmapPalette.CallBack() {
                     @Override
                     public void onPaletteLoaded(@Nullable Palette palette) {
@@ -257,7 +251,7 @@ public class ArtworkUtils {
 
                     @Override
                     public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                        bitmapwork.bitmapfailed(drawableToBitmap(errorDrawable));
+                        bitmapwork.bitmapfailed(getDefaultArtwork(context));
                     }
 
                     @Override
@@ -303,7 +297,7 @@ public class ArtworkUtils {
     }
 
     public static Bitmap drawableToBitmap(Drawable drawable) {
-        Bitmap bitmap = null;
+        Bitmap bitmap;
 
         if (drawable instanceof BitmapDrawable) {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;

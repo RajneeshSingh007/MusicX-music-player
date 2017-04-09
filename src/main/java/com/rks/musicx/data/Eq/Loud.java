@@ -1,13 +1,13 @@
 package com.rks.musicx.data.eq;
 
-import static com.rks.musicx.misc.utils.Constants.EQ_ENABLED;
-import static com.rks.musicx.misc.utils.Constants.GAIN_MAX;
-import static com.rks.musicx.misc.utils.Constants.LOUD_BOOST;
-
 import android.content.SharedPreferences;
 import android.media.audiofx.LoudnessEnhancer;
 import android.util.Log;
+
 import com.rks.musicx.misc.utils.Extras;
+
+import static com.rks.musicx.misc.utils.Constants.GAIN_MAX;
+import static com.rks.musicx.misc.utils.Constants.LOUD_BOOST;
 
 /*
  * Created by Coolalien on 06/01/2017.
@@ -16,7 +16,6 @@ import com.rks.musicx.misc.utils.Extras;
 public class Loud {
 
     private static LoudnessEnhancer loudnessEnhancer = null;
-    private static boolean enabled;
     private static int Gain = -1;
 
     public Loud() {
@@ -29,6 +28,10 @@ public class Loud {
         EndLoudnessEnhancer();
         try {
             loudnessEnhancer = new LoudnessEnhancer(audioSessionId);
+            int loud = Extras.getInstance().saveEq().getInt(LOUD_BOOST, 0);
+            if (loud != 0){
+                loudnessEnhancer.setTargetGain(loud);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -61,12 +64,10 @@ public class Loud {
         if (loudnessEnhancer != null) {
             loudnessEnhancer.release();
             loudnessEnhancer = null;
-            enabled = false;
         }
     }
 
     public static void initLoudnessEnhancerValues() {
-        enabled = Extras.getInstance().saveEq().getBoolean(EQ_ENABLED, false);
         Gain = Extras.getInstance().saveEq().getInt(LOUD_BOOST, 0);
     }
 
@@ -75,9 +76,7 @@ public class Loud {
             return;
         }
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
-        editor.putBoolean(EQ_ENABLED, isEnabled());
-        int gain = getGain() == 0 ? 0 : getGain();
-        editor.putInt(LOUD_BOOST, gain);
+        editor.putInt(LOUD_BOOST, Gain);
         editor.apply();
     }
 
@@ -85,12 +84,7 @@ public class Loud {
         return Gain;
     }
 
-    public static boolean isEnabled() {
-        return enabled;
-    }
-
-    public static void setEnabled(boolean enabled1) {
-        enabled = enabled1;
+    public static void setEnabled(boolean enabled) {
         if (loudnessEnhancer != null) {
             loudnessEnhancer.setEnabled(enabled);
         }

@@ -21,7 +21,8 @@ public class AlbumLoader extends BaseAsyncTaskLoader<List<Album>> {
 
     private String Where;
     private String sortorder;
-    private String[] selectionargs;
+    private String[] selectionargs = null;
+
     private String[] datacol = {BaseColumns._ID,
             MediaStore.Audio.AlbumColumns.ALBUM,
             MediaStore.Audio.AlbumColumns.ARTIST,

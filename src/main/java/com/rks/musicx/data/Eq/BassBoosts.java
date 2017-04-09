@@ -1,13 +1,13 @@
 package com.rks.musicx.data.eq;
 
-import static com.rks.musicx.misc.utils.Constants.BASSBOOST_STRENGTH;
-import static com.rks.musicx.misc.utils.Constants.BASS_BOOST;
-import static com.rks.musicx.misc.utils.Constants.BASS_ENABLED;
-
 import android.content.SharedPreferences;
 import android.media.audiofx.BassBoost;
 import android.util.Log;
+
 import com.rks.musicx.misc.utils.Extras;
+
+import static com.rks.musicx.misc.utils.Constants.BASSBOOST_STRENGTH;
+import static com.rks.musicx.misc.utils.Constants.BASS_BOOST;
 
 /*
  * Created by Coolalien on 06/01/2017.
@@ -16,7 +16,6 @@ import com.rks.musicx.misc.utils.Extras;
 public class BassBoosts {
 
     private static BassBoost bassBoost = null;
-    private static boolean enabled;
     private static short str = -1;
 
     public BassBoosts() {
@@ -26,6 +25,12 @@ public class BassBoosts {
         EndBass();
         try {
             bassBoost = new BassBoost(0, audioID);
+            short str = (short) Extras.getInstance().saveEq().getInt(BASS_BOOST, 0);
+            if (str != 0){
+                if (bassBoost != null && bassBoost.getStrengthSupported()) {
+                    bassBoost.setStrength(str);
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -35,7 +40,6 @@ public class BassBoosts {
         if (bassBoost != null) {
             bassBoost.release();
             bassBoost = null;
-            enabled = false;
         }
     }
 
@@ -62,7 +66,6 @@ public class BassBoosts {
     }
 
     public static void initBassBoostValues() {
-        enabled = Extras.getInstance().saveEq().getBoolean(BASS_ENABLED, false);
         str = (short) Extras.getInstance().saveEq().getInt(BASS_BOOST, 0);
     }
 
@@ -71,8 +74,6 @@ public class BassBoosts {
             return;
         }
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
-        editor.putBoolean(BASS_ENABLED, isEnabled());
-        short str = getStr() == 0 ? 0 : getStr();
         editor.putInt(BASS_BOOST, str);
         editor.apply();
     }
@@ -81,14 +82,17 @@ public class BassBoosts {
         return str;
     }
 
-    public static boolean isEnabled() {
-        return enabled;
-    }
 
-    public static void setEnabled(boolean enabled1) {
-        enabled = enabled1;
+    public static void setEnabled(boolean enabled) {
         if (bassBoost != null) {
             bassBoost.setEnabled(enabled);
         }
+    }
+
+    public static short getRounded(){
+        if (bassBoost == null){
+            return 0;
+        }
+        return bassBoost.getRoundedStrength();
     }
 }

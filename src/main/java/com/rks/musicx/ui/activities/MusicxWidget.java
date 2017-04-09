@@ -28,6 +28,9 @@ import static com.rks.musicx.misc.utils.Constants.ACTION_TOGGLE;
 
 public class MusicxWidget extends AppWidgetProvider {
 
+    private static String title;
+    private static long albumId;
+
     public static void musicxWidget(int updatdeID[], MusicXService musicXService) {
         if (musicXService == null) {
             return;
@@ -63,6 +66,8 @@ public class MusicxWidget extends AppWidgetProvider {
         } else {
             remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
         }
+        title = musicXService.getsongTitle();
+        albumId = musicXService.getsongAlbumID();
         controls(remoteViews, musicXService);
         widgetManager.updateAppWidget(updatdeID, remoteViews);
 
