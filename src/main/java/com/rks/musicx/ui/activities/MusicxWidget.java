@@ -7,14 +7,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.support.annotation.Nullable;
 import android.support.v7.graphics.Palette;
 import android.widget.RemoteViews;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.BaseTarget;
+import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
+import com.palette.BitmapPalette;
+import com.palette.GlidePalette;
 import com.rks.musicx.R;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Helper;
-import com.rks.musicx.misc.utils.bitmap;
-import com.rks.musicx.misc.utils.palette;
 import com.rks.musicx.services.MusicXService;
 
 import static com.rks.musicx.misc.utils.Constants.ACTION_NEXT;
@@ -28,9 +35,6 @@ import static com.rks.musicx.misc.utils.Constants.ACTION_TOGGLE;
 
 public class MusicxWidget extends AppWidgetProvider {
 
-    private static String title;
-    private static long albumId;
-
     public static void musicxWidget(int updatdeID[], MusicXService musicXService) {
         if (musicXService == null) {
             return;
@@ -39,35 +43,44 @@ public class MusicxWidget extends AppWidgetProvider {
         RemoteViews remoteViews = new RemoteViews(musicXService.getPackageName(), R.layout.widget);
         remoteViews.setTextViewText(R.id.title, musicXService.getsongTitle());
         remoteViews.setTextViewText(R.id.artist, musicXService.getsongArtistName());
-        ArtworkUtils.ArtworkLoaderBitmapPalette(musicXService, musicXService.getsongTitle(), musicXService.getsongAlbumID(), new palette() {
 
+        Target<Bitmap> bitmapTarget = new BaseTarget<Bitmap>() {
             @Override
-            public void palettework(Palette palette) {
-                final int color[] = Helper.getAvailableColor(musicXService, palette);
-                remoteViews.setInt(R.id.artist, "setTextColor", color[0]);
-            }
-
-        }, new bitmap() {
-
-            @Override
-            public void bitmapwork(Bitmap bitmap) {
-                remoteViews.setImageViewBitmap(R.id.artwork, bitmap);
+            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                if (resource != null) {
+                    remoteViews.setBitmap(R.id.artwork, "", resource);
+                } else {
+                    remoteViews.setBitmap(R.id.artwork, "", ArtworkUtils.getDefaultArtwork(musicXService));
+                }
             }
 
             @Override
-            public void bitmapfailed(Bitmap bitmap) {
-                remoteViews.setImageViewBitmap(R.id.artwork, bitmap);
-            }
+            public void getSize(SizeReadyCallback cb) {
 
-        });
+            }
+        };
+        Glide.with(musicXService)
+                .load(ArtworkUtils.uri(musicXService.getsongAlbumID()))
+                .asBitmap()
+                .error(R.mipmap.ic_launcher)
+                .placeholder(R.mipmap.ic_launcher)
+                .centerCrop()
+                .override(300, 300)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .listener(GlidePalette.with(ArtworkUtils.uri(musicXService.getsongAlbumID()).toString()).intoCallBack(new BitmapPalette.CallBack() {
+                    @Override
+                    public void onPaletteLoaded(@Nullable Palette palette) {
+                        final int color[] = Helper.getAvailableColor(musicXService, palette);
+                        remoteViews.setInt(R.id.artist, "setTextColor", color[0]);
+                    }
+                }))
+                .into(bitmapTarget);
         remoteViews.setInt(R.id.item_view, "setBackgroundColor", Color.WHITE);
         if (musicXService.isPlaying()) {
             remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
         } else {
             remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
         }
-        title = musicXService.getsongTitle();
-        albumId = musicXService.getsongAlbumID();
         controls(remoteViews, musicXService);
         widgetManager.updateAppWidget(updatdeID, remoteViews);
 

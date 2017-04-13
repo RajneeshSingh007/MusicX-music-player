@@ -58,7 +58,6 @@ import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.MetaDatas;
 import com.rks.musicx.misc.utils.Sleeptimer;
 import com.rks.musicx.misc.utils.permissionManager;
-import com.rks.musicx.misc.widgets.BlurArtwork;
 import com.rks.musicx.misc.widgets.ProgressBar;
 import com.rks.musicx.services.MediaPlayerSingleton;
 import com.rks.musicx.services.MusicXService;
@@ -103,6 +102,19 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     private ImageView BackgroundArt;
     private RequestManager mRequestManager;
     private Handler songProgressHandler = new Handler();
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(META_CHANGED);
+        filter.addAction(PLAYSTATE_CHANGED);
+        filter.addAction(POSITION_CHANGED);
+        filter.addAction(ITEM_ADDED);
+        filter.addAction(ORDER_CHANGED);
+        registerReceiver(broadcastReceiver, filter);
+    }
+
     private Runnable mUpdateProgress = new Runnable() {
 
         @Override
@@ -133,15 +145,15 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
 
         @Override
         public void onReceive(Context context, Intent intent) {
-          if (musicXService == null) {
-            return;
-          }
-          String action = intent.getAction();
-          if (action.equals(PLAYSTATE_CHANGED)) {
-            updateconfig();
-          } else if (action.equals(META_CHANGED)) {
-            miniplayerview();
-          }
+            if (musicXService == null) {
+                return;
+            }
+            String action = intent.getAction();
+            if (action.equals(PLAYSTATE_CHANGED)) {
+                updateconfig();
+            } else if (action.equals(META_CHANGED)) {
+                miniplayerview();
+            }
         }
     };
 
@@ -204,6 +216,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         }
         mRequestManager = Glide.with(this);
     }
+
     @Override
     protected Fragment setFragment() {
         return MainFragment.newInstance();
@@ -251,7 +264,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         return true;
     }
 
-  @Override
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
@@ -265,7 +278,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                 return true;
             case R.id.system_eq:
                 Intent intent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-                if (intent.resolveActivity(getPackageManager()) != null){
+                if (intent.resolveActivity(getPackageManager()) != null) {
                     startActivityForResult(intent, EQ);
                 }
         }
@@ -306,9 +319,9 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-            case PERMISSIONS_REQ:{
-                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    Log.d("Granted","hurray");
+            case PERMISSIONS_REQ: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("Granted", "hurray");
                 }
             }
         }
@@ -328,22 +341,22 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                 }
             }
         }
-        if (requestCode == WRITESETTINGS){
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.System.canWrite(this)) {
-              Log.d("MainActivity", "Granted");
-            } else {
-              Log.d("MainActivity", "Denied or Grant permission Manually");
+        if (requestCode == WRITESETTINGS) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (!Settings.System.canWrite(this)) {
+                    Log.d("MainActivity", "Granted");
+                } else {
+                    Log.d("MainActivity", "Denied or Grant permission Manually");
+                }
             }
-          }
         }
-        if (requestCode == EQ){
+        if (requestCode == EQ) {
             Intent intent = new Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
-            if (permissionManager.isAudioRecordGranted(this)){
+            if (permissionManager.isAudioRecordGranted(this)) {
                 intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, MediaPlayerSingleton.getInstance().getMediaPlayer().getAudioSessionId());
                 intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, this.getPackageName());
                 sendBroadcast(intent);
-            }else {
+            } else {
                 Log.d("MainActivity", "error");
             }
         }
@@ -480,13 +493,13 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                             @Override
                             public void onPaletteLoaded(@Nullable Palette palette) {
                                 int color[] = Helper.getAvailableColor(MainActivity.this, palette);
-                                if (Extras.getInstance().artworkColor()){
+                                if (Extras.getInstance().artworkColor()) {
                                     playToggle.setBackgroundTintList(ColorStateList.valueOf(color[0]));
-                                    songProgress.setDefaultProgressColor(color[0]);
+                                    songProgress.setProgressColor(color[0]);
                                     songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
-                                }else {
+                                } else {
                                     playToggle.setBackgroundTintList(ColorStateList.valueOf(accentcolor));
-                                    songProgress.setDefaultProgressColor(accentcolor);
+                                    songProgress.setProgressColor(accentcolor);
                                     songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
                                 }
                             }
@@ -514,7 +527,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
 
                             @Override
                             public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                                new BlurArtwork(MainActivity.this, 25, ArtworkUtils.drawableToBitmap(errorDrawable), BackgroundArt).execute("");
+                                ArtworkUtils.getBlurArtwork(MainActivity.this, 25, ArtworkUtils.getDefaultArtwork(MainActivity.this), BackgroundArt, 1.0f);
                             }
 
                             @Override

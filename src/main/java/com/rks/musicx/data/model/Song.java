@@ -5,6 +5,8 @@ package com.rks.musicx.data.model;
  * Created by Coolalien on 6/28/2016.
  */
 
+import android.net.Uri;
+
 public class Song {
 
     private long id;
@@ -17,6 +19,8 @@ public class Song {
     private String mSongPath;
     private boolean isSelected = false;
     private String year;
+    private String lyrics;
+    private Uri albumArt;
 
     /*
     Getter
@@ -57,14 +61,37 @@ public class Song {
         return year;
     }
 
+    public void setYear(String year) {
+        this.year = year;
+    }
+
     public boolean isSelected() {
         return isSelected;
     }
 
+    public void setSelected(boolean selected) {
+        isSelected = selected;
+    }
 
     /*
     Setter
      */
+
+    public String getLyrics() {
+        return lyrics;
+    }
+
+    public void setLyrics(String lyrics) {
+        this.lyrics = lyrics;
+    }
+
+    public Uri getAlbumArt() {
+        return albumArt;
+    }
+
+    public void setAlbumArt(Uri albumArt) {
+        this.albumArt = albumArt;
+    }
 
     public long getAlbumId() {
         return albumId;
@@ -96,14 +123,6 @@ public class Song {
 
     public void setmSongPath(String mSongPath) {
         this.mSongPath = mSongPath;
-    }
-
-    public void setSelected(boolean selected) {
-        isSelected = selected;
-    }
-
-    public void setYear(String year) {
-        this.year = year;
     }
 }
 

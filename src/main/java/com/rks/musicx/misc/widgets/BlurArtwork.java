@@ -20,26 +20,30 @@ public class BlurArtwork extends AsyncTask<String, Void, String> {
     private Bitmap bitmap;
     private ImageView imageView;
     private Bitmap finalResult;
+    private final int height;
+    private final int width;
 
-    public BlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView) {
+    public BlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView, float scale) {
         this.context = context;
         this.radius = radius;
         this.bitmap = bitmap;
         this.imageView = imageView;
+        height = Math.round(bitmap.getHeight() * scale);
+        width = Math.round(bitmap.getWidth() * scale);
     }
 
     @Override
     protected String doInBackground(String... params) {
-        finalResult = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        finalResult = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         RenderScript renderScript = RenderScript.create(context); //rs initialized
-        ScriptIntrinsicBlur scriptIntrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript)); //start blur
+        ScriptIntrinsicBlur scriptIntrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));//start blur
         Allocation allocationIn = Allocation.createFromBitmap(renderScript, bitmap); //blurred bitmap
         Allocation allocationOut = Allocation.createFromBitmap(renderScript, finalResult); //output bitmap
         scriptIntrinsicBlur.setRadius(radius); //radius option from users
         scriptIntrinsicBlur.setInput(allocationIn);
         scriptIntrinsicBlur.forEach(allocationOut);
         allocationOut.copyTo(finalResult);
-        return "BlurredArtwork";
+        return "Executed";
     }
 
     @Override
@@ -49,3 +53,5 @@ public class BlurArtwork extends AsyncTask<String, Void, String> {
     }
 
 }
+
+

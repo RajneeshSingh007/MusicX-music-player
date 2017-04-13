@@ -92,13 +92,13 @@ public class EqFragment extends Fragment {
         viewList.add(rb);
         playingPagerAdapter = new PlayingPagerAdapter(viewList);
         effectpager.setAdapter(playingPagerAdapter);
-      switchEq();
-      initBassBoost();
-      initEq(rootView);
-      initPresets(rootView);
-      initVirtualizerBoost();
-      initLoudnessBoost();
-      initPresetReverbBoost();
+        switchEq();
+        initBassBoost();
+        initEq(rootView);
+        initPresets(rootView);
+        initVirtualizerBoost();
+        initLoudnessBoost();
+        initPresetReverbBoost();
 
         ateKey = Helper.getATEKey(getActivity());
         accentcolor = Config.accentColor(getContext(), ateKey);
@@ -130,10 +130,10 @@ public class EqFragment extends Fragment {
             switchCompat.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (switchCompat.isChecked()){
+                    if (switchCompat.isChecked()) {
                         Extras.getInstance().eqSwitch(true);
                         enableDisable(true);
-                    }else {
+                    } else {
                         Extras.getInstance().eqSwitch(false);
                         enableDisable(false);
                     }
@@ -142,7 +142,7 @@ public class EqFragment extends Fragment {
         }
     }
 
-    private void enableDisable(Boolean onoroff){
+    private void enableDisable(Boolean onoroff) {
         Equalizers.setEnabled(onoroff);
         BassBoosts.setEnabled(onoroff);
         Virtualizers.setEnabled(onoroff);
@@ -152,7 +152,12 @@ public class EqFragment extends Fragment {
 
     private void initPresets(View rootView) {
         appCompatSpinner = (AppCompatSpinner) rootView.findViewById(R.id.presets_spinner);
-        arrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, Equalizers.getEqualizerPresets(getActivity()));
+        arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item);
+        if(Equalizers.getEqualizerPresets(getContext()).length > 0){
+            for (String presets : Equalizers.getEqualizerPresets(getContext())){
+                arrayAdapter.add(presets);
+            }
+        }
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         appCompatSpinner.setAdapter(arrayAdapter);
         appCompatSpinner.setSelection(Equalizers.getCurrentPreset());
@@ -189,9 +194,9 @@ public class EqFragment extends Fragment {
             }
 
         });
-        if (Extras.getInstance().saveEq().getInt(BASS_BOOST, 0) != 0){
+        if (Extras.getInstance().saveEq().getInt(BASS_BOOST, 0) != 0) {
             bassBoost.setProgress(Extras.getInstance().saveEq().getInt(BASS_BOOST, 0));
-        }else {
+        } else {
             bassBoost.setProgress(1);
         }
         if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
@@ -210,9 +215,9 @@ public class EqFragment extends Fragment {
             }
 
         });
-        if (Extras.getInstance().saveEq().getInt(PRESET_BOOST, 0) != 0){
+        if (Extras.getInstance().saveEq().getInt(PRESET_BOOST, 0) != 0) {
             reverb.setProgress(Extras.getInstance().saveEq().getInt(PRESET_BOOST, 0));
-        }else {
+        } else {
             reverb.setProgress(1);
         }
         if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
@@ -234,9 +239,9 @@ public class EqFragment extends Fragment {
         if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             virtualizerBoost.getTextPaint().setColor(ContextCompat.getColor(getContext(), R.color.white));
         }
-        if (Extras.getInstance().saveEq().getInt(VIRTUAL_BOOST, 0) != 0){
+        if (Extras.getInstance().saveEq().getInt(VIRTUAL_BOOST, 0) != 0) {
             virtualizerBoost.setProgress(Extras.getInstance().saveEq().getInt(VIRTUAL_BOOST, 0));
-        }else {
+        } else {
             virtualizerBoost.setProgress(1);
         }
     }
@@ -256,9 +261,9 @@ public class EqFragment extends Fragment {
         if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             LoudnessBoost.getTextPaint().setColor(ContextCompat.getColor(getContext(), R.color.white));
         }
-        if (Extras.getInstance().saveEq().getInt(LOUD_BOOST, 0) != 0){
+        if (Extras.getInstance().saveEq().getInt(LOUD_BOOST, 0) != 0) {
             LoudnessBoost.setProgress(Extras.getInstance().saveEq().getInt(LOUD_BOOST, 0));
-        }else {
+        } else {
             LoudnessBoost.setProgress(1);
         }
     }
@@ -301,7 +306,7 @@ public class EqFragment extends Fragment {
                 }
                 seekBarFinal[eqbands] = seekBar;
                 seekBar.setId(i);
-                if (bandLevel != null){
+                if (bandLevel != null) {
                     seekBar.setMax(bandLevel[1] - bandLevel[0]);
                 }
                 int frequency = Equalizers.getCenterFreq(eqbands);
@@ -314,15 +319,15 @@ public class EqFragment extends Fragment {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         try {
-                            if (bandLevel != null){
-                                short level = (short) (progress+bandLevel[0]);
-                                if (fromUser){
+                            if (bandLevel != null) {
+                                short level = (short) (progress + bandLevel[0]);
+                                if (fromUser) {
                                     Equalizers.setBandLevel(eqbands, level);
                                     appCompatSpinner.setSelection(0);
                                     Equalizers.savePrefs(Equalizers.getCurrentPreset(), level);
                                 }
                             }
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
@@ -347,7 +352,7 @@ public class EqFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (getActivity() == null){
+        if (getActivity() == null) {
             return;
         }
         if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {

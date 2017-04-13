@@ -41,7 +41,22 @@
         </menu>
     </item>
 
-
+    <item
+        android:id="@+id/grid_view"
+        android:title="Grid view"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/bytwo"
+                android:title="2x2"/>
+            <item
+                android:id="@+id/bythree"
+                android:title="3x3"/>
+            <item
+                android:id="@+id/byfour"
+                android:title="4x4"/>
+        </menu>
+    </item>
 </menu>
 
 

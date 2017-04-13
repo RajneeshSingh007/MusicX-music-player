@@ -9,4 +9,10 @@ import android.support.v4.app.Fragment;
 public abstract class miniFragment extends Fragment {
 
     abstract public void load();
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        load();
+    }
 }

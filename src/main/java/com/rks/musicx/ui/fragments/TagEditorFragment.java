@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -37,18 +38,12 @@ import com.rks.musicx.misc.utils.bitmap;
 import com.rks.musicx.misc.utils.palette;
 
 import java.io.File;
-import java.util.HashMap;
 
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
 import static com.rks.musicx.R.id.artist;
-import static com.rks.musicx.misc.utils.Constants.SONG_ALBUM;
-import static com.rks.musicx.misc.utils.Constants.SONG_ARTIST;
-import static com.rks.musicx.misc.utils.Constants.SONG_TITLE;
-import static com.rks.musicx.misc.utils.Constants.SONG_TRACK_NUMBER;
-import static com.rks.musicx.misc.utils.Constants.SONG_YEAR;
 import static com.rks.musicx.misc.utils.Helper.editSongTags;
 
 /**
@@ -56,16 +51,17 @@ import static com.rks.musicx.misc.utils.Helper.editSongTags;
  */
 public class TagEditorFragment extends miniFragment implements ImageChooserListener {
 
-    private TextInputEditText mTitleEditText, mArtistEditText, mAlbumEditText, mTrackEditText,mYearEditText;
+    private TextInputEditText mTitleEditText, mArtistEditText, mAlbumEditText, mTrackEditText, mYearEditText, mLyricsEditText;
     private Song song;
     private Toolbar toolbar;
     private FloatingActionButton saveTags;
     private ImageView albumArtwork;
-    private String finalPath,mediaPath;
+    private String finalPath, mediaPath, path;
     private ChosenImage chosenImages;
     private ImageChooserManager imageChooserManager;
+    private MediaScannerConnection mediaScannerConnection;
 
-    public static TagEditorFragment getInstance(){
+    public static TagEditorFragment getInstance() {
         return new TagEditorFragment();
     }
 
@@ -84,6 +80,7 @@ public class TagEditorFragment extends miniFragment implements ImageChooserListe
         mAlbumEditText = (TextInputEditText) rootView.findViewById(R.id.album);
         mTrackEditText = (TextInputEditText) rootView.findViewById(R.id.track_number);
         mYearEditText = (TextInputEditText) rootView.findViewById(R.id.year);
+        mLyricsEditText = (TextInputEditText) rootView.findViewById(R.id.lyrics);
         toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         saveTags = (FloatingActionButton) rootView.findViewById(R.id.save_tag);
         albumArtwork = (ImageView) rootView.findViewById(R.id.album_artwork);
@@ -110,11 +107,13 @@ public class TagEditorFragment extends miniFragment implements ImageChooserListe
         song.setId(songid);
         song.setAlbumId(id);
         song.setYear(year);
+        song.setLyrics(Helper.getInbuiltLyrics(path));
         mTitleEditText.setText(song.getTitle());
         mArtistEditText.setText(song.getArtist());
         mAlbumEditText.setText(song.getAlbum());
         mTrackEditText.setText(String.valueOf(song.getTrackNumber()));
         mYearEditText.setText(song.getYear());
+        mLyricsEditText.setText(song.getLyrics());
         saveTags.setImageBitmap(Helper.textAsBitmap("Save", 40, Color.WHITE));
         ArtworkUtils.ArtworkLoaderPalette(getContext(), title, id, albumArtwork, new palette() {
             @Override
@@ -143,7 +142,7 @@ public class TagEditorFragment extends miniFragment implements ImageChooserListe
 
                     @Override
                     protected Boolean doInBackground(Object... params) {
-                        return storeData(getContext(), song);
+                        return storeData(getContext());
                     }
 
                     @Override
@@ -152,6 +151,17 @@ public class TagEditorFragment extends miniFragment implements ImageChooserListe
                         if (b) {
                             load();
                             Toast.makeText(getContext(), "Tag Edit Success", Toast.LENGTH_SHORT).show();
+                            mediaScannerConnection = new MediaScannerConnection(getContext(),
+                                    new MediaScannerConnection.MediaScannerConnectionClient() {
+
+                                        public void onScanCompleted(String path, Uri uri) {
+                                            mediaScannerConnection.disconnect();
+                                        }
+
+                                        public void onMediaScannerConnected() {
+                                            mediaScannerConnection.scanFile(song.getmSongPath(), "audio/*");
+                                        }
+                                    });
                         } else {
                             Toast.makeText(getContext(), "Tag Edit Failed", Toast.LENGTH_SHORT).show();
                         }
@@ -184,14 +194,16 @@ public class TagEditorFragment extends miniFragment implements ImageChooserListe
     /**
      * Save tags
      */
-    public boolean storeData(Context context, Song song) {
-        HashMap<String, String> tags = new HashMap<>();
-        tags.put(SONG_TITLE, mTitleEditText.getText().toString());
-        tags.put(SONG_ARTIST, mArtistEditText.getText().toString());
-        tags.put(SONG_ALBUM, mAlbumEditText.getText().toString());
-        tags.put(SONG_TRACK_NUMBER, mTrackEditText.getText().toString());
-        tags.put(SONG_YEAR, mYearEditText.getText().toString());
-        return editSongTags(context, song, tags);
+    public boolean storeData(Context context) {
+        Song newData = new Song();
+        newData.setAlbum(mAlbumEditText.getText().toString());
+        newData.setTitle(mTitleEditText.getText().toString());
+        newData.setYear(mYearEditText.getText().toString());
+        newData.setArtist(mArtistEditText.getText().toString());
+        newData.setTrackNumber(Integer.parseInt(mTrackEditText.getText().toString()));
+        newData.setLyrics(mLyricsEditText.getText().toString());
+        newData.setmSongPath(Extras.getInstance().getPath());
+        return editSongTags(context, newData);
     }
 
     @Override
@@ -228,6 +240,7 @@ public class TagEditorFragment extends miniFragment implements ImageChooserListe
     public void onImageChosen(ChosenImage chosenImage) {
         chosenImages = chosenImage;
         finalPath = chosenImages.getFilePathOriginal();
+        song.setAlbumArt(Uri.parse(finalPath));
         if (getActivity() == null) {
             return;
         }
@@ -304,7 +317,7 @@ public class TagEditorFragment extends miniFragment implements ImageChooserListe
                 }, new bitmap() {
                     @Override
                     public void bitmapwork(Bitmap bitmap) {
-                        albumArtwork.setImageBitmap( bitmap);
+                        albumArtwork.setImageBitmap(bitmap);
                     }
 
                     @Override

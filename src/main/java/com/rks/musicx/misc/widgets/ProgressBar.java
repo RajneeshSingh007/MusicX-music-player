@@ -33,6 +33,7 @@ public class ProgressBar extends android.widget.ProgressBar {
     private String atekey = Helper.getATEKey(getContext());
     private int accent = Config.accentColor(getContext(), atekey);
     private int DEFAULT_PROGRESS_COLOR = accent;
+    private int progressColor;
     private int DEFAULT_PROGRESS_BACKGROUND_COLOR = Color.TRANSPARENT;
 
     private ValueAnimator mProgressAnimator;
@@ -57,7 +58,7 @@ public class ProgressBar extends android.widget.ProgressBar {
         // progress color set
         TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.ProgressBar);
 
-        int progressColor = ta.getColor(R.styleable.ProgressBar_ahp_progressColor, DEFAULT_PROGRESS_COLOR);
+        progressColor = ta.getColor(R.styleable.ProgressBar_ahp_progressColor, DEFAULT_PROGRESS_COLOR);
         int backgroundColor = ta.getColor(R.styleable.ProgressBar_ahp_backgroundColor, DEFAULT_PROGRESS_BACKGROUND_COLOR);
         int cornerRadius = ta.getDimensionPixelSize(R.styleable.ProgressBar_ahp_cornerRadius, DEFAULT_CORNER_RADIUS);
 
@@ -96,6 +97,7 @@ public class ProgressBar extends android.widget.ProgressBar {
         gradientDrawable.setCornerRadius(radius);
         return gradientDrawable;
     }
+
 
     private void setUpAnimator() {
         mProgressAnimator = new ValueAnimator();
@@ -253,6 +255,10 @@ public class ProgressBar extends android.widget.ProgressBar {
 
     public void setDefaultProgressBackgroundColor(int defaultProgressBackgroundColor) {
         DEFAULT_PROGRESS_BACKGROUND_COLOR = defaultProgressBackgroundColor;
+    }
+
+    public void setProgressColor(int progressColor) {
+        this.progressColor = progressColor;
     }
 
     public void setDefaultProgressColor(int defaultProgressColor) {

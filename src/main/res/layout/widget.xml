@@ -2,7 +2,7 @@
               android:id="@+id/item_view"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
-              android:layout_margin="8dp"
+              android:layout_margin="4dp"
               android:background="@color/white"
               android:elevation="4dp"
               android:gravity="center_vertical"
@@ -10,8 +10,8 @@
 
     <ImageView
         android:id="@+id/artwork"
-        android:layout_width="110dp"
-        android:layout_height="110dp"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
         android:contentDescription="@null"
         android:scaleType="centerCrop"
         android:src="@mipmap/ic_launcher"/>

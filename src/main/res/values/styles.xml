@@ -18,6 +18,7 @@
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
         <item name="toolbar_popup_theme">?toolbar_popup_theme</item>
         <item name="windowBackground">@color/lightBg</item>
+        <item name="android:windowDisablePreview">true</item>
         <item name="android:windowBackground">@color/lightBg</item>
         <item name="ate_key">light_theme</item>
     </style>
@@ -33,6 +34,7 @@
         <item name="android:windowActionBarOverlay">true</item>
         <item name="windowBackground">@color/darkBg</item>
         <item name="toolbar_popup_theme">?toolbar_popup_theme</item>
+        <item name="android:windowDisablePreview">true</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
         <item name="ate_key">dark_theme</item>
     </style>

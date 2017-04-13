@@ -153,6 +153,9 @@ public class Playing3Fragment extends BaseFragment implements SimpleItemTouchHel
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
+            if (musicXService == null) {
+                return;
+            }
             switch (view.getId()) {
                 case R.id.item_view:
                     musicXService.setdataPos(position, true);
@@ -188,7 +191,7 @@ public class Playing3Fragment extends BaseFragment implements SimpleItemTouchHel
         songArtist = (TextView) rootview.findViewById(R.id.song_artist);
         songTitle = (TextView) rootview.findViewById(R.id.song_title);
         seekbar = (SeekBar) rootview.findViewById(R.id.seekbar);
-        lrcView= (TextView) rootview.findViewById(R.id.lyrics);
+        lrcView = (TextView) rootview.findViewById(R.id.lyrics);
         bottomsheetLyrics = (FrameLayout) rootview.findViewById(R.id.bottomsheetLyrics);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomsheetLyrics);
         diagonalLayout = (DiagonalLayout) rootview.findViewById(R.id.diagonalLayout);
@@ -309,7 +312,7 @@ public class Playing3Fragment extends BaseFragment implements SimpleItemTouchHel
         });
         if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             bottomsheetLyrics.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.MaterialGrey));
-           // lrcview.setTextColor(Color.WHITE);
+            // lrcview.setTextColor(Color.WHITE);
         } else {
             bottomsheetLyrics.setBackgroundColor(Color.WHITE);
 //            lrcview.setTextColor(ContextCompat.getColor(getContext(), R.color.MaterialGrey));
@@ -342,7 +345,7 @@ public class Playing3Fragment extends BaseFragment implements SimpleItemTouchHel
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.clear_queue:
-                        if (queueAdapter.getSnapshot().size() > 0){
+                        if (queueAdapter.getSnapshot().size() > 0) {
                             queueAdapter.clear();
                             queueAdapter.notifyDataSetChanged();
                             musicXService.clearQueue();
@@ -546,12 +549,12 @@ public class Playing3Fragment extends BaseFragment implements SimpleItemTouchHel
                 totalDur.setText(durationCalculator(dur));
             }
             updateQueue("Executed");
-            new Helper(getContext()).LoadLyrics(musicXService.getsongTitle(), musicXService.getsongArtistName(), lrcView);
+            new Helper(getContext()).LoadLyrics(title, artist, musicXService.getsongData(), lrcView);
 
         }
     }
 
-    private void colorMode(int color){
+    private void colorMode(int color) {
         if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             getActivity().getWindow().setNavigationBarColor(color);
             seekbar.setBackgroundTintList(ColorStateList.valueOf(color));
@@ -561,6 +564,7 @@ public class Playing3Fragment extends BaseFragment implements SimpleItemTouchHel
         }
 
     }
+
     private void updateShuffleButton() {
         boolean shuffle = musicXService.isShuffleEnabled();
         if (shuffle) {
@@ -572,11 +576,11 @@ public class Playing3Fragment extends BaseFragment implements SimpleItemTouchHel
 
     private void updateRepeatButton() {
         int mode = musicXService.getRepeatMode();
-        if (mode == musicXService.getNoRepeat()){
+        if (mode == musicXService.getNoRepeat()) {
             repeatButton.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_no));
-        }else if (mode == musicXService.getRepeatCurrent()){
+        } else if (mode == musicXService.getRepeatCurrent()) {
             repeatButton.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_all));
-        } else if (mode == musicXService.getRepeatAll()){
+        } else if (mode == musicXService.getRepeatAll()) {
             repeatButton.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_one));
         }
     }
@@ -662,9 +666,9 @@ public class Playing3Fragment extends BaseFragment implements SimpleItemTouchHel
                         } else {
                             getActivity().getWindow().setStatusBarColor(color[0]);
                         }
-                        if (Extras.getInstance().artworkColor()){
+                        if (Extras.getInstance().artworkColor()) {
                             colorMode(color[0]);
-                        }else {
+                        } else {
                             colorMode(accentColor);
                         }
                     }
@@ -688,7 +692,7 @@ public class Playing3Fragment extends BaseFragment implements SimpleItemTouchHel
         setButtonDrawable();
         if (musicXService.isPlaying()) {
             handler.post(seekbarrunnable);
-        }else {
+        } else {
             handler.removeCallbacks(seekbarrunnable);
         }
     }
@@ -698,7 +702,7 @@ public class Playing3Fragment extends BaseFragment implements SimpleItemTouchHel
         PlayingView();
         if (musicXService.isPlaying()) {
             handler.post(seekbarrunnable);
-        }else {
+        } else {
             handler.removeCallbacks(seekbarrunnable);
         }
         if (isalbumArtChanged) {
@@ -770,9 +774,9 @@ public class Playing3Fragment extends BaseFragment implements SimpleItemTouchHel
                         } else {
                             getActivity().getWindow().setStatusBarColor(color[0]);
                         }
-                        if (Extras.getInstance().artworkColor()){
+                        if (Extras.getInstance().artworkColor()) {
                             colorMode(color[0]);
-                        }else {
+                        } else {
                             colorMode(accentColor);
                         }
                     }

@@ -19,7 +19,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Artist;
 import com.rks.musicx.data.network.ArtistArtwork;
@@ -84,7 +83,7 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
                 ArtworkUtils.ArtworkLoaderPalette(getContext(), file.getAbsolutePath(), holder.ArtistsArtwork, new palette() {
                     @Override
                     public void palettework(Palette palette) {
-                        final int[] colors = getAvailableColor(palette);
+                        final int[] colors = Helper.getAvailableColor(getContext(),palette);
                         holder.backgroundColor.setBackgroundColor(colors[0]);
                         holder.ArtistName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
                         holder.AlbumCount.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
@@ -148,38 +147,6 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
         ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
         colorAnimation.setDuration(duration);
         return colorAnimation;
-    }
-
-    private int[] getAvailableColor(Palette palette) {
-        int[] temp = new int[3]; //array with size 3
-        if (palette.getDarkVibrantSwatch() != null) {
-            temp[0] = palette.getDarkVibrantSwatch().getRgb();
-            temp[1] = palette.getDarkVibrantSwatch().getTitleTextColor();
-            temp[2] = palette.getDarkVibrantSwatch().getBodyTextColor();
-        } else if (palette.getDarkMutedSwatch() != null) {
-            temp[0] = palette.getDarkMutedSwatch().getRgb();
-            temp[1] = palette.getDarkMutedSwatch().getTitleTextColor();
-            temp[2] = palette.getDarkMutedSwatch().getBodyTextColor();
-        } else if (palette.getVibrantSwatch() != null) {
-            temp[0] = palette.getVibrantSwatch().getRgb();
-            temp[1] = palette.getVibrantSwatch().getTitleTextColor();
-            temp[2] = palette.getVibrantSwatch().getBodyTextColor();
-        } else if (palette.getDominantSwatch() != null) {
-            temp[0] = palette.getDominantSwatch().getRgb();
-            temp[1] = palette.getDominantSwatch().getTitleTextColor();
-            temp[2] = palette.getDominantSwatch().getBodyTextColor();
-        } else if (palette.getMutedSwatch() != null) {
-            temp[0] = palette.getMutedSwatch().getRgb();
-            temp[1] = palette.getMutedSwatch().getTitleTextColor();
-            temp[2] = palette.getMutedSwatch().getBodyTextColor();
-        } else {
-            String atkey = Helper.getATEKey(getContext());
-            int accent = Config.accentColor(getContext(), atkey);
-            temp[0] = accent;
-            temp[1] = 0xffe5e5e5;
-            temp[2] = accent;
-        }
-        return temp;
     }
 
     public class ArtistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

@@ -7,6 +7,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.util.Pair;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,6 +27,7 @@ import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
+import com.rks.musicx.misc.utils.ItemOffsetDecoration;
 import com.rks.musicx.ui.adapters.ArtistListAdapter;
 import com.rks.musicx.ui.adapters.BaseRecyclerViewAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -45,7 +47,7 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
     private List<Artist> artistlist;
     private SearchView searchView;
 
-    private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
+    private BaseRecyclerViewAdapter.OnItemClickListener listOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
             switch (view.getId()) {
@@ -60,8 +62,22 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
         }
     };
 
-    public static ArtistListFragment newInstance(int pos) {
-        Extras.getInstance().setTabIndex(pos);
+    private BaseRecyclerViewAdapter.OnItemClickListener gridOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position, View view) {
+            switch (view.getId()) {
+                case R.id.album_artwork:
+                case R.id.item_view:
+                    Fragment fragment = ArtistFragment.newInstance(artistListAdapter.getItem(position));
+                    ImageView imageView = (ImageView) view.findViewById(R.id.album_artwork);
+                    fragTransition(fragment, imageView);
+                    rv.smoothScrollToPosition(position);
+                    break;
+            }
+        }
+    };
+
+    public static ArtistListFragment newInstance() {
         return new ArtistListFragment();
     }
 
@@ -74,21 +90,15 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.common_rv, container, false);
         rv = (FastScrollRecyclerView) rootView.findViewById(R.id.commonrv);
-        artistListAdapter = new ArtistListAdapter(getActivity());
-        artistListAdapter.setLayoutID(R.layout.item_list_view);
-        artistListAdapter.setOnItemClickListener(mOnClick);
-        CustomLayoutManager custom = new CustomLayoutManager(getActivity());
-        rv.setLayoutManager(custom);
-        rv.setAdapter(new ArtistListAdapter(getContext()));
-        rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
-        rv.setHasFixedSize(true);
-        String ateKey = Helper.getATEKey(getContext());
-        int colorAccent = Config.accentColor(getContext(), ateKey);
+        artistListAdapter = new ArtistListAdapter(getContext());
+        int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
         rv.setPopupBgColor(colorAccent);
-        rv.setAdapter(artistListAdapter);
+        rv.setHasFixedSize(true);
         setHasOptionsMenu(true);
         loadArtist();
+        artistView();
         artistlist = new ArrayList<>();
+        rv.setAdapter(artistListAdapter);
         return rootView;
     }
 
@@ -99,6 +109,11 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
         searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.artist_search));
         searchView.setOnQueryTextListener(this);
         searchView.setQueryHint("Search artist");
+        if (Extras.getInstance().artistView()) {
+            menu.findItem(R.id.grid_view).setVisible(false);
+        } else {
+            menu.findItem(R.id.grid_view).setVisible(true);
+        }
     }
 
     @Override
@@ -120,6 +135,18 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
             case R.id.menu_sort_by_number_of_albums:
                 extras.setArtistSortOrder(SortOrder.ArtistSortOrder.ARTIST_NUMBER_OF_ALBUMS);
                 load();
+                break;
+            case R.id.bytwo:
+                Extras.getInstance().setArtistGrid(2);
+                loadGridView();
+                break;
+            case R.id.bythree:
+                Extras.getInstance().setArtistGrid(3);
+                loadGridView();
+                break;
+            case R.id.byfour:
+                Extras.getInstance().setArtistGrid(4);
+                loadGridView();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -178,4 +205,35 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
         return true;
     }
 
+    private void loadGridView() {
+        if (Extras.getInstance().getArtistGrid() == 2) {
+            GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
+            rv.setLayoutManager(layoutManager);
+            load();
+        } else if (Extras.getInstance().getArtistGrid() == 3) {
+            GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
+            rv.setLayoutManager(layoutManager);
+            load();
+        } else if (Extras.getInstance().getArtistGrid() == 4) {
+            GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
+            rv.setLayoutManager(layoutManager);
+            load();
+        }
+    }
+
+    private void artistView() {
+        if (Extras.getInstance().artistView()) {
+            artistListAdapter.setLayoutID(R.layout.item_list_view);
+            artistListAdapter.setOnItemClickListener(listOnClick);
+            CustomLayoutManager custom = new CustomLayoutManager(getContext());
+            custom.setSmoothScrollbarEnabled(true);
+            rv.setLayoutManager(custom);
+            rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
+        } else {
+            artistListAdapter.setOnItemClickListener(gridOnClick);
+            artistListAdapter.setLayoutID(R.layout.item_grid_view);
+            rv.addItemDecoration(new ItemOffsetDecoration(2));
+            loadGridView();
+        }
+    }
 }

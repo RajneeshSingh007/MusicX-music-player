@@ -5,6 +5,7 @@ import android.media.audiofx.Virtualizer;
 import android.util.Log;
 
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.services.MediaPlayerSingleton;
 
 import static com.rks.musicx.misc.utils.Constants.VIRTUAL_BOOST;
 import static com.rks.musicx.misc.utils.Constants.Virtualizer_STRENGTH;
@@ -24,12 +25,12 @@ public class Virtualizers {
     /*
      Init Virtualizer
     */
-    public static void initVirtualizer(int audioID) {
+    public static void initVirtualizer() {
         EndVirtual();
         try {
-            virtualizer = new Virtualizer(0, audioID);
+            virtualizer = new Virtualizer(0, MediaPlayerSingleton.getInstance().getMediaPlayer().getAudioSessionId());
             short str = (short) Extras.getInstance().saveEq().getInt(VIRTUAL_BOOST, 0);
-            if (str != 0){
+            if (str != 0) {
                 virtualizer.setStrength(str);
             }
         } catch (Exception e) {

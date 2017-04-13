@@ -86,7 +86,7 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (getActivity() == null){
+        if (getActivity() == null) {
             return;
         }
         if (!mServiceBound) {
@@ -101,7 +101,7 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment {
             filter.addAction(ORDER_CHANGED);
             try {
                 getActivity().registerReceiver(broadcastReceiver, filter);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 // already registered
             }
         } else {
@@ -114,7 +114,7 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if (getActivity() == null){
+        if (getActivity() == null) {
             return;
         }
         musicXService = null;
@@ -123,7 +123,7 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment {
             mServiceBound = false;
             try {
                 getActivity().unregisterReceiver(broadcastReceiver);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 // already unregistered
             }
         }

@@ -6,6 +6,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,6 +26,7 @@ import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
+import com.rks.musicx.misc.utils.ItemOffsetDecoration;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.BaseRecyclerViewAdapter;
 import com.rks.musicx.ui.adapters.SongListAdapter;
@@ -46,7 +48,7 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
     private SearchView searchView;
     private List<Song> songList;
 
-    private BaseRecyclerViewAdapter.OnItemClickListener onClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
+    private BaseRecyclerViewAdapter.OnItemClickListener listClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
 
         @Override
         public void onItemClick(int position, View view) {
@@ -63,9 +65,26 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
         }
     };
 
+    private BaseRecyclerViewAdapter.OnItemClickListener gridClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
 
-    public static SongListFragment newInstance(int pos) {
-        Extras.getInstance().setTabIndex(pos);
+        @Override
+        public void onItemClick(int position, View view) {
+            switch (view.getId()) {
+                case R.id.album_artwork:
+                case R.id.album_info:
+                    ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
+                    rv.smoothScrollToPosition(position);
+                    break;
+                case R.id.menu_button:
+                    helper.showMenu(trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                    break;
+
+            }
+        }
+    };
+
+
+    public static SongListFragment newInstance() {
         return new SongListFragment();
     }
 
@@ -74,17 +93,13 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.common_rv, container, false);
         rv = (FastScrollRecyclerView) rootView.findViewById(R.id.commonrv);
-        CustomLayoutManager customLayoutManager = new CustomLayoutManager(getActivity());
-        customLayoutManager.setSmoothScrollbarEnabled(true);
-        rv.setLayoutManager(customLayoutManager);
-        rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75, false));
         songListAdapter = new SongListAdapter(getContext());
-        songListAdapter.setOnItemClickListener(onClick);
         String ateKey = Helper.getATEKey(getContext());
         int colorAccent = Config.accentColor(getContext(), ateKey);
         rv.setPopupBgColor(colorAccent);
         rv.setItemAnimator(new DefaultItemAnimator());
         loadTrak();
+        songView();
         setHasOptionsMenu(true);
         helper = new Helper(getContext());
         rv.setAdapter(songListAdapter);
@@ -106,6 +121,11 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
         searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.song_search));
         searchView.setOnQueryTextListener(this);
         searchView.setQueryHint("Search song");
+        if (Extras.getInstance().songView()) {
+            menu.findItem(R.id.grid_view).setVisible(true);
+        } else {
+            menu.findItem(R.id.grid_view).setVisible(false);
+        }
     }
 
     @Override
@@ -140,6 +160,18 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
                 extras.setSongSortOrder(SortOrder.SongSortOrder.SONG_DATE);
                 load();
                 break;
+            case R.id.bytwo:
+                Extras.getInstance().setSongGrid(2);
+                loadGridView();
+                break;
+            case R.id.bythree:
+                Extras.getInstance().setSongGrid(3);
+                loadGridView();
+                break;
+            case R.id.byfour:
+                Extras.getInstance().setSongGrid(4);
+                loadGridView();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -165,6 +197,7 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
     @Override
     public void load() {
         getLoaderManager().restartLoader(trackloader, null, this);
+        songListAdapter.notifyDataSetChanged();
     }
 
 
@@ -206,5 +239,38 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
         loader.reset();
         songListAdapter.notifyDataSetChanged();
     }
+
+    private void loadGridView() {
+        if (Extras.getInstance().getSongGrid() == 2) {
+            GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
+            rv.setLayoutManager(layoutManager);
+            load();
+        } else if (Extras.getInstance().getSongGrid() == 3) {
+            GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
+            rv.setLayoutManager(layoutManager);
+            load();
+        } else if (Extras.getInstance().getSongGrid() == 4) {
+            GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
+            rv.setLayoutManager(layoutManager);
+            load();
+        }
+    }
+
+    private void songView() {
+        if (Extras.getInstance().songView()) {
+            songListAdapter.setLayoutId(R.layout.item_grid_view);
+            songListAdapter.setOnItemClickListener(gridClick);
+            rv.addItemDecoration(new ItemOffsetDecoration(2));
+            loadGridView();
+        } else {
+            songListAdapter.setLayoutId(R.layout.song_list);
+            songListAdapter.setOnItemClickListener(listClick);
+            CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
+            customLayoutManager.setSmoothScrollbarEnabled(true);
+            rv.setLayoutManager(customLayoutManager);
+            rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75, false));
+        }
+    }
+
 
 }

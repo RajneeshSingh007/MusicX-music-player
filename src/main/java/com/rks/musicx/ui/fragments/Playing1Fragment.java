@@ -55,7 +55,6 @@ import com.rks.musicx.misc.utils.PlayingPagerAdapter;
 import com.rks.musicx.misc.utils.SimpleItemTouchHelperCallback;
 import com.rks.musicx.misc.utils.bitmap;
 import com.rks.musicx.misc.utils.palette;
-import com.rks.musicx.misc.widgets.BlurArtwork;
 import com.rks.musicx.misc.widgets.CircleImageView;
 import com.rks.musicx.misc.widgets.CircularSeekBar;
 import com.rks.musicx.ui.activities.EqualizerActivity;
@@ -83,6 +82,7 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHelperCallback.OnStartDragListener, ImageChooserListener {
 
 
+    private final ScheduledExecutorService mExecutorService = Executors.newSingleThreadScheduledExecutor();
     private String finalPath;
     private ChosenImage chosenImages;
     private FloatingActionButton playpausebutton;
@@ -111,7 +111,6 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
     private Helper helper;
     private ImageChooserManager imageChooserManager;
     private String mediaPath;
-    private final ScheduledExecutorService mExecutorService = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> mScheduleFuture;
 
     private Runnable seekbarRunnable = new Runnable() {
@@ -170,6 +169,9 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
+            if (musicXService == null) {
+                return;
+            }
             switch (view.getId()) {
                 case R.id.item_view:
                     musicXService.setdataPos(position, true);
@@ -193,7 +195,7 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.clear_queue:
-                        if (queueAdapter.getSnapshot().size() > 0){
+                        if (queueAdapter.getSnapshot().size() > 0) {
                             queueAdapter.clear();
                             queueAdapter.notifyDataSetChanged();
                             musicXService.clearQueue();
@@ -334,68 +336,68 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
         PlayingPagerAdapter = new PlayingPagerAdapter(Playing3PagerDetails);
         Pager.setAdapter(PlayingPagerAdapter);
         /**
-       * Swipe Listerner
-       */
-      final GestureDetector gesture = new GestureDetector(getActivity(), new GestureDetector.SimpleOnGestureListener() {
-        private static final int SWIPE_THRESHOLD = 200;
-        private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+         * Swipe Listerner
+         */
+        final GestureDetector gesture = new GestureDetector(getActivity(), new GestureDetector.SimpleOnGestureListener() {
+            private static final int SWIPE_THRESHOLD = 200;
+            private static final int SWIPE_VELOCITY_THRESHOLD = 100;
 
-        @Override
-        public boolean onDown(MotionEvent e) {
-          return true;
-        }
-
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-          return super.onSingleTapUp(e);
-        }
-
-        @Override
-        public boolean onDoubleTap(MotionEvent e) {
-
-          return super.onDoubleTap(e);
-        }
-
-        @Override
-        public void onLongPress(MotionEvent e) {
-          super.onLongPress(e);
-        }
-
-        // Determines the fling velocity and then fires the appropriate swipe event accordingly
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-          try {
-            float diffY = e2.getY() - e1.getY();
-            float diffX = e2.getX() - e1.getX();
-            if (Math.abs(diffX) > Math.abs(diffY)) {
-              if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                if (diffX > 0) {
-                  Log.d("Aloha !!!", "no left swipe..");
-                } else {
-                  Log.d("Aloha !!!", "no right swipe..");
-                }
-              }
-            } else {
-              if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
-                if (diffY > 0) {
-                  if (musicXService.isPlaying()) {
-                    musicXService.playprev(true);
-                    Log.d("Aloha !!!", "Down swipe..");
-                  }
-                } else {
-                  if (musicXService.isPlaying()) {
-                    musicXService.playnext(true);
-                    Log.d("Aloha !!!", "Up swipe..");
-                  }
-                }
-              }
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
             }
-          } catch (Exception exception) {
-            exception.printStackTrace();
-          }
-          return true;
-        }
-      });
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                return super.onSingleTapUp(e);
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+
+                return super.onDoubleTap(e);
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                super.onLongPress(e);
+            }
+
+            // Determines the fling velocity and then fires the appropriate swipe event accordingly
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                try {
+                    float diffY = e2.getY() - e1.getY();
+                    float diffX = e2.getX() - e1.getX();
+                    if (Math.abs(diffX) > Math.abs(diffY)) {
+                        if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                            if (diffX > 0) {
+                                Log.d("Aloha !!!", "no left swipe..");
+                            } else {
+                                Log.d("Aloha !!!", "no right swipe..");
+                            }
+                        }
+                    } else {
+                        if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+                            if (diffY > 0) {
+                                if (musicXService.isPlaying()) {
+                                    musicXService.playprev(true);
+                                    Log.d("Aloha !!!", "Down swipe..");
+                                }
+                            } else {
+                                if (musicXService.isPlaying()) {
+                                    musicXService.playnext(true);
+                                    Log.d("Aloha !!!", "Up swipe..");
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+                return true;
+            }
+        });
         coverView.setOnTouchListener((v, event) -> {
             gesture.onTouchEvent(event);
             return true;
@@ -603,9 +605,9 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
                         } else {
                             getActivity().getWindow().setStatusBarColor(colors[0]);
                         }
-                        if (Extras.getInstance().artworkColor()){
+                        if (Extras.getInstance().artworkColor()) {
                             colorMode(colors[0]);
-                        }else {
+                        } else {
                             colorMode(accentColor);
                         }
                     }
@@ -618,7 +620,7 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
                     @Override
                     public void bitmapfailed(Bitmap bitmap) {
                         Playing3view.setBackgroundColor(accentColor);
-                        new BlurArtwork(getContext(), 25, bitmap, blur_artowrk).execute("BlurredArtwork");
+                        ArtworkUtils.getBlurArtwork(getContext(), 25, ArtworkUtils.getDefaultArtwork(getContext()), blur_artowrk, 1.0f);
                     }
                 });
             }
@@ -668,7 +670,7 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
                     favButton.setImageResource(R.drawable.ic_action_favorite_outline);
                 }
             }
-            new Helper(getContext()).LoadLyrics(musicXService.getsongTitle(), musicXService.getsongArtistName(), lrcView);
+            new Helper(getContext()).LoadLyrics(title, artist, musicXService.getsongData(), lrcView);
             updateQueue("Executed");
         }
     }
@@ -692,7 +694,8 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
             mScheduleFuture.cancel(false);
         }
     }
-    private void colorMode(int color){
+
+    private void colorMode(int color) {
         if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
             mSeekBar.setCircleProgressColor(color);
             mSeekBar.setPointerColor(color);
@@ -720,11 +723,11 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
 
     private void updateRepeatButton() {
         int mode = musicXService.getRepeatMode();
-        if (mode == musicXService.getNoRepeat()){
+        if (mode == musicXService.getNoRepeat()) {
             repeatButton.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_no));
-        }else if (mode == musicXService.getRepeatCurrent()){
+        } else if (mode == musicXService.getRepeatCurrent()) {
             repeatButton.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_all));
-        }else if (mode == musicXService.getRepeatAll()){
+        } else if (mode == musicXService.getRepeatAll()) {
             repeatButton.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_one));
         }
     }
@@ -819,9 +822,9 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
                         } else {
                             getActivity().getWindow().setStatusBarColor(colors[0]);
                         }
-                        if (Extras.getInstance().artworkColor()){
+                        if (Extras.getInstance().artworkColor()) {
                             colorMode(colors[0]);
-                        }else {
+                        } else {
                             colorMode(accentColor);
                         }
                     }
@@ -834,7 +837,7 @@ public class Playing1Fragment extends BaseFragment implements SimpleItemTouchHel
                     @Override
                     public void bitmapfailed(Bitmap bitmap) {
                         Playing3view.setBackgroundColor(accentColor);
-                        new BlurArtwork(getContext(), 25, bitmap, blur_artowrk).execute("BlurredArtwork");
+                        ArtworkUtils.getBlurArtwork(getContext(), 25, ArtworkUtils.getDefaultArtwork(getContext()), blur_artowrk, 1.0f);
                     }
                 });
                 queueAdapter.notifyDataSetChanged();

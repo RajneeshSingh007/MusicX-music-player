@@ -10,9 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.rks.musicx.R;
 import com.rks.musicx.misc.utils.Extras;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+
 import java.io.File;
 
 
@@ -22,7 +24,7 @@ import java.io.File;
 
 public class FileAdapter extends BaseRecyclerViewAdapter<File, FileAdapter.Fileviewholder> implements FastScrollRecyclerView.SectionedAdapter {
 
-   // private FileModelComparator fileModelComparator = new FileModelComparator();
+    // private FileModelComparator fileModelComparator = new FileModelComparator();
 
     public FileAdapter(@NonNull Context context) {
         super(context);
@@ -38,21 +40,21 @@ public class FileAdapter extends BaseRecyclerViewAdapter<File, FileAdapter.Filev
     public void onBindViewHolder(FileAdapter.Fileviewholder holder, int position) {
         File file = getItem(position);
         //Collections.sort(data, fileModelComparator);
-        if(!TextUtils.isEmpty(Extras.getInstance().getFolderPath())){
+        if (!TextUtils.isEmpty(Extras.getInstance().getFolderPath())) {
             String path = Extras.getInstance().getFolderPath();
-            String foldername = Extras.getInstance().getFolderPath().substring(path.lastIndexOf("/")+1);
-            if (Extras.getInstance().gettrackFolderpath()){
-              holder.filename.setText(foldername);
+            String foldername = Extras.getInstance().getFolderPath().substring(path.lastIndexOf("/") + 1);
+            if (Extras.getInstance().gettrackFolderpath()) {
+                holder.filename.setText(foldername);
             }
         }
         holder.thumbnail.setImageResource(R.drawable.folder);
-        if (!Extras.getInstance().gettrackFolderpath()){
-          holder.filename.setText(file.getName());
+        if (!Extras.getInstance().gettrackFolderpath()) {
+            holder.filename.setText(file.getName());
         }
         if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
-          holder.filename.setTextColor(Color.WHITE);
+            holder.filename.setTextColor(Color.WHITE);
         } else {
-          holder.filename.setTextColor(Color.BLACK);
+            holder.filename.setTextColor(Color.BLACK);
         }
     }
 

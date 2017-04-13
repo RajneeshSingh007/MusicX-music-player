@@ -68,7 +68,7 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
         guide_detail.setOnClickListener(view -> Helper.GuidLines(AboutActivity.this));
         contact_detail.setText(Html.fromHtml("<a href=\"mailto:developerrajneeshsingh@gmail.com\">Mail us</a>"));
         contact_detail.setMovementMethod(LinkMovementMethod.getInstance());
-        about_app_ver.setText("v 1.3.1");
+        about_app_ver.setText("v 1.3.2");
         developer_name.setText(DEVELOPER_NAME);
         licenses_detail.setText("Licenses");
         testerName.setText(getString(R.string.testerName));

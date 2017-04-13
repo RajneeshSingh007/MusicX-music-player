@@ -5,6 +5,7 @@ import android.media.audiofx.BassBoost;
 import android.util.Log;
 
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.services.MediaPlayerSingleton;
 
 import static com.rks.musicx.misc.utils.Constants.BASSBOOST_STRENGTH;
 import static com.rks.musicx.misc.utils.Constants.BASS_BOOST;
@@ -21,12 +22,12 @@ public class BassBoosts {
     public BassBoosts() {
     }
 
-    public static void initBass(int audioID) {
+    public static void initBass() {
         EndBass();
         try {
-            bassBoost = new BassBoost(0, audioID);
+            bassBoost = new BassBoost(0, MediaPlayerSingleton.getInstance().getMediaPlayer().getAudioSessionId());
             short str = (short) Extras.getInstance().saveEq().getInt(BASS_BOOST, 0);
-            if (str != 0){
+            if (str != 0) {
                 if (bassBoost != null && bassBoost.getStrengthSupported()) {
                     bassBoost.setStrength(str);
                 }
@@ -89,8 +90,8 @@ public class BassBoosts {
         }
     }
 
-    public static short getRounded(){
-        if (bassBoost == null){
+    public static short getRounded() {
+        if (bassBoost == null) {
             return 0;
         }
         return bassBoost.getRoundedStrength();

@@ -22,18 +22,24 @@ import retrofit2.Response;
 
 public class LyricsData extends AsyncTask<String, String, String> {
 
-    private String songName, songArtist;
+    private String songName, songArtist, finallyLoaded, songPath;
     private TextView setLyrics;
     private Call<Vag> vagCall;
     private Context context;
-    private String finallyLoaded;
 
-
-    public LyricsData(Context context, String songName, String songArtist,TextView setLyrics) {
+    public LyricsData(Context context, String songName, String songArtist, TextView setLyrics) {
         this.songName = songName;
         this.songArtist = songArtist;
         this.context = context;
         this.setLyrics = setLyrics;
+    }
+
+    public LyricsData(Context context, String songName, String songArtist, String songPath, TextView setLyrics) {
+        this.songName = songName;
+        this.songArtist = songArtist;
+        this.context = context;
+        this.setLyrics = setLyrics;
+        this.songPath = songPath;
     }
 
 
@@ -64,7 +70,7 @@ public class LyricsData extends AsyncTask<String, String, String> {
                             }
                             setLyrics.setText(finallyLoaded);
                         } else {
-                           setLyrics.setText("No Lyrics Found");
+                            setLyrics.setText(Helper.getInbuiltLyrics(songPath));
                             Log.d("ops ", "No lyrics found");
                         }
                     } else {

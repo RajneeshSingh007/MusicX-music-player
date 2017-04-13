@@ -1,15 +1,5 @@
 package com.rks.musicx.ui.fragments;
 
-import static com.rks.musicx.misc.utils.Constants.BlurView;
-import static com.rks.musicx.misc.utils.Constants.ClearFav;
-import static com.rks.musicx.misc.utils.Constants.ClearRecently;
-import static com.rks.musicx.misc.utils.Constants.PlayingView;
-import static com.rks.musicx.misc.utils.Constants.SaveHeadset;
-import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
-import static com.rks.musicx.misc.utils.Constants.TextFonts;
-import static com.rks.musicx.misc.utils.Constants.Three;
-import static com.rks.musicx.misc.utils.Constants.Zero;
-
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,6 +8,7 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceFragment;
 import android.util.Log;
 import android.view.View;
+
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.prefs.ATECheckBoxPreference;
@@ -35,6 +26,16 @@ import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.widgets.DailogPref;
 import com.rks.musicx.ui.activities.SettingsActivity;
+
+import static com.rks.musicx.misc.utils.Constants.BlurView;
+import static com.rks.musicx.misc.utils.Constants.ClearFav;
+import static com.rks.musicx.misc.utils.Constants.ClearRecently;
+import static com.rks.musicx.misc.utils.Constants.PlayingView;
+import static com.rks.musicx.misc.utils.Constants.SaveHeadset;
+import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
+import static com.rks.musicx.misc.utils.Constants.TextFonts;
+import static com.rks.musicx.misc.utils.Constants.Three;
+import static com.rks.musicx.misc.utils.Constants.Zero;
 
 
 /*
@@ -166,34 +167,32 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                 return true;
             }
         });
-
-
-      findPreference("directory_picker").setOnPreferenceClickListener(new OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick(Preference preference) {
-          StorageChooserView.setScSecondaryActionColor(accentcolor);
-          StorageChooser chooser = new StorageChooser.Builder()
-              .withActivity((SettingsActivity) getActivity())
-              .withFragmentManager(((SettingsActivity) getActivity()).getSupportFragmentManager())
-              .allowCustomPath(true)
-              .allowAddFolder(false)
-              .setDialogTitle("Directory Chooser")
-              .setType(StorageChooser.DIRECTORY_CHOOSER)
-              .skipOverview(false)
-              .showHidden(false)
-              .build();
-          chooser.show();
-          chooser.setOnSelectListener(new StorageChooser.OnSelectListener() {
+        findPreference("directory_picker").setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
-            public void onSelect(String path) {
-              Log.e("PATH", path);
-              Extras.getInstance().saveFolderPath(path);
-              Extras.getInstance().trackFolderPath(true);
+            public boolean onPreferenceClick(Preference preference) {
+                StorageChooserView.setScSecondaryActionColor(accentcolor);
+                StorageChooser chooser = new StorageChooser.Builder()
+                        .withActivity((SettingsActivity) getActivity())
+                        .withFragmentManager(((SettingsActivity) getActivity()).getSupportFragmentManager())
+                        .allowCustomPath(true)
+                        .allowAddFolder(false)
+                        .setDialogTitle("Directory Chooser")
+                        .setType(StorageChooser.DIRECTORY_CHOOSER)
+                        .skipOverview(false)
+                        .showHidden(false)
+                        .build();
+                chooser.show();
+                chooser.setOnSelectListener(new StorageChooser.OnSelectListener() {
+                    @Override
+                    public void onSelect(String path) {
+                        Log.e("PATH", path);
+                        Extras.getInstance().saveFolderPath(path);
+                        Extras.getInstance().trackFolderPath(true);
+                    }
+                });
+                return true;
             }
-          });
-          return true;
-        }
-      });
+        });
         final ATECheckBoxPreference statusBarPref = (ATECheckBoxPreference) findPreference("colored_status_bar");
         final ATECheckBoxPreference navBarPref = (ATECheckBoxPreference) findPreference("colored_nav_bar");
 
@@ -236,7 +235,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
     }
 
 
-  @Override
+    @Override
     public boolean onPreferenceChange(Preference preference, Object o) {
         return false;
     }

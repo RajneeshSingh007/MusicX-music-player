@@ -318,31 +318,29 @@ public class ArtworkUtils {
         return bitmap;
     }
 
-    private static AsyncTask<String, Void, String> getBlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView) {
+    public static AsyncTask<String, Void, String> getBlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView, float scale) {
 
-        return new BlurArtwork(context, radius, bitmap, imageView).execute("BlurredArtwork");
+        return new BlurArtwork(context, radius, bitmap, imageView, scale).execute("Executed");
     }
 
     public static void blurPreferances(Context context, Bitmap blurBitmap, ImageView imageView) {
         String blurView = Extras.getInstance().getmPreferences().getString(BlurView, Constants.Zero);
         switch (blurView) {
             case Constants.Zero:
-                getBlurArtwork(context, 5, blurBitmap, imageView);
+                getBlurArtwork(context, 5, blurBitmap, imageView, 1.0f);
                 break;
             case Constants.One:
-                getBlurArtwork(context, 10, blurBitmap, imageView);
+                getBlurArtwork(context, 10, blurBitmap, imageView,0.8f);
                 break;
             case Constants.Two:
-                getBlurArtwork(context, 15, blurBitmap, imageView);
+                getBlurArtwork(context, 15, blurBitmap, imageView,0.6f);
                 break;
             case Constants.Three:
-                getBlurArtwork(context, 20, blurBitmap, imageView);
+                getBlurArtwork(context, 20, blurBitmap, imageView,0.4f);
                 break;
             case Constants.Four:
-                getBlurArtwork(context, 25, blurBitmap, imageView);
+                getBlurArtwork(context, 25, blurBitmap, imageView,0.2f);
                 break;
-            default:
-                getBlurArtwork(context, 5, blurBitmap, imageView);
         }
     }
 

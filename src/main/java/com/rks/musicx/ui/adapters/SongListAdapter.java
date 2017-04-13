@@ -20,7 +20,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.misc.utils.ArtworkUtils;
@@ -112,7 +111,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             ArtworkUtils.ArtworkLoaderPalette(getContext(), song.getTitle(), song.getAlbumId(), holder.songGridArtwork, new palette() {
                 @Override
                 public void palettework(Palette palette) {
-                    final int[] colors = getAvailableColor(palette);
+                    final int[] colors = Helper.getAvailableColor(getContext(),palette);
                     holder.songView.setBackgroundColor(colors[0]);
                     holder.SongTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
                     holder.SongArtist.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
@@ -139,7 +138,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             ArtworkUtils.ArtworkLoaderPalette(getContext(), song.getTitle(), song.getAlbumId(), holder.songGridArtwork, new palette() {
                 @Override
                 public void palettework(Palette palette) {
-                    final int[] colors = getAvailableColor(palette);
+                    final int[] colors = Helper.getAvailableColor(getContext(),palette);
                     holder.songView.setBackgroundColor(colors[0]);
                     holder.SongTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
                     holder.SongArtist.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
@@ -190,38 +189,6 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
         ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
         colorAnimation.setDuration(duration);
         return colorAnimation;
-    }
-
-    private int[] getAvailableColor(Palette palette) {
-        int[] temp = new int[3]; //array with size 3
-        if (palette.getDarkVibrantSwatch() != null) {
-            temp[0] = palette.getDarkVibrantSwatch().getRgb();
-            temp[1] = palette.getDarkVibrantSwatch().getTitleTextColor();
-            temp[2] = palette.getDarkVibrantSwatch().getBodyTextColor();
-        } else if (palette.getDarkMutedSwatch() != null) {
-            temp[0] = palette.getDarkMutedSwatch().getRgb();
-            temp[1] = palette.getDarkMutedSwatch().getTitleTextColor();
-            temp[2] = palette.getDarkMutedSwatch().getBodyTextColor();
-        } else if (palette.getVibrantSwatch() != null) {
-            temp[0] = palette.getVibrantSwatch().getRgb();
-            temp[1] = palette.getVibrantSwatch().getTitleTextColor();
-            temp[2] = palette.getVibrantSwatch().getBodyTextColor();
-        } else if (palette.getDominantSwatch() != null) {
-            temp[0] = palette.getDominantSwatch().getRgb();
-            temp[1] = palette.getDominantSwatch().getTitleTextColor();
-            temp[2] = palette.getDominantSwatch().getBodyTextColor();
-        } else if (palette.getMutedSwatch() != null) {
-            temp[0] = palette.getMutedSwatch().getRgb();
-            temp[1] = palette.getMutedSwatch().getTitleTextColor();
-            temp[2] = palette.getMutedSwatch().getBodyTextColor();
-        } else {
-            String atkey = Helper.getATEKey(getContext());
-            int accent = Config.accentColor(getContext(), atkey);
-            temp[0] = accent;
-            temp[1] = 0xffe5e5e5;
-            temp[2] = accent;
-        }
-        return temp;
     }
 
     public class SongViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

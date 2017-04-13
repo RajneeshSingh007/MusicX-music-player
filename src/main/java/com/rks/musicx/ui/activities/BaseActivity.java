@@ -1,13 +1,5 @@
 package com.rks.musicx.ui.activities;
 
-import static com.rks.musicx.misc.utils.Constants.DarkTheme;
-import static com.rks.musicx.misc.utils.Constants.Four;
-import static com.rks.musicx.misc.utils.Constants.LightTheme;
-import static com.rks.musicx.misc.utils.Constants.One;
-import static com.rks.musicx.misc.utils.Constants.Three;
-import static com.rks.musicx.misc.utils.Constants.Two;
-import static com.rks.musicx.misc.utils.Constants.Zero;
-
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -19,11 +11,21 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.widget.EditText;
 import android.widget.TextView;
+
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.ATEActivity;
 import com.rks.musicx.R;
 import com.rks.musicx.misc.utils.Extras;
+
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+
+import static com.rks.musicx.misc.utils.Constants.DarkTheme;
+import static com.rks.musicx.misc.utils.Constants.Four;
+import static com.rks.musicx.misc.utils.Constants.LightTheme;
+import static com.rks.musicx.misc.utils.Constants.One;
+import static com.rks.musicx.misc.utils.Constants.Three;
+import static com.rks.musicx.misc.utils.Constants.Two;
+import static com.rks.musicx.misc.utils.Constants.Zero;
 
 
 /*
@@ -277,15 +279,15 @@ public abstract class BaseActivity extends ATEActivity {
                         .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
                         .build());
                 break;
-          case "20":
-            CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
-                .setDefaultFontPath(Typeface.DEFAULT.toString())
-                .setFontAttrId(R.attr.fontPath)
-                .addCustomStyle(AppCompatTextView.class, android.R.attr.textViewStyle)
-                .addCustomStyle(TextView.class, android.R.attr.textViewStyle)
-                .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
-                .build());
-            break;
+            case "20":
+                CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                        .setDefaultFontPath(Typeface.DEFAULT.toString())
+                        .setFontAttrId(R.attr.fontPath)
+                        .addCustomStyle(AppCompatTextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(TextView.class, android.R.attr.textViewStyle)
+                        .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
+                        .build());
+                break;
         }
     }
 

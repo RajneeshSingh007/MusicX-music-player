@@ -5,6 +5,7 @@ import android.media.audiofx.LoudnessEnhancer;
 import android.util.Log;
 
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.services.MediaPlayerSingleton;
 
 import static com.rks.musicx.misc.utils.Constants.GAIN_MAX;
 import static com.rks.musicx.misc.utils.Constants.LOUD_BOOST;
@@ -24,12 +25,12 @@ public class Loud {
     /*
      Init LoudnessEnhancer
     */
-    public static void initLoudnessEnhancer(int audioSessionId) {
+    public static void initLoudnessEnhancer() {
         EndLoudnessEnhancer();
         try {
-            loudnessEnhancer = new LoudnessEnhancer(audioSessionId);
+            loudnessEnhancer = new LoudnessEnhancer(MediaPlayerSingleton.getInstance().getMediaPlayer().getAudioSessionId());
             int loud = Extras.getInstance().saveEq().getInt(LOUD_BOOST, 0);
-            if (loud != 0){
+            if (loud != 0) {
                 loudnessEnhancer.setTargetGain(loud);
             }
         } catch (Exception e) {

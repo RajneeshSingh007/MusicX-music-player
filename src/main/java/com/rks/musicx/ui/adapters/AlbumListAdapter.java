@@ -75,7 +75,7 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
             ArtworkUtils.ArtworkLoaderPalette(getContext(), albums.getAlbumName(), albums.getId(), holder.AlbumArtwork, new palette() {
                 @Override
                 public void palettework(Palette palette) {
-                    final int[] colors = Helper.getAvailableColor(getContext(),palette);
+                    final int[] colors = Helper.getAvailableColor(getContext(), palette);
                     holder.backgroundColor.setBackgroundColor(colors[0]);
                     holder.AlbumName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
                     holder.ArtistName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));

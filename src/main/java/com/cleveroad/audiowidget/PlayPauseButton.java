@@ -254,7 +254,7 @@ class PlayPauseButton extends ImageView implements PlaybackState.PlaybackStateLi
         }
 
         canvas.drawCircle(cx, cy, radius, buttonPaint);
-        if (albumCover != null) {
+        if (albumCover != null && isNeedToFillAlbumCoverMap != null) {
             canvas.drawCircle(cx, cy, radius, buttonPaint);
             albumCover.setBounds((int) (cx - radius), (int) (cy - radius), (int) (cx + radius), (int) (cy + radius));
             albumCover.draw(canvas);
@@ -350,6 +350,7 @@ class PlayPauseButton extends ImageView implements PlaybackState.PlaybackStateLi
     public void albumCover(Drawable newAlbumCover) {
         if (this.albumCover == newAlbumCover) return;
         this.albumCover = newAlbumCover;
+
 
         if (albumCover instanceof BitmapDrawable && !isNeedToFillAlbumCoverMap.containsKey(albumCover.hashCode())) {
             Bitmap bitmap = ((BitmapDrawable) albumCover).getBitmap();

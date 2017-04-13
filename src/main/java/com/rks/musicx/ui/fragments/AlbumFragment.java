@@ -153,6 +153,9 @@ public class AlbumFragment extends Fragment implements LoaderManager.LoaderCallb
 
 
     private void AlbumCover() {
+        if (getActivity() == null) {
+            return;
+        }
         ArtworkUtils.ArtworkLoaderPalette(getContext(), mAlbum.getAlbumName(), mAlbum.getId(), artworkView, new palette() {
             @Override
             public void palettework(Palette palette) {

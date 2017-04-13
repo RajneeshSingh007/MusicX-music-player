@@ -68,7 +68,6 @@ public class Constants {
     public static final String PLAYINGSTATE = "playingState";
     public static final String CURRENTPOS = "position";
     public static final String ACTION_PLAYINGVIEW = "PLAYING_VIEW";
-    public static final String ACTION_BUTTON = "ACTION_BUTTON";
 
     /*
     Sorting properties
@@ -115,6 +114,11 @@ public class Constants {
     public static final String EQSWITCH = "eqswitch";
     public static final String ARTWORKCOLOR = "artwork_adaptive";
     public static final String FOLDERPATH = "folderpath";
+    public static final String ALBUMGRID = "albumgrid";
+    public static final String ARTISTGRID = "artistgrid";
+    public static final String SONGGRID = "songgrid";
+    public static final String TABREMOVE = "tab_remove";
+
     /*
     Choices
      */
@@ -153,43 +157,42 @@ public class Constants {
     public static final String OPEN_EFFECTS = "open_effects";
     public static final String CLOSE_EFFECTS = "close_effects";
     public static final String PRESETPOS = "preset_pos";
-
+    /**
+     * Developer name
+     */
+    public static final String DEVELOPER_NAME = "Rajneesh Singh";
     /**
      * permission array
      */
     public static String[] permissions = new String[]{
-              Manifest.permission.WRITE_EXTERNAL_STORAGE,
-              Manifest.permission.READ_PHONE_STATE,
-              Manifest.permission.READ_EXTERNAL_STORAGE,
-              Manifest.permission.RECORD_AUDIO,
-              Manifest.permission.WRITE_SETTINGS,
-              Manifest.permission.SYSTEM_ALERT_WINDOW};
-      /*
-      Instance
-       */
-      public static Extras sInstance = null;
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.WRITE_SETTINGS,
+            Manifest.permission.SYSTEM_ALERT_WINDOW};
+    /*
+    Instance
+     */
+    public static Extras sInstance = null;
 
     /**
      * Database
+     *
      * @param tableName
      * @return
      */
-      public static String DefaultColumn(String tableName) {
-          return "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
-                  DefaultColumn._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + Separator +
-                  DefaultColumn.SongId + " INTEGER UNIQUE" + Separator +
-                  DefaultColumn.SongTitle + " TEXT" + Separator +
-                  DefaultColumn.SongArtist + " TEXT" + Separator +
-                  DefaultColumn.SongAlbum + " TEXT" + Separator +
-                  DefaultColumn.SongAlbumId + " INTEGER" + Separator +
-                  DefaultColumn.SongNumber + " INTEGER" + Separator +
-                  DefaultColumn.SongPath + " TEXT" + " )";
-      }
-
-  /**
-   * Developer name
-   */
-  public static final String DEVELOPER_NAME = "Rajneesh Singh";
+    public static String DefaultColumn(String tableName) {
+        return "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+                DefaultColumn._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + Separator +
+                DefaultColumn.SongId + " INTEGER UNIQUE" + Separator +
+                DefaultColumn.SongTitle + " TEXT" + Separator +
+                DefaultColumn.SongArtist + " TEXT" + Separator +
+                DefaultColumn.SongAlbum + " TEXT" + Separator +
+                DefaultColumn.SongAlbumId + " INTEGER" + Separator +
+                DefaultColumn.SongNumber + " INTEGER" + Separator +
+                DefaultColumn.SongPath + " TEXT" + " )";
+    }
 
 
 }

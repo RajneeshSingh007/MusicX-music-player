@@ -7,6 +7,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.util.Pair;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,6 +27,7 @@ import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
+import com.rks.musicx.misc.utils.ItemOffsetDecoration;
 import com.rks.musicx.ui.adapters.AlbumListAdapter;
 import com.rks.musicx.ui.adapters.BaseRecyclerViewAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -46,7 +48,22 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
     private List<Album> albumList;
     private SearchView searchView;
 
-    private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
+    private BaseRecyclerViewAdapter.OnItemClickListener gridClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position, View view) {
+            switch (view.getId()) {
+                case R.id.album_artwork:
+                case R.id.item_view:
+                    Fragment fragment = AlbumFragment.newInstance(albumListAdapter.getItem(position));
+                    ImageView imageView = (ImageView) view.findViewById(R.id.album_artwork);
+                    fragTransition(fragment, imageView);
+                    rv.smoothScrollToPosition(position);
+                    break;
+            }
+        }
+    };
+
+    private BaseRecyclerViewAdapter.OnItemClickListener listOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
             switch (view.getId()) {
@@ -61,8 +78,7 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
         }
     };
 
-    public static AlbumListFragment newInstance(int pos) {
-        Extras.getInstance().setTabIndex(pos);
+    public static AlbumListFragment newInstance() {
         return new AlbumListFragment();
     }
 
@@ -76,21 +92,15 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.common_rv, container, false);
         rv = (FastScrollRecyclerView) rootView.findViewById(R.id.commonrv);
-        albumListAdapter = new AlbumListAdapter(getActivity());
-        albumListAdapter.setOnItemClickListener(mOnClick);
-        albumListAdapter.setLayoutID(R.layout.item_list_view);
-        CustomLayoutManager custom = new CustomLayoutManager(getActivity());
-        rv.setLayoutManager(custom);
-        rv.setAdapter(new AlbumListAdapter(getActivity()));
-        rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75, false));
-        String ateKey = Helper.getATEKey(getContext());
-        int colorAccent = Config.accentColor(getContext(), ateKey);
+        albumListAdapter = new AlbumListAdapter(getContext());
+        int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
+        setHasOptionsMenu(true);
+        initload();
+        albumView();
+        albumList = new ArrayList<>();
         rv.setPopupBgColor(colorAccent);
         rv.setHasFixedSize(true);
         rv.setAdapter(albumListAdapter);
-        setHasOptionsMenu(true);
-        initload();
-        albumList = new ArrayList<>();
         return rootView;
     }
 
@@ -108,6 +118,11 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
         searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.album_search));
         searchView.setOnQueryTextListener(this);
         searchView.setQueryHint("Search album");
+        if (Extras.getInstance().albumView()) {
+            menu.findItem(R.id.grid_view).setVisible(false);
+        } else {
+            menu.findItem(R.id.grid_view).setVisible(true);
+        }
     }
 
     @Override
@@ -133,6 +148,18 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
             case R.id.menu_sort_by_number_of_songs:
                 extras.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_NUMBER_OF_SONGS);
                 load();
+                break;
+            case R.id.bytwo:
+                Extras.getInstance().setAlbumGrid(2);
+                loadGridView();
+                break;
+            case R.id.bythree:
+                Extras.getInstance().setAlbumGrid(3);
+                loadGridView();
+                break;
+            case R.id.byfour:
+                Extras.getInstance().setAlbumGrid(4);
+                loadGridView();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -190,6 +217,38 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
         final List<Album> filterlist = Helper.filterAlbum(albumList, newText);
         albumListAdapter.setFilter(filterlist);
         return true;
+    }
+
+    private void loadGridView() {
+        if (Extras.getInstance().getAlbumGrid() == 2) {
+            GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
+            rv.setLayoutManager(layoutManager);
+            load();
+        } else if (Extras.getInstance().getAlbumGrid() == 3) {
+            GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
+            rv.setLayoutManager(layoutManager);
+            load();
+        } else if (Extras.getInstance().getAlbumGrid() == 4) {
+            GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
+            rv.setLayoutManager(layoutManager);
+            load();
+        }
+    }
+
+    private void albumView() {
+        if (Extras.getInstance().albumView()) {
+            albumListAdapter.setOnItemClickListener(listOnClick);
+            albumListAdapter.setLayoutID(R.layout.item_list_view);
+            CustomLayoutManager custom = new CustomLayoutManager(getContext());
+            custom.setSmoothScrollbarEnabled(true);
+            rv.setLayoutManager(custom);
+            rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
+        } else {
+            albumListAdapter.setLayoutID(R.layout.item_grid_view);
+            albumListAdapter.setOnItemClickListener(gridClick);
+            rv.addItemDecoration(new ItemOffsetDecoration(2));
+            loadGridView();
+        }
     }
 
 }

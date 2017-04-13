@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
@@ -25,13 +26,14 @@ import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.BaseRecyclerViewAdapter;
 import com.rks.musicx.ui.adapters.SongListAdapter;
+
 import java.util.List;
 
 /*
  * Created by Coolalien on 26/03/2017.
  */
 
-public class RecentFragment extends miniFragment implements LoaderManager.LoaderCallbacks<List<Song>>  {
+public class RecentFragment extends miniFragment implements LoaderManager.LoaderCallbacks<List<Song>> {
 
     private TextView recentName, recentPlayed, More, RecentlyAddedMore;
     private int accentcolor;
@@ -59,7 +61,36 @@ public class RecentFragment extends miniFragment implements LoaderManager.Loader
             }
         }
     };
+    private LoaderManager.LoaderCallbacks<List<Song>> songLoaders = new LoaderManager.LoaderCallbacks<List<Song>>() {
 
+        @Override
+        public Loader<List<Song>> onCreateLoader(int id, Bundle args) {
+            TrackLoader tracksloader = new TrackLoader(getContext());
+            if (id == trackloaders) {
+                String sortingrecent = MediaStore.Audio.Media.DATE_ADDED;// "%s limit 3" + ">" + (System.currentTimeMillis() / 1000 - 2 * 60 * 60 * 24);
+                tracksloader.filteralbumsong(sortingrecent, null);
+                String sortOrder = String.format("%s limit 9", MediaStore.Audio.Media.DATE_MODIFIED + " DESC");
+                tracksloader.setSortOrder(sortOrder);
+                return tracksloader;
+            }
+            return null;
+        }
+
+        @Override
+        public void onLoadFinished(Loader<List<Song>> loader, List<Song> data) {
+            if (data == null) {
+                return;
+            }
+            recentlyAdded.addDataList(data);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<Song>> loader) {
+            loader.reset();
+            recentlyAdded.notifyDataSetChanged();
+        }
+
+    };
     private BaseRecyclerViewAdapter.OnItemClickListener onClicks = new BaseRecyclerViewAdapter.OnItemClickListener() {
 
         @Override
@@ -76,8 +107,7 @@ public class RecentFragment extends miniFragment implements LoaderManager.Loader
         }
     };
 
-    public static RecentFragment newInstance(int pos) {
-        Extras.getInstance().setTabIndex(pos);
+    public static RecentFragment newInstance() {
         return new RecentFragment();
     }
 
@@ -87,6 +117,20 @@ public class RecentFragment extends miniFragment implements LoaderManager.Loader
         setupInstance(rootView);
         return rootView;
     }
+
+    /*private void recentlyPlayed() {
+        RecentPlayedFragment recentPlayedFragment = new RecentPlayedFragment().newInstance(9, false);
+        if (recentPlayedFragment != null) {
+          getChildFragmentManager().beginTransaction().add(recentlyPlaying.getId(), recentPlayedFragment).commitAllowingStateLoss();
+        }
+    }
+
+    private void recentlyAdded() {
+        RecentlyAddedFragment recentlyAddedFragment = new RecentlyAddedFragment().newInstance("%s limit 9", false);
+        if (recentlyAddedFragment != null) {
+          getChildFragmentManager().beginTransaction().add(recentlyAdded.getId(), recentlyAddedFragment).commitAllowingStateLoss();
+        }
+    }*/
 
     private void setupInstance(View rootView) {
         recentName = (TextView) rootView.findViewById(R.id.recentAdded);
@@ -135,20 +179,6 @@ public class RecentFragment extends miniFragment implements LoaderManager.Loader
         recentlyAdding.setHasFixedSize(true);
         getLoaderManager().initLoader(trackloaders, null, songLoaders);
     }
-
-    /*private void recentlyPlayed() {
-        RecentPlayedFragment recentPlayedFragment = new RecentPlayedFragment().newInstance(9, false);
-        if (recentPlayedFragment != null) {
-          getChildFragmentManager().beginTransaction().add(recentlyPlaying.getId(), recentPlayedFragment).commitAllowingStateLoss();
-        }
-    }
-
-    private void recentlyAdded() {
-        RecentlyAddedFragment recentlyAddedFragment = new RecentlyAddedFragment().newInstance("%s limit 9", false);
-        if (recentlyAddedFragment != null) {
-          getChildFragmentManager().beginTransaction().add(recentlyAdded.getId(), recentlyAddedFragment).commitAllowingStateLoss();
-        }
-    }*/
 
     @Override
     public void onResume() {
@@ -212,35 +242,4 @@ public class RecentFragment extends miniFragment implements LoaderManager.Loader
         loader.reset();
         recentlyPlayed.notifyDataSetChanged();
     }
-
-    private LoaderManager.LoaderCallbacks<List<Song>> songLoaders = new LoaderManager.LoaderCallbacks<List<Song>>() {
-
-        @Override
-        public Loader<List<Song>> onCreateLoader(int id, Bundle args) {
-            TrackLoader tracksloader = new TrackLoader(getContext());
-            if (id == trackloaders) {
-                String sortingrecent = MediaStore.Audio.Media.DATE_ADDED;// "%s limit 3" + ">" + (System.currentTimeMillis() / 1000 - 2 * 60 * 60 * 24);
-                tracksloader.filteralbumsong(sortingrecent, null);
-                String sortOrder = String.format("%s limit 9", MediaStore.Audio.Media.DATE_MODIFIED + " DESC");
-                tracksloader.setSortOrder(sortOrder);
-                return tracksloader;
-            }
-            return null;
-        }
-
-        @Override
-        public void onLoadFinished(Loader<List<Song>> loader, List<Song> data) {
-            if (data == null) {
-                return;
-            }
-            recentlyAdded.addDataList(data);
-        }
-
-        @Override
-        public void onLoaderReset(Loader<List<Song>> loader) {
-            loader.reset();
-            recentlyAdded.notifyDataSetChanged();
-        }
-
-    };
 }

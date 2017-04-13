@@ -6,6 +6,7 @@ import android.media.audiofx.Equalizer;
 
 import com.rks.musicx.R;
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.services.MediaPlayerSingleton;
 
 import static com.rks.musicx.misc.utils.Constants.BAND_LEVEL;
 import static com.rks.musicx.misc.utils.Constants.SAVE_PRESET;
@@ -24,25 +25,25 @@ public class Equalizers {
     public Equalizers() {
     }
 
-    public static void initEq(int audioID) {
+    public static void initEq() {
         try {
             EndEq();
-            equalizer = new Equalizer(0, audioID);
+            equalizer = new Equalizer(0, MediaPlayerSingleton.getInstance().getMediaPlayer().getAudioSessionId());
             bandLevels = new short[equalizer.getNumberOfBands()];
             for (short b = 0; b < equalizer.getNumberOfBands(); b++) {
                 bandLevels[b] = equalizer.getBandLevel(b);
-                short level = (short) Extras.getInstance().saveEq().getInt(BAND_LEVEL+b, 0);
-               if (level != 0){
-                   setBandLevel(b, level);
-               }
-               short preset = (short) Extras.getInstance().saveEq().getInt(SAVE_PRESET, 0);
-                if (preset != -1){
+                short level = (short) Extras.getInstance().saveEq().getInt(BAND_LEVEL + b, 0);
+                if (level != 0) {
+                    setBandLevel(b, level);
+                }
+                short preset = (short) Extras.getInstance().saveEq().getInt(SAVE_PRESET, 0);
+                if (preset != -1) {
                     usePreset(preset);
                 }
             }
             try {
                 preset = equalizer.getCurrentPreset();
-            }catch (Exception e){
+            } catch (Exception e) {
                 preset = -1;
             }
         } catch (Exception e) {
@@ -79,7 +80,7 @@ public class Equalizers {
 
     public static short getBandLevel(short band) {
         if (equalizer == null) {
-           return 0;
+            return 0;
         }
         return equalizer.getBandLevel(band);
     }
@@ -108,11 +109,11 @@ public class Equalizers {
     }
 
     public static void usePreset(short presets) {
-        if (equalizer == null){
+        if (equalizer == null) {
             return;
         }
         preset = presets;
-        if (preset >= 0 && preset < equalizer.getNumberOfPresets()){
+        if (preset >= 0) {
             equalizer.usePreset(preset);
         }
     }

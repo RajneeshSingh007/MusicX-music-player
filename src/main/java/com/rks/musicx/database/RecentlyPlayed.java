@@ -1,18 +1,20 @@
 package com.rks.musicx.database;
 
-import static com.rks.musicx.misc.utils.Constants.DbVersion;
-import static com.rks.musicx.misc.utils.Constants.DefaultColumn;
-import static com.rks.musicx.misc.utils.Constants.RecentlyPlayed_TableName;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.misc.utils.Constants;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.rks.musicx.misc.utils.Constants.DbVersion;
+import static com.rks.musicx.misc.utils.Constants.DefaultColumn;
+import static com.rks.musicx.misc.utils.Constants.RecentlyPlayed_TableName;
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -22,7 +24,7 @@ public class RecentlyPlayed extends SQLiteOpenHelper implements DefaultColumn {
 
 
     private SQLiteDatabase sqLiteDatabase;
-  
+
     public RecentlyPlayed(Context context) {
         super(context, RecentlyPlayed_TableName, null, DbVersion);
 

@@ -1,5 +1,3 @@
-
-
 package com.rks.musicx;
 
 import android.app.Application;
@@ -68,16 +66,16 @@ public class MusicXApplication extends Application {
         Extras.getInstance().eqSwitch(false);
     }
 
-  /**
-   * Create directory
-   */
-  private void createDirectory() {
+    /**
+     * Create directory
+     */
+    private void createDirectory() {
         if (permissionManager.writeExternalStorageGranted(mContext)) {
             Helper.createAppDir("Lyrics");
         } else {
             Log.d("oops error", "Failed to create directory");
         }
-  }
+    }
 
     /**
      * Default init

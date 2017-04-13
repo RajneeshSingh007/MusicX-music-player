@@ -22,9 +22,11 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
+
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.misc.utils.Helper;
+
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Random;
@@ -63,6 +65,7 @@ public class AudioWidget {
     private int accentColor;
     private int primaryColor;
     private String ateKey;
+
     @SuppressWarnings("deprecation")
     private AudioWidget(@NonNull Builder builder) {
         this.context = builder.context.getApplicationContext();
@@ -434,22 +437,22 @@ public class AudioWidget {
     }
 
     private void show(View view, int left, int top) {
-        if (view.getParent() != null || view.getWindowToken() != null){
+        if (view.getParent() != null || view.getWindowToken() != null) {
             windowManager.removeView(view);
         }
-      WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-          WindowManager.LayoutParams.WRAP_CONTENT,
-          WindowManager.LayoutParams.WRAP_CONTENT,
-          WindowManager.LayoutParams.TYPE_PHONE,
-          WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-              | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-              | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-              | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-          PixelFormat.TRANSLUCENT);
-      params.gravity = Gravity.START | Gravity.TOP;
-      params.x = left;
-      params.y = top;
-      windowManager.addView(view, params);
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                PixelFormat.TRANSLUCENT);
+        params.gravity = Gravity.START | Gravity.TOP;
+        params.x = left;
+        params.y = top;
+        windowManager.addView(view, params);
     }
 
     public enum State {
@@ -946,7 +949,7 @@ public class AudioWidget {
 
     private class ExpandCollapseWidgetCallback extends TouchManager.SimpleCallback {
 
-      @Override
+        @Override
         public void onTouched(float x, float y) {
             super.onTouched(x, y);
             expandCollapseWidget.onTouched(x, y);

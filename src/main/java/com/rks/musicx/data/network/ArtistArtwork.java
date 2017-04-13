@@ -35,7 +35,7 @@ public class ArtistArtwork extends AsyncTask<Void, Void, Void> {
     private Context context;
     private String artistName;
 
-    public ArtistArtwork(Context context, String artistName){
+    public ArtistArtwork(Context context, String artistName) {
         this.context = context;
         this.artistName = artistName;
         lastFmClients = new LastFmClients(context);
@@ -121,6 +121,7 @@ public class ArtistArtwork extends AsyncTask<Void, Void, Void> {
 
     /**
      * Artwork quality
+     *
      * @param artistArtwork
      * @return
      */

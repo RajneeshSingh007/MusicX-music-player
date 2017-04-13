@@ -76,97 +76,98 @@ public class permissionManager {
         }
     }
 
-  public static void settingPermission(Activity activity) {
+    public static void settingPermission(Activity activity) {
 
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(activity)) {
-          DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(activity)) {
+            DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
 
-              @Override
-              public void onClick(DialogInterface dialog, int which) {
-                  if (which == DialogInterface.BUTTON_POSITIVE) {
-                      Intent intent;
-                      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                          intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.fromParts("package", activity.getPackageName(), null));
-                          activity.startActivityForResult(intent, WRITESETTINGS);
-                      }
-                  } else if (which == DialogInterface.BUTTON_NEGATIVE) {
-                      Toast.makeText(activity, R.string.toast_permissions_not_granted, Toast.LENGTH_SHORT).show();
-                      dialog.dismiss();
-                  }
-              }
-          };
-          new AlertDialog.Builder(activity)
-                  .setTitle(R.string.permissions_title)
-                  .setMessage(R.string.writesetting)
-                  .setPositiveButton(R.string.btn_continue, listener)
-                  .setNegativeButton(R.string.btn_cancel, listener)
-                  .setCancelable(false)
-                  .show();
-      }
-  }
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (which == DialogInterface.BUTTON_POSITIVE) {
+                        Intent intent;
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                            intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.fromParts("package", activity.getPackageName(), null));
+                            activity.startActivityForResult(intent, WRITESETTINGS);
+                        }
+                    } else if (which == DialogInterface.BUTTON_NEGATIVE) {
+                        Toast.makeText(activity, R.string.toast_permissions_not_granted, Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
+                }
+            };
+            new AlertDialog.Builder(activity)
+                    .setTitle(R.string.permissions_title)
+                    .setMessage(R.string.writesetting)
+                    .setPositiveButton(R.string.btn_continue, listener)
+                    .setNegativeButton(R.string.btn_cancel, listener)
+                    .setCancelable(false)
+                    .show();
+        }
+    }
 
     /**
-   * Check if alert windows granted
-   * @param context
-   * @return
-   */
+     * Check if alert windows granted
+     *
+     * @param context
+     * @return
+     */
     public static boolean isSystemAlertGranted(Context context) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-        if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.SYSTEM_ALERT_WINDOW) == PermissionChecker.PERMISSION_GRANTED || Settings.canDrawOverlays(context)) {
-          return true;
-        }else {
-          return false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.SYSTEM_ALERT_WINDOW) == PermissionChecker.PERMISSION_GRANTED || Settings.canDrawOverlays(context)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
         }
-      }else {
-        return true;
-      }
     }
 
     public static boolean isAudioRecordGranted(Context context) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-        if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PermissionChecker.PERMISSION_GRANTED) {
-          return true;
-        }else {
-          return false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PermissionChecker.PERMISSION_GRANTED) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
         }
-      }else {
-        return true;
-      }
     }
 
     public static boolean isWriteSettingsGranted(Context context) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-        if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.WRITE_SETTINGS) == PermissionChecker.PERMISSION_GRANTED || !Settings.System.canWrite(context)) {
-          return true;
-        }else {
-          return false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.WRITE_SETTINGS) == PermissionChecker.PERMISSION_GRANTED || !Settings.System.canWrite(context)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
         }
-      }else {
-        return true;
-      }
     }
 
     public static boolean isExternalReadStorageGranted(Context context) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-        if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED) {
-          return true;
-        }else {
-          return false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
         }
-      }else {
-        return true;
-      }
     }
 
     public static boolean writeExternalStorageGranted(Context context) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-        if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED) {
-          return true;
-        }else {
-          return false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
         }
-      }else {
-        return true;
-      }
     }
 }

@@ -73,6 +73,8 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 public class ArtistFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Song>> {
 
     private final int trackLoader = 1;
+    private final int albumLoaders = 2;
+    public String selection;
     private FastScrollRecyclerView rv;
     private ImageView artworkView;
     private Artist artist;
@@ -85,9 +87,7 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView artistBio;
     private boolean bio;
     private RecyclerView albumrv;
-    private final int albumLoaders = 2;
     private AlbumListAdapter albumListAdapter;
-
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = (position, view) -> {
         switch (view.getId()) {
             case R.id.item_view:
@@ -99,7 +99,6 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
                 break;
         }
     };
-
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClickAlbum = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
@@ -114,12 +113,6 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
             }
         }
     };
-
-    private void fragTransition(Fragment fragment, ImageView imageView) {
-        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
-        Helper.setFragmentTransition(getActivity(), ArtistFragment.this, fragment, new Pair<View, String>(imageView, "TransitionArtwork"));
-    }
-
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -129,6 +122,41 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
                     break;
             }
         }
+    };
+    private String[] selectionArgs;
+    private LoaderManager.LoaderCallbacks<List<com.rks.musicx.data.model.Album>> albumLoadersCallbacks = new LoaderManager.LoaderCallbacks<List<com.rks.musicx.data.model.Album>>() {
+
+        @Override
+        public Loader<List<com.rks.musicx.data.model.Album>> onCreateLoader(int id, Bundle args) {
+            AlbumLoader albumLoader = new AlbumLoader(getContext());
+            if (id == albumLoaders) {
+                String[] selectargs = getSelectionArgs();
+                String selection = getSelection();
+                if (artist.getName() != null) {
+                    selection = DatabaseUtilsCompat.concatenateWhere(selection, MediaStore.Audio.Albums.ARTIST + " = ?");
+                    selectargs = DatabaseUtilsCompat.appendSelectionArgs(selectargs, new String[]{artist.getName()});
+                }
+                albumLoader.setSortOrder(MediaStore.Audio.Albums.FIRST_YEAR);
+                albumLoader.filterartistsong(selection, selectargs);
+                return albumLoader;
+            }
+            return null;
+        }
+
+        @Override
+        public void onLoadFinished(Loader<List<com.rks.musicx.data.model.Album>> loader, List<com.rks.musicx.data.model.Album> data) {
+            if (data == null) {
+                return;
+            }
+            albumListAdapter.addDataList(data);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<com.rks.musicx.data.model.Album>> loader) {
+            loader.reset();
+            albumListAdapter.notifyDataSetChanged();
+        }
+
     };
 
     public static ArtistFragment newInstance(Artist artist) {
@@ -140,6 +168,11 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
         args.putInt(Constants.ARTIST_TRACK_COUNT, artist.getTrackCount());
         fragment.setArguments(args);
         return fragment;
+    }
+
+    private void fragTransition(Fragment fragment, ImageView imageView) {
+        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
+        Helper.setFragmentTransition(getActivity(), ArtistFragment.this, fragment, new Pair<View, String>(imageView, "TransitionArtwork"));
     }
 
     @Override
@@ -221,6 +254,9 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
         String artistImagePath = new Helper(getContext()).loadArtistImage(artist.getName());
         File file = new File(artistImagePath);
         if (file.exists()) {
+            if (getActivity() == null) {
+                return;
+            }
             mRequestManager.load(file.getAbsolutePath())
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .dontTransform()
@@ -244,73 +280,73 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
             artworkView.setImageResource(R.mipmap.ic_launcher);
         }
         bioView.setVisibility(View.GONE);
-      /**
-       * Swipe Listerner
-       */
-      final GestureDetector gesture = new GestureDetector(getActivity(), new GestureDetector.SimpleOnGestureListener() {
+        /**
+         * Swipe Listerner
+         */
+        final GestureDetector gesture = new GestureDetector(getActivity(), new GestureDetector.SimpleOnGestureListener() {
 
-        @Override
-        public boolean onDown(MotionEvent e) {
-          return true;
-        }
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
 
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-          if (bio){
-            bioView.setVisibility(View.VISIBLE);
-          }else {
-            bioView.setVisibility(View.GONE);
-          }
-          return true;
-        }
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                if (bio) {
+                    bioView.setVisibility(View.VISIBLE);
+                } else {
+                    bioView.setVisibility(View.GONE);
+                }
+                return true;
+            }
 
-        @Override
-        public boolean onDoubleTap(MotionEvent e) {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
 
-          return super.onDoubleTap(e);
-        }
+                return super.onDoubleTap(e);
+            }
 
-        @Override
-        public void onLongPress(MotionEvent e) {
-          super.onLongPress(e);
-        }
+            @Override
+            public void onLongPress(MotionEvent e) {
+                super.onLongPress(e);
+            }
 
-        // Determines the fling velocity and then fires the appropriate swipe event accordingly
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-          return false;
-        }
-      });
-      artworkView.setOnTouchListener((v, event) -> {
-        gesture.onTouchEvent(event);
-        bio = true;
-        return true;
-      });
-      bioView.setOnTouchListener((view, motionEvent) -> {
-        gesture.onTouchEvent(motionEvent);
-        bio = false;
-        return true;
-      });
-      artistBio.setOnTouchListener((view, motionEvent) -> {
-        gesture.onTouchEvent(motionEvent);
-        bio = false;
-        return true;
-      });
-      artistBio();
-      /**
-       * Show Case
-       */
-      ShowcaseConfig config = new ShowcaseConfig();
-      MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(getActivity(), "1400");
-      sequence.setConfig(config);
-      sequence.addSequenceItem(artworkView, "Tap to view avaiable artist Bio", "GOT IT");
-      sequence.start();
-      sequence.setOnItemDismissedListener(new MaterialShowcaseSequence.OnSequenceItemDismissedListener() {
-        @Override
-        public void onDismiss(MaterialShowcaseView materialShowcaseView, int i) {
-          materialShowcaseView.hide();
-        }
-      });
+            // Determines the fling velocity and then fires the appropriate swipe event accordingly
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                return false;
+            }
+        });
+        artworkView.setOnTouchListener((v, event) -> {
+            gesture.onTouchEvent(event);
+            bio = true;
+            return true;
+        });
+        bioView.setOnTouchListener((view, motionEvent) -> {
+            gesture.onTouchEvent(motionEvent);
+            bio = false;
+            return true;
+        });
+        artistBio.setOnTouchListener((view, motionEvent) -> {
+            gesture.onTouchEvent(motionEvent);
+            bio = false;
+            return true;
+        });
+        artistBio();
+        /**
+         * Show Case
+         */
+        ShowcaseConfig config = new ShowcaseConfig();
+        MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(getActivity(), "1400");
+        sequence.setConfig(config);
+        sequence.addSequenceItem(artworkView, "Tap to view avaiable artist Bio", "GOT IT");
+        sequence.start();
+        sequence.setOnItemDismissedListener(new MaterialShowcaseSequence.OnSequenceItemDismissedListener() {
+            @Override
+            public void onDismiss(MaterialShowcaseView materialShowcaseView, int i) {
+                materialShowcaseView.hide();
+            }
+        });
         toolbar.showOverflowMenu();
     }
 
@@ -347,41 +383,40 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
         artistArtwork.execute();
     }
 
-    private void artistBio(){
-      LastFmClients last = new LastFmClients(getContext());
-      LastFmServices lastFmServices = last.createService(LastFmServices.class);
-      Call<com.rks.musicx.data.network.model.Artist> artistCall = lastFmServices.getartist(artist.getName());
-      artistCall.enqueue(new Callback<com.rks.musicx.data.network.model.Artist>() {
-        @Override
-        public void onResponse(Call<com.rks.musicx.data.network.model.Artist> call, Response<com.rks.musicx.data.network.model.Artist> response) {
-          com.rks.musicx.data.network.model.Artist getartist = response.body();
-          if (response.isSuccessful() && getartist != null) {
-            final Artist__ artist1 = getartist.getArtist();
-            if (artist1 != null && artist1.getImage() != null && artist1.getImage().size() > 0) {
-              artistBio.setText(artist1.getBio().getSummary());
-            } else {
-              Log.d("haha", "bio load failed");
-              artistBio.setText("No bio found");
+    private void artistBio() {
+        LastFmClients last = new LastFmClients(getContext());
+        LastFmServices lastFmServices = last.createService(LastFmServices.class);
+        Call<com.rks.musicx.data.network.model.Artist> artistCall = lastFmServices.getartist(artist.getName());
+        artistCall.enqueue(new Callback<com.rks.musicx.data.network.model.Artist>() {
+            @Override
+            public void onResponse(Call<com.rks.musicx.data.network.model.Artist> call, Response<com.rks.musicx.data.network.model.Artist> response) {
+                com.rks.musicx.data.network.model.Artist getartist = response.body();
+                if (response.isSuccessful() && getartist != null) {
+                    final Artist__ artist1 = getartist.getArtist();
+                    if (artist1 != null && artist1.getImage() != null && artist1.getImage().size() > 0) {
+                        artistBio.setText(artist1.getBio().getSummary());
+                    } else {
+                        Log.d("haha", "bio load failed");
+                        artistBio.setText("No bio found");
+                    }
+                } else {
+                    Log.d("haha", "bio load failed");
+                }
             }
-          } else {
-            Log.d("haha", "bio load failed");
-          }
-        }
 
-        @Override
-        public void onFailure(Call<com.rks.musicx.data.network.model.Artist> call, Throwable t) {
-          Log.d("ArtistFrag", "error", t);
-        }
-      });
+            @Override
+            public void onFailure(Call<com.rks.musicx.data.network.model.Artist> call, Throwable t) {
+                Log.d("ArtistFrag", "error", t);
+            }
+        });
     }
-
 
     /*
     * reload track,album
    */
     public void reload() {
         getLoaderManager().restartLoader(trackLoader, null, this);
-        getLoaderManager().restartLoader(albumLoaders, null,albumLoadersCallbacks);
+        getLoaderManager().restartLoader(albumLoaders, null, albumLoadersCallbacks);
     }
 
     @Override
@@ -410,52 +445,13 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
         getLoaderManager().initLoader(albumLoaders, null, albumLoadersCallbacks);
     }
 
-    private String[] selectionArgs;
-
     public String[] getSelectionArgs() {
         return selectionArgs;
     }
 
-    public String selection;
-
     public String getSelection() {
         return selection;
     }
-
-    private LoaderManager.LoaderCallbacks<List<com.rks.musicx.data.model.Album>> albumLoadersCallbacks = new LoaderManager.LoaderCallbacks<List<com.rks.musicx.data.model.Album>>() {
-
-        @Override
-        public Loader<List<com.rks.musicx.data.model.Album>> onCreateLoader(int id, Bundle args) {
-            AlbumLoader albumLoader = new AlbumLoader(getContext());
-            if (id == albumLoaders) {
-                String[] selectargs = getSelectionArgs();
-                String selection = getSelection();
-                if (artist.getName() != null){
-                    selection = DatabaseUtilsCompat.concatenateWhere(selection, MediaStore.Audio.Albums.ARTIST + " = ?");
-                    selectargs = DatabaseUtilsCompat.appendSelectionArgs(selectargs, new String[]{artist.getName()});
-                }
-                albumLoader.setSortOrder(MediaStore.Audio.Albums.FIRST_YEAR);
-                albumLoader.filterartistsong(selection, selectargs);
-                return albumLoader;
-            }
-            return null;
-        }
-
-        @Override
-        public void onLoadFinished(Loader<List<com.rks.musicx.data.model.Album>> loader, List<com.rks.musicx.data.model.Album> data) {
-            if (data == null) {
-                return;
-            }
-            albumListAdapter.addDataList(data);
-        }
-
-        @Override
-        public void onLoaderReset(Loader<List<com.rks.musicx.data.model.Album>> loader) {
-            loader.reset();
-            albumListAdapter.notifyDataSetChanged();
-        }
-
-    };
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
