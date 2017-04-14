@@ -117,7 +117,7 @@ public class Constants {
     public static final String ALBUMGRID = "albumgrid";
     public static final String ARTISTGRID = "artistgrid";
     public static final String SONGGRID = "songgrid";
-    public static final String TABREMOVE = "tab_remove";
+    public static final String WIDGETTRACk = "widgettrack";
 
     /*
     Choices

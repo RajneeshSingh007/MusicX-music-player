@@ -326,23 +326,22 @@ public class Helper {
         try {
             audioFile = AudioFileIO.read(file);
             TagOptionSingleton.getInstance().setAndroid(true);
-        } catch (CannotReadException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (TagException e) {
-            e.printStackTrace();
-        } catch (ReadOnlyFileException e) {
-            e.printStackTrace();
-        } catch (InvalidAudioFrameException e) {
+        } catch (CannotReadException | ReadOnlyFileException | InvalidAudioFrameException | TagException | IOException e) {
             e.printStackTrace();
         }
-        Tag tag = audioFile.getTag();
+        Tag tag = null;
+        if (audioFile != null) {
+            tag = audioFile.getTag();
+        }
         if (tag == null) {
             tag = new ID3v24Tag();
         }
-        String lyrics = tag.getFirst(FieldKey.LYRICS);
-        return lyrics;
+        try {
+            return tag.getFirst(FieldKey.LYRICS);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return "No Lyrics Found";
     }
 
     /**
@@ -926,9 +925,6 @@ public class Helper {
                 try {
                     new LyricsData(context, title, artist, path, lrcView).execute("Executed");
                 } finally {
-                    if (getInbuiltLyrics(path) == null){
-                        lrcView.setText("Lyrics not found");
-                    }
                     lrcView.setText(getInbuiltLyrics(path));
                 }
             }

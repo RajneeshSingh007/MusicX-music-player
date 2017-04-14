@@ -185,7 +185,9 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     protected void function() {
         fragmentLoader(setContainerId(), setFragment());
         permissionManager.checkPermissions(MainActivity.this);
-        permissionManager.widgetPermission(MainActivity.this);
+        if (!Extras.getInstance().getWidgetTrack()){
+            permissionManager.widgetPermission(MainActivity.this);
+        }
         permissionManager.settingPermission(MainActivity.this);
         ateKey = returnAteKey();
         accentcolor = Config.accentColor(this, ateKey);
@@ -336,7 +338,9 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                 if (Settings.canDrawOverlays(this)) {
                     Log.d("MainActivity", "Granted");
                 } else {
-                    permissionManager.isSystemAlertGranted(MainActivity.this);
+                    if (!Extras.getInstance().getWidgetTrack()){
+                        permissionManager.isSystemAlertGranted(MainActivity.this);
+                    }
                     Log.d("MainActivity", "Denied or Grant permission Manually");
                 }
             }

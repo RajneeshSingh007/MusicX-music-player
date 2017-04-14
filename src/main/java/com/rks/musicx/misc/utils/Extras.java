@@ -49,6 +49,7 @@ import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
 import static com.rks.musicx.misc.utils.Constants.TRACKFOLDER;
 import static com.rks.musicx.misc.utils.Constants.TextFonts;
 import static com.rks.musicx.misc.utils.Constants.VIZCOLOR;
+import static com.rks.musicx.misc.utils.Constants.WIDGETTRACk;
 import static com.rks.musicx.misc.utils.Constants.sInstance;
 
 /*
@@ -394,4 +395,17 @@ public class Extras {
         editor.commit();
     }
 
+
+    ///////////////// widgetTracking ///////////////
+
+    public void setWidgetTrack (boolean torf){
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(WIDGETTRACk, torf);
+        editor.commit();
+    }
+
+
+    public boolean getWidgetTrack(){
+        return mPreferences.getBoolean(WIDGETTRACk, false);
+    }
 }
