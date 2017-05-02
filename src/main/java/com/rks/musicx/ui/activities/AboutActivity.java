@@ -26,6 +26,19 @@ import static com.rks.musicx.misc.utils.Constants.DarkTheme;
  * Created by Coolalien on 6/28/2016.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class AboutActivity extends BaseActivity implements ATEActivityThemeCustomizer {
 
     private TextView privacy, appcr, tester, testerName, guide_detail, support, licenses_detail, about_app_title, about_app_disc, about_app_ver, developer, developer_name, contact_detail, changeslog;
@@ -68,7 +81,7 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
         guide_detail.setOnClickListener(view -> Helper.GuidLines(AboutActivity.this));
         contact_detail.setText(Html.fromHtml("<a href=\"mailto:developerrajneeshsingh@gmail.com\">Mail us</a>"));
         contact_detail.setMovementMethod(LinkMovementMethod.getInstance());
-        about_app_ver.setText("v 1.3.2");
+        about_app_ver.setText("v 1.3.5");
         developer_name.setText(DEVELOPER_NAME);
         licenses_detail.setText("Licenses");
         testerName.setText(getString(R.string.testerName));

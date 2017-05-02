@@ -12,7 +12,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.afollestad.appthemeengine.Config;
@@ -24,6 +23,7 @@ import com.rks.musicx.data.model.Playlist;
 import com.rks.musicx.misc.utils.ATEUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
+import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.BaseRecyclerViewAdapter;
@@ -34,6 +34,19 @@ import java.util.List;
 
 /*
  * Created by Coolalien on 6/28/2016.
+ */
+
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 public class PlaylistListFragment extends miniFragment implements LoaderCallbacks<List<Playlist>> {
@@ -47,11 +60,12 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
         public void onItemClick(int position, View view) {
             switch (view.getId()) {
                 case R.id.item_view:
+                    Extras.getInstance().savePlaylistId(playlistListAdapter.getItem(position).getId());
                     PlaylistFragment fragment = PlaylistFragment.newInstance(playlistListAdapter.getItem(position));
                     ((MainActivity) getActivity()).setFragment(fragment);
                     break;
                 case R.id.delete_playlist:
-                    showMenu(view, position);
+                    showMenu(view, playlistListAdapter.getItem(position));
                     break;
             }
         }
@@ -61,7 +75,7 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
         return new PlaylistListFragment();
     }
 
-    private void showMenu(View view, int pos) {
+    private void showMenu(View view, Playlist playlist) {
         PopupMenu popup = new PopupMenu(getActivity(), view);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.playlist_menu, popup.getMenu());
@@ -72,14 +86,14 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
                 switch (item.getItemId()) {
                     case R.id.action_playlist_delete:
                         MaterialDialog.Builder builder = new MaterialDialog.Builder(getContext());
-                        builder.title(playlistListAdapter.getItem(pos).getName());
+                        builder.title(playlist.getName());
                         builder.content(getContext().getString(R.string.deleteplaylist));
                         builder.positiveText(R.string.delete);
                         builder.onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                new Helper(getContext()).deletePlaylist(getContext().getContentResolver(), playlistListAdapter.getItem(pos).getId());
-                                Toast.makeText(getContext(), "Playlist Deleted", Toast.LENGTH_LONG).show();
+                                Helper.deletePlaylist(getContext(), playlist.getName());
+                                Toast.makeText(getContext(),playlist.getName() + " Deleted", Toast.LENGTH_SHORT).show();
                                 load();
                             }
                         });
@@ -140,7 +154,7 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
     }
 
     private void showCreatePlaylistDialog() {
-        View layout = LayoutInflater.from(getActivity()).inflate(R.layout.create_playlist, new LinearLayout(getActivity()), false);
+        View layout = LayoutInflater.from(getContext()).inflate(R.layout.create_playlist, null);
         MaterialDialog.Builder createplaylist = new MaterialDialog.Builder(getContext());
         createplaylist.title(R.string.create_playlist);
         createplaylist.positiveText(android.R.string.ok);
@@ -148,7 +162,7 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
         createplaylist.onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                new Helper(getContext()).createPlaylist(getActivity().getContentResolver(), editText.getText().toString());
+                new Helper(getContext()).createPlaylist(getContext().getContentResolver(), editText.getText().toString());
                 load();
             }
         });
@@ -194,6 +208,7 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
         playlistListAdapter.notifyDataSetChanged();
 
     }
+
 
     @Override
     public void load() {

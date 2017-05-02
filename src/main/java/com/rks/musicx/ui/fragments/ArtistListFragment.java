@@ -4,11 +4,11 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.util.Pair;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,6 +39,19 @@ import java.util.List;
  * Created by Coolalien on 6/28/2016.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class ArtistListFragment extends miniFragment implements LoaderManager.LoaderCallbacks<List<Artist>>, SearchView.OnQueryTextListener {
 
     private FastScrollRecyclerView rv;
@@ -47,30 +60,15 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
     private List<Artist> artistlist;
     private SearchView searchView;
 
-    private BaseRecyclerViewAdapter.OnItemClickListener listOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
-        @Override
-        public void onItemClick(int position, View view) {
-            switch (view.getId()) {
-                case R.id.album_listartwork:
-                case R.id.item_view:
-                    Fragment fragments = ArtistFragment.newInstance(artistListAdapter.getItem(position));
-                    ImageView listartwork = (ImageView) view.findViewById(R.id.album_listartwork);
-                    fragTransition(fragments, listartwork);
-                    rv.smoothScrollToPosition(position);
-                    break;
-            }
-        }
-    };
-
-    private BaseRecyclerViewAdapter.OnItemClickListener gridOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
+    private BaseRecyclerViewAdapter.OnItemClickListener OnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
             switch (view.getId()) {
                 case R.id.album_artwork:
                 case R.id.item_view:
-                    Fragment fragment = ArtistFragment.newInstance(artistListAdapter.getItem(position));
-                    ImageView imageView = (ImageView) view.findViewById(R.id.album_artwork);
-                    fragTransition(fragment, imageView);
+                    Fragment fragments = ArtistFragment.newInstance(artistListAdapter.getItem(position));
+                    ImageView listartwork = (ImageView) view.findViewById(R.id.album_artwork);
+                    fragTransition(fragments, listartwork, "TransitionArtwork");
                     rv.smoothScrollToPosition(position);
                     break;
             }
@@ -81,9 +79,9 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
         return new ArtistListFragment();
     }
 
-    private void fragTransition(Fragment fragment, ImageView imageView) {
-        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
-        Helper.setFragmentTransition(getActivity(), ArtistListFragment.this, fragment, new Pair<View, String>(imageView, "TransitionArtwork"));
+    private void fragTransition(Fragment fragment, ImageView imageView, String transition) {
+        ViewCompat.setTransitionName(imageView,transition);
+        Helper.setFragmentTransition(getActivity(), ArtistListFragment.this, fragment,  new Pair<View, String>(imageView, transition));
     }
 
     @Override
@@ -99,6 +97,7 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
         artistView();
         artistlist = new ArrayList<>();
         rv.setAdapter(artistListAdapter);
+        artistListAdapter.setOnItemClickListener(OnClick);
         return rootView;
     }
 
@@ -139,14 +138,17 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
             case R.id.bytwo:
                 Extras.getInstance().setArtistGrid(2);
                 loadGridView();
+                load();
                 break;
             case R.id.bythree:
                 Extras.getInstance().setArtistGrid(3);
                 loadGridView();
+                load();
                 break;
             case R.id.byfour:
                 Extras.getInstance().setArtistGrid(4);
                 loadGridView();
+                load();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -209,28 +211,23 @@ public class ArtistListFragment extends miniFragment implements LoaderManager.Lo
         if (Extras.getInstance().getArtistGrid() == 2) {
             GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
             rv.setLayoutManager(layoutManager);
-            load();
         } else if (Extras.getInstance().getArtistGrid() == 3) {
             GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
             rv.setLayoutManager(layoutManager);
-            load();
         } else if (Extras.getInstance().getArtistGrid() == 4) {
             GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
             rv.setLayoutManager(layoutManager);
-            load();
         }
     }
 
     private void artistView() {
         if (Extras.getInstance().artistView()) {
             artistListAdapter.setLayoutID(R.layout.item_list_view);
-            artistListAdapter.setOnItemClickListener(listOnClick);
             CustomLayoutManager custom = new CustomLayoutManager(getContext());
             custom.setSmoothScrollbarEnabled(true);
             rv.setLayoutManager(custom);
             rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
         } else {
-            artistListAdapter.setOnItemClickListener(gridOnClick);
             artistListAdapter.setLayoutID(R.layout.item_grid_view);
             rv.addItemDecoration(new ItemOffsetDecoration(2));
             loadGridView();

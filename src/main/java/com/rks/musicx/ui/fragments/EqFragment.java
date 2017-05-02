@@ -48,6 +48,19 @@ import static com.rks.musicx.misc.utils.Constants.VIRTUAL_BOOST;
  * Created by Coolalien on 06/01/2017.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class EqFragment extends Fragment {
 
     private SwitchCompat switchCompat;
@@ -153,10 +166,12 @@ public class EqFragment extends Fragment {
     private void initPresets(View rootView) {
         appCompatSpinner = (AppCompatSpinner) rootView.findViewById(R.id.presets_spinner);
         arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item);
-        if(Equalizers.getEqualizerPresets(getContext()).length > 0){
-            for (String presets : Equalizers.getEqualizerPresets(getContext())){
-                arrayAdapter.add(presets);
-            }
+        if (getPresetNames() == null){
+            return;
+        }
+        for (String presets : getPresetNames()){
+            //getPresetNames().clear();
+            arrayAdapter.add(presets);
         }
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         appCompatSpinner.setAdapter(arrayAdapter);
@@ -164,7 +179,7 @@ public class EqFragment extends Fragment {
         appCompatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != 0) {
+                if (position != -1) {
                     Equalizers.usePreset((short) (position - 1));
                     final short[] range = Equalizers.getBandLevelRange();
                     for (short i = 0; i < Equalizers.getNumberOfBands(); i++) {
@@ -183,6 +198,18 @@ public class EqFragment extends Fragment {
 
             }
         });
+    }
+
+    private List<String> getPresetNames(){
+        List<String> presets = new ArrayList<>();
+        presets.add(getString(R.string.custom));
+        short no = 1;
+        short size = (short) (Equalizers.getPresenNo()+ no);
+        for (short n = 0; n <size; n++) {
+            short plusone = (short) ( n+  no);
+            presets.add(Equalizers.getPresetNames(plusone));
+        }
+        return presets;
     }
 
     private void initBassBoost() {

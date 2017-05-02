@@ -18,9 +18,19 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 
-/**
- * Touch detector for views.
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 class TouchManager implements View.OnTouchListener {
 
     private final View view;
@@ -106,97 +116,31 @@ class TouchManager implements View.OnTouchListener {
         stickyEdgeAnimator.animate(boundsChecker, null);
     }
 
-    /**
-     * Touch manager callback.
-     */
     interface Callback {
 
-        /**
-         * Called when user clicks on view.
-         *
-         * @param x click x coordinate
-         * @param y click y coordinate
-         */
         void onClick(float x, float y);
 
-        /**
-         * Called when user long clicks on view.
-         *
-         * @param x click x coordinate
-         * @param y click y coordinate
-         */
         void onLongClick(float x, float y);
 
-        /**
-         * Called when user touches screen outside view's bounds.
-         */
         void onTouchOutside();
 
-        /**
-         * Called when user touches widget but not removed finger from it.
-         *
-         * @param x x coordinate
-         * @param y y coordinate
-         */
         void onTouched(float x, float y);
 
-        /**
-         * Called when user drags widget.
-         *
-         * @param diffX movement by X axis
-         * @param diffY movement by Y axis
-         */
         void onMoved(float diffX, float diffY);
 
-        /**
-         * Called when user releases finger from widget.
-         *
-         * @param x x coordinate
-         * @param y y coordinate
-         */
         void onReleased(float x, float y);
 
-        /**
-         * Called when sticky edge animation completed.
-         */
         void onAnimationCompleted();
     }
 
-    /**
-     * Interface that return sticky bounds for widget.
-     */
     interface BoundsChecker {
 
-        /**
-         * Get sticky left position.
-         *
-         * @param screenWidth screen width
-         * @return sticky left position
-         */
         float stickyLeftSide(float screenWidth);
 
-        /**
-         * Get sticky right position.
-         *
-         * @param screenWidth screen width
-         * @return sticky right position
-         */
         float stickyRightSide(float screenWidth);
 
-        /**
-         * Get sticky top position.
-         *
-         * @param screenHeight screen height
-         * @return sticky top position
-         */
         float stickyTopSide(float screenHeight);
 
-        /**
-         * Get sticky bottom position.
-         *
-         * @param screenHeight screen height
-         * @return sticky bottom position
-         */
         float stickyBottomSide(float screenHeight);
     }
 
@@ -239,9 +183,6 @@ class TouchManager implements View.OnTouchListener {
 
     }
 
-    /**
-     * View's gesture listener.
-     */
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
         private int prevX, prevY;
@@ -352,9 +293,6 @@ class TouchManager implements View.OnTouchListener {
         }
     }
 
-    /**
-     * Helper class for animating fling gesture.
-     */
     private class FlingGestureAnimator {
         private static final long DEFAULT_ANIM_DURATION = 200;
         private final ValueAnimator flingGestureAnimator;
@@ -434,9 +372,6 @@ class TouchManager implements View.OnTouchListener {
         }
     }
 
-    /**
-     * Helper class for animating sticking to screen edge.
-     */
     private class StickyEdgeAnimator {
         private static final long DEFAULT_ANIM_DURATION = 300;
         private final PropertyValuesHolder dxHolder;

@@ -33,13 +33,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.util.Pair;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.PopupMenu;
 import android.text.TextUtils;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -102,6 +102,19 @@ import static com.rks.musicx.misc.utils.Constants.LightTheme;
  * Created by Coolalien on 24/03/2017.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class Helper {
 
     private Context context;
@@ -111,9 +124,6 @@ public class Helper {
         this.context = context;
     }
 
-    /**
-     * Set Ringtone
-     */
     public static void setRingTone(Context context, String path) {
         if (!permissionManager.isWriteSettingsGranted(context)) {
             if (path != null) {
@@ -171,9 +181,6 @@ public class Helper {
         }
     }
 
-    /**
-     * Share music
-     */
     public static void shareMusic(String path, Context context) {
         if (path != null) {
             File file = new File(path);
@@ -191,9 +198,6 @@ public class Helper {
         }
     }
 
-    /**
-     * Details of music
-     */
     public static void detailMusic(Context context, String title, String album, String artist,
                                    int trackno, String data) {
         if (data != null) {
@@ -234,9 +238,6 @@ public class Helper {
     }
 
 
-    /**
-     * Set color transparency
-     */
     public static int getColorWithAplha(int color, float ratio) {
         int transColor;
         int alpha = Math.round(Color.alpha(color) * ratio);
@@ -247,9 +248,6 @@ public class Helper {
         return transColor;
     }
 
-    /**
-     * Edit songs tags
-     */
     public static boolean editSongTags(Context context, Song song) {
         File f = new File(song.getmSongPath());
         if (f.exists()) {
@@ -322,40 +320,39 @@ public class Helper {
 
     public static String getInbuiltLyrics(String path) {
         File file = new File(path);
-        AudioFile audioFile = null;
-        try {
-            audioFile = AudioFileIO.read(file);
-            TagOptionSingleton.getInstance().setAndroid(true);
-        } catch (CannotReadException | ReadOnlyFileException | InvalidAudioFrameException | TagException | IOException e) {
-            e.printStackTrace();
+        if (file.exists()){
+            AudioFile audioFile = null;
+            try {
+                audioFile = AudioFileIO.read(file);
+                TagOptionSingleton.getInstance().setAndroid(true);
+            } catch (CannotReadException | ReadOnlyFileException | InvalidAudioFrameException | TagException | IOException e) {
+                e.printStackTrace();
+            }
+            Tag tag = null;
+            if (audioFile != null) {
+                tag = audioFile.getTag();
+            }
+            if (tag == null) {
+                tag = new ID3v24Tag();
+            }
+            try {
+                return tag.getFirst(FieldKey.LYRICS);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return "No Lyrics found";
+        }else {
+            Log.d("Helper", "File not found");
+            return null;
         }
-        Tag tag = null;
-        if (audioFile != null) {
-            tag = audioFile.getTag();
-        }
-        if (tag == null) {
-            tag = new ID3v24Tag();
-        }
-        try {
-            return tag.getFirst(FieldKey.LYRICS);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return "No Lyrics Found";
     }
 
-    /**
-     * Translation
-     */
     public static Animator[] getAnimator(View view) {
         return new Animator[]{
                 ObjectAnimator.ofFloat(view, "translationY", view.getMeasuredHeight(), 0)
         };
     }
 
-    /**
-     * Fragment transition
-     */
     @SafeVarargs
     @SuppressLint("NewApi")
     public static void setFragmentTransition(FragmentActivity activity, Fragment firstFragment,
@@ -387,12 +384,6 @@ public class Helper {
         ft.commit();
     }
 
-    /**
-     * String Filters
-     *
-     * @param str
-     * @return
-     */
     public static String stringFilter(String str) {
         if (str == null) {
             return null;
@@ -402,12 +393,6 @@ public class Helper {
         return m.replaceAll("").trim();
     }
 
-    /**
-     * Save Lyrics
-     *
-     * @param path
-     * @param content
-     */
     public static void saveLyrics(String path, String content) {
         try {
             if (!content.isEmpty() && !path.isEmpty() && content.length() > 0 && path.length() > 0) {
@@ -422,9 +407,6 @@ public class Helper {
     }
 
 
-    /**
-     * Create directory
-     */
     public static String createAppDir(String direName) {
         File file = new File(Environment.getExternalStorageDirectory() + "/" + "MusicX", direName);
         if (!file.exists()) {
@@ -433,9 +415,6 @@ public class Helper {
         return null;
     }
 
-    /**
-     * Rotation ImageView
-     */
     public static void rotationAnim(ImageView imageView) {
         RotateAnimation rotateAnimation1 = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f,
                 Animation.RELATIVE_TO_SELF, 0.5f);
@@ -445,9 +424,6 @@ public class Helper {
         imageView.startAnimation(rotateAnimation1);
     }
 
-    /**
-     * Return palette color
-     */
     public static int[] getAvailableColor(Context context, Palette palette) {
         int[] temp = new int[3]; //array with size 3
         if (palette.getDarkVibrantSwatch() != null) {
@@ -480,17 +456,11 @@ public class Helper {
         return temp;
     }
 
-    /**
-     * return theme pref
-     */
     public static String getATEKey(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(DarkTheme, false)
                 ? DarkTheme : LightTheme;
     }
 
-    /**
-     * Filter artist
-     */
     public static List<Artist> filterArtist(List<Artist> artistlist, String query) {
         query = query.toLowerCase();
         final List<Artist> filterartistlist = new ArrayList<>();
@@ -503,9 +473,6 @@ public class Helper {
         return filterartistlist;
     }
 
-    /**
-     * filter album
-     */
     public static List<Album> filterAlbum(List<Album> albumList, String query) {
         query = query.toLowerCase();
         final List<Album> filteralbumlist = new ArrayList<>();
@@ -518,9 +485,6 @@ public class Helper {
         return filteralbumlist;
     }
 
-    /**
-     * load guidlines html
-     */
     public static void GuidLines(Context context) {
         MaterialDialog.Builder builder = new MaterialDialog.Builder(context);
         builder.title("GuideLines");
@@ -545,9 +509,6 @@ public class Helper {
         builder.show();
     }
 
-    /**
-     * show changelogs
-     */
     public static void Changelogs(Context context) {
         MaterialDialog.Builder builder = new MaterialDialog.Builder(context);
         builder.title("Changelogs");
@@ -572,9 +533,6 @@ public class Helper {
         builder.show();
     }
 
-    /**
-     * show licenses
-     */
     public static void Licenses(Context context) {
         MaterialDialog.Builder builder = new MaterialDialog.Builder(context);
         builder.title("Licenses");
@@ -599,9 +557,6 @@ public class Helper {
         builder.show();
     }
 
-    /**
-     * time format
-     */
     public static String shortTime(Context context, long secs) {
         long hours, mins;
         hours = secs / 3600;
@@ -613,9 +568,6 @@ public class Helper {
         return String.format(durationFormat, hours, mins, secs);
     }
 
-    /**
-     * Rate Dailog
-     */
     public static void showRateDialog(final Context mContext) {
         final MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext);
         String appName = mContext.getString(R.string.app_name);
@@ -646,28 +598,16 @@ public class Helper {
         builder.show();
     }
 
-    /**
-     * Storage
-     */
-    public static File getStorage(String location) {
+    public static String getStoragePath() {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            String musicfolderpath = Environment.getExternalStoragePublicDirectory(location).getPath();
+            String musicfolderpath = Environment.getExternalStorageDirectory().getPath();
             Log.d("Helper", musicfolderpath);
-            File path = new File(musicfolderpath);
-            return path;
+            return musicfolderpath;
         } else {
             return null;
         }
     }
 
-    /**
-     * Convert text to bitmap
-     *
-     * @param text
-     * @param textSize
-     * @param textColor
-     * @return
-     */
     public static Bitmap textAsBitmap(String text, float textSize, int textColor) {
         Paint paint = new Paint(ANTI_ALIAS_FLAG);
         paint.setTextSize(textSize); //text size
@@ -682,9 +622,6 @@ public class Helper {
         return image;
     }
 
-    /**
-     * Delete track
-     */
     @SuppressLint("StringFormatInvalid")
     private void DeleteTrack(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders,
                              Fragment fragment, String name, String path, Context context) {
@@ -747,19 +684,22 @@ public class Helper {
         dialog.show();
     }
 
-    /**
-     * Show overflow menu
-     */
-    public void showMenu(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders, Fragment fragment, MainActivity activity, int position, View v, Context context, SongListAdapter songListAdapter) {
+    public void showMenu(boolean torf, int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders, Fragment fragment, MainActivity activity, int position, View v, Context context, SongListAdapter songListAdapter) {
         PopupMenu popup = new PopupMenu(context, v);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.song_list_item, popup.getMenu());
         Song song = songListAdapter.getItem(position);
+        popup.getMenu().findItem(R.id.action_remove_playlist).setVisible(torf);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
+                    case R.id.action_remove_playlist:
+                        deletePlaylistTrack(context,Extras.getInstance().getPlaylistId(), song.getId());
+                        Toast.makeText(context, "Removed from playlist", Toast.LENGTH_SHORT).show();
+                        fragment.getLoaderManager().restartLoader(id, null, songLoaders);
+                        break;
                     case R.id.action_add_to_queue:
                         activity.addToQueue(song);
                         Toast.makeText(context, "Added to queue", Toast.LENGTH_SHORT).show();
@@ -773,14 +713,14 @@ public class Helper {
                         break;
                     case R.id.action_addFav:
                         new FavHelper(context).addFavorite(song.getId());
-                        Toast.makeText(context, "Added to fav", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "Added to fav", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.action_edit_tags:
                         Extras.getInstance().saveMetaData(song);
                         activity.setFragment(TagEditorFragment.getInstance());
                         break;
                     case R.id.action_set_ringtone:
-                        setRingTone(context, songListAdapter.getItem(position).getmSongPath());
+                        setRingTone(context, song.getmSongPath());
                         Toast.makeText(context, "Ringtone set", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.action_delete:
@@ -799,9 +739,9 @@ public class Helper {
                     case R.id.action_removeFav:
                         if (new FavHelper(context).isFavorite(song.getId())) {
                             new FavHelper(context).removeFromFavorites(song.getId());
-                            Toast.makeText(context, "Removed from fav", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Removed from fav", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(context, "First add to fav", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "First add to fav", Toast.LENGTH_SHORT).show();
                         }
                         break;
                 }
@@ -811,9 +751,6 @@ public class Helper {
         popup.show();
     }
 
-    /**
-     * Playlist chooser
-     */
     public void PlaylistChooser(Fragment fragment, Context context, long song) {
         PlayListPicker playListPicker = new PlayListPicker();
         playListPicker.setPicked(new playlistPicked() {
@@ -826,28 +763,53 @@ public class Helper {
         playListPicker.show(fragment.getFragmentManager(), null);
     }
 
-    /**
-     * Delete playlist
-     */
-    public void deletePlaylist(ContentResolver resolver, long playlistId) {
+    public static void deletePlaylistTrack(Context context, long playlistId, long audioId) {
+        ContentResolver resolver = context.getContentResolver();
         Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
-        resolver.delete(uri, null, null);
-        String filter = MediaStore.Audio.Playlists._ID + "=" + playlistId;
-        resolver.delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, filter, null);
+        String filter = MediaStore.Audio.Playlists.Members.AUDIO_ID + " = " + audioId;
+        resolver.delete(uri, filter,null);
     }
 
-    /**
-     * Add songs to playlist
-     */
     public void addSongToPlaylist(ContentResolver resolver, long playlistId, long songId) {
         Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
         final int base = getSongCount(resolver, uri);
         insert(resolver, uri, songId, base + 1);
     }
 
-    /**
-     * getsong count
-     */
+    public static void deletePlaylist(Context context, String selectedplaylist) {
+        String playlistid = getPlayListId(context, selectedplaylist);
+        ContentResolver resolver = context.getContentResolver();
+        String where = MediaStore.Audio.Playlists._ID + "=?";
+        String[] whereVal = {playlistid};
+        resolver.delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, where, whereVal);
+    }
+
+    private static String getPlayListId(Context context, String playlist ) {
+        int recordcount;
+        Uri newuri = MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI;
+        final String playlistid = MediaStore.Audio.Playlists._ID;
+        final String playlistname = MediaStore.Audio.Playlists.NAME;
+        String where = MediaStore.Audio.Playlists.NAME + "=?";
+        String[] whereVal = {playlist};
+        String[] projection = {playlistid, playlistname};
+        ContentResolver resolver = context.getContentResolver();
+        Cursor cursor = resolver.query(newuri , projection, where, whereVal, null);
+        if (cursor != null) {
+            recordcount = cursor.getCount();
+            String foundplaylistid = "";
+            if (recordcount > 0) {
+                cursor.moveToFirst();
+                int idColumn = cursor.getColumnIndex(playlistid);
+                foundplaylistid = cursor.getString(idColumn);
+                cursor.close();
+            }
+            cursor.close();
+            return foundplaylistid;
+        }else {
+            return "";
+        }
+
+    }
     private int getSongCount(ContentResolver resolver, Uri uri) {
         String[] cols = new String[]{"count(*)"};
         Cursor cur = resolver.query(uri, cols, null, null, null);
@@ -859,9 +821,6 @@ public class Helper {
         return count;
     }
 
-    /**
-     * create playlist
-     */
     public Uri createPlaylist(ContentResolver resolver, String playlistName) {
         Uri uri = MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI;
         ContentValues values = new ContentValues();
@@ -869,9 +828,6 @@ public class Helper {
         return resolver.insert(uri, values);
     }
 
-    /**
-     * insert into playlist
-     */
     private void insert(ContentResolver resolver, Uri uri, long songId, int index) {
         ContentValues values = new ContentValues();
         values.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, index);
@@ -880,10 +836,7 @@ public class Helper {
 
     }
 
-    /**
-     * Search lyrics
-     */
-    public void searchLyrics(Context context, String title, String artist, TextView setlyrics) {
+    public void searchLyrics(Context context, String title, String artist, String path, TextView setlyrics) {
         View v = LayoutInflater.from(context).inflate(R.layout.search_lyrics, null);
         MaterialDialog.Builder searchLyrics = new MaterialDialog.Builder(context);
         searchLyrics.title("Search Lyrics");
@@ -895,7 +848,7 @@ public class Helper {
         searchLyrics.onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                new LyricsData(context, songeditText.getText().toString(), artisteditText.getText().toString(), setlyrics).execute("Executed");
+                LoadLyrics(songeditText.getText().toString(),artisteditText.getText().toString(),path, setlyrics);
             }
         });
         searchLyrics.negativeText(android.R.string.cancel);
@@ -909,9 +862,6 @@ public class Helper {
         searchLyrics.show();
     }
 
-    /**
-     * load lyrics
-     */
     public void LoadLyrics(String title, String artist, String path, TextView lrcView) {
         if (title != null && artist != null) {
             File file = new File(loadLyrics(title));
@@ -923,8 +873,8 @@ public class Helper {
                 }
             } else {
                 try {
-                    new LyricsData(context, title, artist, path, lrcView).execute("Executed");
-                } finally {
+                    new LyricsData(context, title, artist,path, lrcView).execute("Executed");
+                }finally {
                     lrcView.setText(getInbuiltLyrics(path));
                 }
             }
@@ -934,16 +884,10 @@ public class Helper {
         }
     }
 
-    /**
-     * load lyrics
-     */
     public String loadLyrics(String name) {
         return getDirLocation() + setFileName(name);
     }
 
-    /**
-     * read lyrics from file
-     */
     public void readLyricsFromFile(File file, TextView textView) {
         if (file != null) {
             FileInputStream iStr;
@@ -973,30 +917,18 @@ public class Helper {
         }
     }
 
-    /**
-     * load artistImage
-     */
     public String loadArtistImage(String name) {
         return getArtistArtworkLocation() + setFileName(name) + ".jpeg";
     }
 
-    /**
-     * ArtistImage Location
-     */
     public String getArtistArtworkLocation() {
         return Environment.getExternalStorageDirectory() + "/MusicX/" + ".ArtistArtwork/";
     }
 
-    /**
-     * Lyrics location
-     */
     public String getDirLocation() {
         return Environment.getExternalStorageDirectory() + "/MusicX/" + "Lyrics/";
     }
 
-    /**
-     * Set fileName
-     */
     public String setFileName(String title) {
         if (TextUtils.isEmpty(title)) {
             title = context.getString(R.string.unknown);
@@ -1004,9 +936,6 @@ public class Helper {
         return title;
     }
 
-    /**
-     * Animate view
-     */
     public void animateViews(View view, int colorBg) {
         colorAnimation = setAnimator(0xffe5e5e5, colorBg);
         colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -1019,9 +948,6 @@ public class Helper {
         });
     }
 
-    /**
-     * animate view
-     */
     private ValueAnimator setAnimator(int colorFrom, int colorTo) {
         ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
         long duration = 300;
@@ -1029,9 +955,6 @@ public class Helper {
         return colorAnimation;
     }
 
-    /**
-     * Filter songs
-     */
     public List<Song> filter(List<Song> songList, String query) {
         query = query.toLowerCase().trim();
         final List<Song> filtersonglist = new ArrayList<>();

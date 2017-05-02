@@ -39,6 +39,19 @@ import java.util.List;
  * Created by Coolalien on 6/28/2016.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class SongListFragment extends miniFragment implements SearchView.OnQueryTextListener, LoaderManager.LoaderCallbacks<List<Song>> {
 
     private FastScrollRecyclerView rv;
@@ -48,41 +61,36 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
     private SearchView searchView;
     private List<Song> songList;
 
-    private BaseRecyclerViewAdapter.OnItemClickListener listClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
+    private BaseRecyclerViewAdapter.OnItemClickListener onClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
 
         @Override
         public void onItemClick(int position, View view) {
-            switch (view.getId()) {
-                case R.id.item_view:
-                    ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
-                    rv.smoothScrollToPosition(position);
-                    break;
-                case R.id.menu_button:
-                    helper.showMenu(trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
-                    break;
+            if (songListAdapter.getLayout() == R.layout.song_list){
+                switch (view.getId()) {
+                    case R.id.item_view:
+                        ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
+                        rv.smoothScrollToPosition(position);
+                        break;
+                    case R.id.menu_button:
+                        helper.showMenu(false, trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                        break;
 
+                }
+            }else if (songListAdapter.getLayout() == R.layout.item_grid_view){
+                switch (view.getId()) {
+                    case R.id.album_artwork:
+                    case R.id.album_info:
+                        ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
+                        rv.smoothScrollToPosition(position);
+                        break;
+                    case R.id.menu_button:
+                        helper.showMenu(false, trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                        break;
+
+                }
             }
         }
     };
-
-    private BaseRecyclerViewAdapter.OnItemClickListener gridClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
-
-        @Override
-        public void onItemClick(int position, View view) {
-            switch (view.getId()) {
-                case R.id.album_artwork:
-                case R.id.album_info:
-                    ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
-                    rv.smoothScrollToPosition(position);
-                    break;
-                case R.id.menu_button:
-                    helper.showMenu(trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
-                    break;
-
-            }
-        }
-    };
-
 
     public static SongListFragment newInstance() {
         return new SongListFragment();
@@ -104,6 +112,7 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
         helper = new Helper(getContext());
         rv.setAdapter(songListAdapter);
         songList = new ArrayList<>();
+        songListAdapter.setOnItemClickListener(onClick);
         return rootView;
     }
 
@@ -163,14 +172,17 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
             case R.id.bytwo:
                 Extras.getInstance().setSongGrid(2);
                 loadGridView();
+                load();
                 break;
             case R.id.bythree:
                 Extras.getInstance().setSongGrid(3);
                 loadGridView();
+                load();
                 break;
             case R.id.byfour:
                 Extras.getInstance().setSongGrid(4);
                 loadGridView();
+                load();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -244,27 +256,22 @@ public class SongListFragment extends miniFragment implements SearchView.OnQuery
         if (Extras.getInstance().getSongGrid() == 2) {
             GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
             rv.setLayoutManager(layoutManager);
-            load();
         } else if (Extras.getInstance().getSongGrid() == 3) {
             GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
             rv.setLayoutManager(layoutManager);
-            load();
         } else if (Extras.getInstance().getSongGrid() == 4) {
             GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
             rv.setLayoutManager(layoutManager);
-            load();
         }
     }
 
     private void songView() {
         if (Extras.getInstance().songView()) {
             songListAdapter.setLayoutId(R.layout.item_grid_view);
-            songListAdapter.setOnItemClickListener(gridClick);
             rv.addItemDecoration(new ItemOffsetDecoration(2));
             loadGridView();
         } else {
             songListAdapter.setLayoutId(R.layout.song_list);
-            songListAdapter.setOnItemClickListener(listClick);
             CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
             customLayoutManager.setSmoothScrollbarEnabled(true);
             rv.setLayoutManager(customLayoutManager);

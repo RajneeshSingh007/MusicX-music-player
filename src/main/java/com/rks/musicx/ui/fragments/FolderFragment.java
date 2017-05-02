@@ -1,14 +1,12 @@
 package com.rks.musicx.ui.fragments;
 
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,22 +17,22 @@ import android.view.ViewGroup;
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
+import com.rks.musicx.data.loaders.FolderLoader;
 import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.loaders.TrackLoader;
+import com.rks.musicx.data.model.FolderModel;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.misc.utils.ATEUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
-import com.rks.musicx.misc.utils.permissionManager;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.BaseRecyclerViewAdapter;
 import com.rks.musicx.ui.adapters.FileAdapter;
 import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,12 +41,25 @@ import java.util.List;
  * Created by Coolalien on 03/24/2017.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class FolderFragment extends miniFragment implements SearchView.OnQueryTextListener, LoaderManager.LoaderCallbacks<List<Song>> {
 
 
-    private final int trackloader = -1;
+    private final int trackloader = 1, folderloader = 2;
     private FastScrollRecyclerView folderrv;
-    private File currentDir;
+    private FolderModel currentDir;
     private FileAdapter fileadapter;
     private Helper helper;
     private SongListAdapter songListAdapter;
@@ -64,7 +75,7 @@ public class FolderFragment extends miniFragment implements SearchView.OnQueryTe
                     folderrv.smoothScrollToPosition(position);
                     break;
                 case R.id.menu_button:
-                    helper.showMenu(trackloader, FolderFragment.this, FolderFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                    helper.showMenu(false, trackloader, FolderFragment.this, FolderFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
                     break;
 
             }
@@ -75,17 +86,25 @@ public class FolderFragment extends miniFragment implements SearchView.OnQueryTe
 
         @Override
         public void onItemClick(int position, View view) {
+            FolderModel folderModel = fileadapter.getItem(position);
+            currentDir = new FolderModel(folderModel.getPath());
             switch (view.getId()) {
                 case R.id.folder_view:
-                    if (fileadapter.getSnapshot().size() > 0) {
+                    adapterLoader(folderModel);
+                    if (fileadapter.getSnapshot().size() > 0){
                         folderrv.setAdapter(songListAdapter);
-                    } else {
-                        Log.d("Folder", "error buddy");
+                        getLoaderManager().restartLoader(trackloader, null, FolderFragment.this);
                     }
                     break;
             }
         }
     };
+
+    private void adapterLoader(FolderModel folderModel){
+        if (folderModel.getmFile().isDirectory()){
+            getLoaderManager().restartLoader(folderloader, null, folderLoaderCallback);
+        }
+    }
 
     public static FolderFragment newInstance() {
         return new FolderFragment();
@@ -105,6 +124,12 @@ public class FolderFragment extends miniFragment implements SearchView.OnQueryTe
     }
 
     private void function() {
+        String storagePath = Extras.getInstance().getFolderPath();
+        if ( storagePath == null){
+            currentDir = new FolderModel(Helper.getStoragePath());
+        }else {
+            currentDir = new FolderModel(storagePath);
+        }
         CustomLayoutManager customLayoutManager = new CustomLayoutManager(getActivity());
         customLayoutManager.setSmoothScrollbarEnabled(true);
         folderrv.setLayoutManager(customLayoutManager);
@@ -114,25 +139,19 @@ public class FolderFragment extends miniFragment implements SearchView.OnQueryTe
         folderrv.setPopupBgColor(colorAccent);
         folderrv.setItemAnimator(new DefaultItemAnimator());
         fileadapter = new FileAdapter(getContext());
-        folderrv.setAdapter(fileadapter);
         fileadapter.setOnItemClickListener(onClik);
         helper = new Helper(getContext());
-        if (permissionManager.isExternalReadStorageGranted(getContext())) {
-            if (!Extras.getInstance().gettrackFolderpath()) {
-                currentDir = Helper.getStorage(Environment.DIRECTORY_MUSIC);
-                fileadapter.getSnapshot().add(currentDir);
-            } else {
-                currentDir = Helper.getStorage(Extras.getInstance().getFolderPath());
-                fileadapter.getSnapshot().add(currentDir);
-            }
-        } else {
-            Log.d("Folder", "Permission not granted");
-        }
-        setHasOptionsMenu(true);
         songListAdapter = new SongListAdapter(getContext());
         songListAdapter.setOnItemClickListener(songOnClick);
+        setHasOptionsMenu(true);
         songList = new ArrayList<>();
+        initLoader();
+        folderrv.setAdapter(fileadapter);
+    }
+
+    private void initLoader(){
         getLoaderManager().initLoader(trackloader, null, FolderFragment.this);
+        getLoaderManager().initLoader(folderloader, null, folderLoaderCallback);
     }
 
 
@@ -151,7 +170,7 @@ public class FolderFragment extends miniFragment implements SearchView.OnQueryTe
     public void onResume() {
         super.onResume();
         String atekey = Helper.getATEKey(getContext());
-        ATEUtils.setStatusBarColor(getActivity(), atekey, Config.primaryColor(getActivity(), atekey));
+        ATEUtils.setStatusBarColor(getActivity(), atekey, Config.primaryColor(getContext(), atekey));
     }
 
     @Override
@@ -159,8 +178,8 @@ public class FolderFragment extends miniFragment implements SearchView.OnQueryTe
         TrackLoader trackLoaders = new TrackLoader(getContext());
         if (id == trackloader) {
             String[] selectargs = new String[]{
-                    "%" + Extras.getInstance().getFolderPath() + "%"
-            }; //filter folders
+                    "%" + getCurrentDir().getPath() +"%"
+            };
             String selection = MediaStore.Audio.Media.DATA + " like ? ";
             trackLoaders.setSortOrder(Extras.getInstance().getSongSortOrder());
             trackLoaders.filteralbumsong(selection, selectargs);
@@ -168,6 +187,11 @@ public class FolderFragment extends miniFragment implements SearchView.OnQueryTe
         }
         return null;
     }
+
+    public FolderModel getCurrentDir() {
+        return currentDir;
+    }
+
 
     @Override
     public void onLoadFinished(Loader<List<Song>> loader, List<Song> data) {
@@ -191,6 +215,7 @@ public class FolderFragment extends miniFragment implements SearchView.OnQueryTe
         searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.song_search));
         searchView.setOnQueryTextListener(this);
         searchView.setQueryHint("Search song");
+        menu.findItem(R.id.grid_view).setVisible(false);
     }
 
     @Override
@@ -245,5 +270,31 @@ public class FolderFragment extends miniFragment implements SearchView.OnQueryTe
         songListAdapter.setFilter(filterlist);
         return true;
     }
+
+    private LoaderManager.LoaderCallbacks<List<FolderModel>> folderLoaderCallback = new LoaderManager.LoaderCallbacks<List<FolderModel>>() {
+        @Override
+        public Loader<List<FolderModel>> onCreateLoader(int id, Bundle args) {
+            FolderLoader folderLoader = new FolderLoader(getContext(), getCurrentDir());
+            if (id == folderloader){
+                return folderLoader;
+            }
+            return null;
+        }
+
+        @Override
+        public void onLoadFinished(Loader<List<FolderModel>> loader, List<FolderModel> data) {
+            if (data == null){
+                return;
+            }
+            fileadapter.clear();
+            fileadapter.addDataList(data);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<FolderModel>> loader) {
+            loader.reset();
+            fileadapter.notifyDataSetChanged();
+        }
+    };
 
 }

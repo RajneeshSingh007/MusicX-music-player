@@ -22,6 +22,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 @SuppressLint("ViewConstructor")
 class PlayPauseButton extends ImageView implements PlaybackState.PlaybackStateListener {
 
@@ -350,8 +363,9 @@ class PlayPauseButton extends ImageView implements PlaybackState.PlaybackStateLi
     public void albumCover(Drawable newAlbumCover) {
         if (this.albumCover == newAlbumCover) return;
         this.albumCover = newAlbumCover;
-
-
+        if (albumCover.hashCode() == 0){
+            return;
+        }
         if (albumCover instanceof BitmapDrawable && !isNeedToFillAlbumCoverMap.containsKey(albumCover.hashCode())) {
             Bitmap bitmap = ((BitmapDrawable) albumCover).getBitmap();
             if (bitmap != null && !bitmap.isRecycled()) {

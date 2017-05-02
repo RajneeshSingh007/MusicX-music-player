@@ -27,6 +27,7 @@ import static com.rks.musicx.misc.utils.Constants.HQ_ARTISTARTWORK;
 import static com.rks.musicx.misc.utils.Constants.KEY_POSITION_X;
 import static com.rks.musicx.misc.utils.Constants.KEY_POSITION_Y;
 import static com.rks.musicx.misc.utils.Constants.PLAYINGSTATE;
+import static com.rks.musicx.misc.utils.Constants.PLAYLIST_ID;
 import static com.rks.musicx.misc.utils.Constants.REORDER_TAB;
 import static com.rks.musicx.misc.utils.Constants.REPEATMODE;
 import static com.rks.musicx.misc.utils.Constants.RESTORE_LASTTAB;
@@ -46,7 +47,6 @@ import static com.rks.musicx.misc.utils.Constants.SONG_YEAR;
 import static com.rks.musicx.misc.utils.Constants.SaveHeadset;
 import static com.rks.musicx.misc.utils.Constants.SaveLyrics;
 import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
-import static com.rks.musicx.misc.utils.Constants.TRACKFOLDER;
 import static com.rks.musicx.misc.utils.Constants.TextFonts;
 import static com.rks.musicx.misc.utils.Constants.VIZCOLOR;
 import static com.rks.musicx.misc.utils.Constants.WIDGETTRACk;
@@ -54,6 +54,19 @@ import static com.rks.musicx.misc.utils.Constants.sInstance;
 
 /*
  * Created by Coolalien on 6/28/2016.
+ */
+
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 public class Extras {
@@ -71,9 +84,14 @@ public class Extras {
     }
 
 
-    public static int px2Dp(int dp, Context c) {
+    public int px2Dp(int dp, Context c) {
         DisplayMetrics displayMetrics = c.getResources().getDisplayMetrics();
         return Math.round(dp * (displayMetrics.ydpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
+    public  int dp2px(Context context, float dpValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
     }
 
     public static void init(Context context) {
@@ -211,7 +229,6 @@ public class Extras {
         return mPreferences.getBoolean(HQ_ARTISTARTWORK, false);
     }
 
-
     public boolean vizColor() {
         return mPreferences.getBoolean(VIZCOLOR, false);
     }
@@ -233,17 +250,6 @@ public class Extras {
         return mPreferences.getString(FOLDERPATH, null);
     }
 
-    public void trackFolderPath(boolean torf) {
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putBoolean(TRACKFOLDER, torf);
-        editor.apply();
-    }
-
-    public boolean gettrackFolderpath() {
-        return mPreferences.getBoolean(TRACKFOLDER, false);
-    }
-
-
     //////////////////// eq switch track //////////////////
 
     public void eqSwitch(Boolean torf) {
@@ -260,7 +266,7 @@ public class Extras {
 
     ///////////////////// MusicX Service pref /////////////////////////
 
-    public void saveServices(boolean savestate, int pos, int repeat, boolean shuffle, String songTitle, String songArtist, long songID, long albumID) {
+    public void saveServices(boolean savestate, int pos, int repeat, boolean shuffle, String songTitle, String songArtist, String path, long songID, long albumID) {
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putInt(CURRENTPOS, pos);
         editor.putInt(REPEATMODE, repeat);
@@ -270,6 +276,7 @@ public class Extras {
         editor.putString(SONG_ARTIST, songArtist);
         editor.putLong(SONG_ID, songID);
         editor.putLong(SONG_ALBUM_ID, albumID);
+        editor.putString(SONG_PATH, path);
         editor.apply();
     }
 
@@ -305,10 +312,9 @@ public class Extras {
         return mPreferences.getLong(SONG_ALBUM_ID, albumid);
     }
 
-    public int getCurrentPos(){
-        return mPreferences.getInt(CURRENTPOS, 0);
+    public String getSongPath(String path){
+        return mPreferences.getString(SONG_PATH, path);
     }
-
 
     //////////////////// Save Metadata pref ////////////////////////
 
@@ -395,7 +401,6 @@ public class Extras {
         editor.commit();
     }
 
-
     ///////////////// widgetTracking ///////////////
 
     public void setWidgetTrack (boolean torf){
@@ -408,4 +413,33 @@ public class Extras {
     public boolean getWidgetTrack(){
         return mPreferences.getBoolean(WIDGETTRACk, false);
     }
+
+
+    ///////////////// Init Setup //////////////////
+
+    public int getInitValue(String spName, String key) {
+        SharedPreferences sharedPreferences = mcontext.getSharedPreferences(spName, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(key, 0);
+    }
+
+    public void setInitValue(int ammount, String spName, String key) {
+        SharedPreferences sharedPreferences = mcontext.getSharedPreferences(spName, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(key, ammount);
+        editor.commit();
+    }
+
+    ///////////////// save Playlist Id /////////////
+
+    public void savePlaylistId(long id){
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putLong(PLAYLIST_ID, id);
+        editor.apply();
+    }
+
+    public long getPlaylistId(){
+        return mPreferences.getLong(PLAYLIST_ID, 0);
+    }
+
+
 }

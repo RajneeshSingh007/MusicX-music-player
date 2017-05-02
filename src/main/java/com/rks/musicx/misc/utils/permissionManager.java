@@ -29,6 +29,19 @@ import static com.rks.musicx.misc.utils.Constants.permissions;
  * Created by Coolalien on 6/28/2016.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class permissionManager {
 
 
@@ -60,6 +73,7 @@ public class permissionManager {
                             intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.fromParts("package", activity.getPackageName(), null));
                             activity.startActivityForResult(intent, OVERLAY_REQ);
                         }
+                        Extras.getInstance().setWidgetTrack(true);
                     } else if (which == DialogInterface.BUTTON_NEGATIVE) {
                         Toast.makeText(activity, R.string.toast_permissions_not_granted, Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
@@ -105,12 +119,6 @@ public class permissionManager {
         }
     }
 
-    /**
-     * Check if alert windows granted
-     *
-     * @param context
-     * @return
-     */
     public static boolean isSystemAlertGranted(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.SYSTEM_ALERT_WINDOW) == PermissionChecker.PERMISSION_GRANTED || Settings.canDrawOverlays(context)) {

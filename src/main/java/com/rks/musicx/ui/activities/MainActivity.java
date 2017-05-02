@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
@@ -83,6 +82,19 @@ import static com.rks.musicx.misc.utils.Constants.WRITESETTINGS;
  * Created by Coolalien on 6/28/2016.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class MainActivity extends BaseActivity implements MetaDatas, ATEActivityThemeCustomizer, NavigationView.OnNavigationItemSelectedListener {
 
     private MusicXService musicXService;
@@ -94,7 +106,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     private DrawerLayout mDrawerLayout;
     private View mNavigationHeader;
     private int count = 0;
-    private int tempInt = 0;
     private FloatingActionButton playToggle;
     private ProgressBar songProgress;
     private TextView SongTitle, SongArtist;
@@ -113,6 +124,8 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         filter.addAction(ITEM_ADDED);
         filter.addAction(ORDER_CHANGED);
         registerReceiver(broadcastReceiver, filter);
+        Intent intent = new Intent(this, MusicXService.class);
+        bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
     }
 
     private Runnable mUpdateProgress = new Runnable() {
@@ -124,13 +137,14 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
 
         }
     };
+
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             MusicXService.MusicXBinder binder = (MusicXService.MusicXBinder) service;
             musicXService = binder.getService();
             mService = true;
-            if (musicXService != null) {
+            if (musicXService != null){
                 MiniPlayerUpdate();
             }
         }
@@ -141,6 +155,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
 
         }
     };
+
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
         @Override
@@ -195,13 +210,13 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         if (mNavigationView != null) {
             mNavigationView.setNavigationItemSelectedListener(this);
         }
-        count = readSharedPreferenceInt("first", "last");
+        count = Extras.getInstance().getInitValue("first", "last");
         if (count == 0) {
             Intent intent = new Intent();
             intent.setClass(MainActivity.this, IntroActivity.class);
             startActivity(intent);
             count++;
-            writeSharedPreference(count, "first", "last");
+            Extras.getInstance().setInitValue(count, "first", "last");
         }
         songDetail.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -219,6 +234,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         mRequestManager = Glide.with(this);
     }
 
+
     @Override
     protected Fragment setFragment() {
         return MainFragment.newInstance();
@@ -234,17 +250,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         super.fragmentLoader(ContainerId, fragment);
     }
 
-    public int readSharedPreferenceInt(String spName, String key) {
-        SharedPreferences sharedPreferences = getSharedPreferences(spName, Context.MODE_PRIVATE);
-        return tempInt = sharedPreferences.getInt(key, 0);
-    }
-
-    public void writeSharedPreference(int ammount, String spName, String key) {
-        SharedPreferences sharedPreferences = getSharedPreferences(spName, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(key, ammount);
-        editor.commit();
-    }
 
     public void showFavorites() {
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
@@ -374,17 +379,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        if (mService) {
-            musicXService = null;
-            unbindService(mServiceConnection);
-            mService = false;
-            unregisterReceiver(broadcastReceiver);
-        }
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         if (!mService) {
@@ -404,6 +398,16 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             }
         }
         Glide.get(this).clearMemory();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mService) {
+            unbindService(mServiceConnection);
+            mService = false;
+            unregisterReceiver(broadcastReceiver);
+        }
     }
 
     @Override

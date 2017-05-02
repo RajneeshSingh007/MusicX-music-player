@@ -28,6 +28,19 @@ import static com.rks.musicx.misc.utils.Constants.Zero;
  * Created by Coolalien on 6/28/2016.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class PlayingActivity extends BaseActivity implements ATEActivityThemeCustomizer {
 
     @Override
@@ -43,15 +56,17 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
     @Override
     protected void function() {
 
-        String playing1 = Extras.getInstance().mPreferences.getString(PlayingView, "0");
-        String playing2 = Extras.getInstance().mPreferences.getString(PlayingView, "1");
-        String playing3 = Extras.getInstance().mPreferences.getString(PlayingView, "2");
-        String playing4 = Extras.getInstance().mPreferences.getString(PlayingView, "3");
+        String playing1 = Extras.getInstance().mPreferences.getString(PlayingView, Zero);
+        String playing2 = Extras.getInstance().mPreferences.getString(PlayingView, One);
+        String playing3 = Extras.getInstance().mPreferences.getString(PlayingView, Two);
+        String playing4 = Extras.getInstance().mPreferences.getString(PlayingView, Three);
+        //String playing5 = Extras.getInstance().mPreferences.getString(PlayingView, Four);
 
         Playing1Fragment playing1Fragment = new Playing1Fragment();
         Playing2Fragment playing2Fragment = new Playing2Fragment();
         Playing3Fragment playing3Fragment = new Playing3Fragment();
         Playing4Fragment playing4Fragment = new Playing4Fragment();
+        //Playing5Fragment playing5Fragment = new Playing5Fragment();
 
         if (playing1.equals(Zero)) {
             setFragment(playing1Fragment);
@@ -61,9 +76,13 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
             setFragment(playing3Fragment);
         } else if (playing4.equals(Three)) {
             setFragment(playing4Fragment);
-        } else {
+        }else {
             setFragment(playing1Fragment);
-        }
+        } /*else if (playing5.equals(Four)){
+            setFragment(playing5Fragment);
+        }else {
+            setFragment(playing1Fragment);
+        }*/
     }
 
 

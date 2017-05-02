@@ -24,9 +24,19 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Created by Coolalien on 3/29/2017.
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 public class ArtistArtwork extends AsyncTask<Void, Void, Void> {
 
     private Call<Artist> artistCall;
@@ -60,6 +70,7 @@ public class ArtistArtwork extends AsyncTask<Void, Void, Void> {
                                     AndroidNetworking.delete(file.getAbsolutePath());
                                 }
                                 AndroidNetworking.download(artworkQuality(artistArtwork), new Helper(context).getArtistArtworkLocation(), artistName + ".jpeg")
+
                                         .setTag("DownloadingArtistImage")
                                         .setPriority(Priority.MEDIUM)
                                         .build()
@@ -119,12 +130,6 @@ public class ArtistArtwork extends AsyncTask<Void, Void, Void> {
         Log.d("ArtistArtwork", "Success");
     }
 
-    /**
-     * Artwork quality
-     *
-     * @param artistArtwork
-     * @return
-     */
     private String artworkQuality(Image_ artistArtwork) {
         if (artistArtwork.getSize().equals("large")) {
             return artistArtwork.getText();

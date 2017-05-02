@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ ©2017 Rajneesh Singh
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name">MusicX</string>
+    <string name="titles">שירים</string>
+    <string name="albums">אלבומים</string>
+    <string name="artists">אומנים</string>
+    <string name="playlists">רשימות השמעה</string>
+    <string name="action_settings">הגדרות</string>
+    <string name="album_artwork">עטיפת אלבום</string>
+    <string name="create_playlist">צור רשימת השמעה</string>
+    <string name="playlist_name">שם רשימת השמעה</string>
+    <string name="action_add_to_queue">הוסף לתור</string>
+    <string name="action_set_as_next_track">השיר הבא</string>
+    <string name="about">אודות</string>
+    <plurals name="albums_count">
+        <item quantity="one">%d אלבומים</item>
+        <item quantity="other">%d אלבומים</item>
+    </plurals>
+    <string name="search">חיפוש</string>
+    <string name="action_add_to_playlist">הוסף לרשימת ההשמעה</string>
+    <string name="choose_playlist">בחר רשימת השמעה</string>
+    <string name="favorites">מועדפים</string>
+    <string name="library">ספרייה</string>
+    <string name="action_set_ringtone">הגדר צלצול</string>
+    <string name="action_share">שתף</string>
+    <string name="action_delete">מחק</string>
+    <string name="action_details">פרטים</string>
+    <string name="delete_music">למחוק את השיר מהמכשיר?</string>
+    <string name="delete">>מחק</string>
+    <string name="cancel">>בטל</string>
+    <string name="share">שתף עם</string>
+    <string name="primary_color">צבע מרכזי</string>
+    <string name="accent_color">צבע מודגש</string>
+    <integer name="tilting_angle">-5</integer>
+    <string name="song_Name"><b>שם השיר:</b></string>
+    <string name="album_name"><b>שם האלבום:</b></string>
+    <string name="artist_name"><b>שם האמן:</b></string>
+    <string name="file_size"><b>גודל הקובץ:</b></string>
+    <string name="file_path"><b>נתיב קובץ:</b></string>
+    <string name="trackno"><b>שיר מספר:</b></string>
+    <string name="okay">אישור</string>
+    <string name="permissions_title">הרשאות</string>
+    <string name="toast_permissions_not_granted">הרשאות לא ניתנו.</string>
+    <string name="menu_sort_by">סדר לפי</string>
+    <string name="sort_order_entry_az">א-ת</string>
+    <string name="sort_order_entry_za">א-ת</string>
+    <string name="sort_order_entry_year">שנה</string>
+    <string name="sort_order_entry_artist">אמן</string>
+    <string name="sort_order_entry_album">אלבום</string>
+    <string name="sort_order_entry_duration">אורך</string>
+    <string name="sort_order_entry_date">תאריך</string>
+    <string name="sort_order_entry_number_of_songs">כמות השירים</string>
+    <string name="sort_order_entry_number_of_albums">כמות האלבומים</string>
+    <string name="deleteplaylist">האם אתה בטוח שברצונך למחוק את הפלייליסט?</string>
+    <string name="navigation_drawer_open">פתח</string>
+    <string name="navigation_drawer_close">סגור</string>
+    <string name="Intro">הקדמה</string>
+    <string name="start">התחל</string>
+    <string name="Continue">המשך</string>
+    <string name="cancel_timer">בטל טיימר</string>
+    <string name="stop_timer">טיימר הופסק</string>
+    <string name="timer_info" formatted="false" tools:ignore="StringFormatInvalid">%02d:%02d</string>
+    <string name="action_sleeptimer">טיימר שינה</string>
+    <string name="minute">דקה</string>
+    <string name="minutes">דקות</string>
+    <string name="stop">עצור בעוד</string>
+    <string name="impossible">0 בלתי אפשרי</string>
+    <string name="action_edit_tags">ערוך תיוגים</string>
+    <string name="draw_over_permissions_message">">האפליקציה צריכה הרשאות לכתיבה על אפליקציות אחרות על מנת שווידג'ט הנגן יופיע</string>
+    <string name="btn_continue">המשך</string>
+    <string name="btn_cancel">בטל</string>
+    <string name="app_info">נגן מוסיקה קליל, אלגנטי ויפה</string>
+    <string name="recentlists">אחרונים</string>
+    <string name="Shares">שתף אפליקציה</string>
+    <string name="Playing_View">מסך נגן</string>
+    <string name="playing_view_selection">בחר תצוגת נגן</string>
+    <string name="base_theme">ערכת נושא כהה</string>
+    <string name="system_ui_colors">צבעי מערכת הפעלה</string>
+    <string name="colored_status_bar_summary">החלף צבע סטטוס בר</string>
+    <string name="colored_status_bar">צבע סטטוס בר</string>
+    <string name="colored_nav_bar">צבע סרגל ניווט</string>
+    <string name="colored_nav_bar_summary">החלף צבע סרגל ניווט</string>
+    <string name="playing_view">תצוגת נגן</string>
+    <string name="personalisation">התאמה אישית</string>
+    <string name="dark_theme">ערכת נושא כהה</string>
+    <string name="dark_theme_summary">אשר ערכת נושא כהה באפליקציה</string>
+    <string name="primary_color_summary">שנה צבע ערכת נושא ראשית</string>
+    <string name="accent_color_summary">שנה צבע כתב מודגש בערכת הנושא</string>
+    <string name="custom">ידני</string>
+    <string name="equalizer">אקוולייזר</string>
+    <string name="unknown">לא ידוע</string>
+    <string name="services">שירותים</string>
+    <string name="save_lyrics_summary">אפשר שמירת מילים לשירים לגישה בעת אי חיבור לרשת</string>
+    <string name="save_lyrics">שמור מילים לשירים</string>
+    <string name="not_available_below_m">לא זמין למערכת הפעלה אנדרואיד 6.0 ומטה</string>
+    <string name="not_available_below_lollipop">לא זמין למערכת הפעלה אנדרואיד 5.0 ומטה</string>
+    <string name="light_ui_modes">מצבי מערכת הפעלה בהירים</string>
+    <string name="light_status_bar_mode">מצב סטטוס בר בהיר</string>
+    <string name="light_toolbar_mode">מצב סרגל כלים בהיר</string>
+    <string name="save_headset_summary">השהה בעת חיבור אוזניות</string>
+    <string name="save_headset">אוזניות</string>
+    <string name="save_telephony_summary">עצור בעת שיחות טלפון</string>
+    <string name="save_telephony">שיחות טלפון</string>
+    <string name="metadata">נתונים</string>
+    <string name="clear_favdb_summary">מחק מידע שמור ל"מועדפים"</string>
+    <string name="clear_favdb">מחק מידע שמור ל"מועדפים"</string>
+    <string name="add_toFav">הוסף למועדפים</string>
+    <string name="clear_recentplayeddb">מחק מידע שמור ל"נוגנו לאחרונה"</string>
+    <string name="network">רשת אינטרט</string>
+    <string name="save_internet_summary">בטל אפשרות להורדה אוטומטית של מילים לשירים ועטיפות אלבום</string>
+    <string name="save_internet">שמור מידע אינטרנט</string>
+    <string name="loudness">עוצמת רעש</string>
+    <string name="Virtual">וירטואל</string>
+    <string name="Bass">באס</string>
+    <string name="testerName">Aashish Shinde</string>
+    <string name="appcr">© 2017 MusicX.</string>
+    <string name="crash_toast_text">דו"ח קריסה נשלח</string>
+    <string name="hide_notification">הסתר התראה</string>
+    <string name="hide_notify">התראה</string>
+    <string name="hide_lockscreenMedia">הסתר את הנגן במסך הנעילה</string>
+    <string name="hide_lockscreen">מסך נעילה</string>
+    <string name="Rate">דרג אותנו</string>
+    <string name="restore_lastTab">שחזר לשונית אחרונה</string>
+    <string name="Tab">תצוגת לשונית</string>
+    <string name="folder">תיקייה</string>
+    <string name="reverb">ריוורב</string>
+    <string name="hqartist_artwork">עטיפות אלבום באיכות גבוהה</string>
+    <string name="hqartist_artwork_summary">אפשר הורדת עטיפות אלבום באיכות גבוהה</string>
+    <string name="storage">אחסון</string>
+    <string name="writesetting">להגדיר צלצול</string>
+</resources>

@@ -31,6 +31,19 @@ import static com.rks.musicx.misc.utils.Constants.PARAM_PLAYLIST_FAVORITES;
  * Created by Coolalien on 6/28/2016.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class FavFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Song>> {
 
     private FastScrollRecyclerView rv;
@@ -45,7 +58,7 @@ public class FavFragment extends Fragment implements LoaderManager.LoaderCallbac
                 ((MainActivity) getActivity()).onSongSelected(playlistViewAdapter.getSnapshot(), position);
                 break;
             case R.id.menu_button:
-                helper.showMenu(trackloader, FavFragment.this, FavFragment.this, ((MainActivity) getActivity()), position, view, getContext(), playlistViewAdapter);
+                helper.showMenu(false, trackloader, FavFragment.this, FavFragment.this, ((MainActivity) getActivity()), position, view, getContext(), playlistViewAdapter);
                 break;
         }
     };

@@ -9,12 +9,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.database.DatabaseUtilsCompat;
-import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -38,6 +38,7 @@ import com.rks.musicx.R;
 import com.rks.musicx.data.loaders.AlbumLoader;
 import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.loaders.TrackLoader;
+import com.rks.musicx.data.model.Album;
 import com.rks.musicx.data.model.Artist;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.ArtistArtwork;
@@ -70,6 +71,19 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
  * Created by Coolalien on 6/28/2016.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class ArtistFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Song>> {
 
     private final int trackLoader = 1;
@@ -88,6 +102,7 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
     private boolean bio;
     private RecyclerView albumrv;
     private AlbumListAdapter albumListAdapter;
+
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = (position, view) -> {
         switch (view.getId()) {
             case R.id.item_view:
@@ -95,24 +110,25 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
                 rv.smoothScrollToPosition(position);
                 break;
             case R.id.menu_button:
-                helper.showMenu(trackLoader, this, ArtistFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                helper.showMenu(false, trackLoader, this, ArtistFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
                 break;
         }
     };
+
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClickAlbum = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
             switch (view.getId()) {
                 case R.id.album_artwork:
                 case R.id.item_view:
-                    Fragment fragments = AlbumFragment.newInstance(albumListAdapter.getItem(position));
                     ImageView Listartwork = (ImageView) view.findViewById(R.id.album_artwork);
-                    fragTransition(fragments, Listartwork);
+                    fragTransition(albumListAdapter.getItem(position), Listartwork,"TransitionArtwork");
                     rv.smoothScrollToPosition(position);
                     break;
             }
         }
     };
+
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -170,9 +186,9 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
         return fragment;
     }
 
-    private void fragTransition(Fragment fragment, ImageView imageView) {
-        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
-        Helper.setFragmentTransition(getActivity(), ArtistFragment.this, fragment, new Pair<View, String>(imageView, "TransitionArtwork"));
+    private void fragTransition(Album album, ImageView imageView, String transition) {
+        ViewCompat.setTransitionName(imageView, transition);
+        Helper.setFragmentTransition(getActivity(), ArtistFragment.this, AlbumFragment.newInstance(album), new Pair<View, String>(imageView, "TransitionArtwork"));
     }
 
     @Override
@@ -351,13 +367,6 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        String ateKey = Helper.getATEKey(getContext());
-        ATEUtils.setStatusBarColor(getActivity(), ateKey, Config.primaryColor(getActivity(), ateKey));
-    }
-
-    @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if (!Extras.getInstance().saveData()) {
@@ -487,4 +496,12 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        getLoaderManager().restartLoader(trackLoader, null, this);
+        getLoaderManager().restartLoader(albumLoaders, null, albumLoadersCallbacks);
+        String ateKey = Helper.getATEKey(getContext());
+        ATEUtils.setStatusBarColor(getActivity(), ateKey, Config.primaryColor(getActivity(), ateKey));
+    }
 }

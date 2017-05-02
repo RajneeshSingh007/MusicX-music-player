@@ -32,6 +32,19 @@ import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class AudioWidget {
 
     private static final long VIBRATION_DURATION = 100;
@@ -286,23 +299,21 @@ public class AudioWidget {
             @Override
             public void albumCoverBitmap(@Nullable Bitmap bitmap) {
                 if (bitmap == null) {
-                    expandCollapseWidget.albumCover(null);
-                    playPauseButton.albumCover(null);
-                } else {
-                    WeakReference<Drawable> wrDrawable = albumCoverCache.get(bitmap.hashCode());
-                    if (wrDrawable != null) {
-                        Drawable drawable = wrDrawable.get();
-                        if (drawable != null) {
-                            expandCollapseWidget.albumCover(drawable);
-                            playPauseButton.albumCover(drawable);
-                            return;
-                        }
-                    }
-                    Drawable albumCover = new BitmapDrawable(context.getResources(), bitmap);
-                    expandCollapseWidget.albumCover(albumCover);
-                    playPauseButton.albumCover(albumCover);
-                    albumCoverCache.put(bitmap.hashCode(), new WeakReference<>(albumCover));
+                    return;
                 }
+                WeakReference<Drawable> wrDrawable = albumCoverCache.get(bitmap.hashCode());
+                if (wrDrawable != null) {
+                    Drawable drawable = wrDrawable.get();
+                    if (drawable != null) {
+                        expandCollapseWidget.albumCover(drawable);
+                        playPauseButton.albumCover(drawable);
+                        return;
+                    }
+                }
+                Drawable albumCover = new BitmapDrawable(context.getResources(), bitmap);
+                expandCollapseWidget.albumCover(albumCover);
+                playPauseButton.albumCover(albumCover);
+                albumCoverCache.put(bitmap.hashCode(), new WeakReference<>(albumCover));
             }
         };
     }
@@ -1079,5 +1090,13 @@ public class AudioWidget {
                 onControlsClickListener.onAlbumLongClicked();
             }
         }
+    }
+
+    public Map<Integer, WeakReference<Drawable>> getAlbumCoverCache() {
+        return albumCoverCache;
+    }
+
+    public Controller getController() {
+        return controller;
     }
 }

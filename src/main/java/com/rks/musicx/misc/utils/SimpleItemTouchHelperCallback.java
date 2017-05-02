@@ -9,6 +9,19 @@ import android.support.v7.widget.helper.ItemTouchHelper;
  * Created by Coolalien on 6/28/2016.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     public static final float ALPHA_FULL = 1.0f;
@@ -60,6 +73,8 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
         mAdapter.onItemDismiss(viewHolder.getAdapterPosition());
     }
 
+
+
     @Override
     public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
@@ -110,7 +125,6 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
     public interface ItemTouchHelperAdapter {
 
         boolean onItemMove(int fromPosition, int toPosition);
-
 
         void onItemDismiss(int position);
     }

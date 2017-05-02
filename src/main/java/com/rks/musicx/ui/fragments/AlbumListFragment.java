@@ -1,14 +1,13 @@
 package com.rks.musicx.ui.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
-import android.support.v4.util.Pair;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,6 +39,19 @@ import java.util.List;
  * Created by Coolalien on 6/28/2016.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class AlbumListFragment extends miniFragment implements LoaderCallbacks<List<Album>>, SearchView.OnQueryTextListener {
 
     private AlbumListAdapter albumListAdapter;
@@ -48,30 +60,14 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
     private List<Album> albumList;
     private SearchView searchView;
 
-    private BaseRecyclerViewAdapter.OnItemClickListener gridClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
+    private BaseRecyclerViewAdapter.OnItemClickListener OnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
             switch (view.getId()) {
                 case R.id.album_artwork:
                 case R.id.item_view:
-                    Fragment fragment = AlbumFragment.newInstance(albumListAdapter.getItem(position));
-                    ImageView imageView = (ImageView) view.findViewById(R.id.album_artwork);
-                    fragTransition(fragment, imageView);
-                    rv.smoothScrollToPosition(position);
-                    break;
-            }
-        }
-    };
-
-    private BaseRecyclerViewAdapter.OnItemClickListener listOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
-        @Override
-        public void onItemClick(int position, View view) {
-            switch (view.getId()) {
-                case R.id.album_listartwork:
-                case R.id.item_view:
-                    Fragment fragments = AlbumFragment.newInstance(albumListAdapter.getItem(position));
-                    ImageView Listartwork = (ImageView) view.findViewById(R.id.album_listartwork);
-                    fragTransition(fragments, Listartwork);
+                    ImageView Listartwork = (ImageView) view.findViewById(R.id.album_artwork);
+                    fragTransition(albumListAdapter.getItem(position), Listartwork, "TransitionArtwork");
                     rv.smoothScrollToPosition(position);
                     break;
             }
@@ -82,9 +78,9 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
         return new AlbumListFragment();
     }
 
-    private void fragTransition(Fragment fragment, ImageView imageView) {
-        ViewCompat.setTransitionName(imageView, "TransitionArtwork");
-        Helper.setFragmentTransition(getActivity(), AlbumListFragment.this, fragment, new Pair<View, String>(imageView, "TransitionArtwork"));
+    private void fragTransition(Album album, ImageView imageView, String transition) {
+        ViewCompat.setTransitionName(imageView, transition);
+        Helper.setFragmentTransition(getActivity(), AlbumListFragment.this, AlbumFragment.newInstance(album), new Pair<View, String>(imageView, transition));
     }
 
     @Override
@@ -98,6 +94,7 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
         initload();
         albumView();
         albumList = new ArrayList<>();
+        albumListAdapter.setOnItemClickListener(OnClick);
         rv.setPopupBgColor(colorAccent);
         rv.setHasFixedSize(true);
         rv.setAdapter(albumListAdapter);
@@ -152,14 +149,17 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
             case R.id.bytwo:
                 Extras.getInstance().setAlbumGrid(2);
                 loadGridView();
+                load();
                 break;
             case R.id.bythree:
                 Extras.getInstance().setAlbumGrid(3);
                 loadGridView();
+                load();
                 break;
             case R.id.byfour:
                 Extras.getInstance().setAlbumGrid(4);
                 loadGridView();
+                load();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -223,21 +223,17 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
         if (Extras.getInstance().getAlbumGrid() == 2) {
             GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
             rv.setLayoutManager(layoutManager);
-            load();
         } else if (Extras.getInstance().getAlbumGrid() == 3) {
             GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
             rv.setLayoutManager(layoutManager);
-            load();
         } else if (Extras.getInstance().getAlbumGrid() == 4) {
             GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
             rv.setLayoutManager(layoutManager);
-            load();
         }
     }
 
     private void albumView() {
         if (Extras.getInstance().albumView()) {
-            albumListAdapter.setOnItemClickListener(listOnClick);
             albumListAdapter.setLayoutID(R.layout.item_list_view);
             CustomLayoutManager custom = new CustomLayoutManager(getContext());
             custom.setSmoothScrollbarEnabled(true);
@@ -245,7 +241,6 @@ public class AlbumListFragment extends miniFragment implements LoaderCallbacks<L
             rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
         } else {
             albumListAdapter.setLayoutID(R.layout.item_grid_view);
-            albumListAdapter.setOnItemClickListener(gridClick);
             rv.addItemDecoration(new ItemOffsetDecoration(2));
             loadGridView();
         }

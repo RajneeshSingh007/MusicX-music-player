@@ -1,18 +1,28 @@
 package com.rks.musicx.data.eq;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.audiofx.Equalizer;
 
-import com.rks.musicx.R;
 import com.rks.musicx.misc.utils.Extras;
-import com.rks.musicx.services.MediaPlayerSingleton;
 
 import static com.rks.musicx.misc.utils.Constants.BAND_LEVEL;
 import static com.rks.musicx.misc.utils.Constants.SAVE_PRESET;
 
 /*
  * Created by Coolalien on 06/01/2017.
+ */
+
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 public class Equalizers {
@@ -25,10 +35,10 @@ public class Equalizers {
     public Equalizers() {
     }
 
-    public static void initEq() {
+    public static void initEq(int audioID) {
+        EndEq();
         try {
-            EndEq();
-            equalizer = new Equalizer(0, MediaPlayerSingleton.getInstance().getMediaPlayer().getAudioSessionId());
+            equalizer = new Equalizer(0, audioID);
             bandLevels = new short[equalizer.getNumberOfBands()];
             for (short b = 0; b < equalizer.getNumberOfBands(); b++) {
                 bandLevels[b] = equalizer.getBandLevel(b);
@@ -65,18 +75,21 @@ public class Equalizers {
         return null;
     }
 
-    public static String[] getEqualizerPresets(Context context) {
-        if (equalizer == null) {
-            return new String[]{};
+    public static short getPresenNo(){
+        if (equalizer != null){
+            return equalizer.getNumberOfPresets();
+        }else {
+            return 0;
         }
-        String[] presets = new String[equalizer.getNumberOfPresets() + 1];
-        presets[0] = context.getResources().getString(R.string.custom);
-        for (short n = 0; n < equalizer.getNumberOfPresets(); n++) {
-            presets[n + 1] = equalizer.getPresetName(n);
-        }
-        return presets;
     }
 
+    public static String getPresetNames(short name){
+        if (equalizer != null){
+            return equalizer.getPresetName(name);
+        }else {
+            return "";
+        }
+    }
 
     public static short getBandLevel(short band) {
         if (equalizer == null) {
