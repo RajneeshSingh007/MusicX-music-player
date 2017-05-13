@@ -1,5 +1,6 @@
 package com.rks.musicx.ui.activities;
 
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -19,6 +20,7 @@ import com.rks.musicx.misc.utils.Extras;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
+import static com.rks.musicx.misc.utils.Constants.BlackTheme;
 import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 import static com.rks.musicx.misc.utils.Constants.Four;
 import static com.rks.musicx.misc.utils.Constants.LightTheme;
@@ -101,7 +103,7 @@ public abstract class BaseActivity extends ATEActivity {
         getSupportFragmentManager().beginTransaction().replace(ContainerId, fragment).commit();
     }
 
-    protected Fragment setFragment() {
+    public Fragment setFragment() {
         return fragment;
     }
 
@@ -332,7 +334,40 @@ public abstract class BaseActivity extends ATEActivity {
     @Nullable
     @Override
     public String getATEKey() {
-        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(DarkTheme, false) ? DarkTheme : LightTheme;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean theme = sharedPreferences.getBoolean(DarkTheme, false);
+        Boolean blacktheme = sharedPreferences.getBoolean(BlackTheme, false);
+        if (theme){
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(BlackTheme, false);
+            editor.apply();
+            return DarkTheme;
+        }else if (blacktheme){
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(DarkTheme, false);
+            editor.apply();
+            return BlackTheme;
+        }else {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(DarkTheme, false);
+            editor.putBoolean(BlackTheme, false);
+            editor.apply();
+            return LightTheme;
+        }
+    }
+
+    public int getStyleTheme(){
+        // Overrides what's set in the current ATE Config
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean darktheme = sharedPreferences.getBoolean(DarkTheme, false);
+        Boolean blacktheme = sharedPreferences.getBoolean(BlackTheme, false);
+        if (darktheme){
+            return R.style.AppThemeNormalDark;
+        }else if (blacktheme){
+            return R.style.AppThemeNormalBlack;
+        }else {
+            return R.style.AppThemeNormalLight;
+        }
     }
 
     public String returnAteKey() {
@@ -358,6 +393,17 @@ public abstract class BaseActivity extends ATEActivity {
                     .accentColorRes(R.color.colorAccentDarkDefault)
                     .navigationViewSelectedIconRes(R.color.colorAccentDarkDefault)
                     .navigationViewSelectedTextRes(R.color.colorAccentDarkDefault)
+                    .coloredNavigationBar(true)
+                    .coloredStatusBar(true)
+                    .commit();
+        }
+        if (!ATE.config(this, BlackTheme).isConfigured(4)) {
+            ATE.config(this, BlackTheme)
+                    .activityTheme(R.style.AppThemeNormalBlack)
+                    .primaryColorRes(R.color.colorPrimaryBlack)
+                    .accentColorRes(R.color.colorAccentBlack)
+                    .navigationViewSelectedIconRes(R.color.colorPrimaryBlack)
+                    .navigationViewSelectedTextRes(R.color.colorPrimaryBlack)
                     .coloredNavigationBar(true)
                     .coloredStatusBar(true)
                     .commit();

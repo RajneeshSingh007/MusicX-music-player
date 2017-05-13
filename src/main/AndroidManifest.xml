@@ -34,7 +34,6 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
-    <uses-permission android:name="android.permission.BROADCAST_STICKY"/>
 
     <uses-permission-sdk-23 android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission-sdk-23 android:name="android.permission.READ_EXTERNAL_STORAGE"/>
@@ -52,7 +51,6 @@
     <uses-permission-sdk-23 android:name="android.permission.WAKE_LOCK"/>
     <uses-permission-sdk-23 android:name="android.permission.CHANGE_CONFIGURATION"/>
     <uses-permission-sdk-23 android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
-    <uses-permission-sdk-23 android:name="android.permission.BROADCAST_STICKY"/>
 
 
     <application
@@ -60,8 +58,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppThemeNormalLight"
-        tools:replace="android:theme">
+        android:theme="@style/AppThemeNormalLight">
 
         <!-- Services -->
         <service
@@ -92,17 +89,6 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/musicxwidget4x4"/>
         </receiver>
-
-        <receiver
-            android:name="com.rks.musicx.data.eq.AudioEffects"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.rks.musicx.misc.utils.Constants.OPEN_EFFECTS"/>
-                <action android:name="com.rks.musicx.misc.utils.Constants.CLOSE_EFFECTS"/>
-            </intent-filter>
-        </receiver>
-
 
         <receiver
             android:name=".services.MediaButtonReceiver"

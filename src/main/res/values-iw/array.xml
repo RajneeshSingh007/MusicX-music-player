@@ -32,14 +32,12 @@
         <item>PlayingView2</item>
         <item>PlayingView3</item>
         <item>PlayingView4</item>
-        <!--<item>PlayingView5</item>-->
     </string-array>
     <string-array name="selectedPlayingView">
         <item>0</item>
         <item>1</item>
         <item>2</item>
         <item>3</item>
-        <!--<item>4</item>-->
     </string-array>
     <string-array name="fontChoice">
         <item>RobotoLight</item>

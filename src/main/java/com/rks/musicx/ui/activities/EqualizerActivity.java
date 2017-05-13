@@ -2,6 +2,7 @@ package com.rks.musicx.ui.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.annotation.StyleRes;
@@ -14,6 +15,7 @@ import com.rks.musicx.ui.fragments.EqFragment;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
+import static com.rks.musicx.misc.utils.Constants.BlackTheme;
 import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 
 /*
@@ -78,9 +80,16 @@ public class EqualizerActivity extends BaseActivity implements ATEActivityThemeC
     @StyleRes
     @Override
     public int getActivityTheme() {
-        // Overrides what's set in the current ATE Config
-        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(DarkTheme, false) ?
-                R.style.AppThemeNormalDark : R.style.AppThemeNormalDark;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean darktheme = sharedPreferences.getBoolean(DarkTheme, false);
+        Boolean blacktheme = sharedPreferences.getBoolean(BlackTheme, false);
+        if (darktheme){
+            return R.style.AppThemeNormalDark;
+        }else if (blacktheme) {
+           return R.style.AppThemeNormalBlack;
+        }else {
+            return  R.style.AppThemeNormalDark;
+        }
     }
 
     @Override

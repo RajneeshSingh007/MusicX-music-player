@@ -74,7 +74,7 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
             }
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            ArtworkUtils.ArtworkLoader(getContext(), song.getTitle(), song.getAlbumId(), holder.queueArtwork);
+            ArtworkUtils.ArtworkLoader(getContext(), song.getAlbum(), song.getAlbumId(), holder.queueArtwork);
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             holder.queueArtwork.setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -85,7 +85,7 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
                     return false;
                 }
             });
-            if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+            if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 holder.SongTitle.setTextColor(Color.WHITE);
                 holder.SongArtist.setTextColor(ContextCompat.getColor(getContext(), R.color.darkthemeTextColor));
                 holder.menu.getDrawable().setTint(Color.WHITE);
@@ -103,7 +103,7 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
             }
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            ArtworkUtils.ArtworkLoader(getContext(), song.getTitle(), song.getAlbumId(), holder.queueArtwork);
+            ArtworkUtils.ArtworkLoader(getContext(), song.getAlbum(), song.getAlbumId(), holder.queueArtwork);
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             holder.menu.getDrawable().setTint(ContextCompat.getColor(getContext(), R.color.white));
             holder.queueArtwork.setOnTouchListener(new View.OnTouchListener() {
@@ -115,7 +115,7 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
                     return false;
                 }
             });
-            if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+            if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 holder.SongTitle.setTextColor(Color.WHITE);
                 holder.SongArtist.setTextColor(ContextCompat.getColor(getContext(), R.color.darkthemeTextColor));
                 holder.menu.getDrawable().setTint(Color.WHITE);
@@ -132,7 +132,7 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
                 holder.itemView.setSelected(false);
 
             }
-            ArtworkUtils.ArtworkLoader(getContext(), song.getTitle(), song.getAlbumId(), holder.queueArtworkgrid);
+            ArtworkUtils.ArtworkLoader(getContext(), song.getAlbum(), song.getAlbumId(), holder.queueArtworkgrid);
         }
     }
 

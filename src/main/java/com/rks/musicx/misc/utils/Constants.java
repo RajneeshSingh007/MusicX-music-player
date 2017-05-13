@@ -30,7 +30,6 @@ public class Constants {
     public static final int OVERLAY_REQ = 1;
     public static final int WRITESETTINGS = 2;
     public static final int EQ = 3445;
-    public static final int IMAGEPICKER = 1234;
 
     private static final String PACKAGENAME = "com.rks.musicx.";
     /*
@@ -85,10 +84,8 @@ public class Constants {
     public static final String ACTION_PLAYINGVIEW = PACKAGENAME+"PLAYING_VIEW";
     public static final String ACTION_COMMAND = PACKAGENAME+"command";
     public static final String ACTION_COMMAND1 = PACKAGENAME+"command1";
-    public static final String ACTION_WIDGET = PACKAGENAME+"widget";
     public static final String ACTION_FAV = PACKAGENAME+"widget_fav";
-    public static final String ACTION_FAV_REMOVE = PACKAGENAME+"widget_fav_remove";
-    public static final int FOCUSCHANGE = 8;
+    public static final String AUDIO_ID = PACKAGENAME + "audioID";
 
     /*
     Sorting properties
@@ -97,12 +94,12 @@ public class Constants {
     public static final String ALBUM_SORT_ORDER = "album_sort_order";
     public static final String SONG_SORT_ORDER = "song_sort_order";
     public static final String ARTIST_ALBUM_SORT = "artist_album_sort";
+    public static final String PLAYLIST_SORT_ORDER = "playlist_sort";
 
     /*
     Playlist  & fav. properties
      */
     public static final String PARAM_PLAYLIST_NAME = "playlist_name";
-    public static final String PARAM_PLAYLIST_FAVORITES = "favorites";
     public static final String PARAM_PLAYLIST_ID = "playlist_id";
     /*
     Floating Widget properties
@@ -131,7 +128,6 @@ public class Constants {
     public static final String RESTORE_LASTTAB = "restore_lasttab";
     public static final String HQ_ARTISTARTWORK = "hqartist_artwork";
     public static final String VIZCOLOR = "vizualizer_color";
-    public static final String TRACKFOLDER = "trackfolder";
     public static final String EQSWITCH = "eqswitch";
     public static final String ARTWORKCOLOR = "artwork_adaptive";
     public static final String FOLDERPATH = "folderpath";
@@ -139,8 +135,9 @@ public class Constants {
     public static final String ARTISTGRID = "artistgrid";
     public static final String SONGGRID = "songgrid";
     public static final String WIDGETTRACk = "widgettrack";
-    public static final String TRACKPLAYLIST = "trackPlaylist";
     public static final String PLAYLIST_ID = "playlistId";
+    public static final String FADEINOUT_DURATION = "fadein_fadeout_seekbar";
+    public static final String FADETRACK = "fade_inout";
 
     /*
     Choices
@@ -150,11 +147,14 @@ public class Constants {
     public static final String Two = "2";
     public static final String Three = "3";
     public static final String Four = "4";
+
     /*
     Theming Properties
      */
     public static final String LightTheme = "light_theme";
     public static final String DarkTheme = "dark_theme";
+    public static final String BlackTheme = "black_theme";
+
     /*
     Database Properties
      */
@@ -163,6 +163,7 @@ public class Constants {
     public static final String Fav_TableName = "Favorites";
     public static final int DbVersion = 2;
     public static final String Separator = ",";
+
     /*
     Equalizer
      */
@@ -178,7 +179,15 @@ public class Constants {
     public static final short Virtualizer_STRENGTH = 1000;
     public static final String OPEN_EFFECTS = PACKAGENAME+"open_effects";
     public static final String CLOSE_EFFECTS = PACKAGENAME+"close_effects";
+
+    /**
+     * Developer Name
+     */
     public static final String DEVELOPER_NAME = "Rajneesh Singh";
+
+    /**
+     * Permissions Array
+     */
     public static String[] permissions = new String[]{
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_PHONE_STATE,
@@ -191,6 +200,11 @@ public class Constants {
      */
     public static Extras sInstance = null;
 
+    /**
+     * Database table
+     * @param tableName
+     * @return
+     */
     public static String DefaultColumn(String tableName) {
         return "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
                 DefaultColumn._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + Separator +
@@ -203,5 +217,9 @@ public class Constants {
                 DefaultColumn.SongPath + " TEXT" + " )";
     }
 
-
+    /**
+     * network link
+     */
+    public static String vagUrl = "http://api.vagalume.com.br/";
+    public static String lastFmUrl = "http://ws.audioscrobbler.com/2.0/";
 }

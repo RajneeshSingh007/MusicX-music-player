@@ -39,5 +39,7 @@
     <color name="new_folder_color">#c14b84</color>
     <color name="select_color">#3fa16e</color>
     <color name="cancel_color">#3fa19f</color>
+    <color name="colorPrimaryBlack">#000000</color>
+    <color name="colorAccentBlack">#ffc400</color>
 </resources>
 

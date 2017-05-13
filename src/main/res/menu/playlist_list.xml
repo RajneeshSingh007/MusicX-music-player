@@ -16,8 +16,32 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/menu_sort_by"
+        android:title="@string/menu_sort_by"
+        app:showAsAction="never">
+
+        <menu>
+            <item
+                android:id="@+id/menu_sort_by_az"
+                android:title="@string/sort_order_entry_az"/>
+
+            <item
+                android:id="@+id/menu_sort_by_za"
+                android:title="@string/sort_order_entry_za"/>
+
+            <item
+                android:id="@+id/menu_sort_by_date"
+                android:title="@string/sort_order_entry_date"/>
+
+        </menu>
+
+    </item>
+
+    <item
         android:id="@+id/action_create_playlist"
         android:title="@string/create_playlist"
         app:showAsAction="never"/>
+
+
 
 </menu>

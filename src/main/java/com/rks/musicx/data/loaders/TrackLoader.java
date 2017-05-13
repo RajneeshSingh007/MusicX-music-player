@@ -105,7 +105,7 @@ public class TrackLoader extends BaseAsyncTaskLoader<List<Song>> {
     }
 
     public void filteralbumsong(String filter, String[] args) {
-        Where = filter + " AND " + MediaStore.Audio.Media.DURATION + ">= 60000"; // list song greater than 1min duration
+        Where = filter + " AND " + MediaStore.Audio.Media.DURATION + ">= 30000"; // list song greater than 30sec duration
         selectionargs = args;
     }
 

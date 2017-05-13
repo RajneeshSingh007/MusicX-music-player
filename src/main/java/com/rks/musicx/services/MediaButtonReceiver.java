@@ -29,9 +29,9 @@ public class MediaButtonReceiver extends android.support.v4.media.session.MediaB
     public void onReceive(Context context, Intent intent) {
         String intentAction = intent.getAction();
         String command = null;
-        if (Intent.ACTION_MEDIA_BUTTON.equals(intentAction)) {
-            KeyEvent event = (KeyEvent) intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-            if (event != null && event.getAction() == KeyEvent.ACTION_DOWN) {
+        KeyEvent event = (KeyEvent) intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+        if (intent.getAction() != null){
+            if (intentAction.equals(Intent.ACTION_MEDIA_BUTTON) && event.getAction() == KeyEvent.ACTION_UP) {
                 switch (event.getKeyCode()) {
                     case KeyEvent.KEYCODE_MEDIA_STOP:
                         Log.d(TAG, "stop");
@@ -62,7 +62,6 @@ public class MediaButtonReceiver extends android.support.v4.media.session.MediaB
                 startServices(context, command);
             }
         }
-        super.onReceive(context, intent);
     }
 
     public void startServices(Context context, String action){

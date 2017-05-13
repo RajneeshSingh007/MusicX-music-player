@@ -28,6 +28,8 @@ import com.rks.musicx.R;
 import com.rks.musicx.misc.widgets.BlurArtwork;
 import com.rks.musicx.misc.widgets.CircleImageView;
 
+import java.io.File;
+
 import static com.rks.musicx.misc.utils.Constants.BlurView;
 
 /*
@@ -85,62 +87,41 @@ public class ArtworkUtils {
         return bitmap;
     }
 
-    public static void ArtworkLoader(Context context, String title, long key, CircleImageView imageView) {
-        Glide.with(context)
-                .load(uri(key))
-                .asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .format(DecodeFormat.PREFER_ARGB_8888)
-                .into(imageView);
-    }
-
-    public static void ArtworkLoader(Context context, String title, String path, CircleImageView imageView) {
-
-        Glide.with(context)
+    private static Target<Bitmap> loadArtwork(Context context, String path, ImageView imageView){
+        return  Glide.with(context)
                 .load(path)
                 .asBitmap()
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .centerCrop()
+                .animate(android.R.anim.fade_in)
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
+                .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
                 .into(imageView);
     }
 
-    public static void ArtworkNetworkLoader(Context context, String title, String key, CircleImageView imageView) {
-
-        Glide.with(context)
-                .load(key)
-                .asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .format(DecodeFormat.PREFER_ARGB_8888)
-                .into(imageView);
-    }
-
-    public static void ArtworkLoader(Context context, String title, long key, ImageView imageView) {
-        Glide.with(context)
+    private static Target<Bitmap> loadArtwork(Context context, long key, ImageView imageView){
+        return  Glide.with(context)
                 .load(uri(key))
                 .asBitmap()
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .centerCrop()
+                .animate(android.R.anim.fade_in)
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
+                .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
                 .into(imageView);
     }
 
-    public static void ArtworkLoaderPalette(Context context, String title, long key, ImageView imageView, palette palettework) {
-        Glide.with(context)
+    private static Target loadArtwork(Context context, long key, ImageView imageView, palette palettework){
+        return Glide.with(context)
                 .load(uri(key))
                 .asBitmap()
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .centerCrop()
+                .animate(android.R.anim.fade_in)
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
@@ -154,15 +135,18 @@ public class ArtworkUtils {
                 .into(imageView);
     }
 
-    public static void ArtworkLoaderPalette(Context context, String key, ImageView imageView, palette palettework) {
-        Glide.with(context)
-                .load(key)
+    private static Target loadArtwork(Context context, String path, ImageView imageView, palette palettework){
+        return Glide.with(context)
+                .load(path)
+                .asBitmap()
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .dontTransform()
+                .centerCrop()
+                .animate(android.R.anim.fade_in)
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
-                .crossFade()
-                .listener(GlidePalette.with(key).intoCallBack(new BitmapPalette.CallBack() {
+                .format(DecodeFormat.PREFER_ARGB_8888)
+                .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                .listener(GlidePalette.with(path).intoCallBack(new BitmapPalette.CallBack() {
                     @Override
                     public void onPaletteLoaded(@Nullable Palette palette) {
                         palettework.palettework(palette);
@@ -171,12 +155,13 @@ public class ArtworkUtils {
                 .into(imageView);
     }
 
-    public static void ArtworkLoaderBitmapPalette(Context context, String title, String key, palette palettework, bitmap bitmapwork) {
-        Glide.with(context)
+    private static Target loadArtwork(Context context, String key, palette palettework, bitmap bitmapwork){
+        return Glide.with(context)
                 .load(key)
                 .asBitmap()
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .centerCrop()
+                .animate(android.R.anim.fade_in)
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
@@ -240,12 +225,13 @@ public class ArtworkUtils {
                 });
     }
 
-    public static void ArtworkLoaderBitmapPalette(Context context, String title, long key, palette palettework, bitmap bitmapwork) {
-        Glide.with(context)
+    private static Target loadArtwork(Context context, long key, palette palettework, bitmap bitmapwork){
+        return Glide.with(context)
                 .load(uri(key))
                 .asBitmap()
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .centerCrop()
+                .animate(android.R.anim.fade_in)
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
@@ -264,7 +250,7 @@ public class ArtworkUtils {
 
                     @Override
                     public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                        bitmapwork.bitmapfailed(getDefaultArtwork(context));
+                        bitmapwork.bitmapfailed(drawableToBitmap(errorDrawable));
                     }
 
                     @Override
@@ -283,13 +269,13 @@ public class ArtworkUtils {
                     }
 
                     @Override
-                    public Request getRequest() {
-                        return null;
+                    public void setRequest(Request request) {
+
                     }
 
                     @Override
-                    public void setRequest(Request request) {
-
+                    public Request getRequest() {
+                        return null;
                     }
 
                     @Override
@@ -307,6 +293,90 @@ public class ArtworkUtils {
 
                     }
                 });
+    }
+
+    public static File getAlbumCoverPath(Context context, String album){
+        String albumImagePath = new Helper(context).loadAlbumImage(album);
+        File file = new File(albumImagePath);
+        return file;
+    }
+
+    public static void ArtworkLoader(Context context, String album, long key, CircleImageView imageView) {
+        if (getAlbumCoverPath(context, album).exists()) {
+            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), imageView);
+        } else {
+            loadArtwork(context, key, imageView);
+        }
+    }
+
+    public static void ArtworkLoader(Context context, String album, String path, CircleImageView imageView) {
+        if (getAlbumCoverPath(context, album).exists()) {
+            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), imageView);
+        } else {
+            loadArtwork(context, path, imageView);
+        }
+    }
+
+    public static void ArtworkLoader(Context context, String album, long key, ImageView imageView) {
+        if (getAlbumCoverPath(context, album).exists()) {
+            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), imageView);
+        } else {
+            loadArtwork(context, key, imageView);
+        }
+    }
+
+    public static void ArtworkNetworkLoader(Context context, String key, CircleImageView imageView) {
+        Glide.with(context)
+                .load(key)
+                .asBitmap()
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .centerCrop()
+                .animate(android.R.anim.fade_in)
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.mipmap.ic_launcher)
+                .format(DecodeFormat.PREFER_ARGB_8888)
+                .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                .into(imageView);
+    }
+
+    public static void ArtworkLoaderPalette(Context context, String album, long key, ImageView imageView, palette palettework) {
+        if (getAlbumCoverPath(context, album).exists()) {
+            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), imageView, palettework);
+        } else {
+            loadArtwork(context, key, imageView, palettework);
+        }
+    }
+
+    public static void ArtworkLoaderPalette(Context context, String album, ImageView imageView, palette palettework) {
+        if (getAlbumCoverPath(context, album).exists()) {
+            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), imageView, palettework);
+        } else {
+            loadArtwork(context, album, imageView, palettework);
+        }
+    }
+
+    public static void ArtworkLoaderBitmapPalette(Context context, String album, String key, palette palettework, bitmap bitmapwork) {
+        if (getAlbumCoverPath(context, album).exists()) {
+            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), palettework, bitmapwork);
+        } else {
+            loadArtwork(context, key, palettework, bitmapwork);
+        }
+    }
+
+    public static void ArtworkLoaderBitmapPalette(Context context, String album, long key, palette palettework, bitmap bitmapwork) {
+        if (getAlbumCoverPath(context, album).exists()) {
+            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), palettework, bitmapwork);
+        } else {
+            loadArtwork(context, key, palettework, bitmapwork);
+        }
+    }
+
+    public static void ArtworkLoaderBitmapPalette(Context context, int size, String album, long key, palette palettework, bitmap bitmapwork) {
+        if (getAlbumCoverPath(context, album).exists()) {
+            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), palettework, bitmapwork);
+        } else {
+            loadArtwork(context, key, palettework, bitmapwork);
+        }
     }
 
     public static Bitmap drawableToBitmap(Drawable drawable) {

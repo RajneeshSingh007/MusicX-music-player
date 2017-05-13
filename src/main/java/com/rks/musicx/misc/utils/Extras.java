@@ -1,10 +1,12 @@
 package com.rks.musicx.misc.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 
+import com.afollestad.appthemeengine.ATE;
 import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.model.Song;
 
@@ -14,8 +16,12 @@ import static com.rks.musicx.misc.utils.Constants.ARTISTGRID;
 import static com.rks.musicx.misc.utils.Constants.ARTIST_ALBUM_SORT;
 import static com.rks.musicx.misc.utils.Constants.ARTIST_SORT_ORDER;
 import static com.rks.musicx.misc.utils.Constants.ARTWORKCOLOR;
+import static com.rks.musicx.misc.utils.Constants.BlackTheme;
 import static com.rks.musicx.misc.utils.Constants.CURRENTPOS;
+import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 import static com.rks.musicx.misc.utils.Constants.EQSWITCH;
+import static com.rks.musicx.misc.utils.Constants.FADEINOUT_DURATION;
+import static com.rks.musicx.misc.utils.Constants.FADETRACK;
 import static com.rks.musicx.misc.utils.Constants.FOLDERPATH;
 import static com.rks.musicx.misc.utils.Constants.FloatingView;
 import static com.rks.musicx.misc.utils.Constants.GridViewAlbum;
@@ -26,8 +32,10 @@ import static com.rks.musicx.misc.utils.Constants.HIDE_NOTIFY;
 import static com.rks.musicx.misc.utils.Constants.HQ_ARTISTARTWORK;
 import static com.rks.musicx.misc.utils.Constants.KEY_POSITION_X;
 import static com.rks.musicx.misc.utils.Constants.KEY_POSITION_Y;
+import static com.rks.musicx.misc.utils.Constants.LightTheme;
 import static com.rks.musicx.misc.utils.Constants.PLAYINGSTATE;
 import static com.rks.musicx.misc.utils.Constants.PLAYLIST_ID;
+import static com.rks.musicx.misc.utils.Constants.PLAYLIST_SORT_ORDER;
 import static com.rks.musicx.misc.utils.Constants.REORDER_TAB;
 import static com.rks.musicx.misc.utils.Constants.REPEATMODE;
 import static com.rks.musicx.misc.utils.Constants.RESTORE_LASTTAB;
@@ -112,6 +120,23 @@ public class Extras {
         editor.apply();
     }
 
+    public boolean getDarkTheme(){
+        return Extras.getInstance().mPreferences.getBoolean(DarkTheme, false);
+    }
+
+    public boolean getBlackTheme(){
+        return Extras.getInstance().mPreferences.getBoolean(BlackTheme, false);
+    }
+
+    public void getThemevalue(Activity activity){
+        if (Extras.getInstance().getDarkTheme()) {
+            ATE.postApply(activity, DarkTheme);
+        }else if(Extras.getInstance().getBlackTheme()){
+            ATE.postApply(activity, BlackTheme);
+        } else {
+            ATE.postApply(activity, LightTheme);
+        }
+    }
 
     //////////////////// Sorting ////////////////////////
     public String getSongSortOrder() {
@@ -142,8 +167,16 @@ public class Extras {
         putString(ARTIST_ALBUM_SORT, value);
     }
 
-    public String getArtistAlbumSort() {
-        return mPreferences.getString(ARTIST_ALBUM_SORT, SortOrder.ArtistAlbumSortOrder.ALBUM_A_Z);
+    public String getArtistAlbumSort(String value) {
+        return mPreferences.getString(ARTIST_ALBUM_SORT, value);
+    }
+
+    public void setPlaylistSortOrder(String value){
+        putString(PLAYLIST_SORT_ORDER, value);
+    }
+
+    public String getPlaylistSort(){
+        return mPreferences.getString(PLAYLIST_SORT_ORDER, SortOrder.PlaylistSortOrder.PLAYLIST_A_Z);
     }
 
     ////////////////////////// Preferences /////////////////////////
@@ -235,6 +268,20 @@ public class Extras {
 
     public boolean artworkColor() {
         return mPreferences.getBoolean(ARTWORKCOLOR, false);
+    }
+
+    public void saveFadeDuration(int dur){
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putInt(FADEINOUT_DURATION, dur);
+        editor.apply();
+    }
+
+    public int getFadeDuration(){
+        return mPreferences.getInt(FADEINOUT_DURATION, 0);
+    }
+
+    public boolean getFadeTrack(){
+        return mPreferences.getBoolean(FADETRACK, false);
     }
 
     ////////////////// folder pref //////////////////
@@ -440,6 +487,7 @@ public class Extras {
     public long getPlaylistId(){
         return mPreferences.getLong(PLAYLIST_ID, 0);
     }
+
 
 
 }

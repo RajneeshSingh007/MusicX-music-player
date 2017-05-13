@@ -1,31 +1,6 @@
 package com.rks.musicx.data.network;
 
 /*
- * Created by Coolalien on 12/23/2016.
- */
-
-import android.content.Context;
-import android.os.AsyncTask;
-import android.util.Log;
-
-import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.common.Priority;
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.DownloadListener;
-import com.rks.musicx.data.network.model.Artist;
-import com.rks.musicx.data.network.model.Artist__;
-import com.rks.musicx.data.network.model.Image_;
-import com.rks.musicx.misc.utils.Constants;
-import com.rks.musicx.misc.utils.Extras;
-import com.rks.musicx.misc.utils.Helper;
-
-import java.io.File;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-/*
  * ©2017 Rajneesh Singh
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,38 +13,63 @@ import retrofit2.Response;
  * limitations under the License.
  */
 
-public class ArtistArtwork extends AsyncTask<Void, Void, Void> {
+import android.content.Context;
+import android.os.AsyncTask;
+import android.util.Log;
 
-    private Call<Artist> artistCall;
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.DownloadListener;
+import com.rks.musicx.data.network.model.Album;
+import com.rks.musicx.data.network.model.Album_;
+import com.rks.musicx.data.network.model.Image_;
+import com.rks.musicx.misc.utils.Constants;
+import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.Helper;
+
+import java.io.File;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+/**
+ * Created by Coolalien on 5/10/2017.
+ */
+public class AlbumArtwork extends AsyncTask<Void, Void, Void> {
+
+    private Call<Album> albumCall;
     private Clients clients;
     private Services services;
     private Context context;
-    private String artistName;
+    private String artistName,albumName;
 
-    public ArtistArtwork(Context context, String artistName) {
+    public AlbumArtwork(Context context, String artistName, String albumName) {
         this.context = context;
         this.artistName = artistName;
+        this.albumName = albumName;
         clients = new Clients(context, Constants.lastFmUrl);
         services = clients.createService(Services.class);
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
-        artistCall = services.getartist(artistName);
-        artistCall.enqueue(new Callback<Artist>() {
+        albumCall = services.getalbum(albumName, artistName);
+       albumCall.enqueue(new Callback<Album>() {
             @Override
-            public void onResponse(Call<com.rks.musicx.data.network.model.Artist> call, Response<Artist> response) {
-                com.rks.musicx.data.network.model.Artist getartist = response.body();
-                if (response.isSuccessful() && getartist != null) {
-                    final Artist__ artist1 = getartist.getArtist();
-                    if (artist1 != null && artist1.getImage() != null && artist1.getImage().size() > 0) {
-                        String artistImagePath = new Helper(context).loadArtistImage(artistName);
+            public void onResponse(Call<Album> call, Response<Album> response) {
+                Album getalbum = response.body();
+                if (response.isSuccessful() && getalbum != null) {
+                    final Album_ album_ = getalbum.getAlbum();
+                    if (album_ != null && album_.getImageList() != null && album_.getImageList().size() > 0) {
+                        String artistImagePath = new Helper(context).loadAlbumImage(albumName);
                         File file = new File(artistImagePath);
-                        for (Image_ artistArtwork : artist1.getImage()) {
+                        for (Image_ albumArtwork : album_.getImageList()) {
                             if (Extras.getInstance().hqArtistArtwork()) {
                                 if (!file.exists()) {
-                                    AndroidNetworking.download(artworkQuality(artistArtwork), new Helper(context).getArtistArtworkLocation(), artistName + ".jpeg")
-                                            .setTag("DownloadingArtistImage")
+                                    AndroidNetworking.download(artworkQuality(albumArtwork), new Helper(context).getAlbumArtworkLocation(), albumName + ".jpeg")
+                                            .setTag("DownloadingAlbumImage")
                                             .setPriority(Priority.MEDIUM)
                                             .build()
                                             .startDownload(new DownloadListener() {
@@ -84,22 +84,21 @@ public class ArtistArtwork extends AsyncTask<Void, Void, Void> {
                                                 }
                                             });
                                 }
-
                             } else {
                                 if (!file.exists()) {
-                                    AndroidNetworking.download(artworkQuality(artistArtwork), new Helper(context).getArtistArtworkLocation(), artistName + ".jpeg")
-                                            .setTag("DownloadingArtistImage")
+                                    AndroidNetworking.download(artworkQuality(albumArtwork), new Helper(context).getAlbumArtworkLocation(), albumName + ".jpeg")
+                                            .setTag("DownloadingAlbumImage")
                                             .setPriority(Priority.MEDIUM)
                                             .build()
                                             .startDownload(new DownloadListener() {
                                                 @Override
                                                 public void onDownloadComplete() {
-                                                    Log.d("Artist", "successfully downloaded");
+                                                    Log.d("Album", "successfully downloaded");
                                                 }
 
                                                 @Override
                                                 public void onError(ANError anError) {
-                                                    Log.d("Artist", "failed");
+                                                    Log.d("Album", "failed");
                                                 }
                                             });
                                 }
@@ -114,8 +113,8 @@ public class ArtistArtwork extends AsyncTask<Void, Void, Void> {
             }
 
             @Override
-            public void onFailure(Call<com.rks.musicx.data.network.model.Artist> call, Throwable t) {
-                Log.d("ArtistArtwork", "error", t);
+            public void onFailure(Call<Album> call, Throwable t) {
+                Log.d("AlbumArtwork", "error", t);
             }
         });
         return null;
@@ -125,7 +124,7 @@ public class ArtistArtwork extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
-        Log.d("ArtistArtwork", "Success");
+        Log.d("AlbumArtwork", "Success");
     }
 
     private String artworkQuality(Image_ artistArtwork) {
@@ -136,7 +135,5 @@ public class ArtistArtwork extends AsyncTask<Void, Void, Void> {
         }
         return null;
     }
-
-
 
 }

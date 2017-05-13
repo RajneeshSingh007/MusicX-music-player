@@ -102,10 +102,13 @@ public class EqView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        /*if (mListener != null){
+            mListener.onProgressChanged((int) (deg - 2));
+        }*/
         midx = canvas.getWidth() / 2;
         midy = canvas.getHeight() / 2;
-
-        float x, y;
+        float x = 0, y = 0;
         int radius = (int) (Math.min(midx, midy) * ((float) 14.5 / 16));
         float deg2 = Math.max(3, deg);
         float deg3 = Math.min(deg, 21);
@@ -123,7 +126,7 @@ public class EqView extends View {
             canvas.drawCircle(x, y, ((float) radius / 15), circlePaint2);
         }
 
-        float tmp2 = deg / 24;
+        float tmp2 = (float) deg / 24;
         float x1 = midx + (float) (radius * ((float) 2 / 5) * Math.sin(2 * Math.PI * (1.0 - tmp2)));
         float y1 = midy + (float) (radius * ((float) 2 / 5) * Math.cos(2 * Math.PI * (1.0 - tmp2)));
         float x2 = midx + (float) (radius * ((float) 3 / 5) * Math.sin(2 * Math.PI * (1.0 - tmp2)));
@@ -132,7 +135,6 @@ public class EqView extends View {
         circlePaint.setColor(Color.parseColor("#222222"));
         canvas.drawCircle(midx, midy, radius * ((float) 13 / 15), circlePaint);
         circlePaint.setColor(Color.parseColor("#000000"));
-        circlePaint.setTextAlign(Paint.Align.CENTER);
         canvas.drawCircle(midx, midy, radius * ((float) 11 / 15), circlePaint);
         canvas.drawText(label, midx, midy + (float) (radius * 1.1), textPaint);
         canvas.drawLine(x1, y1, x2, y2, linePaint);
@@ -141,9 +143,6 @@ public class EqView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-
-        mListener.onProgressChanged(getProgress());
-
         if (e.getAction() == MotionEvent.ACTION_DOWN) {
             float dx = e.getX() - midx;
             float dy = e.getY() - midy;

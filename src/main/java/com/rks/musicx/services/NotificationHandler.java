@@ -4,20 +4,22 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Handler;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.graphics.Palette;
 import android.widget.RemoteViews;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.NotificationTarget;
-import com.palette.GlidePalette;
 import com.rks.musicx.R;
 import com.rks.musicx.database.FavHelper;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.Helper;
+import com.rks.musicx.misc.utils.bitmap;
+import com.rks.musicx.misc.utils.palette;
 import com.rks.musicx.ui.activities.PlayingActivity;
 
 import static com.rks.musicx.misc.utils.Constants.ACTION_FAV;
@@ -47,6 +49,7 @@ import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
 public class NotificationHandler {
 
     public static final int notificationID = 1127;
+    private static Handler handler = new Handler();
 
     public static void buildNotification(MusicXService musicXService, String what){
         if (musicXService == null){
@@ -80,32 +83,37 @@ public class NotificationHandler {
         }
         FavHelper favHelper = new FavHelper(musicXService);
         if (META_CHANGED.equals(what)){
-            NotificationTarget notificationTarget = new NotificationTarget(musicXService, remoteViews, R.id.artwork, builder.build(), notificationID);
-            Glide.with(musicXService)
-                    .load(ArtworkUtils.uri(musicXService.getsongAlbumID()))
-                    .asBitmap()
-                    .error(R.mipmap.ic_launcher)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .listener(GlidePalette.with(ArtworkUtils.uri(musicXService.getsongAlbumID()).toString()).intoCallBack(palette -> {
-                        int colors[] = getAvailableColor(musicXService, palette);
-                        remoteViews.setInt(R.id.item_view, "setBackgroundColor", colors[0]);
-                        remoteViews.setInt(R.id.title, "setTextColor", Color.WHITE);
-                        remoteViews.setInt(R.id.artist, "setTextColor", Color.WHITE);
-                    }))
-                    .into(notificationTarget);
-            NotificationTarget notificationTargetsmall = new NotificationTarget(musicXService, smallremoteView, R.id.small_artwork, builder.build(), notificationID);
-            Glide.with(musicXService)
-                    .load(ArtworkUtils.uri(musicXService.getsongAlbumID()))
-                    .asBitmap()
-                    .error(R.mipmap.ic_launcher)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .listener(GlidePalette.with(ArtworkUtils.uri(musicXService.getsongAlbumID()).toString()).intoCallBack(palette -> {
-                        int colors[] = getAvailableColor(musicXService, palette);
-                        smallremoteView.setInt(R.id.small_item_view, "setBackgroundColor", colors[0]);
-                        smallremoteView.setInt(R.id.small_artist, "setTextColor", Color.WHITE);
-                        smallremoteView.setInt(R.id.small_title, "setTextColor", Color.WHITE);
-                    }))
-                    .into(notificationTargetsmall);
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    ArtworkUtils.ArtworkLoaderBitmapPalette(musicXService, musicXService.getsongAlbumName(), musicXService.getsongAlbumID(), new palette() {
+                        @Override
+                        public void palettework(Palette palette) {
+                            int colors[] = Helper.getAvailableColor(musicXService, palette);
+                            remoteViews.setInt(R.id.item_view, "setBackgroundColor", colors[0]);
+                            remoteViews.setInt(R.id.title, "setTextColor", Color.WHITE);
+                            remoteViews.setInt(R.id.artist, "setTextColor", Color.WHITE);
+                            smallremoteView.setInt(R.id.small_item_view, "setBackgroundColor", colors[0]);
+                            smallremoteView.setInt(R.id.small_title, "setTextColor", Color.WHITE);
+                            smallremoteView.setInt(R.id.small_artist, "setTextColor", Color.WHITE);
+                        }
+                    }, new bitmap() {
+                        @Override
+                        public void bitmapwork(Bitmap bitmap) {
+                            remoteViews.setImageViewBitmap(R.id.artwork, bitmap);
+                            smallremoteView.setImageViewBitmap(R.id.small_artwork, bitmap);
+                            NotificationManagerCompat.from(musicXService).notify(notificationID, builder.build());
+                        }
+
+                        @Override
+                        public void bitmapfailed(Bitmap bitmap) {
+                            remoteViews.setImageViewBitmap(R.id.artwork, bitmap);
+                            smallremoteView.setImageViewBitmap(R.id.small_artwork, bitmap);
+                            NotificationManagerCompat.from(musicXService).notify(notificationID, builder.build());
+                        }
+                    });
+                }
+            });
             if (favHelper.isFavorite(Extras.getInstance().getSongId(musicXService.getsongId()))) {
                 remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite);
             } else {
@@ -184,4 +192,5 @@ public class NotificationHandler {
         }
         return temp;
     }
+
 }

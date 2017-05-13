@@ -2,9 +2,7 @@ package com.rks.musicx.ui.activities;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.preference.PreferenceManager;
 import android.support.annotation.StyleRes;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -20,7 +18,6 @@ import com.rks.musicx.misc.utils.Helper;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 import static com.rks.musicx.misc.utils.Constants.DEVELOPER_NAME;
-import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -81,31 +78,39 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
         guide_detail.setOnClickListener(view -> Helper.GuidLines(AboutActivity.this));
         contact_detail.setText(Html.fromHtml("<a href=\"mailto:developerrajneeshsingh@gmail.com\">Mail us</a>"));
         contact_detail.setMovementMethod(LinkMovementMethod.getInstance());
-        about_app_ver.setText("v 1.3.5");
+        about_app_ver.setText("v 1.3.6");
         developer_name.setText(DEVELOPER_NAME);
         licenses_detail.setText("Licenses");
         testerName.setText(getString(R.string.testerName));
         privacy.setText(Html.fromHtml("<a href=http://musicxplayer.tk/privacy.html> Privacy</a> "));
         privacy.setMovementMethod(LinkMovementMethod.getInstance());
         changeslog.setOnClickListener(view -> Helper.Changelogs(AboutActivity.this));
-        if (!Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+        guide_detail.setTextColor(accentcolor);
+        contact_detail.setTextColor(accentcolor);
+        licenses_detail.setTextColor(accentcolor);
+        changeslog.setTextColor(accentcolor);
+        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
+            about_app_title.setTextColor(Color.WHITE);
+            about_app_disc.setTextColor(Color.WHITE);
+            about_app_ver.setTextColor(Color.WHITE);
+            developer.setTextColor(Color.WHITE);
+            developer_name.setTextColor(Color.WHITE);
+            support.setTextColor(Color.WHITE);
+            tester.setTextColor(Color.WHITE);
+            appcr.setTextColor(Color.WHITE);
+            testerName.setTextColor(Color.WHITE);
+            privacy.setTextColor(Color.WHITE);
+        } else {
             about_app_title.setTextColor(Color.BLACK);
             about_app_disc.setTextColor(Color.BLACK);
             about_app_ver.setTextColor(Color.BLACK);
             developer.setTextColor(Color.BLACK);
             developer_name.setTextColor(Color.BLACK);
-            contact_detail.setTextColor(accentcolor);
-            licenses_detail.setTextColor(accentcolor);
-            changeslog.setTextColor(accentcolor);
             support.setTextColor(Color.BLACK);
-            guide_detail.setTextColor(accentcolor);
             tester.setTextColor(Color.BLACK);
             appcr.setTextColor(Color.BLACK);
             testerName.setTextColor(Color.BLACK);
             privacy.setTextColor(Color.BLACK);
-        } else {
-            AboutDev.setCardBackgroundColor(ContextCompat.getColor(this, R.color.MaterialGrey));
-            AboutApp.setCardBackgroundColor(ContextCompat.getColor(this, R.color.MaterialGrey));
         }
     }
 
@@ -113,9 +118,13 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
     @StyleRes
     @Override
     public int getActivityTheme() {
-        // Overrides what's set in the current ATE Config
-        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(DarkTheme, false) ?
-                R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
+        return getStyleTheme();
+    }
+
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Override
@@ -127,10 +136,5 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
     public boolean onOptionsItemSelected(MenuItem item) {
         this.onBackPressed();
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 }

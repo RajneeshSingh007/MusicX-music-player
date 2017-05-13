@@ -19,6 +19,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.rks.musicx.R;
 import com.rks.musicx.data.loaders.CreatedPlaylistLoader;
+import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.model.Playlist;
 import com.rks.musicx.misc.utils.ATEUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
@@ -145,9 +146,22 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Extras extras = Extras.getInstance();
         switch (item.getItemId()) {
             case R.id.action_create_playlist:
                 showCreatePlaylistDialog();
+                break;
+            case R.id.menu_sort_by_az:
+                extras.setPlaylistSortOrder(SortOrder.PlaylistSortOrder.PLAYLIST_A_Z);
+                load();
+                break;
+            case R.id.menu_sort_by_za:
+                extras.setPlaylistSortOrder(SortOrder.PlaylistSortOrder.PLAYLIST_Z_A);
+                load();
+                break;
+            case R.id.menu_sort_by_date:
+                extras.setPlaylistSortOrder(SortOrder.PlaylistSortOrder.PLAYLIST_DATE_MODIFIED);
+                load();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -189,6 +203,7 @@ public class PlaylistListFragment extends miniFragment implements LoaderCallback
     public Loader<List<Playlist>> onCreateLoader(int id, Bundle args) {
         CreatedPlaylistLoader playlistloader = new CreatedPlaylistLoader(getContext());
         if (id == playloader) {
+            playlistloader.setSortOrder(Extras.getInstance().getPlaylistSort());
             return playlistloader;
         }
         return null;

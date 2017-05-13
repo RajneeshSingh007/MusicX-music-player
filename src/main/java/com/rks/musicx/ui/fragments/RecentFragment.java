@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.data.loaders.RecentlyPlayedLoader;
@@ -162,7 +161,7 @@ public class RecentFragment extends miniFragment implements LoaderManager.Loader
             ((MainActivity) getActivity()).setFragment(recentPlayedFragment);
         });
         accentcolor = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
-        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
             recentName.setTextColor(Color.WHITE);
             recentPlayed.setTextColor(Color.WHITE);
             More.setTextColor(accentcolor);
@@ -203,11 +202,10 @@ public class RecentFragment extends miniFragment implements LoaderManager.Loader
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
-            ATE.postApply(getActivity(), "dark_theme");
-        } else {
-            ATE.postApply(getActivity(), "light_theme");
+        if (getActivity() == null){
+            return;
         }
+        Extras.getInstance().getThemevalue(getActivity());
         CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
         customLayoutManager.setSmoothScrollbarEnabled(true);
         customLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);

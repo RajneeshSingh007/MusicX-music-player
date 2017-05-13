@@ -96,6 +96,8 @@
   <string name="personalisation">Personalizácia</string>
   <string name="dark_theme">Tmavá Téma</string>
   <string name="dark_theme_summary">Použiť tmavú tému cez aplikáciu</string>
+  <string name="black_theme">Černá Téma</string>
+  <string name="black_theme_summary">Použiť Černá tému cez aplikáci</string>
   <string name="primary_color_summary">Zmeniť primárnu farbu témy</string>
   <string name="accent_color_summary">Zmeniť sekundárnu farbu témy</string>
   <string name="custom">vlastné</string>
@@ -135,7 +137,7 @@
   <string name="restore_lastTab">Obnoviť minulé okno</string>
   <string name="Tab">Náhľad Okna</string>
   <string name="folder">Priečinok</string>
-  <string name="reverb">Reverb</string>
+  <string name="reverb">REVERB</string>
   <string name="hqartist_artwork">HQ Náhľady</string>
   <string name="hqartist_artwork_summary">povoliť sťahovanie náhľadov vo vysokej kvalite</string>
   <string name="storage">Úložisko</string>

@@ -90,6 +90,9 @@ public interface playInterface {
 
     void forceStop();
 
+    void receiverCleanup();
+
+    int audioSession();
 
     /*
     *@return song MetaData

@@ -7,6 +7,7 @@ import android.widget.TextView;
 
 import com.rks.musicx.data.network.VagModel.Mu;
 import com.rks.musicx.data.network.VagModel.Vag;
+import com.rks.musicx.misc.utils.Constants;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 
@@ -39,6 +40,8 @@ public class LyricsData extends AsyncTask<String, String, String> {
     private TextView setLyrics;
     private Call<Vag> vagCall;
     private Context context;
+    private Clients clients;
+    private Services services;
 
     public LyricsData(Context context, String songName, String songArtist, String songpath, TextView setLyrics) {
         this.songName = songName;
@@ -46,14 +49,13 @@ public class LyricsData extends AsyncTask<String, String, String> {
         this.context = context;
         this.setLyrics = setLyrics;
         this.songPath = songpath;
+        clients = new Clients(context, Constants.vagUrl);
+        services = clients.createService(Services.class);
     }
 
     @Override
     protected String doInBackground(String... strings) {
-
-        VagClient vagClient = new VagClient(context);
-        VagServices vagServices = vagClient.createService(VagServices.class);
-        vagCall = vagServices.getLyrics(songArtist, songName);
+        vagCall = services.getLyrics(songArtist, songName);
         return "Executed";
     }
 
@@ -89,6 +91,4 @@ public class LyricsData extends AsyncTask<String, String, String> {
             });
         }
     }
-
-
 }

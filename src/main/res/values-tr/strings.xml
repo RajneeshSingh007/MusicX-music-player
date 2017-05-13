@@ -97,6 +97,8 @@
     <string name="personalisation">Kişiselleştirme</string>
     <string name="dark_theme">Karanlık Tema</string>
     <string name="dark_theme_summary">Uygulama boyunca koyu bir tema uygula</string>
+    <string name="black_theme">siyah Tema</string>
+    <string name="black_theme_summary">Uygulama boyunca siyah bir tema uygula</string>
     <string name="primary_color_summary">Ana temanın rengini değiştir</string>
     <string name="accent_color_summary">Vurgu rengini değiştir</string>
     <string name="custom">özel</string>

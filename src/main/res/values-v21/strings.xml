@@ -97,6 +97,8 @@
     <string name="personalisation">Personalisation</string>
     <string name="dark_theme">Dark Theme</string>
     <string name="dark_theme_summary">Apply a dark theme throughout the app</string>
+    <string name="black_theme">Black Theme</string>
+    <string name="black_theme_summary">Apply a black theme throughout the app</string>
     <string name="primary_color_summary">Change the primary theme color</string>
     <string name="accent_color_summary">Change the accent theme color</string>
     <string name="custom">custom</string>
@@ -138,8 +140,8 @@
     <string name="restore_lastTab">Restore last Tab</string>
     <string name="Tab">TabView</string>
     <string name="folder">Folder</string>
-    <string name="reverb">Reverb</string>
-    <string name="hqartist_artwork">HQ ArtistArtwork</string>
-    <string name="hqartist_artwork_summary">enable to download high quality artist artwork</string>
+    <string name="reverb">REVERB</string>
+    <string name="hqartist_artwork">HQ Artwork</string>
+    <string name="hqartist_artwork_summary">enable to download high quality artwork</string>
     <string name="writesetting">To write ringtone in settings</string>
 </resources>

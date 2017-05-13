@@ -1,8 +1,6 @@
 package com.rks.musicx.ui.fragments;
 
 import android.app.Activity;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -36,6 +34,8 @@ import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.bitmap;
 import com.rks.musicx.misc.utils.palette;
+import com.rks.musicx.misc.widgets.changeAlbumArt;
+import com.rks.musicx.misc.widgets.updateAlbumArt;
 
 import java.io.File;
 
@@ -125,12 +125,12 @@ public class TagEditorFragment extends miniFragment implements ImageChooserListe
         mYearEditText.setText(song.getYear());
         mLyricsEditText.setText(song.getLyrics());
         saveTags.setImageBitmap(Helper.textAsBitmap("Save", 40, Color.WHITE));
-        ArtworkUtils.ArtworkLoaderPalette(getContext(), title, id, albumArtwork, new palette() {
+        ArtworkUtils.ArtworkLoaderPalette(getContext(), album, id, albumArtwork, new palette() {
             @Override
             public void palettework(Palette palette) {
                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
                 toolbar.setBackgroundColor(colors[0]);
-                if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+                if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                     getActivity().getWindow().setStatusBarColor(colors[0]);
                 } else {
                     getActivity().getWindow().setStatusBarColor(colors[0]);
@@ -138,7 +138,7 @@ public class TagEditorFragment extends miniFragment implements ImageChooserListe
             }
         });
         int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
-        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
             getActivity().getWindow().setStatusBarColor(colorAccent);
             toolbar.setBackgroundColor(colorAccent);
         } else {
@@ -255,14 +255,39 @@ public class TagEditorFragment extends miniFragment implements ImageChooserListe
 
             @Override
             public void run() {
-                ChangeAlbumCover(finalPath);
+                ChangeAlbumCover(finalPath, song.getmSongPath(), song.getAlbumId());
             }
         });
     }
 
-    private void ChangeAlbumCover(String finalPath) {
+    private void ChangeAlbumCover(String finalPath, String path, long key) {
         if (chosenImages != null) {
-            new updateAlbumArt(finalPath).execute();
+            new updateAlbumArt(finalPath, path, getContext(), key, new changeAlbumArt() {
+                @Override
+                public void onPostWork() {
+                    ArtworkUtils.ArtworkLoaderBitmapPalette(getContext(), song.getAlbum(), path, new palette() {
+                        @Override
+                        public void palettework(Palette palette) {
+                            final int[] colors = Helper.getAvailableColor(getContext(), palette);
+                            if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
+                                getActivity().getWindow().setStatusBarColor(colors[0]);
+                            } else {
+                                getActivity().getWindow().setStatusBarColor(colors[0]);
+                            }
+                        }
+                    }, new bitmap() {
+                        @Override
+                        public void bitmapwork(Bitmap bitmap) {
+                            albumArtwork.setImageBitmap(bitmap);
+                        }
+
+                        @Override
+                        public void bitmapfailed(Bitmap bitmap) {
+
+                        }
+                    });
+                }
+            }).execute();
         }
     }
 
@@ -274,68 +299,5 @@ public class TagEditorFragment extends miniFragment implements ImageChooserListe
     @Override
     public void onImagesChosen(ChosenImages chosenImages) {
 
-    }
-
-    public class updateAlbumArt extends AsyncTask<Void, Void, Void> {
-
-        private Uri albumCover;
-        private ContentValues values;
-        private String path;
-
-        public updateAlbumArt(String path) {
-            this.path = path;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            albumCover = Uri.parse("content://media/external/audio/albumart");
-            try {
-                getContext().getContentResolver().delete(ContentUris.withAppendedId(albumCover, song.getAlbumId()), null, null);
-                values = new ContentValues();
-                values.put("album_id", song.getAlbumId());
-                values.put("_data", path);
-            } catch (Exception e) {
-                Log.d("playing", "error", e);
-            }
-            return null;
-        }
-
-
-        @Override
-        protected void onPostExecute(Void v) {
-            super.onPostExecute(v);
-            Uri newUri = TagEditorFragment.this.getContext().getContentResolver().insert(albumCover, values);
-            if (newUri != null) {
-                File file = new File("content://media/external/audio/albumart");
-                Toast.makeText(getContext(), "AlbumArt Changed", Toast.LENGTH_LONG).show();
-                Log.d("updateAlbumCover", "success hurray !!!");
-                getContext().getContentResolver().notifyChange(albumCover, null);
-                getContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
-                ArtworkUtils.ArtworkLoaderBitmapPalette(getContext(), song.getTitle(), path, new palette() {
-                    @Override
-                    public void palettework(Palette palette) {
-                        final int[] colors = Helper.getAvailableColor(getContext(), palette);
-                        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
-                            getActivity().getWindow().setStatusBarColor(colors[0]);
-                        } else {
-                            getActivity().getWindow().setStatusBarColor(colors[0]);
-                        }
-                    }
-                }, new bitmap() {
-                    @Override
-                    public void bitmapwork(Bitmap bitmap) {
-                        albumArtwork.setImageBitmap(bitmap);
-                    }
-
-                    @Override
-                    public void bitmapfailed(Bitmap bitmap) {
-
-                    }
-                });
-            } else {
-                Toast.makeText(getContext(), "AlbumArt Failed", Toast.LENGTH_LONG).show();
-                Log.d("updateAlbumCover", "failed lol !!!");
-            }
-        }
     }
 }

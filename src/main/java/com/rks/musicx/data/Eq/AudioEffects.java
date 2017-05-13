@@ -38,7 +38,7 @@ public class AudioEffects extends BroadcastReceiver {
             BassBoosts.initBass(audioID);
             Virtualizers.initVirtualizer(audioID);
             Loud.initLoudnessEnhancer(audioID);
-            Reverb.initReverb(audioID);
+            Reverb.initReverb();
         } else if (scan.equals(Constants.CLOSE_EFFECTS)) {
             Equalizers.EndEq();
             BassBoosts.EndBass();

@@ -5,6 +5,7 @@ import android.media.audiofx.PresetReverb;
 import android.util.Log;
 
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.services.MediaPlayerSingleton;
 
 import static com.rks.musicx.misc.utils.Constants.PRESET_BOOST;
 
@@ -29,14 +30,17 @@ public class Reverb {
 
     private static PresetReverb presetReverb = null;
     private static short str = -1;
+    private static int audioID = 0;
 
     public Reverb() {
     }
 
-    public static void initReverb(int audioID) {
+    public static void initReverb() {
         EndReverb();
         try {
             presetReverb = new PresetReverb(0, audioID);
+            MediaPlayerSingleton.getInstance().getMediaPlayer().attachAuxEffect(presetReverb.getId());
+            MediaPlayerSingleton.getInstance().getMediaPlayer().setAuxEffectSendLevel(1.0f);
             short str = (short) Extras.getInstance().saveEq().getInt(PRESET_BOOST, 0);
             if (str != 0) {
                 presetReverb.setPreset(str);

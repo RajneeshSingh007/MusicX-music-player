@@ -49,9 +49,9 @@ public class BlurArtwork extends AsyncTask<String, Void, String> {
     protected String doInBackground(String... params) {
         finalResult = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         RenderScript renderScript = RenderScript.create(context); //rs initialized
-        ScriptIntrinsicBlur scriptIntrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));//start blur
-        Allocation allocationIn = Allocation.createFromBitmap(renderScript, bitmap); //blurred bitmap
-        Allocation allocationOut = Allocation.createFromBitmap(renderScript, finalResult); //output bitmap
+        ScriptIntrinsicBlur scriptIntrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
+        Allocation allocationIn = Allocation.createFromBitmap(renderScript, bitmap, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT | Allocation.USAGE_SHARED);
+        Allocation allocationOut = Allocation.createFromBitmap(renderScript, finalResult);
         scriptIntrinsicBlur.setRadius(radius); //radius option from users
         scriptIntrinsicBlur.setInput(allocationIn);
         scriptIntrinsicBlur.forEach(allocationOut);

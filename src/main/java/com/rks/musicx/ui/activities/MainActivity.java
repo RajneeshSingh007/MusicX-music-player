@@ -15,7 +15,6 @@ import android.media.audiofx.AudioEffect;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -67,7 +66,6 @@ import java.util.List;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 import static com.rks.musicx.misc.utils.Constants.EQ;
 import static com.rks.musicx.misc.utils.Constants.ITEM_ADDED;
 import static com.rks.musicx.misc.utils.Constants.META_CHANGED;
@@ -208,7 +206,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         accentcolor = Config.accentColor(this, ateKey);
         primarycolor = Config.primaryColor(this, ateKey);
         if (mNavigationView != null) {
-            mNavigationView.setNavigationItemSelectedListener(this);
+            mNavigationView.setNavigationItemSelectedListener(MainActivity.this);
         }
         count = Extras.getInstance().getInitValue("first", "last");
         if (count == 0) {
@@ -231,12 +229,19 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         } else {
             logolayout.setBackgroundColor(primarycolor);
         }
-        mRequestManager = Glide.with(this);
+        mRequestManager = Glide.with(MainActivity.this);
+        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
+            SongTitle.setTextColor(Color.WHITE);
+            SongArtist.setTextColor(ContextCompat.getColor(this, R.color.darkthemeTextColor));
+        } else {
+            SongTitle.setTextColor(Color.WHITE);
+            SongArtist.setTextColor(Color.LTGRAY);
+        }
     }
 
 
     @Override
-    protected Fragment setFragment() {
+    public Fragment setFragment() {
         return MainFragment.newInstance();
     }
 
@@ -364,6 +369,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             if (permissionManager.isAudioRecordGranted(this)) {
                 intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, MediaPlayerSingleton.getInstance().getMediaPlayer().getAudioSessionId());
                 intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, this.getPackageName());
+                intent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
                 sendBroadcast(intent);
             } else {
                 Log.d("MainActivity", "error");
@@ -424,9 +430,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     @StyleRes
     @Override
     public int getActivityTheme() {
-        // Overrides what's set in the current ATE Config
-        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(DarkTheme, false) ?
-                R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
+        return getStyleTheme();
     }
 
     public void libraryLoader() {
@@ -489,80 +493,157 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mRequestManager.load(ArtworkUtils.uri(musicXService.getsongAlbumID()))
-                        .asBitmap()
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .centerCrop()
-                        .placeholder(R.mipmap.ic_launcher)
-                        .error(R.mipmap.ic_launcher)
-                        .format(DecodeFormat.PREFER_ARGB_8888)
-                        .override(300, 300)
-                        .listener(GlidePalette.with(ArtworkUtils.uri(musicXService.getsongAlbumID()).toString()).intoCallBack(new BitmapPalette.CallBack() {
-                            @Override
-                            public void onPaletteLoaded(@Nullable Palette palette) {
-                                int color[] = Helper.getAvailableColor(MainActivity.this, palette);
-                                if (Extras.getInstance().artworkColor()) {
-                                    playToggle.setBackgroundTintList(ColorStateList.valueOf(color[0]));
-                                    songProgress.setProgressColor(color[0]);
-                                    songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
-                                } else {
-                                    playToggle.setBackgroundTintList(ColorStateList.valueOf(accentcolor));
-                                    songProgress.setProgressColor(accentcolor);
-                                    songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
+                if (ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()).exists()){
+                    mRequestManager.load(ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()).getAbsolutePath())
+                            .asBitmap()
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .centerCrop()
+                            .placeholder(R.mipmap.ic_launcher)
+                            .error(R.mipmap.ic_launcher)
+                            .format(DecodeFormat.PREFER_ARGB_8888)
+                            .override(300, 300)
+                            .listener(GlidePalette.with(ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()).getAbsolutePath()).intoCallBack(new BitmapPalette.CallBack() {
+                                @Override
+                                public void onPaletteLoaded(@Nullable Palette palette) {
+                                    int color[] = Helper.getAvailableColor(MainActivity.this, palette);
+                                    if (Extras.getInstance().artworkColor()) {
+                                        playToggle.setBackgroundTintList(ColorStateList.valueOf(color[0]));
+                                        songProgress.setProgressColor(color[0]);
+                                        songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
+                                    } else {
+                                        playToggle.setBackgroundTintList(ColorStateList.valueOf(accentcolor));
+                                        songProgress.setProgressColor(accentcolor);
+                                        songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
+                                    }
                                 }
-                            }
-                        }))
-                        .into(new Target<Bitmap>() {
-                            @Override
-                            public void onStart() {
+                            }))
+                            .into(new Target<Bitmap>() {
+                                @Override
+                                public void onLoadStarted(Drawable placeholder) {
 
-                            }
+                                }
 
-                            @Override
-                            public void onStop() {
+                                @Override
+                                public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                    ArtworkUtils.getBlurArtwork(MainActivity.this, 25, ArtworkUtils.getDefaultArtwork(MainActivity.this), BackgroundArt, 1.0f);
+                                }
 
-                            }
+                                @Override
+                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                    ArtworkUtils.blurPreferances(MainActivity.this, resource, BackgroundArt);
+                                }
 
-                            @Override
-                            public void onDestroy() {
+                                @Override
+                                public void onLoadCleared(Drawable placeholder) {
 
-                            }
+                                }
 
-                            @Override
-                            public void onLoadStarted(Drawable placeholder) {
+                                @Override
+                                public void getSize(SizeReadyCallback cb) {
 
-                            }
+                                }
 
-                            @Override
-                            public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                                ArtworkUtils.getBlurArtwork(MainActivity.this, 25, ArtworkUtils.getDefaultArtwork(MainActivity.this), BackgroundArt, 1.0f);
-                            }
+                                @Override
+                                public void setRequest(Request request) {
 
-                            @Override
-                            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                                ArtworkUtils.blurPreferances(MainActivity.this, resource, BackgroundArt);
-                            }
+                                }
 
-                            @Override
-                            public void onLoadCleared(Drawable placeholder) {
+                                @Override
+                                public Request getRequest() {
+                                    return null;
+                                }
 
-                            }
+                                @Override
+                                public void onStart() {
 
-                            @Override
-                            public void getSize(SizeReadyCallback cb) {
+                                }
 
-                            }
+                                @Override
+                                public void onStop() {
 
-                            @Override
-                            public Request getRequest() {
-                                return null;
-                            }
+                                }
 
-                            @Override
-                            public void setRequest(Request request) {
+                                @Override
+                                public void onDestroy() {
 
-                            }
-                        });
+                                }
+                            });
+                }else {
+                    mRequestManager.load(ArtworkUtils.uri(musicXService.getsongAlbumID()))
+                            .asBitmap()
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .centerCrop()
+                            .placeholder(R.mipmap.ic_launcher)
+                            .error(R.mipmap.ic_launcher)
+                            .format(DecodeFormat.PREFER_ARGB_8888)
+                            .override(300, 300)
+                            .listener(GlidePalette.with(ArtworkUtils.uri(musicXService.getsongAlbumID()).toString()).intoCallBack(new BitmapPalette.CallBack() {
+                                @Override
+                                public void onPaletteLoaded(@Nullable Palette palette) {
+                                    int color[] = Helper.getAvailableColor(MainActivity.this, palette);
+                                    if (Extras.getInstance().artworkColor()) {
+                                        playToggle.setBackgroundTintList(ColorStateList.valueOf(color[0]));
+                                        songProgress.setProgressColor(color[0]);
+                                        songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
+                                    } else {
+                                        playToggle.setBackgroundTintList(ColorStateList.valueOf(accentcolor));
+                                        songProgress.setProgressColor(accentcolor);
+                                        songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
+                                    }
+                                }
+                            }))
+                            .into(new Target<Bitmap>() {
+                                @Override
+                                public void onLoadStarted(Drawable placeholder) {
+
+                                }
+
+                                @Override
+                                public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                    ArtworkUtils.getBlurArtwork(MainActivity.this, 25, ArtworkUtils.getDefaultArtwork(MainActivity.this), BackgroundArt, 1.0f);
+                                }
+
+                                @Override
+                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                    ArtworkUtils.blurPreferances(MainActivity.this, resource, BackgroundArt);
+                                }
+
+                                @Override
+                                public void onLoadCleared(Drawable placeholder) {
+
+                                }
+
+                                @Override
+                                public void getSize(SizeReadyCallback cb) {
+
+                                }
+
+                                @Override
+                                public void setRequest(Request request) {
+
+                                }
+
+                                @Override
+                                public Request getRequest() {
+                                    return null;
+                                }
+
+                                @Override
+                                public void onStart() {
+
+                                }
+
+                                @Override
+                                public void onStop() {
+
+                                }
+
+                                @Override
+                                public void onDestroy() {
+
+                                }
+                            });
+                }
             }
         });
     }
@@ -581,13 +662,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                 updateProgress();
             }
             backgroundArt();
-            if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
-                SongTitle.setTextColor(Color.WHITE);
-                SongArtist.setTextColor(ContextCompat.getColor(this, R.color.darkthemeTextColor));
-            } else {
-                SongTitle.setTextColor(Color.WHITE);
-                SongArtist.setTextColor(Color.LTGRAY);
-            }
         }
     }
 

@@ -119,11 +119,11 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
             String artistImagePath = new Helper(getContext()).loadArtistImage(artists.getName());
             File file = new File(artistImagePath);
             if (file.exists()) {
-                ArtworkUtils.ArtworkNetworkLoader(getContext(), artists.getName(), file.getAbsolutePath(), holder.ArtistListArtwork);
+                ArtworkUtils.ArtworkNetworkLoader(getContext(),file.getAbsolutePath(), holder.ArtistListArtwork);
             } else {
                 holder.ArtistListArtwork.setImageResource(R.mipmap.ic_launcher);
             }
-            if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+            if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 holder.ArtistListName.setTextColor(Color.WHITE);
                 holder.ArtistListAlbumCount.setTextColor(ContextCompat.getColor(getContext(), R.color.darkthemeTextColor));
             }

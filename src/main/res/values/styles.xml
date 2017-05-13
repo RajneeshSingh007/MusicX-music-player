@@ -51,18 +51,27 @@
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
         <item name="ate_key">dark_theme</item>
     </style>
+    
+    <style name="ThemeBaseBlack" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorPrimary">@color/colorPrimaryBlack</item>
+        <item name="android:colorAccent">@color/colorAccentBlack</item>
+        <item name="android:colorPrimaryDark">@color/colorPrimaryBlack</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="toolbar_popup_theme">?toolbar_popup_theme</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowBackground">@color/colorPrimaryBlack</item>
+        <item name="windowBackground">@color/colorPrimaryBlack</item>
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+        <item name="cardStyle">@style/CardView.Dark</item>
+        <item name="ate_key">black_theme</item>
+    </style>
 
     <style name="AppThemeLight" parent="ThemeBaseLight"/>
-
+    <style name="AppThemeDark" parent="ThemeBaseDark"/>
+    <style name="AppThemeBlack" parent="ThemeBaseBlack"/>
     <style name="AppThemeNormalLight" parent="ThemeBaseLight"/>
-
-    <style name="AppThemeDark" parent="ThemeBaseDark">
-
-    </style>
-
-    <style name="AppThemeNormalDark" parent="ThemeBaseDark">
-
-    </style>
+    <style name="AppThemeNormalDark" parent="ThemeBaseDark"/>
+    <style name="AppThemeNormalBlack" parent="ThemeBaseBlack"/>
 
     <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
         <item name="spinBars">true</item>

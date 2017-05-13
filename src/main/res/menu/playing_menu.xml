@@ -36,17 +36,22 @@
 
     <item
         android:id="@+id/action_playlist"
-        android:title="Add to Playlist"
+        android:title="@string/action_add_to_playlist"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_edit_tags"
+        android:title="@string/action_edit_tags"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/action_ringtone"
-        android:title="Set Ringtone"
+        android:title="@string/action_set_ringtone"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/action_trackdetails"
-        android:title="Track Details"
+        android:title="@string/action_details"
         app:showAsAction="never"/>
 
     <item

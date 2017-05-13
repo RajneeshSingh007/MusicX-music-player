@@ -2,7 +2,6 @@ package com.rks.musicx.ui.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.preference.PreferenceManager;
 import android.support.annotation.StyleRes;
 import android.support.v4.app.Fragment;
 
@@ -16,7 +15,6 @@ import com.rks.musicx.ui.fragments.Playing4Fragment;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 import static com.rks.musicx.misc.utils.Constants.One;
 import static com.rks.musicx.misc.utils.Constants.PlayingView;
 import static com.rks.musicx.misc.utils.Constants.Three;
@@ -60,13 +58,13 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
         String playing2 = Extras.getInstance().mPreferences.getString(PlayingView, One);
         String playing3 = Extras.getInstance().mPreferences.getString(PlayingView, Two);
         String playing4 = Extras.getInstance().mPreferences.getString(PlayingView, Three);
-        //String playing5 = Extras.getInstance().mPreferences.getString(PlayingView, Four);
+      //  String playing5 = Extras.getInstance().mPreferences.getString(PlayingView, Four);
 
         Playing1Fragment playing1Fragment = new Playing1Fragment();
         Playing2Fragment playing2Fragment = new Playing2Fragment();
         Playing3Fragment playing3Fragment = new Playing3Fragment();
         Playing4Fragment playing4Fragment = new Playing4Fragment();
-        //Playing5Fragment playing5Fragment = new Playing5Fragment();
+       // Playing5Fragment playing5Fragment = new Playing5Fragment();
 
         if (playing1.equals(Zero)) {
             setFragment(playing1Fragment);
@@ -78,7 +76,7 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
             setFragment(playing4Fragment);
         }else {
             setFragment(playing1Fragment);
-        } /*else if (playing5.equals(Four)){
+        }/*else if (playing5.equals(Four)){
             setFragment(playing5Fragment);
         }else {
             setFragment(playing1Fragment);
@@ -105,9 +103,7 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
     @StyleRes
     @Override
     public int getActivityTheme() {
-        // Overrides what's set in the current ATE Config
-        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(DarkTheme, false) ?
-                R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
+        return getStyleTheme();
     }
 
 

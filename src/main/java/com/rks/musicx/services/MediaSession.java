@@ -5,11 +5,11 @@ import android.graphics.Bitmap;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.graphics.Palette;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.rks.musicx.misc.utils.ArtworkUtils;
+import com.rks.musicx.misc.utils.bitmap;
+import com.rks.musicx.misc.utils.palette;
 
 import static com.rks.musicx.misc.utils.Constants.META_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
@@ -53,25 +53,29 @@ public class MediaSession {
             }
         }
         MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
-        builder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicXService.getsongArtistName());
-        builder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, musicXService.getsongAlbumName());
-        builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, musicXService.getsongTitle());
-        builder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, musicXService.getDuration());
         if (META_CHANGED.equals(what)){
-            Glide.with(musicXService)
-                    .load(ArtworkUtils.uri(musicXService.getsongAlbumID()))
-                    .asBitmap()
-                    .into(new SimpleTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            if (resource != null){
-                                builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, resource);
-                            }else {
-                                builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, ArtworkUtils.getDefaultArtwork(musicXService));
-                            }
-                        }
-                    });
-            mediaSessionCompat.setMetadata(builder.build());
+            builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, musicXService.getsongTitle());
+            builder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, musicXService.getDuration());
+            builder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicXService.getsongArtistName());
+            builder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, musicXService.getsongAlbumName());
+            ArtworkUtils.ArtworkLoaderBitmapPalette(musicXService, musicXService.getsongAlbumName(), musicXService.getsongAlbumID(), new palette() {
+                @Override
+                public void palettework(Palette palette) {
+
+                }
+            }, new bitmap() {
+                @Override
+                public void bitmapwork(Bitmap bitmap) {
+                    builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap);
+                    mediaSessionCompat.setMetadata(builder.build());
+                }
+
+                @Override
+                public void bitmapfailed(Bitmap bitmap) {
+                    builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap);
+                    mediaSessionCompat.setMetadata(builder.build());
+                }
+            });
         }
     }
 }

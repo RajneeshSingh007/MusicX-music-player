@@ -74,6 +74,7 @@ public class AudioWidget {
     private boolean shown;
     private boolean released;
     private boolean removeWidgetShown;
+    private boolean collapsed;
     private OnWidgetStateChangedListener onWidgetStateChangedListener;
     private int accentColor;
     private int primaryColor;
@@ -345,25 +346,18 @@ public class AudioWidget {
         }
         shown = false;
         released = true;
-        try {
-            windowManager.removeView(playPauseButton);
-        } catch (IllegalArgumentException e) {
-            // view not attached to window
-        }
         if (byPublic) {
             try {
+                windowManager.removeView(playPauseButton);
+                windowManager.removeView(expandCollapseWidget);
                 windowManager.removeView(removeWidgetView);
             } catch (IllegalArgumentException e) {
                 // view not attached to window
             }
-        }
-        try {
-            windowManager.removeView(expandCollapseWidget);
-        } catch (IllegalArgumentException e) {
-            // widget not added to window yet
-        }
-        if (onWidgetStateChangedListener != null) {
-            onWidgetStateChangedListener.onWidgetStateChanged(State.REMOVED);
+            if (onWidgetStateChangedListener != null) {
+                onWidgetStateChangedListener.onWidgetStateChanged(State.REMOVED);
+                onWidgetStateChangedListener.onWidgetPositionChanged(100,100);
+            }
         }
     }
 
@@ -372,7 +366,11 @@ public class AudioWidget {
     }
 
     public void expand() {
+        if (removeWidgetShown){
+            return;
+        }
         removeWidgetShown = false;
+        collapsed = false;
         playPauseButton.enableProgressChanges(false);
         playPauseButton.postDelayed(this::checkSpaceAndShowExpanded, PlayPauseButton.PROGRESS_CHANGES_DURATION);
     }
@@ -392,6 +390,7 @@ public class AudioWidget {
             playPauseButtonManager.animateToBounds();
             expandedWidgetManager.animateToBounds(expToPpbBoundsChecker, null);
         }
+        collapsed = true;
     }
 
     private void updatePlayPauseButtonPosition() {
@@ -820,9 +819,6 @@ public class AudioWidget {
 
         PlayPauseButtonCallback() {
             animatorUpdateListener = animation -> {
-                if (!removeWidgetShown) {
-                    return;
-                }
                 animatedRemBtnYPos = (int) ((float) animation.getAnimatedValue());
                 updateRemoveBtnPosition();
             };
@@ -846,9 +842,10 @@ public class AudioWidget {
         public void onTouched(float x, float y) {
             super.onTouched(x, y);
             released = false;
+            removeWidgetShown = false;
             handler.postDelayed(() -> {
                 if (!released) {
-                    removeWidgetShown = true;
+                    removeWidgetShown = false;
                     ValueAnimator animator = ValueAnimator.ofFloat(hiddenRemWidPos.y, visibleRemWidPos.y);
                     animator.setDuration(REMOVE_BTN_ANIM_DURATION);
                     animator.addUpdateListener(animatorUpdateListener);
@@ -869,7 +866,12 @@ public class AudioWidget {
                     vibrator.vibrate(VIBRATION_DURATION);
                 }
             }
-            updateRemoveBtnPosition();
+            if (collapsed){
+                removeWidgetShown = true;
+                updateRemoveBtnPosition();
+            }else {
+                removeWidgetShown = false;
+            }
         }
 
         private void updateRemoveBtnPosition() {
@@ -930,12 +932,7 @@ public class AudioWidget {
                 animator.start();
             }
             if (isReadyToRemove()) {
-                hideInternal(false);
-            } else {
-                if (onWidgetStateChangedListener != null) {
-                    WindowManager.LayoutParams params = (WindowManager.LayoutParams) playPauseButton.getLayoutParams();
-                    onWidgetStateChangedListener.onWidgetPositionChanged((int) (params.x + widgetHeight), (int) (params.y + widgetHeight));
-                }
+                hideInternal(true);
             }
         }
 

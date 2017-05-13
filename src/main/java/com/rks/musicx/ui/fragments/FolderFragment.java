@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.data.loaders.FolderLoader;
@@ -158,12 +157,10 @@ public class FolderFragment extends miniFragment implements SearchView.OnQueryTe
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
-            ATE.postApply(getActivity(), "dark_theme");
-        } else {
-            ATE.postApply(getActivity(), "light_theme");
+        if (getActivity() == null){
+            return;
         }
+        Extras.getInstance().getThemevalue(getActivity());
     }
 
     @Override

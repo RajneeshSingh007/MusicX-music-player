@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.data.loaders.FavoritesLoader;
@@ -24,8 +23,6 @@ import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.List;
-
-import static com.rks.musicx.misc.utils.Constants.PARAM_PLAYLIST_FAVORITES;
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -48,10 +45,10 @@ public class FavFragment extends Fragment implements LoaderManager.LoaderCallbac
 
     private FastScrollRecyclerView rv;
     private SongListAdapter playlistViewAdapter;
-    private boolean mFavorites = false;
     private Helper helper;
     private FavoritesLoader favoritesLoader;
     private int trackloader = -1;
+
     private BaseRecyclerViewAdapter.OnItemClickListener onClick = (position, view) -> {
         switch (view.getId()) {
             case R.id.item_view:
@@ -64,23 +61,13 @@ public class FavFragment extends Fragment implements LoaderManager.LoaderCallbac
     };
 
     public static FavFragment newFavoritesFragment() {
-        FavFragment fragment = new FavFragment();
-        Bundle args = new Bundle();
-        args.putBoolean(PARAM_PLAYLIST_FAVORITES, true);
-        fragment.setArguments(args);
-        return fragment;
+        return new FavFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle args = getArguments();
         setHasOptionsMenu(true);
-        if (args != null) {
-            if (args.getBoolean(PARAM_PLAYLIST_FAVORITES)) {
-                mFavorites = true;
-            }
-        }
     }
 
     @Override
@@ -88,10 +75,10 @@ public class FavFragment extends Fragment implements LoaderManager.LoaderCallbac
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_fav, container, false);
         rv = (FastScrollRecyclerView) rootView.findViewById(R.id.favrv);
-        CustomLayoutManager customLayoutManager = new CustomLayoutManager(getActivity());
+        CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
         customLayoutManager.setSmoothScrollbarEnabled(true);
         rv.setLayoutManager(customLayoutManager);
-        rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75, false));
+        rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
         playlistViewAdapter = new SongListAdapter(getContext());
         playlistViewAdapter.setLayoutId(R.layout.song_list);
         playlistViewAdapter.setOnItemClickListener(onClick);
@@ -117,13 +104,11 @@ public class FavFragment extends Fragment implements LoaderManager.LoaderCallbac
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
-            ATE.postApply(getActivity(), "dark_theme");
-        } else {
-            ATE.postApply(getActivity(), "light_theme");
-        }
+       if (getActivity() == null){
+           return;
+       }
+       Extras.getInstance().getThemevalue(getActivity());
     }
-
 
     @Override
     public void onResume() {
@@ -135,9 +120,7 @@ public class FavFragment extends Fragment implements LoaderManager.LoaderCallbac
     @Override
     public Loader<List<Song>> onCreateLoader(int id, Bundle args) {
         if (id == trackloader) {
-            if (mFavorites) {
-                return favoritesLoader;
-            }
+            return favoritesLoader;
         }
         return null;
     }
@@ -148,7 +131,6 @@ public class FavFragment extends Fragment implements LoaderManager.LoaderCallbac
             return;
         }
         playlistViewAdapter.addDataList(data);
-        playlistViewAdapter.notifyDataSetChanged();
     }
 
     @Override

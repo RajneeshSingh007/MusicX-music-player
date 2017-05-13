@@ -27,7 +27,6 @@
             android:layout_height="match_parent"
             android:gravity="center_vertical">
 
-
             <RelativeLayout
                 android:id="@+id/songDetail"
                 android:layout_width="match_parent"
@@ -89,19 +88,17 @@
                         android:paddingTop="4dp"
                         android:scrollHorizontally="true"
                         android:text="Song Artist"
-                        android:textColor="@color/colorSecondaryText"
+                        android:textColor="@color/white"
                         android:textSize="14sp"/>
 
                 </LinearLayout>
-
-
             </RelativeLayout>
 
             <FrameLayout
                 android:id="@+id/container"
+                android:layout_above="@+id/songDetail"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@+id/songDetail"
                 android:layout_marginBottom="2dp"/>
         </RelativeLayout>
 
@@ -114,6 +111,8 @@
             android:src="@drawable/aw_ic_play"
             android:tag="bg_tint_accent_color"
             app:borderWidth="0dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:layout_anchor="@+id/container"
             app:layout_anchorGravity="bottom|right|end"/>
     </android.support.design.widget.CoordinatorLayout>

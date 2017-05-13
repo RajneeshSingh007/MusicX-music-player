@@ -107,7 +107,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:src="@drawable/aw_ic_pause" />
+                android:src="@drawable/aw_ic_play" />
 
             <ImageView
                 android:id="@+id/next"

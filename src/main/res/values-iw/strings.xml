@@ -97,6 +97,8 @@
     <string name="personalisation">התאמה אישית</string>
     <string name="dark_theme">ערכת נושא כהה</string>
     <string name="dark_theme_summary">אשר ערכת נושא כהה באפליקציה</string>
+    <string name="black_theme">ערכת נושא שָׁחוֹר</string>
+    <string name="black_theme_summary">אשר ערכת נושא שָׁחוֹר באפליקציה</string>
     <string name="primary_color_summary">שנה צבע ערכת נושא ראשית</string>
     <string name="accent_color_summary">שנה צבע כתב מודגש בערכת הנושא</string>
     <string name="custom">ידני</string>

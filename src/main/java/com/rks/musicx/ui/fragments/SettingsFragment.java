@@ -8,6 +8,8 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceFragment;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.SeekBar;
 
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
@@ -26,10 +28,15 @@ import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.widgets.DailogPref;
 import com.rks.musicx.ui.activities.SettingsActivity;
+import com.yokkomi.commons.preference.seekbar.SeekBarPreference;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.rks.musicx.misc.utils.Constants.BlurView;
 import static com.rks.musicx.misc.utils.Constants.ClearFav;
 import static com.rks.musicx.misc.utils.Constants.ClearRecently;
+import static com.rks.musicx.misc.utils.Constants.FADEINOUT_DURATION;
 import static com.rks.musicx.misc.utils.Constants.PlayingView;
 import static com.rks.musicx.misc.utils.Constants.SaveHeadset;
 import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
@@ -64,6 +71,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
     private RecentlyPlayedLoader recentlyPlayedLoader;
     private int accentcolor;
     private ATECheckBoxPreference headsetConfig, phoneConfig;
+    private CheckBox checkBox;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,6 +95,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         phoneConfig = (ATECheckBoxPreference) findPreference(SaveTelephony);
         phoneConfig.setChecked(true);
         accentcolor = Config.accentColor(getActivity(), Helper.getATEKey(getActivity()));
+        checkBox = new CheckBox(getActivity());
     }
 
     @Override
@@ -108,7 +117,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
             }
         });
     }
-
+    private List<Integer> integerList = new ArrayList<>();
     public void invalidateSettings() {
         mAteKey = ((SettingsActivity) getActivity()).getATEKey();
         ATEColorPreference primaryColorPref = (ATEColorPreference) findPreference("primary_color");
@@ -141,6 +150,18 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                 // Marks both theme configs as changed so MainActivity restarts itself on return
                 Config.markChanged(getActivity(), "light_theme");
                 Config.markChanged(getActivity(), "dark_theme");
+                // The dark_theme preference value gets saved by Android in the default PreferenceManager.
+                // It's used in getATEKey() of both the Activities.
+                getActivity().recreate();
+                return true;
+            }
+        });
+        findPreference("black_theme").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                // Marks both theme configs as changed so MainActivity restarts itself on return
+                Config.markChanged(getActivity(), "light_theme");
+                Config.markChanged(getActivity(), "black_theme");
                 // The dark_theme preference value gets saved by Android in the default PreferenceManager.
                 // It's used in getATEKey() of both the Activities.
                 getActivity().recreate();
@@ -197,6 +218,34 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                         Extras.getInstance().saveFolderPath(path);
                     }
                 });
+                return true;
+            }
+        });
+        SeekBarPreference seekBarPreference = (SeekBarPreference) findPreference(FADEINOUT_DURATION);
+        SeekBar seekBar = new SeekBar(getActivity());
+        seekBarPreference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                        if (b){
+                            Extras.getInstance().saveFadeDuration(seekBar.getProgress());
+                        }
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+
+                    }
+                });
+                seekBarPreference.onStartTrackingTouch(seekBar);
+                seekBarPreference.onStopTrackingTouch(seekBar);
                 return true;
             }
         });

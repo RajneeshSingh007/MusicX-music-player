@@ -97,6 +97,8 @@
     <string name="personalisation">Personalização</string>
     <string name="dark_theme">Tema Escuro</string>
     <string name="dark_theme_summary">Aplica um tema escuro ao longo do aplicativo</string>
+    <string name="black_theme">Preto Escuro</string>
+    <string name="black_theme_summary">Aplica um Preto escuro ao longo do aplicativo</string>
     <string name="primary_color_summary">Muda a cor primária do tema</string>
     <string name="accent_color_summary">Muda a cor de ênfase do tema</string>
     <string name="custom">customizado</string>
@@ -136,9 +138,9 @@
     <string name="restore_lastTab">Restaurar última Aba</string>
     <string name="Tab">Visualização de guia</string>
     <string name="folder">Pasta</string>
-    <string name="reverb">Reverb</string>
-    <string name="hqartist_artwork">Arte do Artista HD</string>
-    <string name="hqartist_artwork_summary">habilite para baixar arte do artista em alta qualidade</string>
+    <string name="reverb">REVERB</string>
+    <string name="hqartist_artwork">Arte do HD</string>
+    <string name="hqartist_artwork_summary">habilite para baixar arte do em alta qualidade</string>
     <string name="storage">Armazenamento</string>
     <string name="writesetting">Gravar o toque em configurações</string>
 </resources>

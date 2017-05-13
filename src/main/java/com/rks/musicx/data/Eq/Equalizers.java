@@ -126,8 +126,12 @@ public class Equalizers {
             return;
         }
         preset = presets;
-        if (preset >= 0) {
-            equalizer.usePreset(preset);
+        if (presets >= 0) {
+            try {
+                equalizer.usePreset(presets);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 

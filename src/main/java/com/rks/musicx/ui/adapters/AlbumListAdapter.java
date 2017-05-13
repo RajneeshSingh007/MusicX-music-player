@@ -102,7 +102,7 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
             holder.AlbumListName.setText(albums.getAlbumName());
             holder.ArtistListName.setText(albums.getArtistName());
             ArtworkUtils.ArtworkLoader(getContext(), albums.getAlbumName(), albums.getId(), holder.AlbumListArtwork);
-            if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+            if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 holder.AlbumListName.setTextColor(Color.WHITE);
                 holder.ArtistListName.setTextColor(ContextCompat.getColor(getContext(), R.color.darkthemeTextColor));
             }
@@ -184,62 +184,5 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
             triggerOnItemClickListener(position, v);
         }
     }
-
-    /*public class getArt extends AsyncTask<Void,Void,Void>{
-
-        Call<LyricsList> lyricsListCall;
-        Album album;
-        AlbumListAdapter.AlbumViewHolder albumViewHolder;
-
-        public getArt(Album album, AlbumListAdapter.AlbumViewHolder albumViewHolder){
-            this.album = album;
-            this.albumViewHolder = albumViewHolder;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            VagalumeClient vagalumeClient = new VagalumeClient(getContext());
-            VagalumeServices vagalumeServices = vagalumeClient.createService(VagalumeServices.class);
-            lyricsListCall = vagalumeServices.getAlbumArt(album.getArtistName(),album.getAlbumName(),ApiKey);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            lyricsListCall.enqueue(new Callback<LyricsList>() {
-                @Override
-                public void onResponse(Call<LyricsList> call, Response<LyricsList> response) {
-                    LyricsList lyricsList = response.body();
-                    if (response.isSuccessful()){
-                        if (lyricsList !=null){
-                            Picasso.with(getContext())
-                                    .load(lyricsList.getArt().getUrl())
-                                    .centerCrop()
-                                    .resize(300,300)
-                                    .error(R.mipmap.ic_launcher)
-                                    .placeholder(R.mipmap.ic_launcher)
-                                    .config(Bitmap.Config.ARGB_8888)
-                                    .into(albumViewHolder.AlbumArtwork, PicassoPalette.with(vagList.get(0).getUrl(),albumViewHolder.AlbumArtwork).intoCallBack(new PicassoPalette.CallBack() {
-                                        @Override
-                                        public void onPaletteLoaded(Palette palette) {
-                                            final int[] colors = getAvailableColor(palette);
-                                            albumViewHolder.backgroundColor.setBackgroundColor(colors[0]);
-                                            albumViewHolder.AlbumName.setTextColor(colors[1]);
-                                            albumViewHolder.ArtistName.setTextColor(colors[2]);
-                                            animateViews(albumViewHolder,colors[0], colors[1], colors[2]);
-                                        }
-                                    }));
-                        }
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<LyricsList> call, Throwable t) {
-
-                }
-            });
-        }
-    }*/
 
 }

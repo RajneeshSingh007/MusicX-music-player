@@ -10,13 +10,17 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.afollestad.appthemeengine.ATE;
 import com.bumptech.glide.Glide;
 import com.kbeanie.imagechooser.api.ChooserType;
 import com.kbeanie.imagechooser.api.ChosenImage;
@@ -24,8 +28,14 @@ import com.kbeanie.imagechooser.api.ChosenImages;
 import com.kbeanie.imagechooser.api.ImageChooserListener;
 import com.kbeanie.imagechooser.api.ImageChooserManager;
 import com.rks.musicx.R;
+import com.rks.musicx.data.model.Song;
+import com.rks.musicx.database.Queue;
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.services.MusicXService;
+import com.rks.musicx.ui.activities.EqualizerActivity;
+import com.rks.musicx.ui.activities.PlayingActivity;
+import com.rks.musicx.ui.adapters.QueueAdapter;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 import static com.rks.musicx.misc.utils.Constants.ITEM_ADDED;
@@ -61,6 +71,8 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment imple
     private ChosenImage chosenImages;
     private ImageChooserManager imageChooserManager;
     private String mediaPath;
+    private Helper helper;
+    public boolean isalbumArtChanged;
 
 
     protected abstract void reload();
@@ -85,7 +97,9 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment imple
 
     protected abstract ImageView repeatButton();
 
-    protected abstract void  changeArtwork();
+    protected abstract void changeArtwork();
+
+    protected abstract TextView lyricsView();
 
 
     @Override
@@ -93,6 +107,7 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment imple
         View rootView = inflater.inflate(setLayout(), container, false);
         ui(rootView);
         function();
+        helper = new Helper(getContext());
         return rootView;
     }
 
@@ -170,6 +185,9 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment imple
         }
     }
 
+    /**
+     * Service Connection
+     */
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -187,6 +205,9 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment imple
         }
     };
 
+    /**
+     * BroadCast
+     */
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
         @Override
@@ -221,22 +242,10 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment imple
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
-            ATE.postApply(getActivity(), "dark_theme");
-        } else {
-            ATE.postApply(getActivity(), "light_theme");
+        if (getActivity() == null){
+            return;
         }
-    }
-
-
-    public void pickupArtwork() {
-        imageChooserManager = new ImageChooserManager(this, ChooserType.REQUEST_PICK_PICTURE, true);
-        imageChooserManager.setImageChooserListener(this);
-        try {
-            mediaPath = imageChooserManager.choose();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Extras.getInstance().getThemevalue(getActivity());
     }
 
 
@@ -256,17 +265,6 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment imple
         });
     }
 
-    public String getImagePath() {
-        return finalPath;
-    }
-
-    public MusicXService getMusicXService() {
-        return musicXService;
-    }
-
-    public ChosenImage getChosenImages() {
-        return chosenImages;
-    }
 
     @Override
     public void onError(String s) {
@@ -292,6 +290,34 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment imple
         }
     }
 
+    public String getImagePath() {
+        return finalPath;
+    }
+
+    public MusicXService getMusicXService() {
+        return musicXService;
+    }
+
+    public ChosenImage getChosenImages() {
+        return chosenImages;
+    }
+
+    /**
+     * Pick Up Artwork
+     */
+    public void pickupArtwork() {
+        imageChooserManager = new ImageChooserManager(this, ChooserType.REQUEST_PICK_PICTURE, true);
+        imageChooserManager.setImageChooserListener(this);
+        try {
+            mediaPath = imageChooserManager.choose();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Shuffle Button Update
+     */
     public void updateShuffleButton() {
         boolean shuffle = musicXService.isShuffleEnabled();
         if (shuffle) {
@@ -301,6 +327,9 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment imple
         }
     }
 
+    /**
+     * Repeat Button Update
+     */
     public void updateRepeatButton() {
         int mode = musicXService.getRepeatMode();
         if (mode == getMusicXService().getNoRepeat()) {
@@ -310,6 +339,115 @@ public abstract class BaseFragment extends android.support.v4.app.Fragment imple
         } else if (mode == getMusicXService().getRepeatAll()) {
             repeatButton().setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_one));
         }
+    }
+
+    /**
+     * Playing Menu
+     * @param view
+     */
+    public void playingMenu(QueueAdapter queueAdapter, View view, boolean torf) {
+        if (getActivity() == null){
+            return;
+        }
+        PopupMenu popupMenu = new PopupMenu(getContext(), view);
+        MenuInflater menuInflater = popupMenu.getMenuInflater();
+        menuInflater.inflate(R.menu.playing_menu, popupMenu.getMenu());
+        popupMenu.getMenu().findItem(R.id.action_share).setVisible(torf);
+        popupMenu.getMenu().findItem(R.id.action_eq).setVisible(torf);
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.clear_queue:
+                        if (queueAdapter.getSnapshot().size() > 0) {
+                            queueAdapter.clear();
+                            queueAdapter.notifyDataSetChanged();
+                            musicXService.clearQueue();
+                            Queue queue = new Queue(getContext());
+                            queue.removeAll();
+                            Toast.makeText(getContext(), "Cleared Queue", Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                    case R.id.action_changeArt:
+                        pickupArtwork();
+                        isalbumArtChanged = false;
+                        break;
+                    case R.id.action_playlist:
+                        helper.PlaylistChooser(BaseFragment.this, getContext(), musicXService.getsongId());
+                        break;
+                    case R.id.action_lyrics:
+                        helper.searchLyrics(getContext(), musicXService.getsongTitle(), musicXService.getsongArtistName(), musicXService.getsongData(), lyricsView());
+                        break;
+                    case R.id.action_edit_tags:
+                        Extras.getInstance().saveMetaData(musicXService.getCurrentSong());
+                        ((PlayingActivity) getActivity()).setFragment(TagEditorFragment.getInstance());
+                        queueAdapter.notifyDataSetChanged();
+                        break;
+                    case R.id.action_ringtone:
+                        Helper.setRingTone(getContext(), musicXService.getsongData());
+                        break;
+                    case R.id.action_trackdetails:
+                        Helper.detailMusic(getContext(), musicXService.getsongTitle(), musicXService.getsongAlbumName(), musicXService.getsongArtistName(), musicXService.getsongNumber(), musicXService.getsongData());
+                        break;
+                    case R.id.action_eq:
+                        Intent i = new Intent(getContext(), EqualizerActivity.class);
+                        getContext().startActivity(i);
+                        break;
+                    case R.id.action_share:
+                        Helper.shareMusic(musicXService.getsongData(), getContext());
+                        break;
+
+                }
+                return false;
+            }
+        });
+        popupMenu.show();
+    }
+
+
+    /**
+     * Queue Menu
+     * @param view
+     * @param position
+     */
+    public void qeueMenu(QueueAdapter queueAdapter, View view, int position) {
+        if (getActivity() == null){
+            return;
+        }
+        PopupMenu popupMenu = new PopupMenu(getContext(), view);
+        MenuInflater menuInflater = popupMenu.getMenuInflater();
+        menuInflater.inflate(R.menu.playing_menu, popupMenu.getMenu());
+        Song queue = queueAdapter.getItem(position);
+        popupMenu.getMenu().findItem(R.id.action_lyrics).setVisible(false);
+        popupMenu.getMenu().findItem(R.id.action_eq).setVisible(false);
+        popupMenu.getMenu().findItem(R.id.clear_queue).setVisible(false);
+        popupMenu.getMenu().findItem(R.id.action_changeArt).setVisible(false);
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_playlist:
+                        helper.PlaylistChooser(BaseFragment.this, getContext(), queue.getId());
+                        break;
+                    case R.id.action_edit_tags:
+                        Extras.getInstance().saveMetaData(queue);
+                        ((PlayingActivity) getActivity()).setFragment(TagEditorFragment.getInstance());
+                        queueAdapter.notifyDataSetChanged();
+                        break;
+                    case R.id.action_ringtone:
+                        Helper.setRingTone(getContext(), queue.getmSongPath());
+                        break;
+                    case R.id.action_trackdetails:
+                        Helper.detailMusic(getContext(), queue.getTitle(), queue.getAlbum(), queue.getArtist(), queue.getTrackNumber(), queue.getmSongPath());
+                        break;
+                    case R.id.action_share:
+                        Helper.shareMusic(musicXService.getsongData(), getContext());
+                        break;
+                }
+                return false;
+            }
+        });
+        popupMenu.show();
     }
 
 }

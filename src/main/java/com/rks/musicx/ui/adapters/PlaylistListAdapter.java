@@ -3,6 +3,8 @@ package com.rks.musicx.ui.adapters;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -10,12 +12,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Playlist;
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.Helper;
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -50,14 +52,20 @@ public class PlaylistListAdapter extends BaseRecyclerViewAdapter<Playlist, Playl
     public void onBindViewHolder(PlaylistViewHolder holder, int position) {
         Playlist playlist = getItem(position);
         holder.PlaylistName.setText(playlist.getName());
+        Helper helper = new Helper(getContext());
+        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlist.getId());
+        int songCount = helper.getSongCount(getContext().getContentResolver(), uri);
+        holder.SongCount.setText(String.valueOf(songCount) + " " +getContext().getString(R.string.titles));
         holder.deletePlaylist.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
         Drawable drawable = holder.deletePlaylist.getDrawable();
         drawable.mutate();
-        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
             drawable.setTint(Color.WHITE);
             holder.PlaylistName.setTextColor(Color.WHITE);
+            holder.SongCount.setTextColor(Color.WHITE);
         } else {
             drawable.setTint(ContextCompat.getColor(getContext(), R.color.MaterialGrey));
+            holder.SongCount.setTextColor(ContextCompat.getColor(getContext(), R.color.MaterialGrey));
             holder.PlaylistName.setTextColor(ContextCompat.getColor(getContext(), R.color.MaterialGrey));
         }
     }
@@ -69,15 +77,14 @@ public class PlaylistListAdapter extends BaseRecyclerViewAdapter<Playlist, Playl
 
     class PlaylistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        TextView PlaylistName;
-        ImageButton deletePlaylist;
-        LinearLayout PlaylistView;
+        private TextView PlaylistName, SongCount;
+        private ImageButton deletePlaylist;
 
         public PlaylistViewHolder(View itemView) {
             super(itemView);
             PlaylistName = (TextView) itemView.findViewById(R.id.name);
             deletePlaylist = (ImageButton) itemView.findViewById(R.id.delete_playlist);
-            PlaylistView = (LinearLayout) itemView.findViewById(R.id.item_view);
+            SongCount = (TextView) itemView.findViewById(R.id.song_count);
             itemView.setOnClickListener(this);
             deletePlaylist.setOnClickListener(this);
         }

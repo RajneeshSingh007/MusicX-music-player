@@ -48,6 +48,21 @@
     </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
 
     <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory
+        android:title="@string/black_theme"
+        app:ateKey_prefCategory_textColor="?ate_key">
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="black_theme"
+            android:persistent="true"
+            android:summary="@string/black_theme_summary"
+            android:title="@string/black_theme"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+    </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
+
+    <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory
         android:title="@string/personalisation"
         app:ateKey_prefCategory_textColor="?ate_key">
 
@@ -239,6 +254,26 @@
     <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory
         android:title="@string/services"
         app:ateKey_prefCategory_textColor="?ate_key">
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="fade_inout"
+            android:persistent="true"
+            android:summary="enable fade in/out during play/pause"
+            android:title="Enable Fade"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+        <com.yokkomi.commons.preference.seekbar.SeekBarPreference
+            android:defaultValue="1000"
+            android:key="fadein_fadeout_seekbar"
+            android:summary="select duration for fade in/out"
+            android:title="Fade Duration"
+            app:maxValue="3000"
+            app:min="1000"
+            app:padding="3"
+            app:adjustable="true"
+            app:unit=" Duration" />
 
         <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
             android:defaultValue="true"

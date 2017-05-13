@@ -156,7 +156,7 @@ public class AlbumFragment extends Fragment implements LoaderManager.LoaderCallb
         helper = new Helper(getContext());
         int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
         rv.setPopupBgColor(colorAccent);
-        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
             getActivity().getWindow().setStatusBarColor(colorAccent);
             toolbar.setBackgroundColor(colorAccent);
         } else {
@@ -175,7 +175,7 @@ public class AlbumFragment extends Fragment implements LoaderManager.LoaderCallb
             public void palettework(Palette palette) {
                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
                 toolbar.setBackgroundColor(colors[0]);
-                if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+                if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                     getActivity().getWindow().setStatusBarColor(colors[0]);
                 } else {
                     getActivity().getWindow().setStatusBarColor(colors[0]);

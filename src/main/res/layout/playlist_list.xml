@@ -39,9 +39,20 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="SONG TITLE"
+            android:text="Playlist TITLE"
             android:textColor="@color/colorPrimaryText"
             android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/song_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:layout_marginTop="4dp"
+            android:text="Playlist Song Count"
+            android:textColor="@color/colorPrimaryText"
+            android:textSize="14sp"/>
 
     </LinearLayout>
 

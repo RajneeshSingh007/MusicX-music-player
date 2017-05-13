@@ -27,7 +27,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -42,8 +41,8 @@ import com.rks.musicx.data.model.Album;
 import com.rks.musicx.data.model.Artist;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.ArtistArtwork;
-import com.rks.musicx.data.network.LastFmClients;
-import com.rks.musicx.data.network.LastFmServices;
+import com.rks.musicx.data.network.Clients;
+import com.rks.musicx.data.network.Services;
 import com.rks.musicx.data.network.model.Artist__;
 import com.rks.musicx.misc.utils.ATEUtils;
 import com.rks.musicx.misc.utils.Constants;
@@ -259,7 +258,7 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
         toolbar.setTitleTextColor(Color.WHITE);
         helper = new Helper(getContext());
         loadTrak();
-        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
             getActivity().getWindow().setStatusBarColor(colorAccent);
             toolbar.setBackgroundColor(colorAccent);
         } else {
@@ -284,7 +283,7 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
                         public void onPaletteLoaded(@Nullable Palette palette) {
                             final int[] colors = Helper.getAvailableColor(getContext(), palette);
                             toolbar.setBackgroundColor(colors[0]);
-                            if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+                            if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                                 getActivity().getWindow().setStatusBarColor(colors[0]);
                             } else {
                                 getActivity().getWindow().setStatusBarColor(colors[0]);
@@ -376,11 +375,10 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
                 ArtistCover();
             }
         }
-        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
-            ATE.postApply(getActivity(), "dark_theme");
-        } else {
-            ATE.postApply(getActivity(), "light_theme");
+        if (getActivity() == null){
+            return;
         }
+      Extras.getInstance().getThemevalue(getActivity());
     }
 
     /*
@@ -393,8 +391,8 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     private void artistBio() {
-        LastFmClients last = new LastFmClients(getContext());
-        LastFmServices lastFmServices = last.createService(LastFmServices.class);
+        Clients last = new Clients(getContext(), Constants.lastFmUrl);
+        Services lastFmServices = last.createService(Services.class);
         Call<com.rks.musicx.data.network.model.Artist> artistCall = lastFmServices.getartist(artist.getName());
         artistCall.enqueue(new Callback<com.rks.musicx.data.network.model.Artist>() {
             @Override

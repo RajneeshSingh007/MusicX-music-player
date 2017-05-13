@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.data.network.AlbumArtwork;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
@@ -80,10 +81,14 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
         if (layout == R.layout.song_list) {
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            ArtworkUtils.ArtworkLoader(getContext(), song.getTitle(), song.getAlbumId(), holder.SongArtwork);
+            ArtworkUtils.ArtworkLoader(getContext(), song.getAlbum(), song.getAlbumId(), holder.SongArtwork);
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             Drawable drawable = holder.menu.getDrawable();
-            if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+            if (!Extras.getInstance().saveData()) {
+                AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), song.getArtist(), song.getAlbum());
+                albumArtwork.execute();
+            }
+            if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 drawable.setTint(Color.WHITE);
                 holder.SongTitle.setTextColor(Color.WHITE);
                 holder.SongArtist.setTextColor(ContextCompat.getColor(getContext(), R.color.darkthemeTextColor));
@@ -99,7 +104,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             holder.number.setText(position + 1 + ".");
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             Drawable drawable = holder.menu.getDrawable();
-            if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+            if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 drawable.setTint(Color.WHITE);
                 holder.SongTitle.setTextColor(Color.WHITE);
                 holder.number.setTextColor(Color.WHITE);
@@ -121,7 +126,11 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             }
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            ArtworkUtils.ArtworkLoaderPalette(getContext(), song.getTitle(), song.getAlbumId(), holder.songGridArtwork, new palette() {
+            if (!Extras.getInstance().saveData()) {
+                AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), song.getArtist(), song.getAlbum());
+                albumArtwork.execute();
+            }
+            ArtworkUtils.ArtworkLoaderPalette(getContext(), song.getAlbum(), song.getAlbumId(), holder.songGridArtwork, new palette() {
                 @Override
                 public void palettework(Palette palette) {
                     final int[] colors = Helper.getAvailableColor(getContext(),palette);
@@ -134,7 +143,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             holder.menu.setVisibility(View.VISIBLE);
             Drawable drawable = holder.menu.getDrawable();
-            if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+            if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 drawable.setTint(Color.WHITE);
             }
         }
@@ -148,7 +157,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             }
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            ArtworkUtils.ArtworkLoaderPalette(getContext(), song.getTitle(), song.getAlbumId(), holder.songGridArtwork, new palette() {
+            ArtworkUtils.ArtworkLoaderPalette(getContext(), song.getAlbum(), song.getAlbumId(), holder.songGridArtwork, new palette() {
                 @Override
                 public void palettework(Palette palette) {
                     final int[] colors = Helper.getAvailableColor(getContext(),palette);
@@ -161,7 +170,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             holder.menu.setVisibility(View.VISIBLE);
             Drawable drawable = holder.menu.getDrawable();
-            if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+            if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 drawable.setTint(Color.WHITE);
             }
         }

@@ -76,5 +76,4 @@
         <attr name="padding_offset" format="dimension"/>
     </declare-styleable>
 
-
 </resources>

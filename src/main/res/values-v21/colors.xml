@@ -24,6 +24,8 @@
     <color name="colorPrimaryDarkTheme">#263238</color>
     <color name="colorPrimaryDarkDarkTheme">#263238</color>
     <color name="colorAccentDarkTheme">#20a9e9</color>
+    <color name="colorPrimaryBlack">#000000</color>
+    <color name="colorAccentBlack">#ffc400</color>
     <color name="colorPrimaryText">#212121</color>
     <color name="colorSecondaryText">#616161</color>
     <color name="darkthemeTextColor">#f5f5f5</color>

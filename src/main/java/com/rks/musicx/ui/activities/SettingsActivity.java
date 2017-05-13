@@ -3,7 +3,6 @@ package com.rks.musicx.ui.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
@@ -18,8 +17,6 @@ import com.rks.musicx.misc.widgets.TextView;
 import com.rks.musicx.ui.fragments.SettingsFragment;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
-
-import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -84,9 +81,7 @@ public class SettingsActivity extends BaseActivity implements ColorChooserDialog
     @StyleRes
     @Override
     public int getActivityTheme() {
-        // Overrides what's set in the current ATE Config
-        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(DarkTheme, false) ?
-                R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
+      return getStyleTheme();
     }
 
 

@@ -31,9 +31,13 @@ import java.util.List;
 
 public class CreatedPlaylistLoader extends BaseAsyncTaskLoader<List<Playlist>> {
 
+    private String sortorder;
+
     final String[] tableQuery = {
             MediaStore.Audio.Playlists._ID,
-            MediaStore.Audio.Playlists.NAME
+            MediaStore.Audio.Playlists.NAME,
+            MediaStore.Audio.Playlists.DATE_ADDED,
+            MediaStore.Audio.Playlists.DATE_MODIFIED
     };
 
     public CreatedPlaylistLoader(Context context) {
@@ -44,7 +48,7 @@ public class CreatedPlaylistLoader extends BaseAsyncTaskLoader<List<Playlist>> {
     public List<Playlist> loadInBackground() {
         List<Playlist> playlistList = new ArrayList<>();
         if (PermissionChecker.checkCallingOrSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED) {
-            Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, tableQuery, null, null, MediaStore.Audio.Playlists.DATE_MODIFIED);
+            Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, tableQuery, null, null, sortorder);
             if (cursor != null && cursor.moveToFirst()) {
                 int idCol = cursor.getColumnIndex(MediaStore.Audio.Playlists._ID);
                 int nameCol = cursor.getColumnIndex(MediaStore.Audio.Playlists.NAME);
@@ -63,4 +67,9 @@ public class CreatedPlaylistLoader extends BaseAsyncTaskLoader<List<Playlist>> {
             return null;
         }
     }
+
+    public void setSortOrder(String orderBy) {
+        sortorder = orderBy;
+    }
+
 }

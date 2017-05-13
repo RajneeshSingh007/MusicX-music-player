@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.misc.utils.ATEUtils;
@@ -80,7 +79,7 @@ public class MainFragment extends miniFragment {
         fragmentList = new ArrayList<>();
         tabTitles = new ArrayList<>();
 
-        /// Add fragments
+        // Add fragments
         fragmentList.add(RecentFragment.newInstance());
         fragmentList.add(FolderFragment.newInstance());
         fragmentList.add(SongListFragment.newInstance());
@@ -98,6 +97,7 @@ public class MainFragment extends miniFragment {
         tabTitles.add(getString(R.string.playlists).toUpperCase(l));
 
         pagerAdapter = new PagerAdapter(getChildFragmentManager(), fragmentList, tabTitles);
+
         mViewPager.setAdapter(pagerAdapter);
         tabLayout.setupWithViewPager(mViewPager);
         toolbar.setTitle("");
@@ -116,11 +116,10 @@ public class MainFragment extends miniFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
-            ATE.postApply(getActivity(), "dark_theme");
-        } else {
-            ATE.postApply(getActivity(), "light_theme");
+        if (getActivity() == null){
+            return;
         }
+        Extras.getInstance().getThemevalue(getActivity());
     }
 
     @Override
@@ -204,6 +203,7 @@ public class MainFragment extends miniFragment {
             }
             return getChildFragmentManager().findFragmentByTag(tag);
         }
+
     }
 
 }

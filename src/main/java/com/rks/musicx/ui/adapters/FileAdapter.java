@@ -52,7 +52,7 @@ public class FileAdapter extends BaseRecyclerViewAdapter<FolderModel, FileAdapte
         FolderModel file = getItem(position);
         holder.thumbnail.setImageResource(R.drawable.folder);
         holder.filename.setText(file.getName());
-        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
             holder.filename.setTextColor(Color.WHITE);
         } else {
             holder.filename.setTextColor(Color.BLACK);
