@@ -1,5 +1,7 @@
 # MusicX Music Player
-<h3>Simple, Elegant, Beautiful Material Music Player.</h3>
+
+# Introduction
+- Simple, Elegant, Beautiful Material Design Music Player
 
 <p><a href="https://play.google.com/store/apps/details?id=com.rks.musicx"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" height="60" data-canonical-src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" style="max-width:100%;"></a></p>
 
@@ -43,10 +45,9 @@
 <img alt="" src="https://lh3.googleusercontent.com/ms9XiYqPOK7aYQSDefxSbwnLyHF-EvoRvB-6vmO0rWj9t1c9O1CBgknbCY5TMZf61A=h900"
 style="max_width:25%;">
 </p>
+
+# Library
 <p>
-Special thanks to api provided by Last.fm (Artist Image) & https://api.vagalume.com.br/ (Lyrics )
-</p>
-<p><h3> Licenses.</h3>
  <ul>
  <li>
        <a href="https://github.com/bumptech/glide"><b>Glide</b></a>
@@ -97,11 +98,19 @@ Special thanks to api provided by Last.fm (Artist Image) & https://api.vagalume.
         <a href="https://github.com/codekidX/storage-chooser"><b>Directory Chooser</b></a>
     </li>
  </ul>
-	<b>If forgot any other license author,feel free to mail me developerrajneeshsingh@gmail.com.</b>
  </p>
- <p>Feel free to fork this project and fix bugs.</p>
- <p>Also, Thanks To StackOverflow and Slack Developers.</p>
+# Contact
+- Email : developerrajneeshsingh@gmail.com.</b>
 
+# Api Provider 
+- Last.fm
+- Vagalume.br
+
+# Special Thanks
+- Feel free to fork this project and fix bugs.
+- Also, Thanks To StackOverflow and Slack Developers.
+
+# License
 <pre>©2017 Rajneesh Singh 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
