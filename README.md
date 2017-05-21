@@ -3,7 +3,8 @@
 # Introduction
 - Simple, Elegant, Beautiful Material Design Music Player
 
-<p><a href="https://play.google.com/store/apps/details?id=com.rks.musicx"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" height="60" data-canonical-src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" style="max-width:100%;"></a></p>
+# Download
+- <p><a href="https://play.google.com/store/apps/details?id=com.rks.musicx"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" height="60" data-canonical-src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" style="max-width:100%;"></a></p>
 
 # Features
 - Floating widget let you enjoy your music anywhere.
@@ -99,7 +100,8 @@ style="max_width:25%;">
     </li>
  </ul>
  </p>
-# Contact
+ 
+# Contact 
 - Email : developerrajneeshsingh@gmail.com.</b>
 
 # Api Provider 
