@@ -567,129 +567,139 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     private void widgetCover() {
         int size = getResources().getDimensionPixelSize(R.dimen.cover_size);
         if (ArtworkUtils.getAlbumCoverPath(MusicXService.this, getsongAlbumName()).exists()) {
-            Glide.with(MusicXService.this)
-                    .load(ArtworkUtils.getAlbumCoverPath(MusicXService.this, getsongAlbumName()))
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .centerCrop()
-                    .placeholder(R.mipmap.ic_launcher)
-                    .error(R.mipmap.ic_launcher)
-                    .format(DecodeFormat.PREFER_ARGB_8888)
-                    .override(size, size)
-                    .transform(new CropCircleTransformation(MusicXService.this))
-                    .into(new Target<Bitmap>() {
-                        @Override
-                        public void onLoadStarted(Drawable placeholder) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Glide.with(MusicXService.this)
+                            .load(ArtworkUtils.getAlbumCoverPath(MusicXService.this, getsongAlbumName()))
+                            .asBitmap()
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .centerCrop()
+                            .placeholder(R.mipmap.ic_launcher)
+                            .error(R.mipmap.ic_launcher)
+                            .format(DecodeFormat.PREFER_ARGB_8888)
+                            .override(size, size)
+                            .transform(new CropCircleTransformation(MusicXService.this))
+                            .into(new Target<Bitmap>() {
+                                @Override
+                                public void onLoadStarted(Drawable placeholder) {
 
-                        }
+                                }
 
-                        @Override
-                        public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                            audioWidget.controller().albumCoverBitmap(ArtworkUtils.drawableToBitmap(errorDrawable));
-                        }
+                                @Override
+                                public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                    audioWidget.controller().albumCoverBitmap(ArtworkUtils.drawableToBitmap(errorDrawable));
+                                }
 
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            audioWidget.controller().albumCoverBitmap(resource);
-                        }
+                                @Override
+                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                    audioWidget.controller().albumCoverBitmap(resource);
+                                }
 
-                        @Override
-                        public void onLoadCleared(Drawable placeholder) {
+                                @Override
+                                public void onLoadCleared(Drawable placeholder) {
 
-                        }
+                                }
 
-                        @Override
-                        public void getSize(SizeReadyCallback cb) {
+                                @Override
+                                public void getSize(SizeReadyCallback cb) {
 
-                        }
+                                }
 
-                        @Override
-                        public void setRequest(Request request) {
+                                @Override
+                                public void setRequest(Request request) {
 
-                        }
+                                }
 
-                        @Override
-                        public Request getRequest() {
-                            return null;
-                        }
+                                @Override
+                                public Request getRequest() {
+                                    return null;
+                                }
 
-                        @Override
-                        public void onStart() {
+                                @Override
+                                public void onStart() {
 
-                        }
+                                }
 
-                        @Override
-                        public void onStop() {
+                                @Override
+                                public void onStop() {
 
-                        }
+                                }
 
-                        @Override
-                        public void onDestroy() {
+                                @Override
+                                public void onDestroy() {
 
-                        }
-                    });
+                                }
+                            });
+                }
+            });
         }
-        Glide.with(MusicXService.this)
-                .load(ArtworkUtils.uri(getsongAlbumID()))
-                .asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(size, size)
-                .transform(new CropCircleTransformation(MusicXService.this))
-                .into(new Target<Bitmap>() {
-                    @Override
-                    public void onLoadStarted(Drawable placeholder) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Glide.with(MusicXService.this)
+                        .load(ArtworkUtils.uri(getsongAlbumID()))
+                        .asBitmap()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .centerCrop()
+                        .placeholder(R.mipmap.ic_launcher)
+                        .error(R.mipmap.ic_launcher)
+                        .format(DecodeFormat.PREFER_ARGB_8888)
+                        .override(size, size)
+                        .transform(new CropCircleTransformation(MusicXService.this))
+                        .into(new Target<Bitmap>() {
+                            @Override
+                            public void onLoadStarted(Drawable placeholder) {
 
-                    }
+                            }
 
-                    @Override
-                    public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                        audioWidget.controller().albumCoverBitmap(ArtworkUtils.drawableToBitmap(errorDrawable));
-                    }
+                            @Override
+                            public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                audioWidget.controller().albumCoverBitmap(ArtworkUtils.drawableToBitmap(errorDrawable));
+                            }
 
-                    @Override
-                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                        audioWidget.controller().albumCoverBitmap(resource);
-                    }
+                            @Override
+                            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                audioWidget.controller().albumCoverBitmap(resource);
+                            }
 
-                    @Override
-                    public void onLoadCleared(Drawable placeholder) {
+                            @Override
+                            public void onLoadCleared(Drawable placeholder) {
 
-                    }
+                            }
 
-                    @Override
-                    public void getSize(SizeReadyCallback cb) {
+                            @Override
+                            public void getSize(SizeReadyCallback cb) {
 
-                    }
+                            }
 
-                    @Override
-                    public Request getRequest() {
-                        return null;
-                    }
+                            @Override
+                            public Request getRequest() {
+                                return null;
+                            }
 
-                    @Override
-                    public void setRequest(Request request) {
+                            @Override
+                            public void setRequest(Request request) {
 
-                    }
+                            }
 
-                    @Override
-                    public void onStart() {
+                            @Override
+                            public void onStart() {
 
-                    }
+                            }
 
-                    @Override
-                    public void onStop() {
+                            @Override
+                            public void onStop() {
 
-                    }
+                            }
 
-                    @Override
-                    public void onDestroy() {
+                            @Override
+                            public void onDestroy() {
 
-                    }
-                });
+                            }
+                        });
+            }
+        });
 
     }
 

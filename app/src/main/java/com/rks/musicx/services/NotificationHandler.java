@@ -83,7 +83,26 @@ public class NotificationHandler {
             builder.setSmallIcon(R.drawable.aw_ic_pause);
         }
         FavHelper favHelper = new FavHelper(musicXService);
-        if (META_CHANGED.equals(what)) {
+        if (favHelper.isFavorite(Extras.getInstance().getSongId(musicXService.getsongId()))) {
+            remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite);
+        } else {
+            remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite_outline);
+        }
+        if (META_CHANGED.equals(what) || PLAYSTATE_CHANGED.equals(what)) {
+            if (favHelper.isFavorite(Extras.getInstance().getSongId(musicXService.getsongId()))) {
+                remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite);
+            } else {
+                remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite_outline);
+            }
+            if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
+                remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
+                smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_pause);
+                builder.setOngoing(true);
+            } else {
+                remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
+                smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_play);
+                builder.setOngoing(false);
+            }
             handler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -115,31 +134,9 @@ public class NotificationHandler {
                     });
                 }
             });
-            if (favHelper.isFavorite(Extras.getInstance().getSongId(musicXService.getsongId()))) {
-                remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite);
-            } else {
-                remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite_outline);
-            }
         }
         controls(remoteViews, musicXService);
         controlsSmall(smallremoteView, musicXService);
-        if (PLAYSTATE_CHANGED.equals(what)) {
-            if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
-                remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
-                smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_pause);
-                builder.setOngoing(true);
-                if (favHelper.isFavorite(Extras.getInstance().getSongId(musicXService.getsongId()))) {
-                    remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite);
-                } else {
-                    remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite_outline);
-                }
-            } else {
-                remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
-                smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_play);
-                builder.setOngoing(false);
-            }
-        }
-        NotificationManagerCompat.from(musicXService).notify(notificationID, builder.build());
     }
 
     private static void controls(RemoteViews remoteViews, Context context) {

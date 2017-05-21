@@ -2,6 +2,7 @@ package com.rks.musicx.services;
 
 
 import android.graphics.Bitmap;
+import android.os.Handler;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -33,11 +34,14 @@ import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
 
 public class MediaSession {
 
+    private static Handler handler = new Handler();
+
     public static void lockscreenMedia(MediaSessionCompat mediaSessionCompat, MusicXService musicXService, String what) {
         if (musicXService == null) {
             return;
         }
-        if (PLAYSTATE_CHANGED.equals(what)) {
+        MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
+        if (META_CHANGED.equals(what) || PLAYSTATE_CHANGED.equals(what)) {
             if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
                 mediaSessionCompat.setPlaybackState(new PlaybackStateCompat.Builder()
                         .setState(PlaybackStateCompat.STATE_PLAYING, musicXService.getPlayerPos(), 1.0f)
@@ -51,31 +55,34 @@ public class MediaSession {
                                 | PlaybackStateCompat.ACTION_PLAY_PAUSE |
                                 PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS).build());
             }
-        }
-        MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
-        if (META_CHANGED.equals(what)) {
             builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, musicXService.getsongTitle());
             builder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, musicXService.getDuration());
             builder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicXService.getsongArtistName());
             builder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, musicXService.getsongAlbumName());
-            ArtworkUtils.ArtworkLoaderBitmapPalette(musicXService, musicXService.getsongAlbumName(), musicXService.getsongAlbumID(), new palette() {
+            handler.post(new Runnable() {
                 @Override
-                public void palettework(Palette palette) {
+                public void run() {
+                    ArtworkUtils.ArtworkLoaderBitmapPalette(musicXService, musicXService.getsongAlbumName(), musicXService.getsongAlbumID(), new palette() {
+                        @Override
+                        public void palettework(Palette palette) {
 
-                }
-            }, new bitmap() {
-                @Override
-                public void bitmapwork(Bitmap bitmap) {
-                    builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap);
-                    mediaSessionCompat.setMetadata(builder.build());
-                }
+                        }
+                    }, new bitmap() {
+                        @Override
+                        public void bitmapwork(Bitmap bitmap) {
+                            builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap);
+                            mediaSessionCompat.setMetadata(builder.build());
+                        }
 
-                @Override
-                public void bitmapfailed(Bitmap bitmap) {
-                    builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap);
-                    mediaSessionCompat.setMetadata(builder.build());
+                        @Override
+                        public void bitmapfailed(Bitmap bitmap) {
+                            builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap);
+                            mediaSessionCompat.setMetadata(builder.build());
+                        }
+                    });
                 }
             });
+
         }
     }
 }
