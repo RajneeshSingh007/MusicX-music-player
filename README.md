@@ -4,7 +4,8 @@
 - Simple, Elegant, Beautiful Material Design Music Player
 
 # Download
-- <p><a href="https://play.google.com/store/apps/details?id=com.rks.musicx"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" height="60" data-canonical-src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" style="max-width:100%;"></a></p>
+
+<p><a href="https://play.google.com/store/apps/details?id=com.rks.musicx"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" height="80" data-canonical-src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" style="max-width:100%;"></a></p>
 
 # Features
 - Floating widget let you enjoy your music anywhere.
@@ -109,8 +110,10 @@ style="max_width:25%;">
 - Vagalume.br
 
 # Special Thanks
-- Feel free to fork this project and fix bugs.
 - Also, Thanks To StackOverflow and Slack Developers.
+
+ 
+- Feel free to fork this project and fix bugs.
 
 # License
 <pre>©2017 Rajneesh Singh 
