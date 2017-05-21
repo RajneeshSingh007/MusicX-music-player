@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ ©2017 Rajneesh Singh
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory
+        android:title="@string/Playing_View"
+        app:ateKey_prefCategory_textColor="?ate_key">
+
+
+        <com.afollestad.appthemeengine.prefs.ATEListPreference
+            android:defaultValue="0"
+            android:entries="@array/playingChoice"
+            android:entryValues="@array/selectedPlayingView"
+            android:key="playing_selection"
+            android:summary="@string/playing_view_selection"
+            android:title="@string/playing_view"
+            app:ateKey_pref_list="?ateKey_pref_list"/>
+
+
+    </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
+
+    <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory
+        android:title="@string/base_theme"
+        app:ateKey_prefCategory_textColor="?ate_key">
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="dark_theme"
+            android:persistent="true"
+            android:summary="@string/dark_theme_summary"
+            android:title="@string/dark_theme"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+    </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
+
+    <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory
+        android:title="@string/black_theme"
+        app:ateKey_prefCategory_textColor="?ate_key">
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="black_theme"
+            android:persistent="true"
+            android:summary="@string/black_theme_summary"
+            android:title="@string/black_theme"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+    </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
+
+    <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory
+        android:title="@string/personalisation"
+        app:ateKey_prefCategory_textColor="?ate_key">
+
+        <com.afollestad.appthemeengine.prefs.ATEColorPreference
+            android:key="primary_color"
+            android:persistent="false"
+            android:summary="@string/primary_color_summary"
+            android:title="@string/primary_color"
+            app:ateKey_pref_color="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATEColorPreference
+            android:key="accent_color"
+            android:persistent="false"
+            android:summary="@string/accent_color_summary"
+            android:title="@string/accent_color"
+            app:ateKey_pref_color="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="floating_view"
+            android:persistent="true"
+            android:summary="Hide FloatingWidget"
+            android:title="Floating Widget"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="gridlist_songview"
+            android:persistent="true"
+            android:summary="Grid SongView"
+            android:title="Song View"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="gridlist_albumview"
+            android:persistent="true"
+            android:summary="List AlbumView"
+            android:title="Album View"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="gridlist_artistview"
+            android:persistent="true"
+            android:summary="List ArtistView"
+            android:title="Artist View"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="restore_lasttab"
+            android:persistent="true"
+            android:summary="@string/restore_lastTab"
+            android:title="@string/Tab"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="vizualizer_color"
+            android:persistent="true"
+            android:summary="change color from albumart in playingView4"
+            android:title="Visualizer Color"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="artwork_adaptive"
+            android:persistent="true"
+            android:summary="change color from albumart in PlayingViews"
+            android:title="Color Adaptive"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATEListPreference
+            android:defaultValue="11"
+            android:entries="@array/fontChoice"
+            android:entryValues="@array/selectedFont"
+            android:key="change_fonts"
+            android:summary="change fonts of Text"
+            android:title="Fonts"
+            app:ateKey_pref_list="?ateKey_pref_list"/>
+
+        <com.afollestad.appthemeengine.prefs.ATEListPreference
+            android:defaultValue="0"
+            android:entries="@array/blurChoice"
+            android:entryValues="@array/selectedblur"
+            android:key="blur_view"
+            android:summary="change blur intensity"
+            android:title="Playing BlurView"
+            app:ateKey_pref_list="?ateKey_pref_list"/>
+
+        <Preference
+            android:title="Remove Tabs"
+            android:key="remove_tabs"
+            android:summary="select tabs to remove"/>
+
+    </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
+
+
+    <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory
+        android:title="@string/system_ui_colors"
+        app:ateKey_prefCategory_textColor="?ate_key">
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="true"
+            android:key="colored_status_bar"
+            android:persistent="false"
+            android:summary="@string/colored_status_bar_summary"
+            android:title="@string/colored_status_bar"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="true"
+            android:key="colored_nav_bar"
+            android:persistent="false"
+            android:summary="@string/colored_nav_bar_summary"
+            android:title="@string/colored_nav_bar"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+    </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
+
+    <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory
+        android:title="@string/light_ui_modes"
+        app:ateKey_prefCategory_textColor="?ate_key">
+
+        <com.afollestad.appthemeengine.prefs.ATEListPreference
+            android:defaultValue="2"
+            android:entries="@array/light_status_mode_entries"
+            android:entryValues="@array/light_status_mode_values"
+            android:key="light_status_bar_mode"
+            android:persistent="true"
+            android:title="@string/light_status_bar_mode"
+            app:ateKey_pref_list="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATEListPreference
+            android:defaultValue="2"
+            android:entries="@array/light_toolbar_mode_entries"
+            android:entryValues="@array/light_status_mode_values"
+            android:key="light_toolbar_mode"
+            android:persistent="true"
+            android:title="@string/light_toolbar_mode"
+            app:ateKey_pref_list="?ate_key"/>
+
+    </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
+
+    <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory android:title="@string/storage"
+      app:ateKey_prefCategory_textColor="?ate_key">
+
+        <Preference
+          android:title="Directory Chooser"
+          android:key="directory_picker"
+          android:summary="select storage"/>
+
+    </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
+    <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory
+        android:title="@string/network"
+        app:ateKey_prefCategory_textColor="?ate_key">
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="hqartist_artwork"
+            android:persistent="true"
+            android:summary="@string/hqartist_artwork_summary"
+            android:title="@string/hqartist_artwork"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="save_lyrics"
+            android:persistent="true"
+            android:summary="@string/save_lyrics_summary"
+            android:title="@string/save_lyrics"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="save_internet"
+            android:persistent="true"
+            android:summary="@string/save_internet_summary"
+            android:title="@string/save_internet"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+    </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
+
+    <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory
+        android:title="@string/services"
+        app:ateKey_prefCategory_textColor="?ate_key">
+
+        <com.afollestad.appthemeengine.prefs.ATEListPreference
+            android:defaultValue="0"
+            android:entries="@array/fadeDuration"
+            android:entryValues="@array/fadeDurationChoice"
+            android:key="fadein_fadeout_seekbar"
+            android:persistent="true"
+            android:title="Fade Duration"
+            app:ateKey_pref_list="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="fade_inout"
+            android:persistent="true"
+            android:summary="enable fade in/out during play/pause"
+            android:title="Enable Fade"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="true"
+            android:key="save_headset"
+            android:persistent="true"
+            android:summary="@string/save_headset_summary"
+            android:title="@string/save_headset"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="true"
+            android:key="save_telephony"
+            android:persistent="true"
+            android:summary="@string/save_telephony_summary"
+            android:title="@string/save_telephony"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="hide_notification"
+            android:persistent="true"
+            android:summary="@string/hide_notification"
+            android:title="@string/hide_notify"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="hide_lockscreenMedia"
+            android:persistent="true"
+            android:summary="@string/hide_lockscreenMedia"
+            android:title="@string/hide_lockscreen"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+
+    </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
+    <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory
+        android:title="@string/metadata"
+        app:ateKey_prefCategory_textColor="?ate_key">
+
+        <com.afollestad.appthemeengine.prefs.ATEPreference
+            android:key="clear_favdb"
+            android:persistent="true"
+            app:ateKey_pref="?ate_key"
+            android:title="@string/clear_favdb"/>
+
+        <com.afollestad.appthemeengine.prefs.ATEPreference
+            android:key="clear_recentdb"
+            android:persistent="true"
+            app:ateKey_pref="?ate_key"
+            android:title="@string/clear_recentplayeddb"/>
+
+    </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
+</PreferenceScreen>

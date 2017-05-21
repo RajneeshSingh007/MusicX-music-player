@@ -97,7 +97,7 @@ Special thanks to api provided by Last.fm (Artist Image) & https://api.vagalume.
         <a href="https://github.com/codekidX/storage-chooser"><b>Directory Chooser</b></a>
     </li>
  </ul>
-If forgot any other license author,feel free to mail me @developerrajneeshsingh@gmail.com.
+	<b>If forgot any other license author,feel free to mail me developerrajneeshsingh@gmail.com.</b>
  </p>
  <p>Feel free to fork this project and fix bugs.</p>
  <p>Also, Thanks To StackOverflow and Slack Developers.</p>

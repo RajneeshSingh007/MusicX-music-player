@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "772580193267",
+    "project_id": "musicx-140214"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:772580193267:android:b1acbbe1b71e9e0a",
+        "android_client_info": {
+          "package_name": "com.rks.musicx"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "772580193267-admk6nmg78n9t0s0ff4qpcabg351lusi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rks.musicx",
+            "certificate_hash": "AB195E27A0BB43FF04B13B2D9D2231FC072CC445"
+          }
+        },
+        {
+          "client_id": "772580193267-je2a974g1q0p72p3bp9c5jvh9rd2v1pc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNVqncohjnwkwurEZdlEcfc-te67uMzlw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

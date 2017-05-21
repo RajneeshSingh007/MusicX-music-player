@@ -1,0 +1,98 @@
+<!--
+  ~ ©2017 Rajneesh Singh
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <item android:id="@+id/action_remove_playlist"
+      android:title="Remove from playlist"
+      app:showAsAction="never"
+      android:visible="false"/>
+
+  <item
+    android:id="@+id/action_add_to_queue"
+    android:title="@string/action_add_to_queue"
+    app:showAsAction="never"/>
+
+  <item
+    android:id="@+id/action_set_as_next_track"
+    android:title="@string/action_set_as_next_track"
+    app:showAsAction="never"/>
+
+  <item
+    android:id="@+id/action_add_to_playlist"
+    android:title="@string/action_add_to_playlist"
+    app:showAsAction="never"/>
+
+  <item
+    android:id="@+id/action_edit_tags"
+    android:title="@string/action_edit_tags"
+    app:showAsAction="never"/>
+
+  <item
+    android:id="@+id/action_set_ringtone"
+    android:title="@string/action_set_ringtone"
+    app:showAsAction="never"/>
+
+  <item
+    android:id="@+id/action_delete"
+    android:title="@string/action_delete"
+    app:showAsAction="never"/>
+
+  <item
+    android:id="@+id/action_details"
+    android:title="@string/action_details"
+    app:showAsAction="never"/>
+
+  <item
+    android:id="@+id/action_share"
+    android:actionProviderClass="android.widget.ShareActionProvider"
+    android:title="@string/action_share"
+    app:showAsAction="never"/>
+
+  <item
+    android:id="@+id/more"
+    android:title="More"
+    app:showAsAction="never">
+
+    <menu>
+
+      <item
+          android:id="@+id/go_to_album"
+          app:showAsAction="never"
+          android:title="Go to albums"/>
+
+      <item
+          android:id="@+id/go_to_artist"
+          app:showAsAction="never"
+          android:title="Go to artists"/>
+
+      <item
+        android:id="@+id/action_fav"
+        android:title="Go to fav"
+        app:showAsAction="never"/>
+
+      <item
+        android:id="@+id/action_addFav"
+        android:title="@string/add_toFav"
+        app:showAsAction="never"/>
+
+      <item
+        android:id="@+id/action_removeFav"
+        android:title="Remove from favorites"
+        app:showAsAction="never"/>
+
+    </menu>
+  </item>
+
+</menu>

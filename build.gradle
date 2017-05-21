@@ -1,125 +1,23 @@
-/*
- * ©2017 Rajneesh Singh
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *     http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-apply plugin: 'com.android.application'
-apply plugin: 'me.tatarka.retrolambda'
-
-android {
-    signingConfigs {
-        config {
-            keyAlias 'MyAndroidKey'
-            keyPassword 'myKeyPassword'
-            storeFile file('E:/AndroidDevelopment/MusicX.jks')
-            storePassword 'myStorePassword'
-        }
+buildscript {
+    repositories {
+        jcenter()
     }
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
-    defaultConfig {
-        applicationId "com.rks.musicx"
-        minSdkVersion 21
-        targetSdkVersion 25
-        versionCode 56
-        versionName '1.3.6'
-        vectorDrawables.useSupportLibrary = true
-        renderscriptTargetApi 25
-        renderscriptSupportModeEnabled true
-        signingConfig signingConfigs.config
-        multiDexEnabled true
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.1'
+        classpath 'me.tatarka:gradle-retrolambda:3.6.1'
+        classpath 'me.tatarka.retrolambda.projectlombok:lombok.ast:0.2.3.a2'
     }
-    buildTypes {
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            debuggable false
-            shrinkResources true
-            zipAlignEnabled true
-            signingConfig signingConfigs.config
-            proguardFile 'E:/AndroidDevelopment/AppDevelopment/appDev/MusicX/app/proguard-rules.pro'
-        }
-    }
-    dexOptions {
-        preDexLibraries = false
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    productFlavors {
-        MusicX {
-            minSdkVersion 21
-            proguardFile 'E:/AndroidDevelopment/AppDevelopment/appDev/MusicX/app/proguard-rules.pro'
-            signingConfig signingConfigs.config
-            targetSdkVersion 25
-        }
-    }
-
-}
-ext {
-    supportVersion = "25.3.1"
+    configurations.classpath.exclude group: 'com.android.tools.external.lombok'
 }
 
-dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':library')
-    compile project(':play_widget')
-    /*
-                Dialog
-                 */
-    compile files('libs/jaudiotagger.jar')
-    /*
-                Google Package
-                 */
-    //noinspection GradleCompatible
-    compile "com.android.support:support-v4:${supportVersion}"
-    compile "com.android.support:support-vector-drawable:${supportVersion}"
-    compile "com.android.support:appcompat-v7:${supportVersion}"
-    compile "com.android.support:cardview-v7:${supportVersion}"
-    compile "com.android.support:recyclerview-v7:${supportVersion}"
-    compile "com.android.support:design:${supportVersion}"
-    compile "com.android.support:palette-v7:${supportVersion}"
-    compile "com.android.support:percent:${supportVersion}"
-    compile "com.android.support:preference-v14:${supportVersion}"
-    /*
-                ScrollView
-                 */
-    compile 'com.simplecityapps:recyclerview-fastscroll:1.0.16'
-    /*
-                Intro
-                 */
-    compile 'com.github.paolorotolo:appintro:4.0.0'
-    /*
-                Networking
-                 */
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'com.google.code.gson:gson:2.7'
-    /*
-                ImageLoader
-                */
-    compile 'com.github.bumptech.glide:glide:3.7.0'
-    compile 'jp.wasabeef:glide-transformations:2.0.2'
-    /*
-                Custom fonts
-                 */
-    compile 'uk.co.chrisjenx:calligraphy:2.2.0'
-    compile 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.7.2'
-    compile 'com.github.deano2390:MaterialShowcaseView:1.1.0'
-    compile 'com.kbeanie:image-chooser-library:1.5.8@aar'
-    compile 'ch.acra:acra:4.9.0'
-    compile 'com.amitshekhar.android:android-networking:0.1.0'
-    compile 'com.github.codekidX:storage-chooser:1.0.33'
-    compile 'com.yokkomi:seekbar-preference:1.0'
-    compile 'com.afollestad.material-dialogs:commons:0.9.4.2@aar'
-    compile 'com.afollestad.material-dialogs:core:0.9.4.2@aar'
+allprojects {
+    repositories {
+        jcenter()
+        maven { url "https://jitpack.io" }
+        mavenCentral()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
