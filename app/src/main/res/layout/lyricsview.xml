@@ -27,6 +27,9 @@
             android:layout_height="wrap_content"
             android:padding="4dp"
             android:text="No Lyrics found..."
+            android:textIsSelectable="true"
+            android:focusable="true"
+            android:longClickable="true"
             android:textColor="@color/white"
             android:textSize="16sp"/>
 

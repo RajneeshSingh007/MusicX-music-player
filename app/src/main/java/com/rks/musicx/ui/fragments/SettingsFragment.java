@@ -9,7 +9,6 @@ import android.preference.PreferenceFragment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
-import android.widget.CheckBox;
 
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
@@ -26,7 +25,6 @@ import com.codekidlabs.storagechooser.StorageChooserView;
 import com.rks.musicx.R;
 import com.rks.musicx.data.loaders.FavoritesLoader;
 import com.rks.musicx.data.loaders.RecentlyPlayedLoader;
-import com.rks.musicx.misc.utils.ATEUtils;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.SettingsActivity;
@@ -75,7 +73,6 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
     private RecentlyPlayedLoader recentlyPlayedLoader;
     private int accentcolor;
     private ATECheckBoxPreference headsetConfig, phoneConfig;
-    private CheckBox checkBox;
     private List<Integer> integerList = new ArrayList<>();
 
     @Override
@@ -98,7 +95,6 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         phoneConfig = (ATECheckBoxPreference) findPreference(SaveTelephony);
         phoneConfig.setChecked(true);
         accentcolor = Config.accentColor(getActivity(), Helper.getATEKey(getActivity()));
-        checkBox = new CheckBox(getActivity());
     }
 
     @Override
@@ -331,12 +327,6 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         });
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        String ateKey = Helper.getATEKey(getActivity());
-        ATEUtils.setStatusBarColor(getActivity(), ateKey, Config.primaryColor(getActivity(), ateKey));
-    }
 
 
     @Override

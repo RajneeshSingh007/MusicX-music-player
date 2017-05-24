@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import static android.content.Context.MODE_PRIVATE;
 import static com.rks.musicx.misc.utils.Constants.ALBUMGRID;
 import static com.rks.musicx.misc.utils.Constants.ALBUM_SORT_ORDER;
 import static com.rks.musicx.misc.utils.Constants.ARTISTGRID;
@@ -39,8 +40,10 @@ import static com.rks.musicx.misc.utils.Constants.KEY_POSITION_Y;
 import static com.rks.musicx.misc.utils.Constants.LightTheme;
 import static com.rks.musicx.misc.utils.Constants.PLAYER_POS;
 import static com.rks.musicx.misc.utils.Constants.PLAYINGSTATE;
+import static com.rks.musicx.misc.utils.Constants.PLAYINGVIEW_TRACK;
 import static com.rks.musicx.misc.utils.Constants.PLAYLIST_ID;
 import static com.rks.musicx.misc.utils.Constants.PLAYLIST_SORT_ORDER;
+import static com.rks.musicx.misc.utils.Constants.PRESET_POS;
 import static com.rks.musicx.misc.utils.Constants.REMOVETABS;
 import static com.rks.musicx.misc.utils.Constants.REORDER_TAB;
 import static com.rks.musicx.misc.utils.Constants.REPEATMODE;
@@ -65,6 +68,7 @@ import static com.rks.musicx.misc.utils.Constants.TRYPEFACE_PATH;
 import static com.rks.musicx.misc.utils.Constants.TextFonts;
 import static com.rks.musicx.misc.utils.Constants.VIZCOLOR;
 import static com.rks.musicx.misc.utils.Constants.WIDGETTRACk;
+import static com.rks.musicx.misc.utils.Constants.WIDGET_COLOR;
 import static com.rks.musicx.misc.utils.Constants.sInstance;
 
 /*
@@ -93,8 +97,8 @@ public class Extras {
 
     public Extras(Context context) {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        metaData = context.getSharedPreferences("MetaData", Context.MODE_PRIVATE);
-        tagEditor = context.getSharedPreferences("tagEditor", Context.MODE_PRIVATE);
+        metaData = context.getSharedPreferences("MetaData", MODE_PRIVATE);
+        tagEditor = context.getSharedPreferences("tagEditor", MODE_PRIVATE);
         this.mcontext = context;
     }
 
@@ -245,7 +249,7 @@ public class Extras {
     }
 
     public SharedPreferences saveEq() {
-        return mcontext.getSharedPreferences(SAVE_EQ, Context.MODE_PRIVATE);
+        return mcontext.getSharedPreferences(SAVE_EQ, MODE_PRIVATE);
     }
 
     public boolean saveData() {
@@ -277,11 +281,15 @@ public class Extras {
     }
 
     public String getFadeDuration() {
-        return mPreferences.getString(FADEINOUT_DURATION, null);
+        return mPreferences.getString(FADEINOUT_DURATION, "0");
     }
 
     public boolean getFadeTrack() {
         return mPreferences.getBoolean(FADETRACK, false);
+    }
+
+    public boolean getWigetColor(){
+        return mPreferences.getBoolean(WIDGET_COLOR, false);
     }
 
     ////////////////// folder pref //////////////////
@@ -470,12 +478,12 @@ public class Extras {
     ///////////////// Init Setup //////////////////
 
     public int getInitValue(String spName, String key) {
-        SharedPreferences sharedPreferences = mcontext.getSharedPreferences(spName, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = mcontext.getSharedPreferences(spName, MODE_PRIVATE);
         return sharedPreferences.getInt(key, 0);
     }
 
     public void setInitValue(int ammount, String spName, String key) {
-        SharedPreferences sharedPreferences = mcontext.getSharedPreferences(spName, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = mcontext.getSharedPreferences(spName, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(key, ammount);
         editor.commit();
@@ -528,5 +536,29 @@ public class Extras {
         return mPreferences.getString(TRYPEFACE_PATH, null);
     }
 
+
+    //////////// Preset Pos ///////////////
+
+    public void savePresetPos(int position){
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putInt(PRESET_POS, position);
+        editor.commit();
+    }
+
+    public int getPresetPos(){
+        return mPreferences.getInt(PRESET_POS, 0);
+    }
+
+    ///////////// PlayingView Track ///////////
+
+    public void savePlayingViewTrack(boolean torf){
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(PLAYINGVIEW_TRACK, torf);
+        editor.commit();
+    }
+
+    public boolean getPlayingViewTrack(){
+        return mPreferences.getBoolean(PLAYINGVIEW_TRACK, false);
+    }
 
 }

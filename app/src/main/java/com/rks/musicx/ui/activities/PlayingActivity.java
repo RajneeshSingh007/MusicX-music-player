@@ -6,6 +6,7 @@ import android.support.annotation.StyleRes;
 import android.support.v4.app.Fragment;
 
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
+import com.bumptech.glide.Glide;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseActivity;
 import com.rks.musicx.misc.utils.Extras;
@@ -59,29 +60,27 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
         String playing2 = Extras.getInstance().mPreferences.getString(PlayingView, One);
         String playing3 = Extras.getInstance().mPreferences.getString(PlayingView, Two);
         String playing4 = Extras.getInstance().mPreferences.getString(PlayingView, Three);
-        //  String playing5 = Extras.getInstance().mPreferences.getString(PlayingView, Four);
 
         Playing1Fragment playing1Fragment = new Playing1Fragment();
         Playing2Fragment playing2Fragment = new Playing2Fragment();
         Playing3Fragment playing3Fragment = new Playing3Fragment();
         Playing4Fragment playing4Fragment = new Playing4Fragment();
-        // Playing5Fragment playing5Fragment = new Playing5Fragment();
 
         if (playing1.equals(Zero)) {
             setFragment(playing1Fragment);
+            Extras.getInstance().savePlayingViewTrack(false);
         } else if (playing2.equals(One)) {
+            Extras.getInstance().savePlayingViewTrack(false);
             setFragment(playing2Fragment);
         } else if (playing3.equals(Two)) {
+            Extras.getInstance().savePlayingViewTrack(true);
             setFragment(playing3Fragment);
         } else if (playing4.equals(Three)) {
+            Extras.getInstance().savePlayingViewTrack(false);
             setFragment(playing4Fragment);
         } else {
             setFragment(playing1Fragment);
-        }/*else if (playing5.equals(Four)){
-            setFragment(playing5Fragment);
-        }else {
-            setFragment(playing1Fragment);
-        }*/
+        }
     }
 
 
@@ -118,6 +117,12 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Glide.get(this).clearMemory();
     }
 }
 

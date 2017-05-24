@@ -5,13 +5,10 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
-import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.Loader;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,7 +29,6 @@ import com.cleveroad.audiowidget.SmallBang;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BasePlayingFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
-import com.rks.musicx.data.loaders.QueueLoaders;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.database.FavHelper;
 import com.rks.musicx.interfaces.bitmap;
@@ -48,6 +44,7 @@ import com.rks.musicx.misc.widgets.changeAlbumArt;
 import com.rks.musicx.misc.widgets.updateAlbumArt;
 import com.rks.musicx.ui.adapters.QueueAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
@@ -71,7 +68,7 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
  * limitations under the License.
  */
 
-public class Playing3Fragment extends BasePlayingFragment implements SimpleItemTouchHelperCallback.OnStartDragListener, LoaderManager.LoaderCallbacks<List<Song>> {
+public class Playing3Fragment extends BasePlayingFragment implements SimpleItemTouchHelperCallback.OnStartDragListener {
 
     private TextView songArtist, songTitle, currentDur, totalDur;
     private String ateKey;
@@ -89,7 +86,7 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
     private BottomSheetBehavior bottomSheetBehavior;
     private FrameLayout bottomsheetLyrics;
     private DiagonalLayout diagonalLayout;
-    private int queueLoader = -1;
+    private List<Song> queueList = new ArrayList<>();
 
     private Runnable runnable = new Runnable() {
         @Override
@@ -153,10 +150,10 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
             if (getMusicXService() == null) {
                 return;
             }
+            queuerv.scrollToPosition(position);
             switch (view.getId()) {
                 case R.id.item_view:
                     getMusicXService().setdataPos(position, true);
-                    setSelection(position);
                     break;
                 case R.id.menu_button:
                     qeueMenu(queueAdapter, view, position);
@@ -204,7 +201,9 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
         queuerv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
         queuerv.setHasFixedSize(true);
         queueAdapter = new QueueAdapter(getContext(), this);
-        queueAdapter.setLayoutId(R.layout.queue_songlist);
+        if (Extras.getInstance().getPlayingViewTrack()){
+            queueAdapter.setLayoutId(R.layout.song_list);
+        }
         queuerv.setAdapter(queueAdapter);
         queueAdapter.setOnItemClickListener(mOnClick);
         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(queueAdapter);
@@ -329,7 +328,6 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
             }
         });
         sequence.start();
-        getLoaderManager().initLoader(queueLoader, null, this);
     }
 
     @Override
@@ -378,7 +376,7 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
                 seekbar.setMax(dur);
                 totalDur.setText(Helper.durationCalculator(dur));
             }
-            updateQueue("Executed");
+            updateQueue();
             new Helper(getContext()).LoadLyrics(title, artist, getMusicXService().getsongData(), lrcView);
 
         }
@@ -408,30 +406,23 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
         });
     }
 
-    private void updateQueue(String acting) {
-        if (getMusicXService() != null){
-            getLoaderManager().restartLoader(queueLoader, null, this);
-            setSelection(getMusicXService().returnpos());
+    private void updateQueue() {
+        if (getMusicXService() == null) {
+            return;
         }
-    }
-
-    public void setSelection(int position) {
-
-        queueAdapter.setSelection(position);
-
-        if (position >= 0 && position < queueAdapter.data.size()) {
-            queuerv.scrollToPosition(position);
+        queueList = getMusicXService().getPlayList();
+        if (queueList != queueAdapter.getSnapshot() && queueList.size() > 0) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    queueAdapter.addDataList(queueList);
+                }
+            });
         }
-
-        int newselection;
-
-        newselection = position;
-
-        if (newselection >= 0 && position < queueAdapter.data.size()) {
-            queueAdapter.notifyItemChanged(newselection);
-            queueAdapter.notifyDataSetChanged();
+        queueAdapter.setSelection(getMusicXService().returnpos());
+        if (getMusicXService().returnpos() >=0 && getMusicXService().returnpos() < queueAdapter.getSnapshot().size()){
+            queuerv.scrollToPosition(getMusicXService().returnpos());
         }
-        queuerv.scrollToPosition(position);
     }
 
 
@@ -452,7 +443,7 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
                 new updateAlbumArt(finalPath, getMusicXService().getsongData(), getContext(), getMusicXService().getsongAlbumID(), new changeAlbumArt() {
                     @Override
                     public void onPostWork() {
-                        ArtworkUtils.ArtworkLoaderBitmapPalette(getContext(), getMusicXService().getsongAlbumName(), finalPath, new palette() {
+                        ArtworkUtils.ArtworkLoader(getContext(), getMusicXService().getsongAlbumName(), finalPath, getMusicXService().getsongAlbumID(), new palette() {
                             @Override
                             public void palettework(Palette palette) {
                                 final int color[] = Helper.getAvailableColor(getContext(), palette);
@@ -535,7 +526,7 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ArtworkUtils.ArtworkLoaderBitmapPalette(getContext(), getMusicXService().getsongAlbumName(), getMusicXService().getsongAlbumID(), new palette() {
+                ArtworkUtils.ArtworkLoader(getContext(), getMusicXService().getsongAlbumName(), null, getMusicXService().getsongAlbumID(), new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         final int color[] = Helper.getAvailableColor(getContext(), palette);
@@ -584,8 +575,8 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
     }
 
     @Override
-    protected void queueConfig(String action) {
-        updateQueue(action);
+    protected void queueConfig() {
+        updateQueue();
     }
 
     @Override
@@ -598,27 +589,4 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
         mItemTouchHelper.startDrag(viewHolder);
     }
 
-    @Override
-    public Loader<List<Song>> onCreateLoader(int id, Bundle args) {
-        QueueLoaders queueLoaders = new QueueLoaders(getContext(), getMusicXService());
-        if (id == queueLoader) {
-            return queueLoaders;
-        }
-        return null;
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<Song>> loader, List<Song> data) {
-        if (data == null) {
-            return;
-        }
-        queueAdapter.addDataList(data);
-        queueAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<Song>> loader) {
-        loader.reset();
-        queueAdapter.notifyDataSetChanged();
-    }
 }

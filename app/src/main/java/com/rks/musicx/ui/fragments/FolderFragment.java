@@ -299,6 +299,7 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
     @Override
     public void load() {
         getLoaderManager().restartLoader(trackloader, null, this);
+        getLoaderManager().restartLoader(folderloader, null, folderLoaderCallback);
     }
 
     @Override

@@ -17,6 +17,9 @@ import com.rks.musicx.data.model.FolderModel;
 import com.rks.musicx.misc.utils.Extras;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -62,6 +65,12 @@ public class FolderAdapter extends BaseRecyclerViewAdapter<FolderModel, FolderAd
         } else {
             holder.filename.setTextColor(Color.BLACK);
         }
+    }
+
+    public void setFilter(List<FolderModel> filter) {
+        data = new ArrayList<>();
+        data.addAll(filter);
+        notifyDataSetChanged();
     }
 
     @Override

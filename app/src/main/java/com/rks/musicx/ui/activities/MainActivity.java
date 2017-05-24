@@ -300,6 +300,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         if (musicXService == null) {
             return;
         }
+        Extras.getInstance().saveSeekServices(0);
         musicXService.setPlaylist(songList, pos, true);
     }
 
@@ -308,6 +309,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         if (musicXService == null) {
             return;
         }
+        Extras.getInstance().saveSeekServices(0);
         musicXService.setPlaylistandShufle(songList, play);
     }
 
@@ -488,11 +490,14 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     }
 
     private void backgroundArt() {
+        if (musicXService == null){
+            return;
+        }
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()).exists()) {
-                    mRequestManager.load(ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()).getAbsolutePath())
+                    mRequestManager.load(ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()))
                             .asBitmap()
                             .diskCacheStrategy(DiskCacheStrategy.ALL)
                             .centerCrop()
@@ -500,21 +505,22 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                             .error(R.mipmap.ic_launcher)
                             .format(DecodeFormat.PREFER_ARGB_8888)
                             .override(300, 300)
-                            .listener(GlidePalette.with(ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()).getAbsolutePath()).intoCallBack(new BitmapPalette.CallBack() {
-                                @Override
-                                public void onPaletteLoaded(@Nullable Palette palette) {
-                                    int color[] = Helper.getAvailableColor(MainActivity.this, palette);
-                                    if (Extras.getInstance().artworkColor()) {
-                                        playToggle.setBackgroundTintList(ColorStateList.valueOf(color[0]));
-                                        songProgress.setProgressColor(color[0]);
-                                        songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
-                                    } else {
-                                        playToggle.setBackgroundTintList(ColorStateList.valueOf(accentcolor));
-                                        songProgress.setProgressColor(accentcolor);
-                                        songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
-                                    }
-                                }
-                            }))
+                            .listener(GlidePalette.with(ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()).getAbsolutePath())
+                                    .intoCallBack(new BitmapPalette.CallBack() {
+                                        @Override
+                                        public void onPaletteLoaded(@Nullable Palette palette) {
+                                            int color[] = Helper.getAvailableColor(MainActivity.this, palette);
+                                            if (Extras.getInstance().artworkColor()) {
+                                                playToggle.setBackgroundTintList(ColorStateList.valueOf(color[0]));
+                                                songProgress.setProgressColor(color[0]);
+                                                songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
+                                            } else {
+                                                playToggle.setBackgroundTintList(ColorStateList.valueOf(accentcolor));
+                                                songProgress.setProgressColor(accentcolor);
+                                                songProgress.setDefaultProgressBackgroundColor(Color.TRANSPARENT);
+                                            }
+                                        }
+                                    }))
                             .into(new Target<Bitmap>() {
                                 @Override
                                 public void onLoadStarted(Drawable placeholder) {
@@ -523,7 +529,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
 
                                 @Override
                                 public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                                    ArtworkUtils.getBlurArtwork(MainActivity.this, 25, ArtworkUtils.drawableToBitmap(errorDrawable), BackgroundArt, 1.0f);
+                                    ArtworkUtils.blurPreferances(MainActivity.this, ArtworkUtils.drawableToBitmap(errorDrawable), BackgroundArt);
                                 }
 
                                 @Override
@@ -598,7 +604,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
 
                                 @Override
                                 public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                                    ArtworkUtils.getBlurArtwork(MainActivity.this, 25, ArtworkUtils.drawableToBitmap(errorDrawable), BackgroundArt, 1.0f);
+                                    ArtworkUtils.blurPreferances(MainActivity.this, ArtworkUtils.drawableToBitmap(errorDrawable), BackgroundArt);
                                 }
 
                                 @Override

@@ -45,10 +45,6 @@
             android:icon="@drawable/ic_nav_settings"
             android:title="@string/action_settings"/>
 
-        <!--<item
-            android:id="@+id/action_donate"
-            android:icon="@drawable/ic_attach_money_black_24dp"
-            android:title="Donate"/>-->
         <item
             android:id="@+id/about"
             android:icon="@drawable/about"

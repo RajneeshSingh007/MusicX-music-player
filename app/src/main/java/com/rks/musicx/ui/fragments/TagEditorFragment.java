@@ -38,8 +38,6 @@ import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.widgets.changeAlbumArt;
 import com.rks.musicx.misc.widgets.updateAlbumArt;
 
-import java.io.File;
-
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
@@ -126,7 +124,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
         mYearEditText.setText(song.getYear());
         mLyricsEditText.setText(song.getLyrics());
         saveTags.setImageBitmap(Helper.textAsBitmap("Save", 40, Color.WHITE));
-        ArtworkUtils.ArtworkLoaderPalette(getContext(), album, id, albumArtwork, new palette() {
+        ArtworkUtils.ArtworkLoader(getContext(), album, null, id, new palette() {
             @Override
             public void palettework(Palette palette) {
                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -136,6 +134,16 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
                 } else {
                     getActivity().getWindow().setStatusBarColor(colors[0]);
                 }
+            }
+        }, new bitmap() {
+            @Override
+            public void bitmapwork(Bitmap bitmap) {
+                albumArtwork.setImageBitmap(bitmap);
+            }
+
+            @Override
+            public void bitmapfailed(Bitmap bitmap) {
+                albumArtwork.setImageBitmap(bitmap);
             }
         });
         int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
@@ -160,8 +168,6 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
                     protected void onPostExecute(Boolean b) {
                         super.onPostExecute(b);
                         if (b) {
-                            File file = new File(song.getmSongPath());
-                            getContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
                             Toast.makeText(getContext(), "Tag Edit Success", Toast.LENGTH_SHORT).show();
                             mediaScannerConnection = new MediaScannerConnection(getContext(),
                                     new MediaScannerConnection.MediaScannerConnectionClient() {
@@ -209,9 +215,11 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
         newData.setTitle(mTitleEditText.getText().toString());
         newData.setYear(mYearEditText.getText().toString());
         newData.setArtist(mArtistEditText.getText().toString());
-        newData.setTrackNumber(Integer.parseInt(mTrackEditText.getText().toString()));
+        newData.setTrackNumber(Helper.parseToInt(mTrackEditText.getText().toString(), song.getTrackNumber()));
         newData.setLyrics(mLyricsEditText.getText().toString());
-        newData.setmSongPath(Extras.getInstance().getPath());
+        newData.setmSongPath(song.getmSongPath());
+        newData.setId(song.getId());
+        newData.setAlbumId(song.getAlbumId());
         return editSongTags(context, newData);
     }
 
@@ -261,7 +269,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
             new updateAlbumArt(finalPath, path, getContext(), key, new changeAlbumArt() {
                 @Override
                 public void onPostWork() {
-                    ArtworkUtils.ArtworkLoaderBitmapPalette(getContext(), song.getAlbum(), path, new palette() {
+                    ArtworkUtils.ArtworkLoader(getContext(), song.getAlbum(), path, song.getAlbumId(), new palette() {
                         @Override
                         public void palettework(Palette palette) {
                             final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -279,7 +287,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
 
                         @Override
                         public void bitmapfailed(Bitmap bitmap) {
-
+                            albumArtwork.setImageBitmap(bitmap);
                         }
                     });
                 }
@@ -296,4 +304,5 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
     public void onImagesChosen(ChosenImages chosenImages) {
 
     }
+
 }

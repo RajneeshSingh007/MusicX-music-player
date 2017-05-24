@@ -18,7 +18,6 @@ import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.loaders.PlaylistLoader;
 import com.rks.musicx.data.model.Playlist;
 import com.rks.musicx.data.model.Song;
-import com.rks.musicx.misc.utils.ATEUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
@@ -168,8 +167,6 @@ public class PlaylistFragment extends Fragment {
     public void onResume() {
         super.onResume();
         getLoaderManager().restartLoader(trackloader, null, playlistLoader);
-        String ateKey = Helper.getATEKey(getContext());
-        ATEUtils.setStatusBarColor(getActivity(), ateKey, Config.primaryColor(getActivity(), ateKey));
     }
 
 }

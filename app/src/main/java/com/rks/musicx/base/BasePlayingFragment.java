@@ -117,7 +117,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                 case POSITION_CHANGED:
                 case ITEM_ADDED:
                 case ORDER_CHANGED:
-                    queueConfig(action);
+                    queueConfig();
                     break;
             }
         }
@@ -129,7 +129,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
 
     protected abstract void metaConfig();
 
-    protected abstract void queueConfig(String action);
+    protected abstract void queueConfig();
 
     protected abstract void onPaused();
 

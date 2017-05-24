@@ -25,7 +25,6 @@ import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.AlbumArtwork;
 import com.rks.musicx.interfaces.palette;
-import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.widgets.CircleImageView;
@@ -82,13 +81,15 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
         if (layout == R.layout.song_list) {
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            ArtworkUtils.ArtworkLoader(getContext(), song.getAlbum(), song.getAlbumId(), holder.SongArtwork);
+            AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), song.getArtist(), song.getAlbum(), song.getAlbumId(), holder.SongArtwork, new palette() {
+                @Override
+                public void palettework(Palette palette) {
+
+                }
+            });
+            albumArtwork.execute();
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             Drawable drawable = holder.menu.getDrawable();
-            if (!Extras.getInstance().saveData()) {
-                AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), song.getArtist(), song.getAlbum());
-                albumArtwork.execute();
-            }
             if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 drawable.setTint(Color.WHITE);
                 holder.SongTitle.setTextColor(Color.WHITE);
@@ -117,7 +118,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
                 holder.SongArtist.setTextColor(Color.DKGRAY);
             }
         }
-        if (layout == R.layout.item_grid_view) {
+        if (layout == R.layout.item_grid_view || layout == R.layout.recent_list) {
             int pos = holder.getAdapterPosition();
             if (lastpos < pos) {
                 for (Animator animator : getAnimator(holder.songView)) {
@@ -127,11 +128,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             }
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            if (!Extras.getInstance().saveData()) {
-                AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), song.getArtist(), song.getAlbum());
-                albumArtwork.execute();
-            }
-            ArtworkUtils.ArtworkLoaderPalette(getContext(), song.getAlbum(), song.getAlbumId(), holder.songGridArtwork, new palette() {
+            AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), song.getArtist(), song.getAlbum(), song.getAlbumId(), holder.songGridArtwork, new palette() {
                 @Override
                 public void palettework(Palette palette) {
                     final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -141,33 +138,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
                     animateViews(holder, colors[0]);
                 }
             });
-            holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
-            holder.menu.setVisibility(View.VISIBLE);
-            Drawable drawable = holder.menu.getDrawable();
-            if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
-                drawable.setTint(Color.WHITE);
-            }
-        }
-        if (layout == R.layout.recent_list) {
-            int pos = holder.getAdapterPosition();
-            if (lastpos < pos) {
-                for (Animator animator : Helper.getAnimator(holder.songView)) {
-                    animator.setDuration(duration).start();
-                    animator.setInterpolator(interpolator);
-                }
-            }
-            holder.SongTitle.setText(song.getTitle());
-            holder.SongArtist.setText(song.getArtist());
-            ArtworkUtils.ArtworkLoaderPalette(getContext(), song.getAlbum(), song.getAlbumId(), holder.songGridArtwork, new palette() {
-                @Override
-                public void palettework(Palette palette) {
-                    final int[] colors = Helper.getAvailableColor(getContext(), palette);
-                    holder.songView.setBackgroundColor(colors[0]);
-                    holder.SongTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
-                    holder.SongArtist.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
-                    animateViews(holder, colors[0]);
-                }
-            });
+            albumArtwork.execute();
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             holder.menu.setVisibility(View.VISIBLE);
             Drawable drawable = holder.menu.getDrawable();
@@ -247,18 +218,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
                 menu.setOnClickListener(this);
                 itemView.setOnClickListener(this);
             }
-            if (layout == R.layout.item_grid_view) {
-                songGridArtwork = (ImageView) itemView.findViewById(R.id.album_artwork);
-                SongTitle = (TextView) itemView.findViewById(R.id.album_name);
-                SongArtist = (TextView) itemView.findViewById(R.id.artist_name);
-                songView = (LinearLayout) itemView.findViewById(R.id.backgroundColor);
-                menu = (ImageButton) itemView.findViewById(R.id.menu_button);
-                menu.setOnClickListener(this);
-                itemView.findViewById(R.id.item_view).setOnClickListener(this);
-                songGridArtwork.setOnClickListener(this);
-                itemView.setOnClickListener(this);
-            }
-            if (layout == R.layout.recent_list) {
+            if (layout == R.layout.item_grid_view || layout == R.layout.recent_list) {
                 songGridArtwork = (ImageView) itemView.findViewById(R.id.album_artwork);
                 SongTitle = (TextView) itemView.findViewById(R.id.album_name);
                 SongArtist = (TextView) itemView.findViewById(R.id.artist_name);

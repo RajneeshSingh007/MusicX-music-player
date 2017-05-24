@@ -8,7 +8,6 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -539,8 +538,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             return;
         }
         Log.d(TAG, "Play");
-        if (repeatMode != REPEAT_CURRENT && getDuration() > 2000
-                && getPlayerPos() >= getDuration() - 2000) {
+        if (repeatMode != REPEAT_CURRENT && getDuration() > 2000 && getPlayerPos() >= getDuration() - 2000) {
             playnext(true);
         }
         MediaPlayerSingleton.getInstance().getMediaPlayer().start();
@@ -633,74 +631,75 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                             });
                 }
             });
+        }else {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Glide.with(MusicXService.this)
+                            .load(ArtworkUtils.uri(getsongAlbumID()))
+                            .asBitmap()
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .centerCrop()
+                            .placeholder(R.mipmap.ic_launcher)
+                            .error(R.mipmap.ic_launcher)
+                            .format(DecodeFormat.PREFER_ARGB_8888)
+                            .override(size, size)
+                            .transform(new CropCircleTransformation(MusicXService.this))
+                            .into(new Target<Bitmap>() {
+                                @Override
+                                public void onLoadStarted(Drawable placeholder) {
+
+                                }
+
+                                @Override
+                                public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                    audioWidget.controller().albumCoverBitmap(ArtworkUtils.drawableToBitmap(errorDrawable));
+                                }
+
+                                @Override
+                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                    audioWidget.controller().albumCoverBitmap(resource);
+                                }
+
+                                @Override
+                                public void onLoadCleared(Drawable placeholder) {
+
+                                }
+
+                                @Override
+                                public void getSize(SizeReadyCallback cb) {
+
+                                }
+
+                                @Override
+                                public Request getRequest() {
+                                    return null;
+                                }
+
+                                @Override
+                                public void setRequest(Request request) {
+
+                                }
+
+                                @Override
+                                public void onStart() {
+
+                                }
+
+                                @Override
+                                public void onStop() {
+
+                                }
+
+                                @Override
+                                public void onDestroy() {
+
+                                }
+                            });
+                }
+            });
+
         }
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                Glide.with(MusicXService.this)
-                        .load(ArtworkUtils.uri(getsongAlbumID()))
-                        .asBitmap()
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .centerCrop()
-                        .placeholder(R.mipmap.ic_launcher)
-                        .error(R.mipmap.ic_launcher)
-                        .format(DecodeFormat.PREFER_ARGB_8888)
-                        .override(size, size)
-                        .transform(new CropCircleTransformation(MusicXService.this))
-                        .into(new Target<Bitmap>() {
-                            @Override
-                            public void onLoadStarted(Drawable placeholder) {
-
-                            }
-
-                            @Override
-                            public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                                audioWidget.controller().albumCoverBitmap(ArtworkUtils.drawableToBitmap(errorDrawable));
-                            }
-
-                            @Override
-                            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                                audioWidget.controller().albumCoverBitmap(resource);
-                            }
-
-                            @Override
-                            public void onLoadCleared(Drawable placeholder) {
-
-                            }
-
-                            @Override
-                            public void getSize(SizeReadyCallback cb) {
-
-                            }
-
-                            @Override
-                            public Request getRequest() {
-                                return null;
-                            }
-
-                            @Override
-                            public void setRequest(Request request) {
-
-                            }
-
-                            @Override
-                            public void onStart() {
-
-                            }
-
-                            @Override
-                            public void onStop() {
-
-                            }
-
-                            @Override
-                            public void onDestroy() {
-
-                            }
-                        });
-            }
-        });
-
     }
 
     @Override
@@ -814,6 +813,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             fastplay = true;
             fastplay(true, CurrentSong);
             Log.d(TAG, "PlayNext");
+            Extras.getInstance().saveSeekServices(0);
         } else {
             isPlaying = false;
             fastplay = false;
@@ -829,6 +829,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             fastplay(true, CurrentSong);
             paused = false;
             Log.d(TAG, "PlayPrev");
+            Extras.getInstance().saveSeekServices(0);
         } else {
             isPlaying = false;
             fastplay = false;
@@ -950,23 +951,24 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     public void restorePos() {
         int seekpos = Extras.getInstance().getmPreferences().getInt(PLAYER_POS, 0);
         seekto(seekpos);
-        SharedPreferences.Editor editor = Extras.getInstance().getmPreferences().edit();
-        editor.putInt(PLAYER_POS, 0);
-        editor.commit();
     }
+
 
     @Override
     public int fadeDurationValue() {
         int fadeDuration = 0;
-        if (Extras.getInstance().getFadeDuration().equals("0")){
-            fadeDuration = 1000;
-            return fadeDuration;
-        }else if (Extras.getInstance().getFadeDuration().equals("1")){
-            fadeDuration = 3000;
-            return fadeDuration;
-        }else if (Extras.getInstance().getFadeDuration().equals("2")){
-            fadeDuration = 5000;
-            return fadeDuration;
+        String savedvalue = Extras.getInstance().getFadeDuration();
+        if ( savedvalue != null){
+            if (savedvalue.equals("0")){
+                fadeDuration = 1000;
+                return fadeDuration;
+            }else if (savedvalue.equals("1")){
+                fadeDuration = 3000;
+                return fadeDuration;
+            }else if (savedvalue.equals("2")){
+                fadeDuration = 5000;
+                return fadeDuration;
+            }
         }
         return fadeDuration;
     }
@@ -1058,6 +1060,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     @Override
     public void setdataPos(int pos, boolean play) {
         if (pos != -1 && pos < playList.size()) {
+            Extras.getInstance().saveSeekServices(0);
             playingIndex = pos;
             CurrentSong = playList.get(pos);
             if (play) {

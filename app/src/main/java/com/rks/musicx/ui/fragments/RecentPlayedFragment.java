@@ -13,7 +13,6 @@ import com.rks.musicx.R;
 import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Song;
-import com.rks.musicx.misc.utils.ATEUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
@@ -187,13 +186,6 @@ public class RecentPlayedFragment extends BaseLoaderFragment {
         return limit;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        getLoaderManager().restartLoader(recentlyplayed, null, this);
-        String ateKey = Helper.getATEKey(getActivity());
-        ATEUtils.setStatusBarColor(getActivity(), ateKey, Config.primaryColor(getActivity(), ateKey));
-    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -217,6 +209,9 @@ public class RecentPlayedFragment extends BaseLoaderFragment {
     @Override
     public void load() {
         getLoaderManager().restartLoader(recentlyplayed, null, this);
+        if (getActivity() == null){
+            return;
+        }
     }
 
 

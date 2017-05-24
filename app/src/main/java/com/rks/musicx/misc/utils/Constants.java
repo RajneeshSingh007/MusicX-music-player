@@ -83,7 +83,8 @@ public class Constants {
     public static final String FADETRACK = "fade_inout";
     public static final String REMOVETABS = "remove_tabs";
     public static final String TRYPEFACE_PATH = "font_path";
-
+    public static final String WIDGET_COLOR = "widget_color";
+    public static final String PLAYINGVIEW_TRACK = "isplayingView3";
     /*
     Choices
      */

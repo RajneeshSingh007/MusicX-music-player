@@ -13,19 +13,6 @@ import android.widget.ImageView;
  * Created by Coolalien on 6/28/2016.
  */
 
-/*
- * ©2017 Rajneesh Singh
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *     http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 public class BlurArtwork extends AsyncTask<String, Void, String> {
 
     private Context context;
@@ -35,11 +22,15 @@ public class BlurArtwork extends AsyncTask<String, Void, String> {
     private Bitmap finalResult;
     private final int height;
     private final int width;
+    private RenderScript renderScript = null;
+    private Allocation allocationIn  = null;
+    private Allocation allocationOut = null;
+    private ScriptIntrinsicBlur scriptIntrinsicBlur = null;
 
-    public BlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView, float scale) {
-        this.context = context;
+    public BlurArtwork(Context contexts, int radius, Bitmap bitmaps, ImageView imageView, float scale) {
+        this.context = contexts;
         this.radius = radius;
-        this.bitmap = bitmap;
+        this.bitmap = bitmaps;
         this.imageView = imageView;
         height = Math.round(bitmap.getHeight() * scale);
         width = Math.round(bitmap.getWidth() * scale);
@@ -48,10 +39,10 @@ public class BlurArtwork extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... params) {
         finalResult = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        RenderScript renderScript = RenderScript.create(context); //rs initialized
-        ScriptIntrinsicBlur scriptIntrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
-        Allocation allocationIn = Allocation.createFromBitmap(renderScript, bitmap, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT | Allocation.USAGE_SHARED);
-        Allocation allocationOut = Allocation.createTyped(renderScript, allocationIn.getType());
+        renderScript = RenderScript.create(context); //rs initialized
+        scriptIntrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
+        allocationIn = Allocation.createFromBitmap(renderScript, bitmap, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT | Allocation.USAGE_SHARED);
+        allocationOut = Allocation.createFromBitmap(renderScript, finalResult);
         scriptIntrinsicBlur.setRadius(radius); //radius option from users
         scriptIntrinsicBlur.setInput(allocationIn);
         scriptIntrinsicBlur.forEach(allocationOut);
@@ -63,6 +54,22 @@ public class BlurArtwork extends AsyncTask<String, Void, String> {
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
         imageView.setImageBitmap(finalResult);
+        try {
+            if (renderScript != null) {
+                renderScript.destroy();
+            }
+            if (allocationIn != null) {
+                allocationIn.destroy();
+            }
+            if (allocationOut != null) {
+                allocationOut.destroy();
+            }
+            if (scriptIntrinsicBlur != null) {
+                scriptIntrinsicBlur.destroy();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

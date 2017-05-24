@@ -128,7 +128,7 @@ public class Equalizers {
         if (equalizer == null) {
             return;
         }
-        if (presets >= 0 && presets < equalizer.getNumberOfPresets()) {
+        if (presets >= 0) {
             preset = presets;
             equalizer.usePreset(presets);
         }

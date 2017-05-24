@@ -1,9 +1,7 @@
 package com.rks.musicx.data.model;
 
-import android.text.TextUtils;
-
 import java.io.File;
-import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,7 +24,6 @@ import java.util.List;
 public class FolderModel implements Comparable<FolderModel> {
 
     private static final List<String> fileExtensions = new ArrayList<>(Arrays.asList("aac", "mp4", "flac", "m4a", "mp3", "ogg"));
-
     private final File mFile;
     private final FileModelComparator mFileModelComparator;
     private final FileExtensionFilter mFileExtensionFilter;
@@ -34,7 +31,7 @@ public class FolderModel implements Comparable<FolderModel> {
     public FolderModel(File file) {
         mFile = file;
         mFileModelComparator = new FileModelComparator();
-        mFileExtensionFilter = new FileExtensionFilter();
+        mFileExtensionFilter = new FileExtensionFilter(fileExtensions);
     }
 
 
@@ -42,7 +39,12 @@ public class FolderModel implements Comparable<FolderModel> {
         mFile = new File(filePath);
 
         mFileModelComparator = new FileModelComparator();
-        mFileExtensionFilter = new FileExtensionFilter();
+        mFileExtensionFilter = new FileExtensionFilter(fileExtensions);
+    }
+
+
+    public long getLastModified() {
+        return mFile.lastModified();
     }
 
 
@@ -52,7 +54,12 @@ public class FolderModel implements Comparable<FolderModel> {
 
 
     public String getPath() {
-        return mFile.getAbsolutePath();
+        return mFile.getPath();
+    }
+
+
+    public String getURLString() {
+        return mFile.getPath();
     }
 
 
@@ -69,28 +76,23 @@ public class FolderModel implements Comparable<FolderModel> {
         return mFile.getParent();
     }
 
-    public File getParentFile(){
-        return mFile.getParentFile();
-    }
-
-    public static List<String> getFileExtensions() {
-        return fileExtensions;
-    }
-
-    public boolean isFileExists() {
+    public boolean isFileExists(){
         return mFile.exists();
     }
 
     public List<FolderModel> listFilesSorted() {
         List<FolderModel> files = new ArrayList<>();
-        File extra = new File(mFile.getAbsolutePath(), "..");
-        files.add(new FolderModel(extra));
-        File[] filesArray =mFile.listFiles(mFileExtensionFilter);
+        File[] filesArray = mFile.listFiles(mFileExtensionFilter);
+
         if (filesArray == null) {
             return files;
         }
-        for (int k =0; k< filesArray.length; k++){
-            files.add(new FolderModel(filesArray[k]));
+        for (File file : filesArray) {
+            if (file.getName().equals(".nomedia")) {
+                files.clear();
+                break;
+            }
+            files.add(new FolderModel(file));
         }
         Collections.sort(files, mFileModelComparator);
         return files;
@@ -134,53 +136,49 @@ public class FolderModel implements Comparable<FolderModel> {
         }
     }
 
-    private class FileExtensionFilter implements FileFilter {
+    public File getmFile() {
+        return mFile;
+    }
 
-        public FileExtensionFilter() {
+    private class FileExtensionFilter implements FilenameFilter {
+
+        private List<String> mExtensions;
+
+        public FileExtensionFilter(List<String> extensions) {
+            mExtensions = extensions;
         }
-
 
         @Override
-        public boolean accept(File file) {
-            if (file.isHidden() || !file.canRead()) {
-                return false;
-            }
-            if (file.isFile()) {
-                String name = file.getName();
-                return getfileExtension(name);
-            } else if (file.isDirectory()) {
-                return checkDir(file);
-            } else
-                return false;
-        }
+        public boolean accept(File dir, String filename) {
 
-        public  boolean getfileExtension(String name) {
-            if (TextUtils.isEmpty(name)) {
+            if (new File(dir, filename).isHidden() || !new File(dir, filename).canRead()) {
                 return false;
             }
-            int p = name.lastIndexOf(".") + 1;
-            if (p < 1) {
-                return false;
+            if (new File(dir, filename).isDirectory()) {
+                return true;
             }
-            String ext = name.substring(p).toLowerCase();
-            for (String o : fileExtensions) {
-                if (o.equals(ext)) {
-                    return true;
+
+            if (new File(dir, filename).isFile() && new File(dir, filename).exists()){
+                if (!mExtensions.isEmpty()) {
+                    String ext = getFileExtension(filename);
+                    if (mExtensions.contains(ext)) {
+                        return true;
+                    }
                 }
             }
             return false;
         }
 
+        private String getFileExtension(String filename) {
 
-        private  boolean checkDir(File dir) {
-            return dir.exists() && dir.canRead() && !".".equals(dir.getName()) && dir.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File pathname) {
-                    String name = pathname.getName();
-                    return !".".equals(name) && !"..".equals(name) && pathname.canRead() &&  (pathname.isDirectory()  || (pathname.isFile() && getfileExtension(name)));
-                }
-
-            }).length != 0;
+            String ext = null;
+            int i = filename.lastIndexOf('.');
+            if (i != -1 && i < filename.length()) {
+                ext = filename.substring(i + 1).toLowerCase();
+            }
+            return ext;
         }
+
     }
+
 }

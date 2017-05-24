@@ -61,6 +61,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Album;
 import com.rks.musicx.data.model.Artist;
+import com.rks.musicx.data.model.FolderModel;
 import com.rks.musicx.data.model.Playlist;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.LyricsData;
@@ -106,6 +107,11 @@ import static com.rks.musicx.R.string.file_size;
 import static com.rks.musicx.misc.utils.Constants.BlackTheme;
 import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 import static com.rks.musicx.misc.utils.Constants.LightTheme;
+import static com.rks.musicx.misc.utils.Constants.SONG_ALBUM;
+import static com.rks.musicx.misc.utils.Constants.SONG_ARTIST;
+import static com.rks.musicx.misc.utils.Constants.SONG_TITLE;
+import static com.rks.musicx.misc.utils.Constants.SONG_TRACK_NUMBER;
+import static com.rks.musicx.misc.utils.Constants.SONG_YEAR;
 
 /*
  * Created by Coolalien on 24/03/2017.
@@ -298,35 +304,42 @@ public class Helper {
                 tag = new ID3v24Tag();
             }
             try {
+                String year = song.getYear() != null ? song.getYear() : SONG_YEAR;
+                String title = song.getTitle() != null ? song.getTitle() : SONG_TITLE;
+                String album = song.getAlbum() != null ? song.getArtist() : SONG_ALBUM;
+                String artist = song.getArtist() != null ? song.getArtist() : SONG_ARTIST;
+                String track = song.getTrackNumber() != 0 ? String.valueOf(song.getTrackNumber()) : SONG_TRACK_NUMBER;
+                String lyrics = song.getLyrics() != null ? song.getLyrics() : "No Lyrics";
                 tag.deleteField(FieldKey.LYRICS);
-                tag.setField(FieldKey.TITLE, song.getTitle());
-                tag.setField(FieldKey.YEAR, song.getYear());
-                tag.setField(FieldKey.ARTIST, song.getArtist());
-                tag.setField(FieldKey.ALBUM, song.getAlbum());
-                tag.setField(FieldKey.TRACK, String.valueOf(song.getTrackNumber()));
-                tag.setField(FieldKey.LYRICS, song.getLyrics());
+                tag.setField(FieldKey.TITLE, title);
+                tag.setField(FieldKey.YEAR,  year);
+                tag.setField(FieldKey.ARTIST, artist);
+                tag.setField(FieldKey.ALBUM, album);
+                tag.setField(FieldKey.TRACK, track);
+                tag.setField(FieldKey.LYRICS, lyrics);
                 ContentValues values = new ContentValues();
-                values.put(MediaStore.Audio.Media.TITLE, song.getTitle());
-                values.put(MediaStore.Audio.Media.YEAR, song.getYear());
-                values.put(MediaStore.Audio.Media.ARTIST, song.getArtist());
-                values.put(MediaStore.Audio.Media.TRACK, song.getTrackNumber());
+                values.put(MediaStore.Audio.Media.TITLE, title);
+                values.put(MediaStore.Audio.Media.YEAR, year);
+                values.put(MediaStore.Audio.Media.ARTIST, artist);
+                values.put(MediaStore.Audio.Media.TRACK, track);
                 Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, new String[]{BaseColumns._ID,
                                 MediaStore.Audio.AlbumColumns.ALBUM, MediaStore.Audio.AlbumColumns.ALBUM_KEY,
                                 MediaStore.Audio.AlbumColumns.ARTIST}, MediaStore.Audio.AlbumColumns.ALBUM + " = ?",
-                        new String[]{song.getAlbum()}, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+                        new String[]{album}, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
 
                 if (cursor != null && cursor.moveToFirst()) {
                     long id = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
                     values.put(MediaStore.Audio.Media.ALBUM_ID, id);
                 } else {
-                    values.put(MediaStore.Audio.Media.ALBUM, song.getAlbum());
+                    values.put(MediaStore.Audio.Media.ALBUM, album);
                 }
                 if (cursor != null) {
                     cursor.close();
                 }
                 if (values.size() > 0) {
-                    String id = String.valueOf(song.getId());
-                    context.getContentResolver().update(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values, id, null);
+                    context.getContentResolver().update(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values, MediaStore.Audio.Media._ID + "=" + song.getId(), null);
+                }else {
+                    return false;
                 }
             } catch (FieldDataInvalidException e) {
                 e.printStackTrace();
@@ -1298,6 +1311,18 @@ public class Helper {
             }
         }
         return filtersonglist;
+    }
+
+    public List<FolderModel> filterFolder(List<FolderModel> modelList, String query){
+        query = query.toLowerCase().trim();
+        final List<FolderModel> folderModels = new ArrayList<>();
+        for (FolderModel folder : folderModels){
+            final String text = folder.getName().toLowerCase().trim();
+            if (text.contains(query)){
+                folderModels.add(folder);
+            }
+        }
+        return folderModels;
     }
 
     /**

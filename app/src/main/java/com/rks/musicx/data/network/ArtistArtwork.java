@@ -5,8 +5,11 @@ package com.rks.musicx.data.network;
  */
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.support.v7.graphics.Palette;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
@@ -15,6 +18,9 @@ import com.androidnetworking.interfaces.DownloadListener;
 import com.rks.musicx.data.network.model.Artist;
 import com.rks.musicx.data.network.model.Artist__;
 import com.rks.musicx.data.network.model.Image_;
+import com.rks.musicx.interfaces.bitmap;
+import com.rks.musicx.interfaces.palette;
+import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Constants;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
@@ -45,10 +51,17 @@ public class ArtistArtwork extends AsyncTask<Void, Void, Void> {
     private Services services;
     private Context context;
     private String artistName;
+    private ImageView imageView;
+    private palette palettework;
+    private Helper helper;
+    private boolean hqdownloaded = false, lowdownloaded = false;
 
-    public ArtistArtwork(Context context, String artistName) {
+    public ArtistArtwork(Context context, String artistName, ImageView imageView, palette palettework) {
         this.context = context;
         this.artistName = artistName;
+        this.imageView = imageView;
+        this.palettework = palettework;
+        helper = new Helper(context);
         clients = new Clients(context, Constants.lastFmUrl);
         services = clients.createService(Services.class);
     }
@@ -65,43 +78,49 @@ public class ArtistArtwork extends AsyncTask<Void, Void, Void> {
                     if (artist1 != null && artist1.getImage() != null && artist1.getImage().size() > 0) {
                         String artistImagePath = new Helper(context).loadArtistImage(artistName);
                         File file = new File(artistImagePath);
+                        File file1 = new File(helper.getAlbumArtworkLocation(), artistName + ".jpeg");
                         for (Image_ artistArtwork : artist1.getImage()) {
-                            if (Extras.getInstance().hqArtistArtwork()) {
-                                if (!file.exists()) {
-                                    AndroidNetworking.download(artworkQuality(artistArtwork), new Helper(context).getArtistArtworkLocation(), artistName + ".jpeg")
-                                            .setTag("DownloadingArtistImage")
-                                            .setPriority(Priority.MEDIUM)
-                                            .build()
-                                            .startDownload(new DownloadListener() {
-                                                @Override
-                                                public void onDownloadComplete() {
-                                                    Log.d("Artist", "successfully downloaded");
-                                                }
+                            if (!file.exists()) {
+                                if (!Extras.getInstance().saveData()) {
+                                    if (Extras.getInstance().hqArtistArtwork()){
+                                        if (artistArtwork.getSize().equals("mega")){
+                                            hqdownloaded = true;
+                                            AndroidNetworking.download(artistArtwork.getText(), helper.getArtistArtworkLocation(), artistName + ".jpeg")
+                                                    .setTag("DownloadingArtistImage")
+                                                    .setPriority(Priority.MEDIUM)
+                                                    .build()
+                                                    .startDownload(new DownloadListener() {
+                                                        @Override
+                                                        public void onDownloadComplete() {
+                                                            Log.d("Artist", "successfully downloaded");
+                                                        }
 
-                                                @Override
-                                                public void onError(ANError anError) {
-                                                    Log.d("Artist", "failed");
-                                                }
-                                            });
-                                }
+                                                        @Override
+                                                        public void onError(ANError anError) {
+                                                            Log.d("Artist", "failed");
+                                                        }
+                                                    });
+                                        }
+                                    }else {
+                                        if (artistArtwork.getSize().equals("extralarge")){
+                                            lowdownloaded = true;
+                                            AndroidNetworking.download(artistArtwork.getText(), helper.getArtistArtworkLocation(), artistName + ".jpeg")
+                                                    .setTag("DownloadingArtistImage")
+                                                    .setPriority(Priority.MEDIUM)
+                                                    .build()
+                                                    .startDownload(new DownloadListener() {
+                                                        @Override
+                                                        public void onDownloadComplete() {
+                                                            Log.d("Artist", "successfully downloaded");
+                                                        }
 
-                            } else {
-                                if (!file.exists()) {
-                                    AndroidNetworking.download(artworkQuality(artistArtwork), new Helper(context).getArtistArtworkLocation(), artistName + ".jpeg")
-                                            .setTag("DownloadingArtistImage")
-                                            .setPriority(Priority.MEDIUM)
-                                            .build()
-                                            .startDownload(new DownloadListener() {
-                                                @Override
-                                                public void onDownloadComplete() {
-                                                    Log.d("Artist", "successfully downloaded");
-                                                }
-
-                                                @Override
-                                                public void onError(ANError anError) {
-                                                    Log.d("Artist", "failed");
-                                                }
-                                            });
+                                                        @Override
+                                                        public void onError(ANError anError) {
+                                                            Log.d("Artist", "failed");
+                                                        }
+                                                    });
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -126,15 +145,24 @@ public class ArtistArtwork extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
         Log.d("ArtistArtwork", "Success");
-    }
+        String artistImagePath = new Helper(context).loadArtistImage(artistName);
+        File file = new File(artistImagePath);
+        ArtworkUtils.ArtworkLoader(context, null, file.getAbsolutePath(),0, new palette() {
+            @Override
+            public void palettework(Palette palette) {
+                palettework.palettework(palette);
+            }
+        }, new bitmap() {
+            @Override
+            public void bitmapwork(Bitmap bitmap) {
+                imageView.setImageBitmap(bitmap);
+            }
 
-    private String artworkQuality(Image_ artistArtwork) {
-        if (artistArtwork.getSize().equals("large")) {
-            return artistArtwork.getText();
-        } else if (artistArtwork.getSize().equals("mega")) {
-            return artistArtwork.getText();
-        }
-        return null;
+            @Override
+            public void bitmapfailed(Bitmap bitmap) {
+                imageView.setImageBitmap(bitmap);
+            }
+        });
     }
 
 

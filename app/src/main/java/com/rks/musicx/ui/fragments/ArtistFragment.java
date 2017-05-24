@@ -26,11 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.afollestad.appthemeengine.Config;
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.palette.BitmapPalette;
-import com.palette.GlidePalette;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
@@ -43,7 +39,7 @@ import com.rks.musicx.data.network.ArtistArtwork;
 import com.rks.musicx.data.network.Clients;
 import com.rks.musicx.data.network.Services;
 import com.rks.musicx.data.network.model.Artist__;
-import com.rks.musicx.misc.utils.ATEUtils;
+import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.Constants;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
@@ -54,7 +50,6 @@ import com.rks.musicx.ui.adapters.AlbumListAdapter;
 import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
-import java.io.File;
 import java.util.List;
 
 import retrofit2.Call;
@@ -239,35 +234,7 @@ public class ArtistFragment extends BaseLoaderFragment {
             getActivity().getWindow().setStatusBarColor(colorAccent);
             toolbar.setBackgroundColor(colorAccent);
         }
-        mRequestManager = Glide.with(this);
-        String artistImagePath = new Helper(getContext()).loadArtistImage(artist.getName());
-        File file = new File(artistImagePath);
-        if (file.exists()) {
-            if (getActivity() == null) {
-                return;
-            }
-            mRequestManager.load(file.getAbsolutePath())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .dontTransform()
-                    .placeholder(R.mipmap.ic_launcher)
-                    .error(R.mipmap.ic_launcher)
-                    .crossFade()
-                    .listener(GlidePalette.with(file.getAbsolutePath()).intoCallBack(new BitmapPalette.CallBack() {
-                        @Override
-                        public void onPaletteLoaded(@Nullable Palette palette) {
-                            final int[] colors = Helper.getAvailableColor(getContext(), palette);
-                            toolbar.setBackgroundColor(colors[0]);
-                            if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
-                                getActivity().getWindow().setStatusBarColor(colors[0]);
-                            } else {
-                                getActivity().getWindow().setStatusBarColor(colors[0]);
-                            }
-                        }
-                    }))
-                    .into(artworkView);
-        } else {
-            artworkView.setImageResource(R.mipmap.ic_launcher);
-        }
+        artistCover();
         bioView.setVisibility(View.GONE);
         /**
          * Swipe Listerner
@@ -421,19 +388,15 @@ public class ArtistFragment extends BaseLoaderFragment {
 
     @Override
     public void load() {
-
+        if (getActivity() == null){
+            return;
+        }
+        reload();
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (!Extras.getInstance().saveData()) {
-            String artistImagePath = new Helper(getContext()).loadArtistImage(artist.getName());
-            File file = new File(artistImagePath);
-            if (!file.exists()) {
-                ArtistCover();
-            }
-        }
         if (getActivity() == null) {
             return;
         }
@@ -444,8 +407,19 @@ public class ArtistFragment extends BaseLoaderFragment {
     *
     * ArtistCover
     */
-    private void ArtistCover() {
-        ArtistArtwork artistArtwork = new ArtistArtwork(getContext(), artist.getName());
+    private void artistCover() {
+        ArtistArtwork artistArtwork = new ArtistArtwork(getContext(), artist.getName(), artworkView, new palette() {
+            @Override
+            public void palettework(Palette palette) {
+                final int[] colors = Helper.getAvailableColor(getContext(), palette);
+                toolbar.setBackgroundColor(colors[0]);
+                if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
+                    getActivity().getWindow().setStatusBarColor(colors[0]);
+                } else {
+                    getActivity().getWindow().setStatusBarColor(colors[0]);
+                }
+            }
+        });
         artistArtwork.execute();
     }
 
@@ -530,15 +504,6 @@ public class ArtistFragment extends BaseLoaderFragment {
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        getLoaderManager().restartLoader(trackloader, null, this);
-        getLoaderManager().restartLoader(albumLoaders, null, albumLoadersCallbacks);
-        String ateKey = Helper.getATEKey(getContext());
-        ATEUtils.setStatusBarColor(getActivity(), ateKey, Config.primaryColor(getActivity(), ateKey));
     }
 
     @Override

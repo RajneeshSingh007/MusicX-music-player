@@ -14,7 +14,6 @@ import com.rks.musicx.R;
 import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Song;
-import com.rks.musicx.misc.utils.ATEUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
@@ -87,15 +86,6 @@ public class RecentlyAddedFragment extends BaseLoaderFragment {
             setIsgridView(isgridview);
         }
         setHasOptionsMenu(true);
-    }
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        getLoaderManager().restartLoader(trackloader, null, this);
-        String ateKey = Helper.getATEKey(getContext());
-        ATEUtils.setStatusBarColor(getActivity(), ateKey, Config.primaryColor(getActivity(), ateKey));
     }
 
     @Override
@@ -223,6 +213,9 @@ public class RecentlyAddedFragment extends BaseLoaderFragment {
     @Override
     public void load() {
         getLoaderManager().restartLoader(trackloader, null, this);
+        if (getActivity() == null){
+            return;
+        }
     }
 
 

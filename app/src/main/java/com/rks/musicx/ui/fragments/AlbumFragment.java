@@ -16,9 +16,8 @@ import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Album;
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.data.network.AlbumArtwork;
 import com.rks.musicx.interfaces.palette;
-import com.rks.musicx.misc.utils.ATEUtils;
-import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
@@ -215,7 +214,10 @@ public class AlbumFragment extends BaseLoaderFragment {
 
     @Override
     public void load() {
-
+        if (getActivity() == null){
+            return;
+        }
+        getLoaderManager().restartLoader(trackloader, null, this);
     }
 
 
@@ -223,7 +225,7 @@ public class AlbumFragment extends BaseLoaderFragment {
         if (getActivity() == null) {
             return;
         }
-        ArtworkUtils.ArtworkLoaderPalette(getContext(), mAlbum.getAlbumName(), mAlbum.getId(), artworkView, new palette() {
+        AlbumArtwork albumArtwork = new AlbumArtwork(getContext(),mAlbum.getArtistName(), mAlbum.getArtistName(), mAlbum.getId(), artworkView, new palette() {
             @Override
             public void palettework(Palette palette) {
                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -235,16 +237,9 @@ public class AlbumFragment extends BaseLoaderFragment {
                 }
             }
         });
+        albumArtwork.execute();
     }
 
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        getLoaderManager().restartLoader(trackloader, null, this);
-        String ateKey = Helper.getATEKey(getContext());
-        ATEUtils.setStatusBarColor(getActivity(), ateKey, Config.primaryColor(getActivity(), ateKey));
-    }
 
     @Override
     public void setAdapater(List<Song> data) {

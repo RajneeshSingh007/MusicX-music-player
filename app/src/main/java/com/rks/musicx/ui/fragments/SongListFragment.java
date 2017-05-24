@@ -256,7 +256,6 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
     @Override
     public void load() {
         getLoaderManager().restartLoader(trackloader, null, this);
-        songListAdapter.notifyDataSetChanged();
     }
 
 

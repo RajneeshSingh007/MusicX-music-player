@@ -28,7 +28,6 @@ import com.rks.musicx.R;
 import com.rks.musicx.interfaces.bitmap;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.widgets.BlurArtwork;
-import com.rks.musicx.misc.widgets.CircleImageView;
 
 import java.io.File;
 
@@ -89,61 +88,18 @@ public class ArtworkUtils {
         return bitmap;
     }
 
-    private static Target<Bitmap> loadArtwork(Context context, String path, ImageView imageView) {
+    public static File getAlbumCoverPath(Context context, String album) {
+        String albumImagePath = new Helper(context).loadAlbumImage(album);
+        File file = new File(albumImagePath);
+        return file;
+    }
+
+    private static Target<Bitmap> loadArtwork(Context context,  String path, palette palettework, bitmap bitmapwork) {
         return Glide.with(context)
                 .load(path)
                 .asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .centerCrop()
-                .animate(android.R.anim.fade_in)
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                .into(imageView);
-    }
-
-    private static Target<Bitmap> loadArtwork(Context context, long key, ImageView imageView) {
-        return Glide.with(context)
-                .load(uri(key))
-                .asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .animate(android.R.anim.fade_in)
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                .into(imageView);
-    }
-
-    private static Target loadArtwork(Context context, long key, ImageView imageView, palette palettework) {
-        return Glide.with(context)
-                .load(uri(key))
-                .asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .animate(android.R.anim.fade_in)
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                .listener(GlidePalette.with(uri(key).toString()).intoCallBack(new BitmapPalette.CallBack() {
-                    @Override
-                    public void onPaletteLoaded(@Nullable Palette palette) {
-                        palettework.palettework(palette);
-                    }
-                }))
-                .into(imageView);
-    }
-
-    private static Target loadArtwork(Context context, String path, ImageView imageView, palette palettework) {
-        return Glide.with(context)
-                .load(path)
-                .asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .animate(android.R.anim.fade_in)
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
@@ -154,26 +110,6 @@ public class ArtworkUtils {
                         palettework.palettework(palette);
                     }
                 }))
-                .into(imageView);
-    }
-
-    private static Target loadArtwork(Context context, String key, palette palettework, bitmap bitmapwork) {
-        return Glide.with(context)
-                .load(key)
-                .asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .animate(android.R.anim.fade_in)
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                .listener(GlidePalette.with(key).intoCallBack(new BitmapPalette.CallBack() {
-                    @Override
-                    public void onPaletteLoaded(@Nullable Palette palette) {
-                        palettework.palettework(palette);
-                    }
-                }))
                 .into(new Target<Bitmap>() {
                     @Override
                     public void onLoadStarted(Drawable placeholder) {
@@ -227,13 +163,12 @@ public class ArtworkUtils {
                 });
     }
 
-    private static Target loadArtwork(Context context, long key, palette palettework, bitmap bitmapwork) {
+    private static Target<Bitmap> loadArtwork(Context context, long key, palette palettework, bitmap bitmapwork) {
         return Glide.with(context)
                 .load(uri(key))
                 .asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .centerCrop()
-                .animate(android.R.anim.fade_in)
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
                 .format(DecodeFormat.PREFER_ARGB_8888)
@@ -271,13 +206,13 @@ public class ArtworkUtils {
                     }
 
                     @Override
-                    public Request getRequest() {
-                        return null;
+                    public void setRequest(Request request) {
+
                     }
 
                     @Override
-                    public void setRequest(Request request) {
-
+                    public Request getRequest() {
+                        return null;
                     }
 
                     @Override
@@ -297,73 +232,70 @@ public class ArtworkUtils {
                 });
     }
 
-    public static File getAlbumCoverPath(Context context, String album) {
-        String albumImagePath = new Helper(context).loadAlbumImage(album);
-        File file = new File(albumImagePath);
-        return file;
-    }
-
-    public static void ArtworkLoader(Context context, String album, long key, CircleImageView imageView) {
-        if (getAlbumCoverPath(context, album).exists()) {
-            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), imageView);
-        }
-        loadArtwork(context, key, imageView);
-    }
-
-    public static void ArtworkLoader(Context context, String album, String path, CircleImageView imageView) {
-        if (getAlbumCoverPath(context, album).exists()) {
-            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), imageView);
-        }
-        loadArtwork(context, path, imageView);
-    }
-
-    public static void ArtworkLoader(Context context, String album, long key, ImageView imageView) {
-        if (getAlbumCoverPath(context, album).exists()) {
-            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), imageView);
-        }
-        loadArtwork(context, key, imageView);
-    }
-
-    public static void ArtworkNetworkLoader(Context context, String key, CircleImageView imageView) {
-        Glide.with(context)
-                .load(key)
-                .asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .animate(android.R.anim.fade_in)
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .format(DecodeFormat.PREFER_ARGB_8888)
-                .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                .into(imageView);
-    }
-
-    public static void ArtworkLoaderPalette(Context context, String album, long key, ImageView imageView, palette palettework) {
-        if (getAlbumCoverPath(context, album).exists()) {
-            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), imageView, palettework);
-        }
-        loadArtwork(context, key, imageView, palettework);
-    }
-
-    public static void ArtworkLoaderPalette(Context context, String album, ImageView imageView, palette palettework) {
-        if (getAlbumCoverPath(context, album).exists()) {
-            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), imageView, palettework);
-        }
-        loadArtwork(context, album, imageView, palettework);
-    }
-
-    public static void ArtworkLoaderBitmapPalette(Context context, String album, String key, palette palettework, bitmap bitmapwork) {
+    public static void ArtworkLoader(Context context, String album, String path, long key, palette palettework, bitmap bitmapwork) {
         if (getAlbumCoverPath(context, album).exists()) {
             loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), palettework, bitmapwork);
+        } else {
+            if (path != null){
+                loadArtwork(context, path, palettework, bitmapwork);
+            }else {
+                loadArtwork(context, key, palettework, bitmapwork);
+            }
         }
-        loadArtwork(context, key, palettework, bitmapwork);
     }
 
-    public static void ArtworkLoaderBitmapPalette(Context context, String album, long key, palette palettework, bitmap bitmapwork) {
-        if (getAlbumCoverPath(context, album).exists()) {
-            loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), palettework, bitmapwork);
+
+
+    public static AsyncTask<String, Void, String> getBlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView, float scale) {
+        BlurArtwork blurArtwork = new BlurArtwork(context, radius, bitmap, imageView, scale);
+        return blurArtwork.execute("Executed");
+    }
+
+    public static void blurPreferances(Context context, Bitmap blurBitmap, ImageView imageView) {
+        String blurView = Extras.getInstance().getmPreferences().getString(BlurView, Constants.Two);
+        switch (blurView) {
+            case Constants.Zero:
+                getBlurArtwork(context, radius(), blurBitmap, imageView, 1.0f);
+                break;
+            case Constants.One:
+                getBlurArtwork(context, radius(), blurBitmap, imageView, 0.8f);
+                break;
+            case Constants.Two:
+                getBlurArtwork(context, radius(), blurBitmap, imageView, 0.6f);
+                break;
+            case Constants.Three:
+                getBlurArtwork(context, radius(), blurBitmap, imageView, 0.4f);
+                break;
+            case Constants.Four:
+                getBlurArtwork(context, radius(), blurBitmap, imageView, 0.2f);
+                break;
+            default: getBlurArtwork(context, 25, blurBitmap, imageView, 0.2f);
+                break;
         }
-        loadArtwork(context, key, palettework, bitmapwork);
+    }
+
+
+    public static int radius(){
+        int radius = 1;
+        String blurView = Extras.getInstance().getmPreferences().getString(BlurView, Constants.Zero);
+        switch (blurView) {
+            case Constants.Zero:
+                radius = 5;
+                return radius;
+            case Constants.One:
+                radius = 10;
+                return radius;
+            case Constants.Two:
+                radius = 15;
+                return radius;
+            case Constants.Three:
+                radius = 20;
+                return radius;
+            case Constants.Four:
+                radius = 25;
+                return radius;
+        }
+        return radius;
     }
 
     public static Bitmap drawableToBitmap(Drawable drawable) {
@@ -388,31 +320,6 @@ public class ArtworkUtils {
         return bitmap;
     }
 
-    public static AsyncTask<String, Void, String> getBlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView, float scale) {
-
-        return new BlurArtwork(context, radius, bitmap, imageView, scale).execute("Executed");
-    }
-
-    public static void blurPreferances(Context context, Bitmap blurBitmap, ImageView imageView) {
-        String blurView = Extras.getInstance().getmPreferences().getString(BlurView, Constants.Zero);
-        switch (blurView) {
-            case Constants.Zero:
-                getBlurArtwork(context, 5, blurBitmap, imageView, 1.0f);
-                break;
-            case Constants.One:
-                getBlurArtwork(context, 10, blurBitmap, imageView, 0.8f);
-                break;
-            case Constants.Two:
-                getBlurArtwork(context, 15, blurBitmap, imageView, 0.6f);
-                break;
-            case Constants.Three:
-                getBlurArtwork(context, 20, blurBitmap, imageView, 0.4f);
-                break;
-            case Constants.Four:
-                getBlurArtwork(context, 25, blurBitmap, imageView, 0.2f);
-                break;
-        }
-    }
 
 }
 

@@ -71,11 +71,15 @@ public class MusicXwidget4x4 extends AppWidgetProvider {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                ArtworkUtils.ArtworkLoaderBitmapPalette(musicXService, musicXService.getsongAlbumName(), musicXService.getsongAlbumID(), new palette() {
+                ArtworkUtils.ArtworkLoader(musicXService, musicXService.getsongAlbumName(),null, musicXService.getsongAlbumID(), new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         int colors[] = Helper.getAvailableColor(musicXService, palette);
-                        remoteViews.setInt(R.id.item_view, "setBackgroundColor", colors[0]);
+                        if (Extras.getInstance().getWigetColor()){
+                            remoteViews.setInt(R.id.item_view, "setBackgroundColor", Color.TRANSPARENT);
+                        }else {
+                            remoteViews.setInt(R.id.item_view, "setBackgroundColor", colors[0]);
+                        }
                         remoteViews.setInt(R.id.title, "setTextColor", Color.WHITE);
                         remoteViews.setInt(R.id.artist, "setTextColor", Color.WHITE);
                     }
@@ -160,6 +164,7 @@ public class MusicXwidget4x4 extends AppWidgetProvider {
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(musicXService, this.getClass()));
             if (appWidgetIds.length > 0) {
                 musicxWidgetUpdate(musicXService, appWidgetIds);
+                FavHelper favHelper = new FavHelper(musicXService);
                 RemoteViews remoteViews = new RemoteViews(musicXService.getPackageName(), R.layout.bigwidget);
                 if (PLAYSTATE_CHANGED.equals(what)) {
                     if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
@@ -169,33 +174,6 @@ public class MusicXwidget4x4 extends AppWidgetProvider {
                     }
                 }
                 if (META_CHANGED.equals(what)) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ArtworkUtils.ArtworkLoaderBitmapPalette(musicXService, musicXService.getsongAlbumName(), musicXService.getsongAlbumID(), new palette() {
-                                @Override
-                                public void palettework(Palette palette) {
-                                    int colors[] = Helper.getAvailableColor(musicXService, palette);
-                                    remoteViews.setInt(R.id.item_view, "setBackgroundColor", colors[0]);
-                                    remoteViews.setInt(R.id.title, "setTextColor", Color.WHITE);
-                                    remoteViews.setInt(R.id.artist, "setTextColor", Color.WHITE);
-                                }
-                            }, new bitmap() {
-                                @Override
-                                public void bitmapwork(Bitmap bitmap) {
-                                    remoteViews.setImageViewBitmap(R.id.artwork, bitmap);
-                                    appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
-                                }
-
-                                @Override
-                                public void bitmapfailed(Bitmap bitmap) {
-                                    remoteViews.setImageViewBitmap(R.id.artwork, bitmap);
-                                    appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
-                                }
-                            });
-                        }
-                    });
-                    FavHelper favHelper = new FavHelper(musicXService);
                     if (favHelper.isFavorite(Extras.getInstance().getSongId(musicXService.getsongId()))) {
                         remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite);
                     } else {

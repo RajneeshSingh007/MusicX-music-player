@@ -26,8 +26,6 @@ import static com.rks.musicx.misc.utils.Constants.ACTION_FAV;
 import static com.rks.musicx.misc.utils.Constants.ACTION_NEXT;
 import static com.rks.musicx.misc.utils.Constants.ACTION_PREVIOUS;
 import static com.rks.musicx.misc.utils.Constants.ACTION_TOGGLE;
-import static com.rks.musicx.misc.utils.Constants.META_CHANGED;
-import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
 
 /*
  * Created by Coolalien on 02/05/2017.
@@ -63,8 +61,7 @@ public class NotificationHandler {
         PendingIntent pendInt = PendingIntent.getActivity(musicXService, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = (NotificationCompat.Builder) new NotificationCompat.Builder(musicXService)
                 .setWhen(System.currentTimeMillis())
-                .setCategory(Intent
-                        .CATEGORY_APP_MUSIC)
+                .setCategory(Intent.CATEGORY_APP_MUSIC)
                 .setPriority(Notification.PRIORITY_DEFAULT)
                 .setShowWhen(false)
                 .setAutoCancel(true)
@@ -88,55 +85,49 @@ public class NotificationHandler {
         } else {
             remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite_outline);
         }
-        if (META_CHANGED.equals(what) || PLAYSTATE_CHANGED.equals(what)) {
-            if (favHelper.isFavorite(Extras.getInstance().getSongId(musicXService.getsongId()))) {
-                remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite);
-            } else {
-                remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite_outline);
-            }
-            if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
-                remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
-                smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_pause);
-                builder.setOngoing(true);
-            } else {
-                remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
-                smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_play);
-                builder.setOngoing(false);
-            }
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    ArtworkUtils.ArtworkLoaderBitmapPalette(musicXService, musicXService.getsongAlbumName(), musicXService.getsongAlbumID(), new palette() {
-                        @Override
-                        public void palettework(Palette palette) {
-                            int colors[] = Helper.getAvailableColor(musicXService, palette);
-                            remoteViews.setInt(R.id.item_view, "setBackgroundColor", colors[0]);
-                            remoteViews.setInt(R.id.title, "setTextColor", Color.WHITE);
-                            remoteViews.setInt(R.id.artist, "setTextColor", Color.WHITE);
-                            smallremoteView.setInt(R.id.small_item_view, "setBackgroundColor", colors[0]);
-                            smallremoteView.setInt(R.id.small_title, "setTextColor", Color.WHITE);
-                            smallremoteView.setInt(R.id.small_artist, "setTextColor", Color.WHITE);
-                        }
-                    }, new bitmap() {
-                        @Override
-                        public void bitmapwork(Bitmap bitmap) {
-                            remoteViews.setImageViewBitmap(R.id.artwork, bitmap);
-                            smallremoteView.setImageViewBitmap(R.id.small_artwork, bitmap);
-                            NotificationManagerCompat.from(musicXService).notify(notificationID, builder.build());
-                        }
-
-                        @Override
-                        public void bitmapfailed(Bitmap bitmap) {
-                            remoteViews.setImageViewBitmap(R.id.artwork, bitmap);
-                            smallremoteView.setImageViewBitmap(R.id.small_artwork, bitmap);
-                            NotificationManagerCompat.from(musicXService).notify(notificationID, builder.build());
-                        }
-                    });
-                }
-            });
+        if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
+            remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
+            smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_pause);
+            builder.setOngoing(true);
+        } else {
+            remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
+            smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_play);
+            builder.setOngoing(false);
         }
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                ArtworkUtils.ArtworkLoader(musicXService, musicXService.getsongAlbumName(),null, musicXService.getsongAlbumID(), new palette() {
+                    @Override
+                    public void palettework(Palette palette) {
+                        int colors[] = Helper.getAvailableColor(musicXService, palette);
+                        remoteViews.setInt(R.id.item_view, "setBackgroundColor", colors[0]);
+                        remoteViews.setInt(R.id.title, "setTextColor", Color.WHITE);
+                        remoteViews.setInt(R.id.artist, "setTextColor", Color.WHITE);
+                        smallremoteView.setInt(R.id.small_item_view, "setBackgroundColor", colors[0]);
+                        smallremoteView.setInt(R.id.small_title, "setTextColor", Color.WHITE);
+                        smallremoteView.setInt(R.id.small_artist, "setTextColor", Color.WHITE);
+                    }
+                }, new bitmap() {
+                    @Override
+                    public void bitmapwork(Bitmap bitmap) {
+                        remoteViews.setImageViewBitmap(R.id.artwork, bitmap);
+                        smallremoteView.setImageViewBitmap(R.id.small_artwork, bitmap);
+                        NotificationManagerCompat.from(musicXService).notify(notificationID, builder.build());
+                    }
+
+                    @Override
+                    public void bitmapfailed(Bitmap bitmap) {
+                        remoteViews.setImageViewBitmap(R.id.artwork, bitmap);
+                        smallremoteView.setImageViewBitmap(R.id.small_artwork, bitmap);
+                        NotificationManagerCompat.from(musicXService).notify(notificationID, builder.build());
+                    }
+                });
+            }
+        });
         controls(remoteViews, musicXService);
         controlsSmall(smallremoteView, musicXService);
+        //NotificationManagerCompat.from(musicXService).notify(notificationID, builder.build());
     }
 
     private static void controls(RemoteViews remoteViews, Context context) {

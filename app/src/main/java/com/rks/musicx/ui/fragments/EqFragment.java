@@ -44,7 +44,6 @@ import static com.rks.musicx.data.eq.Equalizers.setBandLevel;
 import static com.rks.musicx.misc.utils.Constants.BASS_BOOST;
 import static com.rks.musicx.misc.utils.Constants.LOUD_BOOST;
 import static com.rks.musicx.misc.utils.Constants.PRESET_BOOST;
-import static com.rks.musicx.misc.utils.Constants.PRESET_POS;
 import static com.rks.musicx.misc.utils.Constants.VIRTUAL_BOOST;
 
 /*
@@ -177,22 +176,22 @@ public class EqFragment extends Fragment {
             arrayAdapter.add(getPresetNames().get(presets));
             appCompatSpinner.setAdapter(arrayAdapter);
         }
-        int spinnerPos = Extras.getInstance().getmPreferences().getInt(PRESET_POS, 0);
-        if (spinnerPos > getPresetNames().size()){
-            appCompatSpinner.setSelection(spinnerPos, true);
+        int spinnerPos = Extras.getInstance().getPresetPos();
+        if (spinnerPos > getPresetNames().size() && spinnerPos >=0){
+            appCompatSpinner.setSelection(spinnerPos, false);
         }
         appCompatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position != -1) {
                     Equalizers.usePreset((short) (position - 1));
-                    final short[] range = Equalizers.getBandLevelRange();
                     for (short i = 0; i < Equalizers.getNumberOfBands(); i++) {
+                        final short[] range = Equalizers.getBandLevelRange();
                         if (range != null) {
                             seekBarFinal[i].setProgress(Equalizers.getBandLevel(i) - range[0]);
                         }
                     }
-                    Extras.getInstance().getmPreferences().edit().putInt(PRESET_POS, position).commit();
+                    Extras.getInstance().savePresetPos(position);
                 } else {
                     Log.d(TAG, "Error buddy");
                 }

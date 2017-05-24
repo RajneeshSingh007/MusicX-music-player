@@ -143,6 +143,15 @@
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
 
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="widget_color"
+            android:persistent="true"
+            android:summary="set background color transparent"
+            android:title="HomeScreen Widget Color"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
         <com.afollestad.appthemeengine.prefs.ATEListPreference
             android:defaultValue="11"
             android:entries="@array/fontChoice"
@@ -153,7 +162,7 @@
             app:ateKey_pref_list="?ateKey_pref_list"/>
 
         <com.afollestad.appthemeengine.prefs.ATEListPreference
-            android:defaultValue="0"
+            android:defaultValue="2"
             android:entries="@array/blurChoice"
             android:entryValues="@array/selectedblur"
             android:key="blur_view"
@@ -278,7 +287,6 @@
             android:title="Enable Fade"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
-
 
         <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
             android:defaultValue="true"

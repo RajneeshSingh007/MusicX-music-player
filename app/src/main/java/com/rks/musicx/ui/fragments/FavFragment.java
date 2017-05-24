@@ -9,7 +9,6 @@ import com.rks.musicx.R;
 import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Song;
-import com.rks.musicx.misc.utils.ATEUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
@@ -108,6 +107,9 @@ public class FavFragment extends BaseLoaderFragment {
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
+                if (getActivity() == null){
+                    return;
+                }
                 CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
                 customLayoutManager.setSmoothScrollbarEnabled(true);
                 rv.setLayoutManager(customLayoutManager);
@@ -166,8 +168,6 @@ public class FavFragment extends BaseLoaderFragment {
     public void onResume() {
         super.onResume();
         getLoaderManager().restartLoader(favloader, null, this);
-        String ateKey = Helper.getATEKey(getContext());
-        ATEUtils.setStatusBarColor(getActivity(), ateKey, Config.primaryColor(getActivity(), ateKey));
     }
 
     @Override

@@ -23,8 +23,8 @@ import android.widget.TextView;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Album;
+import com.rks.musicx.data.network.AlbumArtwork;
 import com.rks.musicx.interfaces.palette;
-import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.widgets.CircleImageView;
@@ -86,8 +86,7 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
             }
             holder.AlbumName.setText(albums.getAlbumName());
             holder.ArtistName.setText(albums.getArtistName());
-            //new getArt(albums,holder).execute();
-            ArtworkUtils.ArtworkLoaderPalette(getContext(), albums.getAlbumName(), albums.getId(), holder.AlbumArtwork, new palette() {
+            AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), albums.getArtistName(), albums.getAlbumName(), albums.getId(), holder.AlbumArtwork, new palette() {
                 @Override
                 public void palettework(Palette palette) {
                     final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -97,12 +96,19 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
                     animateViews(holder, colors[0]);
                 }
             });
+            albumArtwork.execute();
             holder.menu.setVisibility(View.GONE);
         }
         if (layoutID == R.layout.item_list_view) {
             holder.AlbumListName.setText(albums.getAlbumName());
             holder.ArtistListName.setText(albums.getArtistName());
-            ArtworkUtils.ArtworkLoader(getContext(), albums.getAlbumName(), albums.getId(), holder.AlbumListArtwork);
+            AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), albums.getArtistName(), albums.getAlbumName(), albums.getId(), holder.AlbumListArtwork, new palette() {
+                @Override
+                public void palettework(Palette palette) {
+
+                }
+            });
+            albumArtwork.execute();
             if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 holder.AlbumListName.setTextColor(Color.WHITE);
                 holder.ArtistListName.setTextColor(ContextCompat.getColor(getContext(), R.color.darkthemeTextColor));

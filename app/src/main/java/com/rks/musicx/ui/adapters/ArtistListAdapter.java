@@ -25,13 +25,11 @@ import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Artist;
 import com.rks.musicx.data.network.ArtistArtwork;
 import com.rks.musicx.interfaces.palette;
-import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.widgets.CircleImageView;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,42 +86,28 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
             }
             holder.ArtistName.setText(getContext().getResources().getQuantityString(R.plurals.albums_count, artists.getAlbumCount(), artists.getAlbumCount()));
             holder.AlbumCount.setText(artists.getName());
-            if (!Extras.getInstance().saveData()) {
-                ArtistArtwork artistArtwork = new ArtistArtwork(getContext(), artists.getName());
-                artistArtwork.execute();
-            }
-            String artistImagePath = new Helper(getContext()).loadArtistImage(artists.getName());
-            File file = new File(artistImagePath);
-            if (file.exists()) {
-                ArtworkUtils.ArtworkLoaderPalette(getContext(), file.getAbsolutePath(), holder.ArtistsArtwork, new palette() {
-                    @Override
-                    public void palettework(Palette palette) {
-                        final int[] colors = Helper.getAvailableColor(getContext(), palette);
-                        holder.backgroundColor.setBackgroundColor(colors[0]);
-                        holder.ArtistName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
-                        holder.AlbumCount.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
-                        animateViews(holder, colors[0]);
-                    }
-                });
-            } else {
-                holder.ArtistsArtwork.setImageResource(R.mipmap.ic_launcher);
-            }
+            ArtistArtwork artistArtwork = new ArtistArtwork(getContext(), artists.getName(), holder.ArtistsArtwork, new palette() {
+                @Override
+                public void palettework(Palette palette) {
+                    final int[] colors = Helper.getAvailableColor(getContext(), palette);
+                    holder.backgroundColor.setBackgroundColor(colors[0]);
+                    holder.ArtistName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
+                    holder.AlbumCount.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
+                    animateViews(holder, colors[0]);
+                }
+            });
+            artistArtwork.execute();
             holder.menu.setVisibility(View.GONE);
         }
         if (layoutID == R.layout.item_list_view) {
             holder.ArtistListName.setText(artists.getName());
             holder.ArtistListAlbumCount.setText(getContext().getResources().getQuantityString(R.plurals.albums_count, artists.getAlbumCount(), artists.getAlbumCount()));
-            if (!Extras.getInstance().saveData()) {
-                ArtistArtwork artistArtwork = new ArtistArtwork(getContext(), artists.getName());
-                artistArtwork.execute();
-            }
-            String artistImagePath = new Helper(getContext()).loadArtistImage(artists.getName());
-            File file = new File(artistImagePath);
-            if (file.exists()) {
-                ArtworkUtils.ArtworkNetworkLoader(getContext(), file.getAbsolutePath(), holder.ArtistListArtwork);
-            } else {
-                holder.ArtistListArtwork.setImageResource(R.mipmap.ic_launcher);
-            }
+            ArtistArtwork artistArtwork = new ArtistArtwork(getContext(), artists.getName(), holder.ArtistListArtwork, new palette() {
+                @Override
+                public void palettework(Palette palette) {
+                }
+            });
+            artistArtwork.execute();
             if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 holder.ArtistListName.setTextColor(Color.WHITE);
                 holder.ArtistListAlbumCount.setTextColor(ContextCompat.getColor(getContext(), R.color.darkthemeTextColor));
