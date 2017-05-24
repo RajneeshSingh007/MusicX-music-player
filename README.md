@@ -50,7 +50,7 @@ style="max_width:25%;">
 
 # Library
 <p>
-- <a href="usic-Player/blob/master/app/src/main/assets/licenses.html"><b>Library List</b></a>
+- <a href="https://github.com/RajneeshSingh007/MusicX-Music-Player/blob/master/app/src/main/assets/licenses.html"><b>Library List</b></a>
  </p>
  
 # Contact 
