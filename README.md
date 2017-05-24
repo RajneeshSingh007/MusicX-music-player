@@ -50,56 +50,7 @@ style="max_width:25%;">
 
 # Library
 <p>
- <ul>
- <li>
-       <a href="https://github.com/bumptech/glide"><b>Glide</b></a>
- </li>
-     <li>
-        <a href="https://github.com/afollestad/app-theme-engine"><b>AppThemeEngine</b></a>    
-    </li>
-    <li>
-        <a href="https://github.com/afollestad/material-dialogs"><b>MaterialDialogs</b></a>
-    </li>
-    <li>
-        <a href="https://github.com/Cleveroad/MusicBobber"><b>MusicBobber</b></a>
-    </li>
-        <li>
-        <a href="https://github.com/timusus/RecyclerView-FastScroll"><b>FastScroll RecyclerView</b></a>
-    </li>
-       <li>
-        <a href="https://github.com/Cleveroad/PlayWidget"><b>PlayWidget</b></a>
-    </li>
-    <li>
-        <a href="https://github.com/chrisjenx/Calligraphy"><b>Calligraphy</b></a>
-    </li>
-    <li>
-        <a href="http://square.github.io/retrofit/"><b>Retrofit 2</b></a>
-    </li>
-       <li>
-        <a href="https://github.com/h6ah4i/android-verticalseekbar"><b>VerticalSeekBar</b></a>
-    </li>
-        <li>
-        <a href="https://github.com/deano2390/MaterialShowcaseView"><b>MaterialShowcaseView</b></a>
-    </li>
-        <li>
-        <a href="https://bitbucket.org/ijabz/jaudiotagger"><b>Jaudiotagger library</b></a>
-    </li>
-    <li>
-        <a href="https://github.com/paolorotolo/AppIntro"><b>MaterialShowcaseView</b></a>
-    </li>
-    <li>
-        <a href= "https://github.com/harjot-oberai/Croller"><b>Croller</b></a>
-    </li>
-    <li>
-        <a href="https://github.com/HudsonAndroid/CircleVisualizerFFTView"><b>CircleVisualizerFFTView</b></a>
-    </li>
-    <li>
-        <a href="https://github.com/amitshekhariitbhu/Fast-Android-Networking"><b>Fast Networking</b></a>
-    </li>
-    <li>
-        <a href="https://github.com/codekidX/storage-chooser"><b>Directory Chooser</b></a>
-    </li>
- </ul>
+- <a href="usic-Player/blob/master/app/src/main/assets/licenses.html"><b>Library List</b></a>
  </p>
  
 # Contact 
