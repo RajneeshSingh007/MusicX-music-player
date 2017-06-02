@@ -3,6 +3,7 @@ package com.rks.musicx.ui.fragments;
 
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -19,6 +20,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.afollestad.appthemeengine.Config;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.cleveroad.audiowidget.SmallBang;
 import com.cleveroad.play_widget.PlayLayout;
 import com.cleveroad.play_widget.VisualizerShadowChanger;
@@ -32,6 +38,7 @@ import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.GestureListerner;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.PlayingPagerAdapter;
 import com.rks.musicx.misc.utils.SimpleItemTouchHelperCallback;
@@ -44,6 +51,7 @@ import com.rks.musicx.ui.adapters.QueueAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.wasabeef.glide.transformations.CropCircleTransformation;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
@@ -113,6 +121,7 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
             switch (view.getId()) {
                 case R.id.item_view:
                     getMusicXService().setdataPos(position, true);
+                    Extras.getInstance().saveSeekServices(0);
                     break;
             }
         }
@@ -158,6 +167,9 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
                     @Override
                     public void palettework(Palette palette) {
                         final int[] colors = Helper.getAvailableColor(getContext(), palette);
+                        if(getActivity().getWindow() == null){
+                            return;
+                        }
                         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                             getActivity().getWindow().setStatusBarColor(colors[0]);
                         } else {
@@ -250,6 +262,34 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
         mPlayLayout = (PlayLayout) coverView.findViewById(R.id.revealView);
         lrcView = (TextView) lyricsView.findViewById(R.id.lyrics);
 
+        coverView.setOnTouchListener(new GestureListerner() {
+            @Override
+            public void onRightToLeft() {
+
+            }
+
+            @Override
+            public void onLeftToRight() {
+
+            }
+
+            @Override
+            public void onBottomToTop() {
+            }
+
+            @Override
+            public void onTopToBottom() {
+            }
+
+            @Override
+            public void doubleClick() {
+                if(getActivity() == null){
+                    return;
+                }
+                getActivity().onBackPressed();
+            }
+        });
+
         Playing4PagerDetails = new ArrayList<>(2);
         Playing4PagerDetails.add(coverView);
         Playing4PagerDetails.add(lyricsView);
@@ -287,7 +327,7 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
         } else {
             mPlayLayout.setProgressLineColor(ContextCompat.getColor(getContext(), R.color.translucent_white_8p));
         }
-        if (getActivity() == null){
+        if (getActivity() == null || getActivity().getWindow() == null){
             return;
         }
         getActivity().getWindow().setStatusBarColor(accentColor);
@@ -368,6 +408,8 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
                             mHandler.removeCallbacks(runnable);
                         } catch (Exception c){
                             c.printStackTrace();
+                        }finally {
+                            mHandler.post(runnable);
                         }
                     }
                 }
@@ -465,7 +507,7 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
     }
 
     private void colorMode(int color) {
-        if (getActivity() == null) {
+        if (getActivity() == null || getActivity().getWindow() == null) {
             return;
         }
         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
@@ -545,6 +587,9 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
                             @Override
                             public void palettework(Palette palette) {
                                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
+                                if(getActivity().getWindow() == null || getActivity() == null){
+                                    return;
+                                }
                                 if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                                     getActivity().getWindow().setStatusBarColor(colors[0]);
                                 } else {
@@ -572,6 +617,39 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
                         queueAdapter.notifyDataSetChanged();
                     }
                 }).execute();
+
+                if (permissionManager.isAudioRecordGranted(getContext())){
+                    Glide.with(getContext())
+                            .load(finalPath)
+                            .asBitmap()
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
+                            .placeholder(R.mipmap.ic_launcher)
+                            .error(R.mipmap.ic_launcher)
+                            .format(DecodeFormat.PREFER_ARGB_8888)
+                            .override(getSize(), getSize())
+                            .transform(new CropCircleTransformation(getContext()))
+                            .into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onLoadStarted(Drawable placeholder) {
+                                }
+
+                                @Override
+                                public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                    if (getMusicXService().getAudioWidget() != null){
+                                        getMusicXService().getAudioWidget().controller().albumCoverBitmap(ArtworkUtils.drawableToBitmap(errorDrawable));
+                                    }
+                                }
+
+                                @Override
+                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                    if (getMusicXService().getAudioWidget() != null){
+                                        getMusicXService().getAudioWidget().controller().albumCoverBitmap(resource);
+                                    }
+                                }
+
+                            });
+                }
             }
         }
     }

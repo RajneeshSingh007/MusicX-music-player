@@ -24,6 +24,9 @@
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="always"/>
 
+    <item android:id="@+id/shuffle_all"
+        android:title="@string/shuffle_all"/>
+
     <item
         android:id="@+id/menu_sort_by"
         android:title="@string/menu_sort_by"

@@ -152,6 +152,16 @@
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
 
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="hd_artwork"
+            android:persistent="true"
+            android:summary="Load album artwork in full size,Caution : use on high end devices"
+            android:title="Artwork Loader"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
+
+
         <com.afollestad.appthemeengine.prefs.ATEListPreference
             android:defaultValue="11"
             android:entries="@array/fontChoice"

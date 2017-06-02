@@ -65,6 +65,7 @@
             android:text="SONG ARTIST"
             android:textColor="@color/colorSecondaryText"
             android:textSize="14sp"/>
+
     </LinearLayout>
 
     <ImageButton

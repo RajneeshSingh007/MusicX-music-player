@@ -1,11 +1,13 @@
 package com.rks.musicx;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
-import com.androidnetworking.AndroidNetworking;
 import com.rks.musicx.misc.utils.ArtworkUtils;
+import com.rks.musicx.misc.utils.Encryption;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.permissionManager;
@@ -15,6 +17,10 @@ import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 import org.acra.sender.HttpSender;
+import org.solovyev.android.checkout.Billing;
+import org.solovyev.android.checkout.PlayStoreListener;
+
+import javax.annotation.Nonnull;
 
 
 /*
@@ -37,8 +43,8 @@ import org.acra.sender.HttpSender;
 @ReportsCrashes(formUri = "https://coolalienx.cloudant.com/acra-musicx/_design/acra-storage/_update/report",
         reportType = HttpSender.Type.JSON,
         httpMethod = HttpSender.Method.POST,
-        formUriBasicAuthLogin = "theiraingthaddrifilightf",
-        formUriBasicAuthPassword = "a144efe5c5929defb9523c02a7a6bbc24df3e066", customReportContent = {
+        formUriBasicAuthLogin = "hishorybrentraolutterece",
+        formUriBasicAuthPassword = "7a6a382cba5e7a20e8aec27a2311d9aa4d83c5cb", customReportContent = {
         ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME,
         ReportField.ANDROID_VERSION, ReportField.PHONE_MODEL,
         ReportField.BRAND, ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE,
@@ -59,6 +65,16 @@ public class MusicXApplication extends Application {
         return instance;
     }
 
+    @Nonnull
+    private final Billing mBilling = new Billing(this, new Billing.DefaultConfiguration() {
+        @Nonnull
+        @Override
+        public String getPublicKey() {
+            final String s = "use your key";
+            return Encryption.xor(s, "decryption string");
+        }
+    });
+
     @Override
     public void onCreate() {
         mContext = getApplicationContext();
@@ -68,16 +84,33 @@ public class MusicXApplication extends Application {
         instance = this;
         createDirectory();
         ACRA.init(this);
-        AndroidNetworking.initialize(getApplicationContext());
         Extras.getInstance().setwidgetPosition(100);
         Extras.getInstance().eqSwitch(false);
+        mBilling.addPlayStoreListener(new PlayStoreListener() {
+            @Override
+            public void onPurchasesChanged() {
+                Toast.makeText(MusicXApplication.this, "Play Store: purchases have changed!", Toast.LENGTH_LONG).show();
+            }
+        });
     }
+
 
     private void createDirectory() {
         if (permissionManager.writeExternalStorageGranted(mContext)) {
             Helper.createAppDir("Lyrics");
+            Helper.createAppDir(".AlbumArtwork");
+            Helper.createAppDir(".ArtistArtwork");
         } else {
             Log.d("oops error", "Failed to create directory");
         }
+    }
+
+    @Nonnull
+    public Billing getmBilling() {
+        return mBilling;
+    }
+
+    public static MusicXApplication get(Activity activity) {
+        return (MusicXApplication) activity.getApplication();
     }
 }

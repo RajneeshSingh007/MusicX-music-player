@@ -1,5 +1,6 @@
 package com.rks.musicx.ui.fragments;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,7 +18,9 @@ import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Album;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.AlbumArtwork;
+import com.rks.musicx.interfaces.bitmap;
 import com.rks.musicx.interfaces.palette;
+import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
@@ -67,6 +70,7 @@ public class AlbumFragment extends BaseLoaderFragment {
             switch (v.getId()) {
                 case R.id.shuffle_fab:
                     ((MainActivity) getActivity()).onShuffleRequested(songListAdapter.getSnapshot(), true);
+                    Extras.getInstance().saveSeekServices(0);
                     break;
             }
         }
@@ -76,6 +80,7 @@ public class AlbumFragment extends BaseLoaderFragment {
         switch (view.getId()) {
             case R.id.item_view:
                 ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
+                Extras.getInstance().saveSeekServices(0);
                 break;
             case R.id.menu_button:
                 helper.showMenu(false, trackloader, this, AlbumFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
@@ -222,27 +227,43 @@ public class AlbumFragment extends BaseLoaderFragment {
 
 
     private void AlbumCover() {
-        if (getActivity() == null) {
-            return;
+        if (!Extras.getInstance().saveData()){
+            AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), mAlbum.getArtistName(), mAlbum.getArtistName());
+            albumArtwork.execute();
         }
-        AlbumArtwork albumArtwork = new AlbumArtwork(getContext(),mAlbum.getArtistName(), mAlbum.getArtistName(), mAlbum.getId(), artworkView, new palette() {
+        ArtworkUtils.ArtworkLoader(getContext(), mAlbum.getAlbumName(), null, mAlbum.getId(), new palette() {
             @Override
             public void palettework(Palette palette) {
                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
                 toolbar.setBackgroundColor(colors[0]);
+                if (getActivity() == null || getActivity().getWindow() == null) {
+                    return;
+                }
                 if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                     getActivity().getWindow().setStatusBarColor(colors[0]);
                 } else {
                     getActivity().getWindow().setStatusBarColor(colors[0]);
                 }
             }
+        }, new bitmap() {
+            @Override
+            public void bitmapwork(Bitmap bitmap) {
+                artworkView.setImageBitmap(bitmap);
+            }
+
+            @Override
+            public void bitmapfailed(Bitmap bitmap) {
+                artworkView.setImageBitmap(bitmap);
+            }
         });
-        albumArtwork.execute();
     }
 
 
     @Override
     public void setAdapater(List<Song> data) {
+        if (data == null){
+            return;
+        }
         songListAdapter.addDataList(data);
     }
 

@@ -14,23 +14,19 @@ package com.rks.musicx.data.network;
  */
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ImageView;
 
-import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.common.Priority;
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.DownloadListener;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.rks.musicx.R;
 import com.rks.musicx.data.network.model.Album;
 import com.rks.musicx.data.network.model.Album_;
 import com.rks.musicx.data.network.model.Image_;
-import com.rks.musicx.interfaces.bitmap;
-import com.rks.musicx.interfaces.palette;
-import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Constants;
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.FileTarget;
 import com.rks.musicx.misc.utils.Helper;
 
 import java.io.File;
@@ -48,22 +44,18 @@ public class AlbumArtwork extends AsyncTask<Void, Void, Void> {
     private Clients clients;
     private Services services;
     private Context context;
-    private long albumId;
     private String artistName, albumName;
-    private ImageView imageView;
-    private palette palettework;
     private Helper helper;
+    private File file;
 
-    public AlbumArtwork(Context context, String artistName, String albumName, long albumId, ImageView imageView, palette palettework) {
+    public AlbumArtwork(Context context, String artistName, String albumName) {
         this.context = context;
         this.artistName = artistName;
         this.albumName = albumName;
-        this.albumId = albumId;
-        this.imageView = imageView;
-        this.palettework = palettework;
         helper = new Helper(context);
         clients = new Clients(context, Constants.lastFmUrl);
         services = clients.createService(Services.class);
+        file = new File(helper.getAlbumArtworkLocation(), albumName + ".jpeg");
     }
 
     @Override
@@ -76,58 +68,40 @@ public class AlbumArtwork extends AsyncTask<Void, Void, Void> {
                 if (response.isSuccessful() && getalbum != null) {
                     final Album_ album_ = getalbum.getAlbum();
                     if (album_ != null && album_.getImageList() != null && album_.getImageList().size() > 0) {
-                        String artistImagePath = helper.loadAlbumImage(albumName);
-                        File file = new File(artistImagePath);
-                        File file1 = new File(helper.getAlbumArtworkLocation(), albumName + ".jpeg");
                         for (Image_ artistArtwork : album_.getImageList()){
-                           if (!file.exists()){
-                               if (!Extras.getInstance().saveData()) {
-                                   if (Extras.getInstance().hqArtistArtwork()){
-                                       if(artistArtwork.getSize().equals("mega")){
-                                           AndroidNetworking.download(artistArtwork.getText(), helper.getAlbumArtworkLocation(), albumName + ".jpeg")
-                                                   .setTag("DownloadingAlbumImage")
-                                                   .setPriority(Priority.MEDIUM)
-                                                   .build()
-                                                   .startDownload(new DownloadListener() {
-                                                       @Override
-                                                       public void onDownloadComplete() {
-                                                           Log.d("Album", "successfully downloaded");
-                                                       }
-
-                                                       @Override
-                                                       public void onError(ANError anError) {
-                                                           Log.d("Album", "failed");
-                                                       }
-                                                   });
-                                       }
-                                   }else {
-                                       if(artistArtwork.getSize().equals("extralarge")){
-                                           AndroidNetworking.download(artistArtwork.getText(), helper.getAlbumArtworkLocation(), albumName + ".jpeg")
-                                                   .setTag("DownloadingAlbumImage")
-                                                   .setPriority(Priority.MEDIUM)
-                                                   .build()
-                                                   .startDownload(new DownloadListener() {
-                                                       @Override
-                                                       public void onDownloadComplete() {
-                                                           Log.d("Album", "successfully downloaded");
-                                                       }
-
-                                                       @Override
-                                                       public void onError(ANError anError) {
-                                                           Log.d("Album", "failed");
-                                                       }
-                                                   });
-                                       }
-                                   }
-                               }
-                           }else {
-                               boolean delete = file1.delete();
-                               if (delete){
-                                   Log.d("Artist", "deleted");
-                               }else {
-                                   Log.d("Artist", "delete failed");
-                               }
-                           }
+                            if (!file.exists()){
+                                    if (Extras.getInstance().hqArtistArtwork()){
+                                        if(artistArtwork.getSize().equals("mega")){
+                                            Glide
+                                                    .with(context)
+                                                    .load(artistArtwork.getText())
+                                                    .asBitmap()
+                                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                                    .skipMemoryCache(true)
+                                                    .placeholder(R.mipmap.ic_launcher)
+                                                    .error(R.mipmap.ic_launcher)
+                                                    .format(DecodeFormat.PREFER_ARGB_8888)
+                                                    .centerCrop()
+                                                    .override(600, 600)
+                                                    .into(new FileTarget(file.getAbsolutePath(), 600, 600));
+                                        }
+                                    }else {
+                                        if(artistArtwork.getSize().equals("extralarge")) {
+                                            Glide
+                                                    .with(context)
+                                                    .load(artistArtwork.getText())
+                                                    .asBitmap()
+                                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                                    .skipMemoryCache(true)
+                                                    .placeholder(R.mipmap.ic_launcher)
+                                                    .error(R.mipmap.ic_launcher)
+                                                    .format(DecodeFormat.PREFER_ARGB_8888)
+                                                    .centerCrop()
+                                                    .override(600, 600)
+                                                    .into(new FileTarget(file.getAbsolutePath(), 600, 600));
+                                        }
+                                    }
+                            }
                         }
                     } else {
                         Log.d("haha", "downloading failed");
@@ -149,19 +123,7 @@ public class AlbumArtwork extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
-        ArtworkUtils.ArtworkLoader(context, albumName , null, albumId,palettework, new bitmap() {
-            @Override
-            public void bitmapwork(Bitmap bitmap) {
-                imageView.setImageBitmap(bitmap);
-            }
-
-            @Override
-            public void bitmapfailed(Bitmap bitmap) {
-                imageView.setImageBitmap(bitmap);
-            }
-        });
         Log.d("AlbumArtwork", "Success");
     }
-
 
 }

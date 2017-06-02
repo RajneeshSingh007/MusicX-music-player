@@ -63,6 +63,7 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
                 switch (view.getId()) {
                     case R.id.item_view:
                         ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
+                        Extras.getInstance().saveSeekServices(0);
                         rv.smoothScrollToPosition(position);
                         break;
                     case R.id.menu_button:
@@ -75,6 +76,7 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
                     case R.id.album_artwork:
                     case R.id.album_info:
                         ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
+                        Extras.getInstance().saveSeekServices(0);
                         rv.smoothScrollToPosition(position);
                         break;
                     case R.id.menu_button:
@@ -108,7 +110,13 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Extras extras = Extras.getInstance();
+        if (getActivity() == null){
+            return false;
+        }
         switch (item.getItemId()) {
+            case R.id.shuffle_all:
+                ((MainActivity) getActivity()).onShuffleRequested(songList, true);
+                break;
             case R.id.menu_sort_by_az:
                 extras.setSongSortOrder(SortOrder.SongSortOrder.SONG_A_Z);
                 load();

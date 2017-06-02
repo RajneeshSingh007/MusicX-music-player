@@ -32,6 +32,7 @@ import static com.rks.musicx.misc.utils.Constants.FloatingView;
 import static com.rks.musicx.misc.utils.Constants.GridViewAlbum;
 import static com.rks.musicx.misc.utils.Constants.GridViewArtist;
 import static com.rks.musicx.misc.utils.Constants.GridViewSong;
+import static com.rks.musicx.misc.utils.Constants.HD_ARTWORK;
 import static com.rks.musicx.misc.utils.Constants.HIDE_LOCKSCREEEN;
 import static com.rks.musicx.misc.utils.Constants.HIDE_NOTIFY;
 import static com.rks.musicx.misc.utils.Constants.HQ_ARTISTARTWORK;
@@ -50,6 +51,7 @@ import static com.rks.musicx.misc.utils.Constants.REPEATMODE;
 import static com.rks.musicx.misc.utils.Constants.RESTORE_LASTTAB;
 import static com.rks.musicx.misc.utils.Constants.SAVE_DATA;
 import static com.rks.musicx.misc.utils.Constants.SAVE_EQ;
+import static com.rks.musicx.misc.utils.Constants.SETTINGS_TRACK;
 import static com.rks.musicx.misc.utils.Constants.SHUFFLEMODE;
 import static com.rks.musicx.misc.utils.Constants.SONGGRID;
 import static com.rks.musicx.misc.utils.Constants.SONG_ALBUM;
@@ -67,7 +69,7 @@ import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
 import static com.rks.musicx.misc.utils.Constants.TRYPEFACE_PATH;
 import static com.rks.musicx.misc.utils.Constants.TextFonts;
 import static com.rks.musicx.misc.utils.Constants.VIZCOLOR;
-import static com.rks.musicx.misc.utils.Constants.WIDGETTRACk;
+import static com.rks.musicx.misc.utils.Constants.WIDGETTRACK;
 import static com.rks.musicx.misc.utils.Constants.WIDGET_COLOR;
 import static com.rks.musicx.misc.utils.Constants.sInstance;
 
@@ -292,6 +294,8 @@ public class Extras {
         return mPreferences.getBoolean(WIDGET_COLOR, false);
     }
 
+    public boolean getHdArtwork(){return mPreferences.getBoolean(HD_ARTWORK, false);}
+
     ////////////////// folder pref //////////////////
 
     public void saveFolderPath(String path) {
@@ -465,15 +469,26 @@ public class Extras {
     ///////////////// widgetTracking ///////////////
 
     public boolean getWidgetTrack() {
-        return mPreferences.getBoolean(WIDGETTRACk, false);
+        return mPreferences.getBoolean(WIDGETTRACK, false);
     }
 
     public void setWidgetTrack(boolean torf) {
         SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putBoolean(WIDGETTRACk, torf);
+        editor.putBoolean(WIDGETTRACK, torf);
         editor.commit();
     }
 
+    /////////////// Settings Permission /////////////
+
+    public boolean getSettings(){
+        return mPreferences.getBoolean(SETTINGS_TRACK, false);
+    }
+
+    public void setSettings(boolean torf){
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(SETTINGS_TRACK, torf);
+        editor.commit();
+    }
 
     ///////////////// Init Setup //////////////////
 
@@ -560,5 +575,6 @@ public class Extras {
     public boolean getPlayingViewTrack(){
         return mPreferences.getBoolean(PLAYINGVIEW_TRACK, false);
     }
+
 
 }

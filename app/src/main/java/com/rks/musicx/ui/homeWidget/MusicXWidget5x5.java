@@ -1,5 +1,18 @@
 package com.rks.musicx.ui.homeWidget;
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -23,7 +36,7 @@ import com.rks.musicx.services.MediaPlayerSingleton;
 import com.rks.musicx.services.MusicXService;
 import com.rks.musicx.ui.activities.PlayingActivity;
 
-import static com.rks.musicx.misc.utils.Constants.ACTION_COMMAND;
+import static com.rks.musicx.misc.utils.Constants.ACTION_COMMAND2;
 import static com.rks.musicx.misc.utils.Constants.ACTION_FAV;
 import static com.rks.musicx.misc.utils.Constants.ACTION_NEXT;
 import static com.rks.musicx.misc.utils.Constants.ACTION_PLAYINGVIEW;
@@ -32,31 +45,18 @@ import static com.rks.musicx.misc.utils.Constants.ACTION_TOGGLE;
 import static com.rks.musicx.misc.utils.Constants.META_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
 
-/*
- * Created by Coolalien on 02/05/2017.
+/**
+ * Created by Coolalien on 6/1/2017.
  */
+public class MusicXWidget5x5 extends AppWidgetProvider {
 
-/*
- * ©2017 Rajneesh Singh
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *     http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-public class MusicxWidget4x2 extends AppWidgetProvider {
-
-    private static MusicxWidget4x2 sInstance;
+    private static MusicXWidget5x5 sInstance;
     private Handler handler = new Handler();
 
-    public static synchronized MusicxWidget4x2 getInstance() {
+    public static synchronized MusicXWidget5x5 getInstance() {
         if (sInstance == null) {
-            sInstance = new MusicxWidget4x2();
+            sInstance = new MusicXWidget5x5();
         }
         return sInstance;
     }
@@ -65,7 +65,7 @@ public class MusicxWidget4x2 extends AppWidgetProvider {
         if (musicXService == null) {
             return;
         }
-        RemoteViews remoteViews = new RemoteViews(musicXService.getPackageName(), R.layout.widget);
+        RemoteViews remoteViews = new RemoteViews(musicXService.getPackageName(), R.layout.bigger_widget);
         Intent intent = new Intent(musicXService, PlayingActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendInt = PendingIntent.getActivity(musicXService, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -75,7 +75,7 @@ public class MusicxWidget4x2 extends AppWidgetProvider {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                ArtworkUtils.ArtworkLoader(musicXService, musicXService.getsongAlbumName(), null, musicXService.getsongAlbumID(), new palette() {
+                ArtworkUtils.ArtworkLoader(musicXService, musicXService.getsongAlbumName(),null, musicXService.getsongAlbumID(), new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         int colors[] = Helper.getAvailableColor(musicXService, palette);
@@ -110,11 +110,11 @@ public class MusicxWidget4x2 extends AppWidgetProvider {
             remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite_outline);
         }
         controls(remoteViews, musicXService);
-        // pushUpdate(musicXService, updatdeID, remoteViews);
+        //pushUpdate(musicXService, updatdeID, remoteViews);
     }
 
     private void defaultAppWidget(Context context, int[] appWidgetIds) {
-        final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget);
+        final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.bigger_widget);
         views.setTextViewText(R.id.title, "Hello");
         views.setTextViewText(R.id.artist, "Adele");
         controls(views, context);
@@ -150,7 +150,7 @@ public class MusicxWidget4x2 extends AppWidgetProvider {
         defaultAppWidget(context, appWidgetIds);
         context.startService(new Intent(context, MusicXService.class));
         Intent updateIntent = new Intent();
-        updateIntent.setAction(ACTION_COMMAND);
+        updateIntent.setAction(ACTION_COMMAND2);
         updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
         updateIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         context.sendBroadcast(updateIntent);
@@ -169,7 +169,7 @@ public class MusicxWidget4x2 extends AppWidgetProvider {
             if (appWidgetIds.length > 0) {
                 musicxWidgetUpdate(musicXService, appWidgetIds);
                 FavHelper favHelper = new FavHelper(musicXService);
-                RemoteViews remoteViews = new RemoteViews(musicXService.getPackageName(), R.layout.widget);
+                RemoteViews remoteViews = new RemoteViews(musicXService.getPackageName(), R.layout.bigger_widget);
                 if (PLAYSTATE_CHANGED.equals(what)) {
                     if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
                         remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);

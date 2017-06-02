@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -40,7 +39,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
     public DividerItemDecoration(Context context, int paddingLeft, boolean darks) {
         this.size = paddingLeft;
         final TypedArray a = context.obtainStyledAttributes(ATTRS);
-        if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
             mDivider = ContextCompat.getDrawable(context, R.drawable.divider_white);
         } else {
             if (darks) {

@@ -461,16 +461,16 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                         }
                         break;
                     case R.id.action_eq:
-                        Intent intents = new Intent(MainActivity.this, EqualizerActivity.class);
-                        startActivity(intents);
+                        Helper.startActivity(MainActivity.this, EqualizerActivity.class);
                         break;
                     case R.id.action_settings:
-                        Intent settings = new Intent(MainActivity.this, SettingsActivity.class);
-                        startActivity(settings);
+                        Helper.startActivity(MainActivity.this, SettingsActivity.class);
+                        break;
+                    case R.id.action_donation:
+                        Helper.startActivity(MainActivity.this, DonationActivity.class);
                         break;
                     case R.id.about:
-                        Intent about = new Intent(MainActivity.this, AboutActivity.class);
-                        startActivity(about);
+                        Helper.startActivity(MainActivity.this, AboutActivity.class);
                         break;
                     case R.id.shares:
                         Intent intent = new Intent(Intent.ACTION_SEND);
@@ -499,7 +499,8 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                 if (ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()).exists()) {
                     mRequestManager.load(ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()))
                             .asBitmap()
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
                             .centerCrop()
                             .placeholder(R.mipmap.ic_launcher)
                             .error(R.mipmap.ic_launcher)
@@ -575,7 +576,8 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                 } else {
                     mRequestManager.load(ArtworkUtils.uri(musicXService.getsongAlbumID()))
                             .asBitmap()
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
                             .centerCrop()
                             .placeholder(R.mipmap.ic_launcher)
                             .error(R.mipmap.ic_launcher)

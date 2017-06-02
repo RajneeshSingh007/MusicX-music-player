@@ -36,6 +36,7 @@ import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.services.MusicXService;
 import com.rks.musicx.ui.activities.EqualizerActivity;
 import com.rks.musicx.ui.activities.PlayingActivity;
+import com.rks.musicx.ui.activities.SettingsActivity;
 import com.rks.musicx.ui.adapters.QueueAdapter;
 import com.rks.musicx.ui.fragments.TagEditorFragment;
 
@@ -76,6 +77,8 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
     private ImageChooserManager imageChooserManager;
     private String mediaPath;
     private Helper helper;
+    int size;
+
     /**
      * Service Connection
      */
@@ -155,6 +158,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         ui(rootView);
         function();
         helper = new Helper(getContext());
+        size = getResources().getDimensionPixelSize(R.dimen.cover_size);
         return rootView;
     }
 
@@ -301,6 +305,10 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         return chosenImages;
     }
 
+    public int getSize() {
+        return size;
+    }
+
     /**
      * Pick Up Artwork
      */
@@ -396,6 +404,12 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                     case R.id.action_share:
                         Helper.shareMusic(musicXService.getsongData(), getContext());
                         break;
+                    case R.id.action_settings:
+                        Intent intent = new Intent(getContext(), SettingsActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        getActivity().startActivity(intent);
+                        break;
 
                 }
                 return false;
@@ -423,6 +437,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         popupMenu.getMenu().findItem(R.id.action_eq).setVisible(false);
         popupMenu.getMenu().findItem(R.id.clear_queue).setVisible(false);
         popupMenu.getMenu().findItem(R.id.action_changeArt).setVisible(false);
+        popupMenu.getMenu().findItem(R.id.action_settings).setVisible(false);
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -450,5 +465,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         });
         popupMenu.show();
     }
+
+
 
 }

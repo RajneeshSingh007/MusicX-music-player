@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -15,16 +16,18 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
-import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.afollestad.appthemeengine.Config;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.cleveroad.audiowidget.SmallBang;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BasePlayingFragment;
@@ -37,9 +40,11 @@ import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.GestureListerner;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.PlayingPagerAdapter;
 import com.rks.musicx.misc.utils.SimpleItemTouchHelperCallback;
+import com.rks.musicx.misc.utils.permissionManager;
 import com.rks.musicx.misc.widgets.CircleImageView;
 import com.rks.musicx.misc.widgets.CircularSeekBar;
 import com.rks.musicx.misc.widgets.changeAlbumArt;
@@ -50,6 +55,7 @@ import com.rks.musicx.ui.adapters.QueueAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.wasabeef.glide.transformations.CropCircleTransformation;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
@@ -168,6 +174,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
             switch (view.getId()) {
                 case R.id.item_view:
                     getMusicXService().setdataPos(position, true);
+                    Extras.getInstance().saveSeekServices(0);
                     break;
                 case R.id.menu_button:
                     qeueMenu(queueAdapter, view, position);
@@ -297,74 +304,39 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
         Playing3PagerDetails.add(lyricsView);
         pagerAdapter = new PlayingPagerAdapter(Playing3PagerDetails);
         Pager.setAdapter(pagerAdapter);
-        /**
-         * Swipe Listerner
-         */
-        final GestureDetector gesture = new GestureDetector(getActivity(), new GestureDetector.SimpleOnGestureListener() {
-            private static final int SWIPE_THRESHOLD = 300;
-            private static final int SWIPE_VELOCITY_THRESHOLD = 200;
-
+        coverView.setOnTouchListener(new GestureListerner() {
             @Override
-            public boolean onDown(MotionEvent e) {
-                return true;
+            public void onRightToLeft() {
+
             }
 
             @Override
-            public boolean onSingleTapUp(MotionEvent e) {
-                return super.onSingleTapUp(e);
+            public void onLeftToRight() {
+
             }
 
             @Override
-            public boolean onDoubleTap(MotionEvent e) {
-
-                return super.onDoubleTap(e);
-            }
-
-            @Override
-            public void onLongPress(MotionEvent e) {
-                super.onLongPress(e);
-            }
-
-            // Determines the fling velocity and then fires the appropriate swipe event accordingly
-            @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                try {
-                    float diffY = e2.getY() - e1.getY();
-                    float diffX = e2.getX() - e1.getX();
-                    if (Math.abs(diffX) > Math.abs(diffY)) {
-                        if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                            if (diffX > 0) {
-                                Log.d("Aloha !!!", "no left swipe..");
-                            } else {
-                                Log.d("Aloha !!!", "no right swipe..");
-                            }
-                        }
-                    } else {
-                        if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
-                            if (diffY > 0) {
-                                if (getMusicXService().isPlaying()) {
-                                    getMusicXService().playprev(true);
-                                    Log.d("Aloha !!!", "Down swipe..");
-                                }
-                            } else {
-                                if (getMusicXService().isPlaying()) {
-                                    getMusicXService().playnext(true);
-                                    Log.d("Aloha !!!", "Up swipe..");
-                                }
-                            }
-                        }
-                    }
-                } catch (Exception exception) {
-                    exception.printStackTrace();
+            public void onBottomToTop() {
+                if (getMusicXService().isPlaying()) {
+                    getMusicXService().playnext(true);
                 }
-                return true;
+            }
+
+            @Override
+            public void onTopToBottom() {
+                if (getMusicXService().isPlaying()) {
+                    getMusicXService().playprev(true);
+                }
+            }
+
+            @Override
+            public void doubleClick() {
+                if(getActivity() == null){
+                    return;
+                }
+                getActivity().onBackPressed();
             }
         });
-        coverView.setOnTouchListener((v, event) -> {
-            gesture.onTouchEvent(event);
-            return true;
-        });
-
         /**
          * SlidingPanel
          */
@@ -520,7 +492,10 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
                                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
                                 Playing3view.setBackgroundColor(colors[0]);
                                 mAlbumCoverView.setBorderColor(colors[0]);
-                                new Helper(getContext()).animateViews(Playing3view, colors[0]);
+                                Helper.animateViews(getContext(),Playing3view, colors[0]);
+                                if(getActivity().getWindow() == null || getActivity() == null){
+                                    return;
+                                }
                                 if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                                     getActivity().getWindow().setStatusBarColor(colors[0]);
                                 } else {
@@ -543,11 +518,49 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
                             public void bitmapfailed(Bitmap bitmap) {
                                 mAlbumCoverView.setImageBitmap(bitmap);
                                 ArtworkUtils.blurPreferances(getContext(), bitmap, blur_artowrk);
+                                if (permissionManager.isAudioRecordGranted(getContext())){
+                                    if (getMusicXService().getAudioWidget() != null){
+                                        getMusicXService().getAudioWidget().controller().albumCoverBitmap(bitmap);
+                                    }
+                                }
                             }
                         });
                         queueAdapter.notifyDataSetChanged();
                     }
                 }).execute();
+
+                if (permissionManager.isAudioRecordGranted(getContext())){
+                    Glide.with(getContext())
+                            .load(finalPath)
+                            .asBitmap()
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
+                            .placeholder(R.mipmap.ic_launcher)
+                            .error(R.mipmap.ic_launcher)
+                            .format(DecodeFormat.PREFER_ARGB_8888)
+                            .override(getSize(), getSize())
+                            .transform(new CropCircleTransformation(getContext()))
+                            .into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onLoadStarted(Drawable placeholder) {
+                                }
+
+                                @Override
+                                public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                    if (getMusicXService().getAudioWidget() != null){
+                                        getMusicXService().getAudioWidget().controller().albumCoverBitmap(ArtworkUtils.drawableToBitmap(errorDrawable));
+                                    }
+                                }
+
+                                @Override
+                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                    if (getMusicXService().getAudioWidget() != null){
+                                        getMusicXService().getAudioWidget().controller().albumCoverBitmap(resource);
+                                    }
+                                }
+
+                            });
+                }
             }
         }
     }
@@ -565,7 +578,10 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
                         final int[] colors = Helper.getAvailableColor(getContext(), palette);
                         Playing3view.setBackgroundColor(colors[0]);
                         mAlbumCoverView.setBorderColor(colors[0]);
-                        new Helper(getContext()).animateViews(Playing3view, colors[0]);
+                        Helper.animateViews(getContext(),Playing3view, colors[0]);
+                        if(getActivity().getWindow() == null){
+                            return;
+                        }
                         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                             getActivity().getWindow().setStatusBarColor(colors[0]);
                         } else {
@@ -597,7 +613,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
 
 
     private void colorMode(int color) {
-        if (getActivity() == null) {
+        if (getActivity() == null || getActivity().getWindow() == null) {
             return;
         }
         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {

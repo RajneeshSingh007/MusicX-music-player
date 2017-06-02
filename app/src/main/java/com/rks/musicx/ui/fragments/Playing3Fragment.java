@@ -14,9 +14,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
-import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -25,6 +22,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.afollestad.appthemeengine.Config;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.cleveroad.audiowidget.SmallBang;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BasePlayingFragment;
@@ -37,8 +39,10 @@ import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.GestureListerner;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.SimpleItemTouchHelperCallback;
+import com.rks.musicx.misc.utils.permissionManager;
 import com.rks.musicx.misc.widgets.DiagonalLayout;
 import com.rks.musicx.misc.widgets.changeAlbumArt;
 import com.rks.musicx.misc.widgets.updateAlbumArt;
@@ -47,6 +51,7 @@ import com.rks.musicx.ui.adapters.QueueAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.wasabeef.glide.transformations.CropCircleTransformation;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
@@ -154,6 +159,7 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
             switch (view.getId()) {
                 case R.id.item_view:
                     getMusicXService().setdataPos(position, true);
+                    Extras.getInstance().saveSeekServices(0);
                     break;
                 case R.id.menu_button:
                     qeueMenu(queueAdapter, view, position);
@@ -224,84 +230,45 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
         seekbar.setThumb(drawable);
         favButton.setOnClickListener(onClick);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        /**
-         * GestureView
-         */
-        final GestureDetector gestureDetector = new GestureDetector(getActivity(), new GestureDetector.OnGestureListener() {
-
-            private static final int SWIPE_THRESHOLD = 300;
-            private static final int SWIPE_VELOCITY_THRESHOLD = 200;
-
+        diagonalLayout.setOnTouchListener(new GestureListerner() {
             @Override
-            public boolean onDown(MotionEvent motionEvent) {
-                return false;
-            }
-
-            @Override
-            public void onShowPress(MotionEvent motionEvent) {
+            public void onRightToLeft() {
 
             }
 
             @Override
-            public boolean onSingleTapUp(MotionEvent motionEvent) {
-                return false;
-            }
-
-            @Override
-            public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-                return false;
-            }
-
-            @Override
-            public void onLongPress(MotionEvent motionEvent) {
+            public void onLeftToRight() {
 
             }
 
             @Override
-            public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-                try {
-                    float diffy = motionEvent1.getY() - motionEvent.getY();
-                    float diffx = motionEvent1.getX() - motionEvent.getX();
-                    if (Math.abs(diffx) > Math.abs(diffy)) {
-                        if (Math.abs(diffx) > SWIPE_THRESHOLD && Math.abs(v) > SWIPE_VELOCITY_THRESHOLD) {
-                            if (diffx > 0) {
-                                Log.d("Aloha !!!", "no left swipe..");
-                            } else {
-                                Log.d("Aloha !!!", "no right swipe..");
-                            }
-                        }
-                    } else {
-                        if (Math.abs(diffy) > SWIPE_THRESHOLD && Math.abs(v1) > SWIPE_VELOCITY_THRESHOLD) {
-                            if (diffy > 0) {
-                                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-                            } else {
-                                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                                bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-                                    @Override
-                                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                                        if (newState == BottomSheetBehavior.STATE_DRAGGING) {
-                                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                                    }
-                                });
-                            }
+            public void onBottomToTop() {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+                    @Override
+                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                        if (newState == BottomSheetBehavior.STATE_DRAGGING) {
+                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                         }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return false;
+
+                    @Override
+                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                    }
+                });
             }
-        });
-        albumArt.setOnTouchListener(new View.OnTouchListener() {
+
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                gestureDetector.onTouchEvent(motionEvent);
-                return true;
+            public void onTopToBottom() {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            }
+
+            @Override
+            public void doubleClick() {
+                if(getActivity() == null){
+                    return;
+                }
+                getActivity().onBackPressed();
             }
         });
         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
@@ -447,6 +414,9 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
                             @Override
                             public void palettework(Palette palette) {
                                 final int color[] = Helper.getAvailableColor(getContext(), palette);
+                                if (getActivity().getWindow() == null){
+                                    return;
+                                }
                                 if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                                     getActivity().getWindow().setStatusBarColor(color[0]);
                                 } else {
@@ -472,12 +442,44 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
                         queueAdapter.notifyDataSetChanged();
                     }
                 }).execute();
+                if (permissionManager.isAudioRecordGranted(getContext())){
+                    Glide.with(getContext())
+                            .load(finalPath)
+                            .asBitmap()
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
+                            .placeholder(R.mipmap.ic_launcher)
+                            .error(R.mipmap.ic_launcher)
+                            .format(DecodeFormat.PREFER_ARGB_8888)
+                            .override(getSize(), getSize())
+                            .transform(new CropCircleTransformation(getContext()))
+                            .into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onLoadStarted(Drawable placeholder) {
+                                }
+
+                                @Override
+                                public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                    if (getMusicXService().getAudioWidget() != null){
+                                        getMusicXService().getAudioWidget().controller().albumCoverBitmap(ArtworkUtils.drawableToBitmap(errorDrawable));
+                                    }
+                                }
+
+                                @Override
+                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                    if (getMusicXService().getAudioWidget() != null){
+                                        getMusicXService().getAudioWidget().controller().albumCoverBitmap(resource);
+                                    }
+                                }
+
+                            });
+                }
             }
         }
     }
 
     private void colorMode(int color) {
-        if (getActivity() == null) {
+        if (getActivity() == null || getActivity().getWindow() == null) {
             return;
         }
         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
@@ -530,6 +532,9 @@ public class Playing3Fragment extends BasePlayingFragment implements SimpleItemT
                     @Override
                     public void palettework(Palette palette) {
                         final int color[] = Helper.getAvailableColor(getContext(), palette);
+                        if (getActivity().getWindow() == null || getActivity() == null){
+                            return;
+                        }
                         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                             getActivity().getWindow().setStatusBarColor(color[0]);
                         } else {

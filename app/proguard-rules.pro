@@ -53,3 +53,14 @@
 }  
 -keep class android.support.v8.renderscript.** { *; }
 -dontwarn jp.co.cyberagent.android.gpuimage.**
+-keep class com.android.vending.billing.**
+
+-assumenosideeffects class org.solovyev.android.checkout.Billing {
+    public static void debug(...);
+    public static void warning(...);
+    public static void error(...);
+}
+
+-assumenosideeffects class org.solovyev.android.checkout.Check {
+    static *;
+}

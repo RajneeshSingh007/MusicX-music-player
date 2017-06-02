@@ -142,4 +142,7 @@
   <string name="hqartist_artwork_summary">povoliť sťahovanie náhľadov vo vysokej kvalite</string>
   <string name="storage">Úložisko</string>
   <string name="writesetting">Nastaviť zvonenie v nastaveniach</string>
+    <string name="donation">Donation</string>
+    <string name="support">Support</string>
+    <string name="shuffle_all">Shuffle All</string>
 </resources>

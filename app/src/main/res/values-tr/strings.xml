@@ -143,4 +143,7 @@
     <string name="hqartist_artwork_summary">Sanatçı resimlerini kaliteli indirmeyi etkinleştir</string>
     <string name="storage">Depolama</string>
     <string name="writesetting">Ayarlara zil sesi yazmak için</string>
+    <string name="donation">Donation</string>
+    <string name="support">Support</string>
+    <string name="shuffle_all">Shuffle All</string>
 </resources>

@@ -39,8 +39,8 @@ import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
 import static com.rks.musicx.data.eq.BassBoosts.setBassBoostStrength;
-import static com.rks.musicx.data.eq.Equalizers.getBandLevelRange;
-import static com.rks.musicx.data.eq.Equalizers.setBandLevel;
+import static com.rks.musicx.data.eq.Equalizers.getBandLevel;
+import static com.rks.musicx.data.eq.Equalizers.getNumberOfBands;
 import static com.rks.musicx.misc.utils.Constants.BASS_BOOST;
 import static com.rks.musicx.misc.utils.Constants.LOUD_BOOST;
 import static com.rks.musicx.misc.utils.Constants.PRESET_BOOST;
@@ -139,6 +139,7 @@ public class EqFragment extends Fragment {
         sequence.start();
     }
 
+
     private void switchEq() {
         if (switchCompat != null) {
             switchCompat.setChecked(Extras.getInstance().geteqSwitch());
@@ -151,6 +152,7 @@ public class EqFragment extends Fragment {
                     } else {
                         Extras.getInstance().eqSwitch(false);
                         enableDisable(false);
+
                     }
                 }
             });
@@ -176,22 +178,23 @@ public class EqFragment extends Fragment {
             arrayAdapter.add(getPresetNames().get(presets));
             appCompatSpinner.setAdapter(arrayAdapter);
         }
-        int spinnerPos = Extras.getInstance().getPresetPos();
-        if (spinnerPos > getPresetNames().size() && spinnerPos >=0){
-            appCompatSpinner.setSelection(spinnerPos, false);
+        for (int k= 0; k <getPresetNames().size(); k++){
+            if (k == Equalizers.getCurrentPreset()) {
+                k = Equalizers.getCurrentPreset();
+                appCompatSpinner.setSelection(k);
+            }
         }
         appCompatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position != -1) {
-                    Equalizers.usePreset((short) (position - 1));
-                    for (short i = 0; i < Equalizers.getNumberOfBands(); i++) {
+                    Equalizers.usePreset((short) ((short) position -1));
+                    for (short i = 0; i < getNumberOfBands(); i++) {
                         final short[] range = Equalizers.getBandLevelRange();
                         if (range != null) {
-                            seekBarFinal[i].setProgress(Equalizers.getBandLevel(i) - range[0]);
+                            seekBarFinal[i].setProgress(getBandLevel(i) - range[0]);
                         }
                     }
-                    Extras.getInstance().savePresetPos(position);
                 } else {
                     Log.d(TAG, "Error buddy");
                 }
@@ -304,11 +307,12 @@ public class EqFragment extends Fragment {
     }
 
 
+
     private void initEq(View rootView) {
         try {
-            for (short i = 0; i < Equalizers.getNumberOfBands(); i++) {
+            for (short i = 0; i < getNumberOfBands(); i++) {
                 short eqbands = i;
-                short[] bandLevel = getBandLevelRange();
+                short[] bandLevel = Equalizers.getBandLevelRange();
                 seekBar = new VerticalSeekBar(getContext());
                 textView = new TextView(getContext());
                 switch (i) {
@@ -364,9 +368,10 @@ public class EqFragment extends Fragment {
                             if (fromUser) {
                                 if (bandLevel != null) {
                                     short level = (short) (seekbar.getProgress() + bandLevel[0]);
-                                    setBandLevel(eqbands, level);
+                                    Equalizers.setBandLevel(eqbands, level);
                                 }
                                 appCompatSpinner.setSelection(0);
+                                Extras.getInstance().savePresetPos(0);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();

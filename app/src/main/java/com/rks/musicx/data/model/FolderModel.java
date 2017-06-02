@@ -136,9 +136,6 @@ public class FolderModel implements Comparable<FolderModel> {
         }
     }
 
-    public File getmFile() {
-        return mFile;
-    }
 
     private class FileExtensionFilter implements FilenameFilter {
 
@@ -150,15 +147,14 @@ public class FolderModel implements Comparable<FolderModel> {
 
         @Override
         public boolean accept(File dir, String filename) {
-
-            if (new File(dir, filename).isHidden() || !new File(dir, filename).canRead()) {
+            File scan = new File(dir, filename);
+            if (scan.isHidden() || !scan.canRead()) {
                 return false;
             }
-            if (new File(dir, filename).isDirectory()) {
+            if (scan.isDirectory()) {
                 return true;
             }
-
-            if (new File(dir, filename).isFile() && new File(dir, filename).exists()){
+            if (scan.isFile() && scan.exists()){
                 if (!mExtensions.isEmpty()) {
                     String ext = getFileExtension(filename);
                     if (mExtensions.contains(ext)) {

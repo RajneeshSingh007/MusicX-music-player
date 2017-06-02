@@ -145,4 +145,7 @@
     <string name="hqartist_artwork_summary">enable to download high quality artwork</string>
     <string name="storage">Storage</string>
     <string name="writesetting">To write ringtone in settings</string>
+    <string name="donation">Donation</string>
+    <string name="support">Support</string>
+    <string name="shuffle_all">Shuffle All</string>
 </resources>

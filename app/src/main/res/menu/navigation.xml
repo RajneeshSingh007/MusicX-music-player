@@ -45,6 +45,10 @@
             android:icon="@drawable/ic_nav_settings"
             android:title="@string/action_settings"/>
 
+        <item android:id="@+id/action_donation"
+            android:icon="@drawable/donation"
+            android:title="@string/support"/>
+
         <item
             android:id="@+id/about"
             android:icon="@drawable/about"

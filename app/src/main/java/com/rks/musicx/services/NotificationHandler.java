@@ -26,6 +26,7 @@ import static com.rks.musicx.misc.utils.Constants.ACTION_FAV;
 import static com.rks.musicx.misc.utils.Constants.ACTION_NEXT;
 import static com.rks.musicx.misc.utils.Constants.ACTION_PREVIOUS;
 import static com.rks.musicx.misc.utils.Constants.ACTION_TOGGLE;
+import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
 
 /*
  * Created by Coolalien on 02/05/2017.
@@ -85,15 +86,17 @@ public class NotificationHandler {
         } else {
             remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite_outline);
         }
-        if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
-            remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
-            smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_pause);
-            builder.setOngoing(true);
-        } else {
-            remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
-            smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_play);
-            builder.setOngoing(false);
-        }
+       if (PLAYSTATE_CHANGED.equals(what)){
+           if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
+               remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
+               smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_pause);
+               builder.setOngoing(true);
+           } else {
+               remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
+               smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_play);
+               builder.setOngoing(false);
+           }
+       }
         handler.post(new Runnable() {
             @Override
             public void run() {

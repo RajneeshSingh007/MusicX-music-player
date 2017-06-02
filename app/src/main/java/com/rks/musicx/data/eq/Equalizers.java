@@ -40,24 +40,20 @@ public class Equalizers {
         try {
             equalizer = new Equalizer(0, audioID);
             bandLevels = new short[equalizer.getNumberOfBands()];
-            for (short b = 0; b < equalizer.getNumberOfBands(); b++) {
-                short level = (short) Extras.getInstance().saveEq().getInt(BAND_LEVEL + b, 0);
-                bandLevels[b] =  level;
-                if (level != -1) {
-                    setBandLevel(b, level);
-                }else {
-                    setBandLevel(b, b);
-                }
-            }
             preset = (short) Extras.getInstance().saveEq().getInt(SAVE_PRESET, 0);
-            if (preset != -1) {
-                usePreset(preset);
+            if (preset < 0) {
+                for (short b = 0; b < equalizer.getNumberOfBands(); b++) {
+                    short level = (short) Extras.getInstance().saveEq().getInt(BAND_LEVEL + b, 0);
+                    setBandLevel(b, bandLevels[level]);
+                }
             }else {
-                try {
-                    preset = equalizer.getCurrentPreset();
-                    usePreset(preset);
-                } catch (Exception x) {
-                    preset = -1;
+                usePreset(preset);
+                short[] levels = equalizer.getProperties().bandLevels;
+                for(short i=0; i<levels.length; i++){
+                    SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
+                    editor.putInt(SAVE_PRESET, preset);
+                    editor.putInt(BAND_LEVEL + i, getBandLevel(i));
+                    editor.commit();
                 }
             }
         } catch (Exception e) {
@@ -117,20 +113,16 @@ public class Equalizers {
         }
     }
 
-    public static int getCurrentPreset() {
-        if (equalizer == null) {
-            return 0;
-        }
-        return equalizer.getCurrentPreset() + 1;
-    }
-
     public static void usePreset(short presets) {
-        if (equalizer == null) {
-            return;
-        }
-        if (presets >= 0) {
-            preset = presets;
-            equalizer.usePreset(presets);
+        if (equalizer != null) {
+            try {
+                if (presets >= 0) {
+                    preset = presets;
+                    equalizer.usePreset(presets);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -146,6 +138,13 @@ public class Equalizers {
             return equalizer.getCenterFreq(band);
         }
         return 0;
+    }
+
+    public static int getCurrentPreset(){
+        if (equalizer == null){
+            return 0;
+        }
+        return equalizer.getCurrentPreset() +1;
     }
 
     public static void savePrefs() {

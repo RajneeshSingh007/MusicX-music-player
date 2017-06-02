@@ -30,10 +30,8 @@ import android.util.Log;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SizeReadyCallback;
-import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.cleveroad.audiowidget.AudioWidget;
 import com.rks.musicx.R;
 import com.rks.musicx.data.eq.BassBoosts;
@@ -51,6 +49,7 @@ import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.permissionManager;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.activities.PlayingActivity;
+import com.rks.musicx.ui.homeWidget.MusicXWidget5x5;
 import com.rks.musicx.ui.homeWidget.MusicXwidget4x4;
 import com.rks.musicx.ui.homeWidget.MusicxWidget4x2;
 
@@ -68,6 +67,7 @@ import static com.rks.musicx.misc.utils.Constants.ACTION_CHANGE_STATE;
 import static com.rks.musicx.misc.utils.Constants.ACTION_CHOOSE_SONG;
 import static com.rks.musicx.misc.utils.Constants.ACTION_COMMAND;
 import static com.rks.musicx.misc.utils.Constants.ACTION_COMMAND1;
+import static com.rks.musicx.misc.utils.Constants.ACTION_COMMAND2;
 import static com.rks.musicx.misc.utils.Constants.ACTION_FAV;
 import static com.rks.musicx.misc.utils.Constants.ACTION_NEXT;
 import static com.rks.musicx.misc.utils.Constants.ACTION_PAUSE;
@@ -112,7 +112,7 @@ import static com.rks.musicx.misc.utils.Constants.SONG_TRACK_NUMBER;
 
 public class MusicXService extends Service implements playInterface, MediaPlayer.OnPreparedListener,
         MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener,
-        AudioWidget.OnControlsClickListener, AudioWidget.OnWidgetStateChangedListener, AudioManager.OnAudioFocusChangeListener {
+        AudioWidget.OnControlsClickListener, AudioWidget.OnWidgetStateChangedListener, AudioManager.OnAudioFocusChangeListener{
 
 
     public final int NO_REPEAT = 1;
@@ -142,6 +142,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     private AudioManager audioManager;
     private MusicxWidget4x2 musicxWidget = MusicxWidget4x2.getInstance(); //4x2 widget
     private MusicXwidget4x4 musicXwidget4x4 = MusicXwidget4x4.getInstance(); // 4x4 widget
+    private MusicXWidget5x5 musicXWidget5x5 = MusicXWidget5x5.getInstance(); // jumbo widget
     private MediaButtonReceiver mediaButtonReceiver = null;
     private ControlReceiver controlReceiver = null;
     private FavHelper favHelper;
@@ -210,7 +211,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             MediaPlayerSingleton.getInstance().getMediaPlayer().setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK);
             Log.d(TAG, "MediaInit");
         } catch (Exception e) {
-            Log.d("MusicXService", "initMedia_error", e);
+            Log.d(TAG, "initMedia_error", e);
         }
     }
 
@@ -290,7 +291,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                     break;
                 }
                 case ACTION_CHANGE_STATE: {
-                    if (permissionManager.isSystemAlertGranted(this)) {
+                    if (permissionManager.isSystemAlertGranted(MusicXService.this)) {
                         if (!Extras.getInstance().floatingWidget()) {
                             audioWidget.show(Extras.getInstance().getwidgetPositionX(), Extras.getInstance().getwidgetPositionY());
                         } else {
@@ -308,6 +309,10 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                 case ACTION_COMMAND1: {
                     int[] appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
                     musicXwidget4x4.musicxWidgetUpdate(MusicXService.this, appWidgetIds);
+                }
+                case ACTION_COMMAND2: {
+                    int[] appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
+                    musicXWidget5x5.musicxWidgetUpdate(MusicXService.this, appWidgetIds);
                 }
                 case ACTION_FAV: {
                     if (favHelper.isFavorite(Extras.getInstance().getSongId(getsongId()))) {
@@ -542,9 +547,9 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             playnext(true);
         }
         MediaPlayerSingleton.getInstance().getMediaPlayer().start();
-        if (permissionManager.isSystemAlertGranted(this)) {
+        if (permissionManager.isSystemAlertGranted(MusicXService.this)) {
             if (!Extras.getInstance().floatingWidget()) {
-                if (!audioWidget.isShown()) {
+                if (!audioWidget.isShown()){
                     audioWidget.show(Extras.getInstance().getwidgetPositionX(), Extras.getInstance().getwidgetPositionY());
                 }
                 audioWidget.controller().start();
@@ -571,17 +576,16 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                     Glide.with(MusicXService.this)
                             .load(ArtworkUtils.getAlbumCoverPath(MusicXService.this, getsongAlbumName()))
                             .asBitmap()
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .centerCrop()
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
                             .placeholder(R.mipmap.ic_launcher)
                             .error(R.mipmap.ic_launcher)
                             .format(DecodeFormat.PREFER_ARGB_8888)
                             .override(size, size)
                             .transform(new CropCircleTransformation(MusicXService.this))
-                            .into(new Target<Bitmap>() {
+                            .into(new SimpleTarget<Bitmap>() {
                                 @Override
                                 public void onLoadStarted(Drawable placeholder) {
-
                                 }
 
                                 @Override
@@ -594,40 +598,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                                     audioWidget.controller().albumCoverBitmap(resource);
                                 }
 
-                                @Override
-                                public void onLoadCleared(Drawable placeholder) {
-
-                                }
-
-                                @Override
-                                public void getSize(SizeReadyCallback cb) {
-
-                                }
-
-                                @Override
-                                public void setRequest(Request request) {
-
-                                }
-
-                                @Override
-                                public Request getRequest() {
-                                    return null;
-                                }
-
-                                @Override
-                                public void onStart() {
-
-                                }
-
-                                @Override
-                                public void onStop() {
-
-                                }
-
-                                @Override
-                                public void onDestroy() {
-
-                                }
                             });
                 }
             });
@@ -638,17 +608,16 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                     Glide.with(MusicXService.this)
                             .load(ArtworkUtils.uri(getsongAlbumID()))
                             .asBitmap()
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .centerCrop()
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
                             .placeholder(R.mipmap.ic_launcher)
                             .error(R.mipmap.ic_launcher)
                             .format(DecodeFormat.PREFER_ARGB_8888)
                             .override(size, size)
                             .transform(new CropCircleTransformation(MusicXService.this))
-                            .into(new Target<Bitmap>() {
+                            .into(new SimpleTarget<Bitmap>() {
                                 @Override
                                 public void onLoadStarted(Drawable placeholder) {
-
                                 }
 
                                 @Override
@@ -661,40 +630,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                                     audioWidget.controller().albumCoverBitmap(resource);
                                 }
 
-                                @Override
-                                public void onLoadCleared(Drawable placeholder) {
-
-                                }
-
-                                @Override
-                                public void getSize(SizeReadyCallback cb) {
-
-                                }
-
-                                @Override
-                                public Request getRequest() {
-                                    return null;
-                                }
-
-                                @Override
-                                public void setRequest(Request request) {
-
-                                }
-
-                                @Override
-                                public void onStart() {
-
-                                }
-
-                                @Override
-                                public void onStop() {
-
-                                }
-
-                                @Override
-                                public void onDestroy() {
-
-                                }
                             });
                 }
             });
@@ -851,7 +786,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
     @Override
     public int returnpos() {
-        Log.d(TAG, "ReturnPosition");
         return playList.indexOf(CurrentSong) != -1 && playList.indexOf(CurrentSong) < playList.size() ? playList.indexOf(CurrentSong) : -1;
     }
 
@@ -892,7 +826,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     @Override
     public void forceStop() {
         if (isPlaying()) {
-            MediaPlayerSingleton.getInstance().getMediaPlayer().stop();
             stopMediaplayer();
             if (permissionManager.isSystemAlertGranted(this)) {
                 if (!Extras.getInstance().floatingWidget()) {
@@ -959,15 +892,16 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         int fadeDuration = 0;
         String savedvalue = Extras.getInstance().getFadeDuration();
         if ( savedvalue != null){
-            if (savedvalue.equals("0")){
-                fadeDuration = 1000;
-                return fadeDuration;
-            }else if (savedvalue.equals("1")){
-                fadeDuration = 3000;
-                return fadeDuration;
-            }else if (savedvalue.equals("2")){
-                fadeDuration = 5000;
-                return fadeDuration;
+            switch (savedvalue) {
+                case "0":
+                    fadeDuration = 1000;
+                    return fadeDuration;
+                case "1":
+                    fadeDuration = 3000;
+                    return fadeDuration;
+                case "2":
+                    fadeDuration = 5000;
+                    return fadeDuration;
             }
         }
         return fadeDuration;
@@ -1019,7 +953,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
     @Override
     public int getPlayerPos() {
-        Log.d(TAG, "Return_Player_Position");
         if (MediaPlayerSingleton.getInstance().getMediaPlayer() != null && returnpos() < playList.size()) {
             return MediaPlayerSingleton.getInstance().getMediaPlayer().getCurrentPosition();
         } else {
@@ -1034,6 +967,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         } else {
             MediaPlayerSingleton.getInstance().getMediaPlayer().seekTo(0);
         }
+
     }
 
     @Override
@@ -1060,7 +994,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     @Override
     public void setdataPos(int pos, boolean play) {
         if (pos != -1 && pos < playList.size()) {
-            Extras.getInstance().saveSeekServices(0);
             playingIndex = pos;
             CurrentSong = playList.get(pos);
             if (play) {
@@ -1092,8 +1025,8 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             return;
         }
         if (returnpos() != -1 && playList.size() > 0) {
-            stopMediaplayer();
             Uri dataLoader = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, song.getId());
+            stopMediaplayer();
             try {
                 MediaPlayerSingleton.getInstance().getMediaPlayer().setDataSource(MusicXService.this, dataLoader);
                 MediaPlayerSingleton.getInstance().getMediaPlayer().prepareAsync();
@@ -1114,6 +1047,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             isShuffled = true;
             updateService(QUEUE_CHANGED);
             shuffle();
+            Extras.getInstance().saveSeekServices(0);
             setdataPos(0, true);
         }
     }
@@ -1145,7 +1079,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (permissionManager.isSystemAlertGranted(this)) {
+        if (permissionManager.isSystemAlertGranted(MusicXService.this)) {
             if (!Extras.getInstance().floatingWidget()) {
                 audioWidget.controller().onControlsClickListener(null);
                 audioWidget.controller().onWidgetStateChangedListener(null);
@@ -1320,6 +1254,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         if (META_CHANGED.equals(updateservices) || PLAYSTATE_CHANGED.equals(updateservices)) {
             musicxWidget.notifyChange(this, updateservices);
             musicXwidget4x4.notifyChange(this, updateservices);
+            musicXWidget5x5.notifyChange(this, updateservices);
             if (!Extras.getInstance().hideNotify()) {
                 NotificationHandler.buildNotification(MusicXService.this, updateservices);
             }
@@ -1403,6 +1338,24 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         }
     }
 
+    @Override
+    public long getArtistID() {
+        if (CurrentSong != null) {
+            return CurrentSong.getArtistId();
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public String getYear() {
+        if (CurrentSong != null) {
+            return CurrentSong.getYear();
+        } else {
+            return null;
+        }
+    }
+
     public List<Song> getPlayList() {
         return playList;
     }
@@ -1435,9 +1388,13 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         return CurrentSong;
     }
 
+    public AudioWidget getAudioWidget() {
+        return audioWidget;
+    }
+
     /*
-    * Remove Notification _/\_
-    */
+        * Remove Notification _/\_
+        */
     private void removeNotification() {
         NotificationManagerCompat.from(this).cancel(NotificationHandler.notificationID);
     }
@@ -1484,7 +1441,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         }
     }
 
-
     /**
      * BroadCast controls
      */
@@ -1511,7 +1467,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             } else if (intent.getAction().equals(ACTION_TOGGLE)) {
                 toggle();
             } else if (intent.getAction().equals(ACTION_CHANGE_STATE)) {
-                if (permissionManager.isSystemAlertGranted(context)) {
+                if (permissionManager.isSystemAlertGranted(MusicXService.this)) {
                     if (!Extras.getInstance().floatingWidget()) {
                         audioWidget.show(Extras.getInstance().getwidgetPositionX(), Extras.getInstance().getwidgetPositionY());
                     } else {
@@ -1534,6 +1490,9 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             } else if (intent.getAction().equals(ACTION_COMMAND1)) {
                 int[] appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
                 musicXwidget4x4.musicxWidgetUpdate(MusicXService.this, appWidgetIds);
+            } else if (intent.getAction().equals(ACTION_COMMAND2)) {
+                int[] appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
+                musicXWidget5x5.musicxWidgetUpdate(MusicXService.this, appWidgetIds);
             }
         }
 

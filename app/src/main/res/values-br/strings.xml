@@ -143,4 +143,7 @@
     <string name="hqartist_artwork_summary">habilite para baixar arte do em alta qualidade</string>
     <string name="storage">Armazenamento</string>
     <string name="writesetting">Gravar o toque em configurações</string>
+    <string name="donation">Donation</string>
+    <string name="support">Support</string>
+    <string name="shuffle_all">Shuffle All</string>
 </resources>

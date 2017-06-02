@@ -1,9 +1,8 @@
 package com.rks.musicx.ui.adapters;
 
 import android.animation.Animator;
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
@@ -24,7 +23,9 @@ import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.AlbumArtwork;
+import com.rks.musicx.interfaces.bitmap;
 import com.rks.musicx.interfaces.palette;
+import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.widgets.CircleImageView;
@@ -59,7 +60,6 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
     private int duration = 300;
     private Interpolator interpolator = new LinearInterpolator();
     private int lastpos = -1;
-    private ValueAnimator colorAnimation;
 
     public SongListAdapter(@NonNull Context context) {
         super(context);
@@ -78,16 +78,29 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
     @Override
     public void onBindViewHolder(SongListAdapter.SongViewHolder holder, int position) {
         Song song = getItem(position);
+        if (!Extras.getInstance().saveData()){
+            AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), song.getArtist(), song.getAlbum());
+            albumArtwork.execute();
+        }
         if (layout == R.layout.song_list) {
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), song.getArtist(), song.getAlbum(), song.getAlbumId(), holder.SongArtwork, new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(), song.getAlbum(), null, song.getAlbumId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
 
                 }
+            }, new bitmap() {
+                @Override
+                public void bitmapwork(Bitmap bitmap) {
+                    holder.SongArtwork.setImageBitmap(bitmap);
+                }
+
+                @Override
+                public void bitmapfailed(Bitmap bitmap) {
+                    holder.SongArtwork.setImageBitmap(bitmap);
+                }
             });
-            albumArtwork.execute();
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             Drawable drawable = holder.menu.getDrawable();
             if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
@@ -128,17 +141,26 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             }
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), song.getArtist(), song.getAlbum(), song.getAlbumId(), holder.songGridArtwork, new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(), song.getAlbum(), null, song.getAlbumId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
                     final int[] colors = Helper.getAvailableColor(getContext(), palette);
                     holder.songView.setBackgroundColor(colors[0]);
                     holder.SongTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
                     holder.SongArtist.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
-                    animateViews(holder, colors[0]);
+                    Helper.animateViews(getContext(), holder.itemView, colors[0]);
+                }
+            }, new bitmap() {
+                @Override
+                public void bitmapwork(Bitmap bitmap) {
+                    holder.songGridArtwork.setImageBitmap(bitmap);
+                }
+
+                @Override
+                public void bitmapfailed(Bitmap bitmap) {
+                    holder.songGridArtwork.setImageBitmap(bitmap);
                 }
             });
-            albumArtwork.execute();
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             holder.menu.setVisibility(View.VISIBLE);
             Drawable drawable = holder.menu.getDrawable();
@@ -147,6 +169,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             }
         }
     }
+
 
     public int getLayout() {
         return layout;
@@ -167,26 +190,6 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
         data = new ArrayList<>();
         data.addAll(songList);
         notifyDataSetChanged();
-    }
-
-    private void animateViews(SongViewHolder songViewHolder, int colorBg) {
-        colorAnimation = setAnimator(0xffe5e5e5,
-                colorBg);
-        colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-
-            @Override
-            public void onAnimationUpdate(ValueAnimator animator) {
-                songViewHolder.songView.setBackgroundColor((Integer) animator.getAnimatedValue());
-            }
-
-        });
-        colorAnimation.start();
-    }
-
-    private ValueAnimator setAnimator(int colorFrom, int colorTo) {
-        ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-        colorAnimation.setDuration(duration);
-        return colorAnimation;
     }
 
     public class SongViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

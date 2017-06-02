@@ -143,4 +143,7 @@
     <string name="hqartist_artwork_summary">אפשר הורדת עטיפות אלבום באיכות גבוהה</string>
     <string name="storage">אחסון</string>
     <string name="writesetting">להגדיר צלצול</string>
+    <string name="donation">Donation</string>
+    <string name="support">Support</string>
+    <string name="shuffle_all">Shuffle All</string>
 </resources>

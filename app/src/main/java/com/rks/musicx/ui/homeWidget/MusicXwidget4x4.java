@@ -21,6 +21,7 @@ import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.services.MediaPlayerSingleton;
 import com.rks.musicx.services.MusicXService;
+import com.rks.musicx.ui.activities.PlayingActivity;
 
 import static com.rks.musicx.misc.utils.Constants.ACTION_COMMAND1;
 import static com.rks.musicx.misc.utils.Constants.ACTION_FAV;
@@ -66,6 +67,10 @@ public class MusicXwidget4x4 extends AppWidgetProvider {
             return;
         }
         RemoteViews remoteViews = new RemoteViews(musicXService.getPackageName(), R.layout.bigwidget);
+        Intent intent = new Intent(musicXService, PlayingActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendInt = PendingIntent.getActivity(musicXService, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.item_view, pendInt);
         remoteViews.setTextViewText(R.id.title, musicXService.getsongTitle());
         remoteViews.setTextViewText(R.id.artist, musicXService.getsongArtistName());
         handler.post(new Runnable() {
@@ -106,11 +111,11 @@ public class MusicXwidget4x4 extends AppWidgetProvider {
             remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite_outline);
         }
         controls(remoteViews, musicXService);
-        pushUpdate(musicXService, updatdeID, remoteViews);
+        //pushUpdate(musicXService, updatdeID, remoteViews);
     }
 
     private void defaultAppWidget(Context context, int[] appWidgetIds) {
-        final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget);
+        final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.bigwidget);
         views.setTextViewText(R.id.title, "Hello");
         views.setTextViewText(R.id.artist, "Adele");
         controls(views, context);

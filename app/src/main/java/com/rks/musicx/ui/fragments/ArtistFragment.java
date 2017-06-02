@@ -1,5 +1,6 @@
 package com.rks.musicx.ui.fragments;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,7 +27,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.afollestad.appthemeengine.Config;
-import com.bumptech.glide.RequestManager;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
@@ -39,7 +39,9 @@ import com.rks.musicx.data.network.ArtistArtwork;
 import com.rks.musicx.data.network.Clients;
 import com.rks.musicx.data.network.Services;
 import com.rks.musicx.data.network.model.Artist__;
+import com.rks.musicx.interfaces.bitmap;
 import com.rks.musicx.interfaces.palette;
+import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Constants;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
@@ -87,18 +89,19 @@ public class ArtistFragment extends BaseLoaderFragment {
     private Toolbar toolbar;
     private Helper helper;
     private FloatingActionButton fab;
-    private RequestManager mRequestManager;
     private FrameLayout bioView;
     private TextView artistBio;
     private boolean bio;
     private RecyclerView albumrv;
     private AlbumListAdapter albumListAdapter;
+    private String[] selectionArgs;
 
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = (position, view) -> {
         switch (view.getId()) {
             case R.id.item_view:
                 ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
                 rv.smoothScrollToPosition(position);
+                Extras.getInstance().saveSeekServices(0);
                 break;
             case R.id.menu_button:
                 helper.showMenu(false, trackloader, this, ArtistFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
@@ -120,17 +123,19 @@ public class ArtistFragment extends BaseLoaderFragment {
         }
     };
 
+
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.shuffle_fab:
                     ((MainActivity) getActivity()).onShuffleRequested(songListAdapter.getSnapshot(), true);
+                    Extras.getInstance().saveSeekServices(0);
                     break;
             }
         }
     };
-    private String[] selectionArgs;
+
     private LoaderManager.LoaderCallbacks<List<com.rks.musicx.data.model.Album>> albumLoadersCallbacks = new LoaderManager.LoaderCallbacks<List<com.rks.musicx.data.model.Album>>() {
 
         @Override
@@ -182,6 +187,7 @@ public class ArtistFragment extends BaseLoaderFragment {
         Helper.setFragmentTransition(getActivity(), ArtistFragment.this, AlbumFragment.newInstance(album), new Pair<View, String>(imageView, "TransitionArtwork"));
     }
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -216,9 +222,7 @@ public class ArtistFragment extends BaseLoaderFragment {
     protected void funtion() {
         String ateKey = Helper.getATEKey(getContext());
         int colorAccent = Config.accentColor(getContext(), ateKey);
-
         rv.setPopupBgColor(colorAccent);
-
         fab.setOnClickListener(mOnClickListener);
         toolbar.setTitle(artist.getName());
         toolbar.setTitleTextColor(Color.WHITE);
@@ -408,19 +412,37 @@ public class ArtistFragment extends BaseLoaderFragment {
     * ArtistCover
     */
     private void artistCover() {
-        ArtistArtwork artistArtwork = new ArtistArtwork(getContext(), artist.getName(), artworkView, new palette() {
+       if (!Extras.getInstance().saveData()){
+           ArtistArtwork artistArtwork = new ArtistArtwork(getContext(), artist.getName());
+           artistArtwork.execute();
+       }
+        ArtworkUtils.ArtworkLoader(getContext(), null, ArtworkUtils.getArtistCoverPath(getContext(),artist.getName()).getAbsolutePath(),0, new palette() {
             @Override
             public void palettework(Palette palette) {
                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
                 toolbar.setBackgroundColor(colors[0]);
+                if (getActivity() == null || getActivity().getWindow() == null) {
+                    return;
+                }
                 if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                     getActivity().getWindow().setStatusBarColor(colors[0]);
                 } else {
                     getActivity().getWindow().setStatusBarColor(colors[0]);
                 }
+                Helper.animateViews(getContext(), toolbar, colors[0]);
+            }
+        }, new bitmap() {
+            @Override
+            public void bitmapwork(Bitmap bitmap) {
+                artworkView.setImageBitmap(bitmap);
+            }
+
+            @Override
+            public void bitmapfailed(Bitmap bitmap) {
+                artworkView.setImageBitmap(bitmap);
             }
         });
-        artistArtwork.execute();
+
     }
 
     private void artistBio() {

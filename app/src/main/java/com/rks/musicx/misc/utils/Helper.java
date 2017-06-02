@@ -5,6 +5,7 @@ import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -133,18 +134,19 @@ import static com.rks.musicx.misc.utils.Constants.SONG_YEAR;
 public class Helper {
 
     private Context context;
-    private ValueAnimator colorAnimation;
+    private static ValueAnimator colorAnimation;
 
     public Helper(Context context) {
         this.context = context;
     }
 
     public static void setRingTone(Context context, String path) {
-        if (!permissionManager.isWriteSettingsGranted(context)) {
+        if (permissionManager.isWriteSettingsGranted(context)) {
             setRingtone(context, path);
+            Toast.makeText(context, "Ringtone set", Toast.LENGTH_SHORT).show();
         } else {
             Log.d("Helper", "Write Permission Not Granted on mashmallow+");
-            setRingtone(context, path);
+            Toast.makeText(context, "Settings write permission denied", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -175,7 +177,6 @@ public class Helper {
             Uri newuri = ContentUris.withAppendedId(uri, Long.valueOf(id));
             try {
                 RingtoneManager.setActualDefaultRingtoneUri(context, RingtoneManager.TYPE_RINGTONE, newuri);
-                Toast.makeText(context, "Ringtone set", Toast.LENGTH_SHORT).show();
             } catch (Throwable t) {
                 t.printStackTrace();
             }
@@ -286,13 +287,7 @@ public class Helper {
             AudioFile audioFile = null;
             try {
                 audioFile = AudioFileIO.read(f);
-            } catch (CannotReadException | InvalidAudioFrameException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (TagException e) {
-                e.printStackTrace();
-            } catch (ReadOnlyFileException e) {
+            } catch (CannotReadException | InvalidAudioFrameException | TagException | IOException | ReadOnlyFileException e) {
                 e.printStackTrace();
             }
             TagOptionSingleton.getInstance().setAndroid(true);
@@ -309,7 +304,7 @@ public class Helper {
                 String album = song.getAlbum() != null ? song.getArtist() : SONG_ALBUM;
                 String artist = song.getArtist() != null ? song.getArtist() : SONG_ARTIST;
                 String track = song.getTrackNumber() != 0 ? String.valueOf(song.getTrackNumber()) : SONG_TRACK_NUMBER;
-                String lyrics = song.getLyrics() != null ? song.getLyrics() : "No Lyrics";
+                String lyrics = song.getLyrics() != null ? song.getLyrics() : "No_Lyrics";
                 tag.deleteField(FieldKey.LYRICS);
                 tag.setField(FieldKey.TITLE, title);
                 tag.setField(FieldKey.YEAR,  year);
@@ -330,29 +325,28 @@ public class Helper {
                 if (cursor != null && cursor.moveToFirst()) {
                     long id = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
                     values.put(MediaStore.Audio.Media.ALBUM_ID, id);
+                    cursor.close();
                 } else {
                     values.put(MediaStore.Audio.Media.ALBUM, album);
                 }
-                if (cursor != null) {
-                    cursor.close();
-                }
                 if (values.size() > 0) {
-                    context.getContentResolver().update(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values, MediaStore.Audio.Media._ID + "=" + song.getId(), null);
+                    context.getContentResolver().update(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values, android.provider.MediaStore.Audio.Media._ID + "=?", new String[]{String.valueOf(song.getId())});
                 }else {
                     return false;
                 }
-            } catch (FieldDataInvalidException e) {
-                e.printStackTrace();
-
-            }
-            try {
                 if (audioFile != null) {
-                    audioFile.commit();
+                    try {
+                        audioFile.commit();
+                    } catch (CannotWriteException e) {
+                        e.printStackTrace();
+                        return false;
+                    }
                     audioFile.setTag(tag);
                 }
                 return true;
-            } catch (CannotWriteException e) {
+            } catch (FieldDataInvalidException e) {
                 e.printStackTrace();
+
             }
         }
         return false;
@@ -1010,6 +1004,7 @@ public class Helper {
         popup.show();
     }
 
+
     public static int parseToInt(String maybeInt, int defaultValue) {
         if (maybeInt == null) return defaultValue;
         maybeInt = maybeInt.trim();
@@ -1275,7 +1270,7 @@ public class Helper {
      * @param view
      * @param colorBg
      */
-    public void animateViews(View view, int colorBg) {
+    public static void animateViews(Context context, View view, int colorBg) {
         colorAnimation = setAnimator(0xffe5e5e5, colorBg);
         colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
@@ -1285,9 +1280,10 @@ public class Helper {
             }
 
         });
+        colorAnimation.start();
     }
 
-    private ValueAnimator setAnimator(int colorFrom, int colorTo) {
+    private static ValueAnimator setAnimator(int colorFrom, int colorTo) {
         ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
         long duration = 300;
         colorAnimation.setDuration(duration);
@@ -1339,6 +1335,20 @@ public class Helper {
                 .setFontAttrId(R.attr.fontPath)
                 .build());
         Extras.getInstance().saveTypeface(path);
+    }
+
+    /**
+     * Start Activity
+     * @param context
+     * @param sClass
+     * @param <S>
+     */
+    public static <S> void startActivity(Activity context, Class<S> sClass){
+        if (context == null){
+            return;
+        }
+        Intent intent = new Intent(context, sClass);
+        context.startActivity(intent);
     }
 
 }

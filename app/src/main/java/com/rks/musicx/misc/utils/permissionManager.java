@@ -73,7 +73,6 @@ public class permissionManager {
                             intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.fromParts("package", activity.getPackageName(), null));
                             activity.startActivityForResult(intent, OVERLAY_REQ);
                         }
-                        Extras.getInstance().setWidgetTrack(true);
                     } else if (which == DialogInterface.BUTTON_NEGATIVE) {
                         Toast.makeText(activity, R.string.toast_permissions_not_granted, Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
@@ -121,11 +120,8 @@ public class permissionManager {
 
     public static boolean isSystemAlertGranted(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.SYSTEM_ALERT_WINDOW) == PermissionChecker.PERMISSION_GRANTED || Settings.canDrawOverlays(context)) {
-                return true;
-            } else {
-                return false;
-            }
+            final boolean result = PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.SYSTEM_ALERT_WINDOW) == PermissionChecker.PERMISSION_GRANTED  || Settings.canDrawOverlays(context);
+            return result;
         } else {
             return true;
         }
@@ -145,12 +141,9 @@ public class permissionManager {
 
     public static boolean isWriteSettingsGranted(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.WRITE_SETTINGS) == PermissionChecker.PERMISSION_GRANTED || !Settings.System.canWrite(context)) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
+            final boolean result = PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.WRITE_SETTINGS) == PermissionChecker.PERMISSION_GRANTED || Settings.System.canWrite(context);
+            return result;
+        }else {
             return true;
         }
     }

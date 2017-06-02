@@ -77,7 +77,7 @@ public class Constants {
     public static final String ALBUMGRID = "albumgrid";
     public static final String ARTISTGRID = "artistgrid";
     public static final String SONGGRID = "songgrid";
-    public static final String WIDGETTRACk = "widgettrack";
+    public static final String WIDGETTRACK = "widgettrack";
     public static final String PLAYLIST_ID = "playlistId";
     public static final String FADEINOUT_DURATION = "fadein_fadeout_seekbar";
     public static final String FADETRACK = "fade_inout";
@@ -85,6 +85,8 @@ public class Constants {
     public static final String TRYPEFACE_PATH = "font_path";
     public static final String WIDGET_COLOR = "widget_color";
     public static final String PLAYINGVIEW_TRACK = "isplayingView3";
+    public static final String SETTINGS_TRACK = "settings_track";
+    public static final String HD_ARTWORK = "hd_artwork";
     /*
     Choices
      */
@@ -178,6 +180,7 @@ public class Constants {
     public static final String ACTION_PLAYINGVIEW = PACKAGENAME + "PLAYING_VIEW";
     public static final String ACTION_COMMAND = PACKAGENAME + "command";
     public static final String ACTION_COMMAND1 = PACKAGENAME + "command1";
+    public static final String ACTION_COMMAND2 = PACKAGENAME + "command2";
     public static final String ACTION_FAV = PACKAGENAME + "widget_fav";
     public static final String PLAYER_POS = PACKAGENAME + "player_pos";
     public static final String AUDIO_ID = PACKAGENAME + "audioeffect_id";

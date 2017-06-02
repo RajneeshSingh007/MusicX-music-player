@@ -29,6 +29,7 @@ import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.SettingsActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +39,8 @@ import static com.rks.musicx.misc.utils.Constants.BlurView;
 import static com.rks.musicx.misc.utils.Constants.ClearFav;
 import static com.rks.musicx.misc.utils.Constants.ClearRecently;
 import static com.rks.musicx.misc.utils.Constants.DarkTheme;
+import static com.rks.musicx.misc.utils.Constants.FADETRACK;
+import static com.rks.musicx.misc.utils.Constants.HQ_ARTISTARTWORK;
 import static com.rks.musicx.misc.utils.Constants.LightTheme;
 import static com.rks.musicx.misc.utils.Constants.PlayingView;
 import static com.rks.musicx.misc.utils.Constants.REMOVETABS;
@@ -74,6 +77,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
     private int accentcolor;
     private ATECheckBoxPreference headsetConfig, phoneConfig;
     private List<Integer> integerList = new ArrayList<>();
+    private Helper helper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -95,6 +99,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         phoneConfig = (ATECheckBoxPreference) findPreference(SaveTelephony);
         phoneConfig.setChecked(true);
         accentcolor = Config.accentColor(getActivity(), Helper.getATEKey(getActivity()));
+        helper = new Helper(getActivity());
     }
 
     @Override
@@ -325,6 +330,51 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                 return true;
             }
         });
+        ATECheckBoxPreference hqArtwork = (ATECheckBoxPreference) findPreference(HQ_ARTISTARTWORK);
+        File file = new File(helper.getAlbumArtworkLocation());
+        File file1 = new File(helper.getArtistArtworkLocation());
+
+        if (hqArtwork.isChecked()){
+            try {
+                if (file.isDirectory() && file1.isDirectory() ){
+                    deleteRecursive(file);
+                    deleteRecursive(file1);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                Helper.createAppDir(".AlbumArtwork");
+                Helper.createAppDir(".ArtistArtwork");
+            }
+        }else {
+            try {
+                if (file.isDirectory() && file1.isDirectory() ){
+                    deleteRecursive(file);
+                    deleteRecursive(file1);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                Helper.createAppDir(".AlbumArtwork");
+                Helper.createAppDir(".ArtistArtwork");
+            }
+        }
+        ATECheckBoxPreference fadePref = (ATECheckBoxPreference) findPreference(FADETRACK);
+        if (fadePref.isChecked()){
+            Extras.getInstance().getmPreferences().edit().putBoolean(FADETRACK, true).commit();
+        }else {
+            Extras.getInstance().getmPreferences().edit().putBoolean(FADETRACK, false).commit();
+        }
+    }
+
+    public void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory()) {
+            for (File child : fileOrDirectory.listFiles()) {
+                deleteRecursive(child);
+            }
+        }
+
+        fileOrDirectory.delete();
     }
 
 

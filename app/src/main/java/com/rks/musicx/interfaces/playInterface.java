@@ -115,4 +115,9 @@ public interface playInterface {
 
     int getsongNumber();
 
+    long getArtistID();
+
+    String getYear();
+
+
 }

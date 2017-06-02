@@ -55,6 +55,10 @@
         app:showAsAction="never"/>
 
     <item
+        android:id="@+id/action_settings"
+        android:title="@string/action_settings"/>
+
+    <item
         android:id="@+id/action_share"
         android:actionProviderClass="android.widget.ShareActionProvider"
         android:title="@string/action_share"

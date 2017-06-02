@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.FolderModel;
@@ -55,6 +56,8 @@ public class FolderAdapter extends BaseRecyclerViewAdapter<FolderModel, FolderAd
         FolderModel file = getItem(position);
         Glide.with(getContext())
                 .load(R.drawable.folder)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
                 .crossFade()
                 .placeholder(R.drawable.folder)
                 .error(R.drawable.folder)
