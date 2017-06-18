@@ -8,12 +8,10 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
 import android.util.Pair;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.afollestad.appthemeengine.Config;
@@ -68,37 +66,14 @@ public class AlbumListFragment extends BaseRefreshFragment implements LoaderCall
                 case R.id.item_view:
                     ImageView Listartwork = (ImageView) view.findViewById(R.id.album_artwork);
                     fragTransition(albumListAdapter.getItem(position), Listartwork, "TransitionArtwork");
-                    rv.smoothScrollToPosition(position);
                     break;
             }
         }
     };
 
-    public static AlbumListFragment newInstance() {
-        return new AlbumListFragment();
-    }
-
     private void fragTransition(Album album, ImageView imageView, String transition) {
         ViewCompat.setTransitionName(imageView, transition);
         Helper.setFragmentTransition(getActivity(), AlbumListFragment.this, AlbumFragment.newInstance(album), new Pair<View, String>(imageView, transition));
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.common_rv, container, false);
-        rv = (FastScrollRecyclerView) rootView.findViewById(R.id.commonrv);
-        albumListAdapter = new AlbumListAdapter(getContext());
-        int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
-        setHasOptionsMenu(true);
-        initload();
-        albumView();
-        albumList = new ArrayList<>();
-        albumListAdapter.setOnItemClickListener(OnClick);
-        rv.setPopupBgColor(colorAccent);
-        rv.setHasFixedSize(true);
-        rv.setAdapter(albumListAdapter);
-        return rootView;
     }
 
     @Override
@@ -184,16 +159,36 @@ public class AlbumListFragment extends BaseRefreshFragment implements LoaderCall
         albumListAdapter.notifyDataSetChanged();
     }
 
-    /*
-    load album
-     */
+
     private void initload() {
         getLoaderManager().initLoader(albumLoader, null, this);
     }
 
-    /*
-    reload album
-     */
+    @Override
+    protected int setLayout() {
+        return R.layout.common_rv;
+    }
+
+    @Override
+    protected void ui(View view) {
+        rv = (FastScrollRecyclerView) view.findViewById(R.id.commonrv);
+    }
+
+    @Override
+    protected void funtion() {
+        albumListAdapter = new AlbumListAdapter(getContext());
+        int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
+        setHasOptionsMenu(true);
+        albumView();
+        albumList = new ArrayList<>();
+        albumListAdapter.setOnItemClickListener(OnClick);
+        rv.setPopupBgColor(colorAccent);
+        rv.setHasFixedSize(true);
+        rv.setAdapter(albumListAdapter);
+        initload();
+    }
+
+
     @Override
     public void load() {
         getLoaderManager().restartLoader(albumLoader, null, this);
@@ -239,4 +234,8 @@ public class AlbumListFragment extends BaseRefreshFragment implements LoaderCall
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 }

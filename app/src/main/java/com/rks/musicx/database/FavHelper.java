@@ -33,7 +33,7 @@ public class FavHelper {
     public FavHelper(Context context) {
         this.context = context;
         defaultSongLoader = new DefaultSongLoader(context);
-        commonDatabase = new CommonDatabase(context, Constants.Fav_TableName);
+        commonDatabase = new CommonDatabase(context, Constants.Fav_TableName, true);
         defaultSongLoader.setProvider(true);
     }
 

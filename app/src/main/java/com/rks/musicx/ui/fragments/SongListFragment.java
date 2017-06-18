@@ -1,6 +1,5 @@
 package com.rks.musicx.ui.fragments;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.view.MenuItemCompat;
@@ -18,17 +17,20 @@ import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.data.network.AlbumArtwork;
+import com.rks.musicx.database.CommonDatabase;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.ItemOffsetDecoration;
 import com.rks.musicx.ui.activities.MainActivity;
-import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.rks.musicx.misc.utils.Constants.DOWNLOAD_ARTWORK;
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -47,13 +49,13 @@ import java.util.List;
  * limitations under the License.
  */
 
-public class SongListFragment extends BaseLoaderFragment implements SearchView.OnQueryTextListener{
+public class SongListFragment extends BaseLoaderFragment implements SearchView.OnQueryTextListener {
 
     private FastScrollRecyclerView rv;
-    private SongListAdapter songListAdapter;
     private Helper helper;
     private SearchView searchView;
-    private List<Song> songList;
+    private AlbumArtwork albumArtwork;
+    private CommonDatabase commonDatabase;
 
     private BaseRecyclerViewAdapter.OnItemClickListener onClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
 
@@ -64,7 +66,6 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
                     case R.id.item_view:
                         ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
                         Extras.getInstance().saveSeekServices(0);
-                        rv.smoothScrollToPosition(position);
                         break;
                     case R.id.menu_button:
                         helper.showMenu(false, trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
@@ -77,7 +78,6 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
                     case R.id.album_info:
                         ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
                         Extras.getInstance().saveSeekServices(0);
-                        rv.smoothScrollToPosition(position);
                         break;
                     case R.id.menu_button:
                         helper.showMenu(false, trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
@@ -87,10 +87,6 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
             }
         }
     };
-
-    public static SongListFragment newInstance() {
-        return new SongListFragment();
-    }
 
 
     @Override
@@ -171,6 +167,21 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
             return;
         }
         Extras.getInstance().getThemevalue(getActivity());
+        commonDatabase.add(getSongList());
+        songList = commonDatabase.readLimit(-1, null);
+        if (songList == null){
+            return;
+        }
+        try {
+            if (!Extras.getInstance().saveData()){
+               for (Song song : songList){
+                    albumArtwork = new AlbumArtwork(getActivity(), song.getArtist(), song.getAlbum());
+                    albumArtwork.execute();
+                }
+            }
+        }finally {
+            commonDatabase.close();
+        }
     }
 
 
@@ -198,11 +209,12 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
         helper = new Helper(getContext());
         songList = new ArrayList<>();
         background();
+        commonDatabase = new CommonDatabase(getContext(), DOWNLOAD_ARTWORK, true);
     }
 
     @Override
     protected String filter() {
-        return MediaStore.Audio.Media.IS_MUSIC + " !=0" + " OR " + MediaStore.Audio.Media.TRACK + " !=0";
+        return MediaStore.Audio.Media.IS_MUSIC + " !=0";//+ " OR " + MediaStore.Audio.Media.TRACK + " !=0";
     }
 
     @Override
@@ -217,27 +229,10 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
 
     @Override
     protected void background() {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                if (getActivity() != null){
-                    songListAdapter = new SongListAdapter(getContext());
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                if (getActivity() == null){
-                    return;
-                }
-                loadTrak();
-                songView();
-                rv.setAdapter(songListAdapter);
-                songListAdapter.setOnItemClickListener(onClick);
-            }
-        }.execute();
+        loadTrak();
+        songView();
+        rv.setAdapter(songListAdapter);
+        songListAdapter.setOnItemClickListener(onClick);
     }
 
     @Override
@@ -308,15 +303,15 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
     }
 
 
-    @Override
-    public void setAdapater(List<Song> data) {
-        songList = data;
-        songListAdapter.addDataList(data);
-    }
 
     @Override
-    public void notifyChanges() {
-        songListAdapter.notifyDataSetChanged();
+    public void onDestroy() {
+        if (!Extras.getInstance().saveData()){
+            if (albumArtwork != null) {
+                albumArtwork.cancel(true);
+            }
+        }
+        super.onDestroy();
     }
 
 }

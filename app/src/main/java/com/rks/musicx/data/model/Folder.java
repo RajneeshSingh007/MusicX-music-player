@@ -21,21 +21,21 @@ import java.util.List;
  * limitations under the License.
  */
 
-public class FolderModel implements Comparable<FolderModel> {
+public class Folder implements Comparable<Folder> {
 
     private static final List<String> fileExtensions = new ArrayList<>(Arrays.asList("aac", "mp4", "flac", "m4a", "mp3", "ogg"));
     private final File mFile;
     private final FileModelComparator mFileModelComparator;
     private final FileExtensionFilter mFileExtensionFilter;
 
-    public FolderModel(File file) {
+    public Folder(File file) {
         mFile = file;
         mFileModelComparator = new FileModelComparator();
         mFileExtensionFilter = new FileExtensionFilter(fileExtensions);
     }
 
 
-    public FolderModel(String filePath) {
+    public Folder(String filePath) {
         mFile = new File(filePath);
 
         mFileModelComparator = new FileModelComparator();
@@ -80,19 +80,23 @@ public class FolderModel implements Comparable<FolderModel> {
         return mFile.exists();
     }
 
-    public List<FolderModel> listFilesSorted() {
-        List<FolderModel> files = new ArrayList<>();
+    public File getmFile() {
+        return mFile;
+    }
+
+    public List<Folder> listFilesSorted() {
+        List<Folder> files = new ArrayList<>();
         File[] filesArray = mFile.listFiles(mFileExtensionFilter);
 
         if (filesArray == null) {
-            return files;
+            return null;
         }
         for (File file : filesArray) {
             if (file.getName().equals(".nomedia")) {
                 files.clear();
                 break;
             }
-            files.add(new FolderModel(file));
+            files.add(new Folder(file));
         }
         Collections.sort(files, mFileModelComparator);
         return files;
@@ -101,21 +105,21 @@ public class FolderModel implements Comparable<FolderModel> {
 
     @Override
     public boolean equals(Object model) {
-        if (!(model instanceof FolderModel)) {
+        if (!(model instanceof Folder)) {
             return false;
         }
-        return mFile.equals(((FolderModel) model).mFile);
+        return mFile.equals(((Folder) model).mFile);
     }
 
     @Override
-    public int compareTo(FolderModel model) {
-        return mFile.compareTo(((FolderModel) model).mFile);
+    public int compareTo(Folder model) {
+        return mFile.compareTo(((Folder) model).mFile);
     }
 
-    private class FileModelComparator implements Comparator<FolderModel> {
+    private class FileModelComparator implements Comparator<Folder> {
 
         @Override
-        public int compare(FolderModel f1, FolderModel f2) {
+        public int compare(Folder f1, Folder f2) {
 
             if (f1.equals(f2)) {
                 return 0;

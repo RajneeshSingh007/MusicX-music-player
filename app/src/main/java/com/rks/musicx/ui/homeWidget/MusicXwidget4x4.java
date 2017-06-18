@@ -76,7 +76,7 @@ public class MusicXwidget4x4 extends AppWidgetProvider {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                ArtworkUtils.ArtworkLoader(musicXService, musicXService.getsongAlbumName(),null, musicXService.getsongAlbumID(), new palette() {
+                ArtworkUtils.ArtworkLoader(musicXService,  300, 600,  musicXService.getsongAlbumName(),null, musicXService.getsongAlbumID(), new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         int colors[] = Helper.getAvailableColor(musicXService, palette);

@@ -1,20 +1,20 @@
 package com.rks.musicx.ui.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
+import com.rks.musicx.base.BaseRefreshFragment;
 import com.rks.musicx.data.loaders.PlaylistLoader;
 import com.rks.musicx.data.model.Playlist;
 import com.rks.musicx.data.model.Song;
@@ -26,6 +26,7 @@ import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.rks.musicx.misc.utils.Constants.PARAM_PLAYLIST_ID;
@@ -49,13 +50,15 @@ import static com.rks.musicx.misc.utils.Constants.PARAM_PLAYLIST_NAME;
  * limitations under the License.
  */
 
-public class PlaylistFragment extends Fragment {
+public class PlaylistFragment extends BaseRefreshFragment {
 
     private FastScrollRecyclerView rv;
     private Playlist mPlaylist;
     private SongListAdapter playlistViewAdapter;
     private int trackloader = -1;
     private Helper helper;
+    private List<Song> playList;
+    private Toolbar toolbar;
 
     private LoaderManager.LoaderCallbacks<List<Song>> playlistLoader = new LoaderCallbacks<List<Song>>() {
         @Override
@@ -72,6 +75,7 @@ public class PlaylistFragment extends Fragment {
             if (data == null) {
                 return;
             }
+            playList = data;
             playlistViewAdapter.addDataList(data);
         }
 
@@ -114,37 +118,7 @@ public class PlaylistFragment extends Fragment {
         }
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_playlist, container, false);
-        rv = (FastScrollRecyclerView) rootView.findViewById(R.id.playlistrv);
-        CustomLayoutManager customLayoutManager = new CustomLayoutManager(getActivity());
-        customLayoutManager.setSmoothScrollbarEnabled(true);
-        rv.setLayoutManager(customLayoutManager);
-        rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75, false));
-        playlistViewAdapter = new SongListAdapter(getContext());
-        playlistViewAdapter.setLayoutId(R.layout.song_list);
-        playlistViewAdapter.setOnItemClickListener(mOnclick);
-        rv.setAdapter(playlistViewAdapter);
-        rv.hasFixedSize();
-        String ateKey = Helper.getATEKey(getContext());
-        int colorAccent = Config.accentColor(getContext(), ateKey);
-        rv.setPopupBgColor(colorAccent);
-        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        toolbar.setVisibility(View.VISIBLE);
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        activity.setSupportActionBar(toolbar);
-        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        helper = new Helper(getContext());
-        load();
-        return rootView;
-    }
-
-    /*
-    loader
-     */
-    private void load() {
+    private void init() {
         getLoaderManager().initLoader(trackloader, null, playlistLoader);
     }
 
@@ -158,15 +132,66 @@ public class PlaylistFragment extends Fragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.playlist_list, menu);
+        menu.findItem(R.id.menu_sort_by).setVisible(false);
+        menu.findItem(R.id.action_create_playlist).setVisible(false);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        getActivity().onBackPressed();
+        if (getActivity() == null){
+            return false;
+        }
+        switch (item.getItemId()) {
+            case R.id.shuffle_all:
+                ((MainActivity) getActivity()).onShuffleRequested(playList, true);
+                break;
+        }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    protected int setLayout() {
+        return R.layout.fragment_playlist;
+    }
+
+    @Override
+    protected void ui(View view) {
+        rv = (FastScrollRecyclerView) view.findViewById(R.id.playlistrv);
+        toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+    }
+
+    @Override
+    protected void funtion() {
+        CustomLayoutManager customLayoutManager = new CustomLayoutManager(getActivity());
+        customLayoutManager.setSmoothScrollbarEnabled(true);
+        rv.setLayoutManager(customLayoutManager);
+        rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75, false));
+        playlistViewAdapter = new SongListAdapter(getContext());
+        playlistViewAdapter.setLayoutId(R.layout.song_list);
+        playlistViewAdapter.setOnItemClickListener(mOnclick);
+        rv.setAdapter(playlistViewAdapter);
+        rv.hasFixedSize();
+        String ateKey = Helper.getATEKey(getContext());
+        int colorAccent = Config.accentColor(getContext(), ateKey);
+        rv.setPopupBgColor(colorAccent);
+        toolbar.setVisibility(View.VISIBLE);
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null && activity.getSupportActionBar() != null){
+            activity.setSupportActionBar(toolbar);
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        helper = new Helper(getContext());
+        init();
+        playList = new ArrayList<>();
+    }
+
+    @Override
+    public void load() {
         getLoaderManager().restartLoader(trackloader, null, playlistLoader);
     }
+
 
 }

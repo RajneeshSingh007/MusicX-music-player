@@ -1,8 +1,6 @@
 package com.rks.musicx.ui.fragments;
 
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
@@ -16,9 +14,7 @@ import com.rks.musicx.R;
 import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Album;
-import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.AlbumArtwork;
-import com.rks.musicx.interfaces.bitmap;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
@@ -26,10 +22,7 @@ import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.MainActivity;
-import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-
-import java.util.List;
 
 import static com.rks.musicx.misc.utils.Constants.ALBUM_ARTIST;
 import static com.rks.musicx.misc.utils.Constants.ALBUM_ID;
@@ -58,21 +51,18 @@ public class AlbumFragment extends BaseLoaderFragment {
 
     private ImageView artworkView;
     private Album mAlbum;
-    private SongListAdapter songListAdapter;
     private FastScrollRecyclerView rv;
     private Toolbar toolbar;
     private Helper helper;
     private FloatingActionButton shuffle;
+    private AlbumArtwork albumArtwork;
 
-    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.shuffle_fab:
-                    ((MainActivity) getActivity()).onShuffleRequested(songListAdapter.getSnapshot(), true);
-                    Extras.getInstance().saveSeekServices(0);
-                    break;
-            }
+    private View.OnClickListener mOnClickListener = v -> {
+        switch (v.getId()) {
+            case R.id.shuffle_fab:
+                ((MainActivity) getActivity()).onShuffleRequested(songListAdapter.getSnapshot(), true);
+                Extras.getInstance().saveSeekServices(0);
+                break;
         }
     };
 
@@ -139,18 +129,16 @@ public class AlbumFragment extends BaseLoaderFragment {
         shuffle.setOnClickListener(mOnClickListener);
         toolbar.setTitle(mAlbum.getAlbumName());
         toolbar.setTitleTextColor(Color.WHITE);
+        background();
         AlbumCover();
         helper = new Helper(getContext());
         int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
         rv.setPopupBgColor(colorAccent);
-        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
-            getActivity().getWindow().setStatusBarColor(colorAccent);
-            toolbar.setBackgroundColor(colorAccent);
-        } else {
-            getActivity().getWindow().setStatusBarColor(colorAccent);
-            toolbar.setBackgroundColor(colorAccent);
+        if (getActivity() == null){
+            return;
         }
-        background();
+        Helper.setColor(getActivity(), colorAccent, toolbar);
+        Helper.rotateFab(shuffle);
     }
 
     @Override
@@ -165,36 +153,19 @@ public class AlbumFragment extends BaseLoaderFragment {
 
     @Override
     protected String sortOder() {
-        return MediaStore.Audio.Media.DATE_ADDED;
+        return MediaStore.Audio.Media.DATE_MODIFIED;
     }
 
     @Override
     protected void background() {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                if (getActivity() != null){
-                    songListAdapter = new SongListAdapter(getContext());
-                    songListAdapter.setLayoutId(R.layout.detail_list);
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                if (getActivity() == null){
-                    return;
-                }
-                CustomLayoutManager c = new CustomLayoutManager(getContext());
-                c.setSmoothScrollbarEnabled(true);
-                getLoaderManager().initLoader(trackloader, null, AlbumFragment.this);
-                rv.setLayoutManager(c);
-                rv.setAdapter(songListAdapter);
-                rv.addItemDecoration(new DividerItemDecoration(getActivity(), 75, false));
-                songListAdapter.setOnItemClickListener(mOnClick);
-            }
-        }.execute();
+        songListAdapter.setLayoutId(R.layout.detail_list);
+        CustomLayoutManager c = new CustomLayoutManager(getContext());
+        c.setSmoothScrollbarEnabled(true);
+        getLoaderManager().initLoader(trackloader, null, AlbumFragment.this);
+        rv.setLayoutManager(c);
+        rv.setAdapter(songListAdapter);
+        rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
+        songListAdapter.setOnItemClickListener(mOnClick);
     }
 
     @Override
@@ -219,56 +190,36 @@ public class AlbumFragment extends BaseLoaderFragment {
 
     @Override
     public void load() {
-        if (getActivity() == null){
-            return;
-        }
         getLoaderManager().restartLoader(trackloader, null, this);
     }
 
 
     private void AlbumCover() {
         if (!Extras.getInstance().saveData()){
-            AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), mAlbum.getArtistName(), mAlbum.getArtistName());
+            albumArtwork = new AlbumArtwork(getContext(), mAlbum.getArtistName(), mAlbum.getArtistName());
             albumArtwork.execute();
         }
-        ArtworkUtils.ArtworkLoader(getContext(), mAlbum.getAlbumName(), null, mAlbum.getId(), new palette() {
+        ArtworkUtils.ArtworkLoader(getContext(), 300, 600, mAlbum.getAlbumName(), null, mAlbum.getId(), new palette() {
             @Override
             public void palettework(Palette palette) {
                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
-                toolbar.setBackgroundColor(colors[0]);
-                if (getActivity() == null || getActivity().getWindow() == null) {
+                if (getActivity() == null) {
                     return;
                 }
-                if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
-                    getActivity().getWindow().setStatusBarColor(colors[0]);
-                } else {
-                    getActivity().getWindow().setStatusBarColor(colors[0]);
-                }
+                Helper.setColor(getActivity(), colors[0], toolbar);
+                Helper.animateViews(getContext(), toolbar, colors[0]);
             }
-        }, new bitmap() {
-            @Override
-            public void bitmapwork(Bitmap bitmap) {
-                artworkView.setImageBitmap(bitmap);
-            }
-
-            @Override
-            public void bitmapfailed(Bitmap bitmap) {
-                artworkView.setImageBitmap(bitmap);
-            }
-        });
+        },artworkView);
     }
 
 
     @Override
-    public void setAdapater(List<Song> data) {
-        if (data == null){
-            return;
+    public void onDestroy() {
+        if (!Extras.getInstance().saveData()){
+            if (albumArtwork != null){
+                albumArtwork.cancel(true);
+            }
         }
-        songListAdapter.addDataList(data);
-    }
-
-    @Override
-    public void notifyChanges() {
-        songListAdapter.notifyDataSetChanged();
+        super.onDestroy();
     }
 }

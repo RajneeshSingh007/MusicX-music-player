@@ -1,8 +1,6 @@
 package com.rks.musicx.ui.fragments;
 
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -16,11 +14,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Pair;
-import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -34,22 +30,20 @@ import com.rks.musicx.data.loaders.AlbumLoader;
 import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.model.Album;
 import com.rks.musicx.data.model.Artist;
-import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.ArtistArtwork;
 import com.rks.musicx.data.network.Clients;
 import com.rks.musicx.data.network.Services;
 import com.rks.musicx.data.network.model.Artist__;
-import com.rks.musicx.interfaces.bitmap;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Constants;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.GestureListerner;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.AlbumListAdapter;
-import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.List;
@@ -80,21 +74,20 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
 public class ArtistFragment extends BaseLoaderFragment {
 
-    private final int albumLoaders = 2;
+    private final int albumLoaders = 4;
     public String selection;
     private FastScrollRecyclerView rv;
     private ImageView artworkView;
     private Artist artist;
-    private SongListAdapter songListAdapter;
     private Toolbar toolbar;
     private Helper helper;
     private FloatingActionButton fab;
     private FrameLayout bioView;
     private TextView artistBio;
-    private boolean bio;
     private RecyclerView albumrv;
     private AlbumListAdapter albumListAdapter;
     private String[] selectionArgs;
+    private ArtistArtwork artistArtwork;
 
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = (position, view) -> {
         switch (view.getId()) {
@@ -124,15 +117,12 @@ public class ArtistFragment extends BaseLoaderFragment {
     };
 
 
-    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.shuffle_fab:
-                    ((MainActivity) getActivity()).onShuffleRequested(songListAdapter.getSnapshot(), true);
-                    Extras.getInstance().saveSeekServices(0);
-                    break;
-            }
+    private View.OnClickListener mOnClickListener = v -> {
+        switch (v.getId()) {
+            case R.id.shuffle_fab:
+                ((MainActivity) getActivity()).onShuffleRequested(songListAdapter.getSnapshot(), true);
+                Extras.getInstance().saveSeekServices(0);
+                break;
         }
     };
 
@@ -140,8 +130,8 @@ public class ArtistFragment extends BaseLoaderFragment {
 
         @Override
         public Loader<List<com.rks.musicx.data.model.Album>> onCreateLoader(int id, Bundle args) {
-            AlbumLoader albumLoader = new AlbumLoader(getContext());
             if (id == albumLoaders) {
+                AlbumLoader albumLoader = new AlbumLoader(getContext());
                 String[] selectargs = getSelectionArgs();
                 String selection = getSelection();
                 if (artist.getName() != null) {
@@ -157,7 +147,7 @@ public class ArtistFragment extends BaseLoaderFragment {
 
         @Override
         public void onLoadFinished(Loader<List<com.rks.musicx.data.model.Album>> loader, List<com.rks.musicx.data.model.Album> data) {
-            if (data == null) {
+            if (data == null){
                 return;
             }
             albumListAdapter.addDataList(data);
@@ -200,7 +190,6 @@ public class ArtistFragment extends BaseLoaderFragment {
             int trackCount = args.getInt(Constants.ARTIST_TRACK_COUNT);
             artist = new Artist(id, name, albumCount, trackCount);
         }
-        setHasOptionsMenu(true);
     }
 
     @Override
@@ -220,6 +209,7 @@ public class ArtistFragment extends BaseLoaderFragment {
     }
     @Override
     protected void funtion() {
+        background();
         String ateKey = Helper.getATEKey(getContext());
         int colorAccent = Config.accentColor(getContext(), ateKey);
         rv.setPopupBgColor(colorAccent);
@@ -227,70 +217,118 @@ public class ArtistFragment extends BaseLoaderFragment {
         toolbar.setTitle(artist.getName());
         toolbar.setTitleTextColor(Color.WHITE);
         helper = new Helper(getContext());
-        loadTrak();
         if (getActivity() == null){
             return;
         }
-        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
-            getActivity().getWindow().setStatusBarColor(colorAccent);
-            toolbar.setBackgroundColor(colorAccent);
-        } else {
-            getActivity().getWindow().setStatusBarColor(colorAccent);
-            toolbar.setBackgroundColor(colorAccent);
-        }
+        Helper.setColor(getActivity(), colorAccent, toolbar);
         artistCover();
         bioView.setVisibility(View.GONE);
-        /**
-         * Swipe Listerner
-         */
-        final GestureDetector gesture = new GestureDetector(getActivity(), new GestureDetector.SimpleOnGestureListener() {
-
+        artworkView.setOnTouchListener(new GestureListerner() {
             @Override
-            public boolean onDown(MotionEvent e) {
-                return true;
+            public void onRightToLeft() {
+
             }
 
             @Override
-            public boolean onSingleTapUp(MotionEvent e) {
-                if (bio) {
-                    bioView.setVisibility(View.VISIBLE);
-                } else {
-                    bioView.setVisibility(View.GONE);
-                }
-                return true;
+            public void onLeftToRight() {
+
             }
 
             @Override
-            public boolean onDoubleTap(MotionEvent e) {
+            public void onBottomToTop() {
 
-                return super.onDoubleTap(e);
             }
 
             @Override
-            public void onLongPress(MotionEvent e) {
-                super.onLongPress(e);
+            public void onTopToBottom() {
+
             }
 
-            // Determines the fling velocity and then fires the appropriate swipe event accordingly
             @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                return false;
+            public void doubleClick() {
+
+            }
+
+            @Override
+            public void singleClick() {
+                bioView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void otherFunction() {
             }
         });
-        artworkView.setOnTouchListener((v, event) -> {
-            gesture.onTouchEvent(event);
-            bio = true;
-            return true;
+        bioView.setOnTouchListener(new GestureListerner() {
+            @Override
+            public void onRightToLeft() {
+
+            }
+
+            @Override
+            public void onLeftToRight() {
+
+            }
+
+            @Override
+            public void onBottomToTop() {
+
+            }
+
+            @Override
+            public void onTopToBottom() {
+
+            }
+
+            @Override
+            public void doubleClick() {
+
+            }
+
+            @Override
+            public void singleClick() {
+                bioView.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void otherFunction() {
+
+            }
         });
-        bioView.setOnTouchListener((view, motionEvent) -> {
-            gesture.onTouchEvent(motionEvent);
-            bio = false;
-            return true;
-        });
-        artistBio.setOnTouchListener((view, motionEvent) -> {
-            gesture.onTouchEvent(motionEvent);
-            bio = false;
-            return true;
+        artistBio.setOnTouchListener(new GestureListerner() {
+            @Override
+            public void onRightToLeft() {
+
+            }
+
+            @Override
+            public void onLeftToRight() {
+
+            }
+
+            @Override
+            public void onBottomToTop() {
+
+            }
+
+            @Override
+            public void onTopToBottom() {
+
+            }
+
+            @Override
+            public void doubleClick() {
+
+            }
+
+            @Override
+            public void singleClick() {
+
+            }
+
+            @Override
+            public void otherFunction() {
+                bioView.setVisibility(View.GONE);
+            }
         });
         artistBio();
         /**
@@ -308,7 +346,7 @@ public class ArtistFragment extends BaseLoaderFragment {
             }
         });
         toolbar.showOverflowMenu();
-        background();
+        Helper.rotateFab(fab);
     }
 
     @Override
@@ -323,51 +361,36 @@ public class ArtistFragment extends BaseLoaderFragment {
 
     @Override
     protected String sortOder() {
-        return MediaStore.Audio.Media.DATE_ADDED;
+        return MediaStore.Audio.Media.DATE_MODIFIED;
     }
 
     @Override
     protected void background() {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                if (getActivity() != null){
-                    songListAdapter = new SongListAdapter(getContext());
-                    songListAdapter.setLayoutId(R.layout.song_list);
-                }
-                return null;
-            }
+        songListAdapter.setLayoutId(R.layout.song_list);
+        albumListAdapter = new AlbumListAdapter(getContext());
+        albumListAdapter.setLayoutID(R.layout.recent_list);
+        CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
+        customLayoutManager.setSmoothScrollbarEnabled(true);
+        customLayoutManager.setOrientation(CustomLayoutManager.HORIZONTAL);
+        albumrv.setAdapter(albumListAdapter);
+        albumrv.setLayoutManager(customLayoutManager);
+        albumrv.setHasFixedSize(true);
+        albumrv.setNestedScrollingEnabled(false);
+        albumrv.setVerticalScrollBarEnabled(false);
+        albumrv.setHorizontalScrollBarEnabled(false);
+        albumrv.setScrollBarSize(0);
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                if (getActivity() == null){
-                    return;
-                }
-                albumListAdapter = new AlbumListAdapter(getContext());
-                albumListAdapter.setLayoutID(R.layout.recent_list);
-                CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
-                customLayoutManager.setSmoothScrollbarEnabled(true);
-                customLayoutManager.setOrientation(CustomLayoutManager.HORIZONTAL);
-                albumrv.setAdapter(albumListAdapter);
-                albumrv.setLayoutManager(customLayoutManager);
-                albumrv.setHasFixedSize(true);
-                albumrv.setNestedScrollingEnabled(false);
-                albumrv.setVerticalScrollBarEnabled(false);
-                albumrv.setHorizontalScrollBarEnabled(false);
-                albumrv.setScrollBarSize(0);
+        CustomLayoutManager c = new CustomLayoutManager(getContext());
+        c.setSmoothScrollbarEnabled(true);
+        rv.setAdapter(songListAdapter);
+        rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
+        rv.setLayoutManager(c);
+        rv.setHasFixedSize(true);
 
-                CustomLayoutManager c = new CustomLayoutManager(getContext());
-                c.setSmoothScrollbarEnabled(true);
-                rv.setAdapter(songListAdapter);
-                rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
-                rv.setLayoutManager(c);
-                rv.setHasFixedSize(true);
+        songListAdapter.setOnItemClickListener(mOnClick);
+        albumListAdapter.setOnItemClickListener(mOnClickAlbum);
 
-                songListAdapter.setOnItemClickListener(mOnClick);
-                albumListAdapter.setOnItemClickListener(mOnClickAlbum);
-            }
-        }.execute();
+        loadTrak();
     }
 
     @Override
@@ -392,9 +415,6 @@ public class ArtistFragment extends BaseLoaderFragment {
 
     @Override
     public void load() {
-        if (getActivity() == null){
-            return;
-        }
         reload();
     }
 
@@ -413,35 +433,22 @@ public class ArtistFragment extends BaseLoaderFragment {
     */
     private void artistCover() {
        if (!Extras.getInstance().saveData()){
-           ArtistArtwork artistArtwork = new ArtistArtwork(getContext(), artist.getName());
+           artistArtwork = new ArtistArtwork(getContext(), artist.getName());
            artistArtwork.execute();
        }
-        ArtworkUtils.ArtworkLoader(getContext(), null, ArtworkUtils.getArtistCoverPath(getContext(),artist.getName()).getAbsolutePath(),0, new palette() {
-            @Override
-            public void palettework(Palette palette) {
-                final int[] colors = Helper.getAvailableColor(getContext(), palette);
-                toolbar.setBackgroundColor(colors[0]);
-                if (getActivity() == null || getActivity().getWindow() == null) {
-                    return;
+        if (ArtworkUtils.getArtistFileName(getContext(), artist.getName()).equalsIgnoreCase(artist.getName())){
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600,ArtworkUtils.getArtistCoverPath(getContext(),artist.getName()).getAbsolutePath(), new palette() {
+                @Override
+                public void palettework(Palette palette) {
+                    final int[] colors = Helper.getAvailableColor(getContext(), palette);
+                    if (getActivity() == null) {
+                        return;
+                    }
+                    Helper.setColor(getActivity(), colors[0], toolbar);
+                    Helper.animateViews(getContext(), toolbar, colors[0]);
                 }
-                if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
-                    getActivity().getWindow().setStatusBarColor(colors[0]);
-                } else {
-                    getActivity().getWindow().setStatusBarColor(colors[0]);
-                }
-                Helper.animateViews(getContext(), toolbar, colors[0]);
-            }
-        }, new bitmap() {
-            @Override
-            public void bitmapwork(Bitmap bitmap) {
-                artworkView.setImageBitmap(bitmap);
-            }
-
-            @Override
-            public void bitmapfailed(Bitmap bitmap) {
-                artworkView.setImageBitmap(bitmap);
-            }
-        });
+            }, artworkView);
+        }
 
     }
 
@@ -528,13 +535,14 @@ public class ArtistFragment extends BaseLoaderFragment {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void setAdapater(List<Song> data) {
-        songListAdapter.addDataList(data);
-    }
 
     @Override
-    public void notifyChanges() {
-        songListAdapter.notifyDataSetChanged();
+    public void onDestroy() {
+        if (!Extras.getInstance().saveData()){
+           if (artistArtwork != null){
+               artistArtwork.cancel(true);
+           }
+        }
+        super.onDestroy();
     }
 }

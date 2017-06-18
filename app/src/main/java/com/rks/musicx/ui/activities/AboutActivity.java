@@ -71,7 +71,6 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
     @Override
     protected void function() {
         accentcolor = Config.accentColor(this, Helper.getATEKey(this));
-        overridePendingTransition(R.anim.slide_in_up, R.anim.fade_back);
         setSupportActionBar(toolbar);
         licenses_detail.setOnClickListener(v -> Helper.Licenses(AboutActivity.this));
         about_app_title.setText(getString(R.string.app_name));
@@ -79,7 +78,7 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
         guide_detail.setOnClickListener(view -> Helper.GuidLines(AboutActivity.this));
         contact_detail.setText(Html.fromHtml("<a href=\"mailto:developerrajneeshsingh@gmail.com\">Mail us</a>"));
         contact_detail.setMovementMethod(LinkMovementMethod.getInstance());
-        about_app_ver.setText("v 1.4.1");
+        about_app_ver.setText("v 1.4.2");
         developer_name.setText(DEVELOPER_NAME);
         licenses_detail.setText("Licenses");
         testerName.setText(getString(R.string.testerName));

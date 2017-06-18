@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -46,6 +47,7 @@ import com.rks.musicx.interfaces.playInterface;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Constants;
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.permissionManager;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.activities.PlayingActivity;
@@ -54,6 +56,7 @@ import com.rks.musicx.ui.homeWidget.MusicXwidget4x4;
 import com.rks.musicx.ui.homeWidget.MusicxWidget4x2;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -149,19 +152,40 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     private int volume;
     private boolean mLostAudioFocus = false;
     private boolean mIsDucked = false;
-    private Handler handler;
+    private static Handler handler;
     private int trackDuration;
+    private CommonDatabase recent, queue;
+    private List<Song> queueList = new ArrayList<>();
 
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            AudioWidget audioWidgets = audioWidget;
-            if (audioWidgets != null && isPlaying && returnpos() < playList.size()) {
-                audioWidget.controller().position(getPlayerPos());
-            }
-            handler.postDelayed(runnable, 1000);
+    private static class ProgressRunnable implements Runnable {
+
+        private final WeakReference<MusicXService>  musicxService;
+
+        public ProgressRunnable(MusicXService musicXService) {
+            musicxService = new WeakReference<MusicXService>(musicXService);
         }
-    };
+
+        @Override
+        public void run () {
+            MusicXService musicXService = musicxService.get();
+            if (musicXService != null){
+                if (musicXService.audioWidget != null && musicXService.isPlaying() && musicXService.returnpos() < musicXService.playList.size()){
+                    musicXService.audioWidget.controller().position(musicXService.getPlayerPos());
+                }
+            }
+            handler.postDelayed(this,1000);
+        }
+    }
+
+    private void widgetProgress(){
+        handler.post(new ProgressRunnable(this));
+    }
+
+    private void removeProgress(){
+        handler.removeCallbacks(new ProgressRunnable(this));
+        handler.removeCallbacksAndMessages(null);
+    }
+
     private PhoneStateListener phoneStateListener = new PhoneStateListener() {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
@@ -222,6 +246,9 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     }
 
     private void otherstuff() {
+        recent = new CommonDatabase(this, Constants.RecentlyPlayed_TableName, true);
+        queue = new CommonDatabase(this, Constants.Queue_TableName, true);
+        CurrentSong = new Song();
         autoPhoneState = Extras.getInstance().getmPreferences().getBoolean(PREF_AUTO_PAUSE, false);
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         checkTelephonyState();
@@ -560,8 +587,11 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         } else {
             Log.d(TAG, "Overlay Permission failed");
         }
-        CommonDatabase commonDatabase = new CommonDatabase(this, Constants.RecentlyPlayed_TableName);
-        commonDatabase.add(CurrentSong);
+        try {
+            recent.add(CurrentSong);
+        }finally {
+            recent.close();
+        }
         updateService(PLAYSTATE_CHANGED);
         paused = false;
         isPlaying = true;
@@ -569,38 +599,40 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
     private void widgetCover() {
         int size = getResources().getDimensionPixelSize(R.dimen.cover_size);
-        if (ArtworkUtils.getAlbumCoverPath(MusicXService.this, getsongAlbumName()).exists()) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Glide.with(MusicXService.this)
-                            .load(ArtworkUtils.getAlbumCoverPath(MusicXService.this, getsongAlbumName()))
-                            .asBitmap()
-                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                            .skipMemoryCache(true)
-                            .placeholder(R.mipmap.ic_launcher)
-                            .error(R.mipmap.ic_launcher)
-                            .format(DecodeFormat.PREFER_ARGB_8888)
-                            .override(size, size)
-                            .transform(new CropCircleTransformation(MusicXService.this))
-                            .into(new SimpleTarget<Bitmap>() {
-                                @Override
-                                public void onLoadStarted(Drawable placeholder) {
-                                }
+        if (Extras.getInstance().getDownloadedArtwork()){
+            if (ArtworkUtils.getAlbumCoverPath(MusicXService.this, getsongAlbumName()).exists()) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Glide.with(MusicXService.this)
+                                .load(ArtworkUtils.getAlbumCoverPath(MusicXService.this, getsongAlbumName()))
+                                .asBitmap()
+                                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                .skipMemoryCache(true)
+                                .placeholder(R.mipmap.ic_launcher)
+                                .error(R.mipmap.ic_launcher)
+                                .format(DecodeFormat.PREFER_ARGB_8888)
+                                .override(size, size)
+                                .transform(new CropCircleTransformation(MusicXService.this))
+                                .into(new SimpleTarget<Bitmap>() {
+                                    @Override
+                                    public void onLoadStarted(Drawable placeholder) {
+                                    }
 
-                                @Override
-                                public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                                    audioWidget.controller().albumCoverBitmap(ArtworkUtils.drawableToBitmap(errorDrawable));
-                                }
+                                    @Override
+                                    public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                        audioWidget.controller().albumCoverBitmap(ArtworkUtils.drawableToBitmap(errorDrawable));
+                                    }
 
-                                @Override
-                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                                    audioWidget.controller().albumCoverBitmap(resource);
-                                }
+                                    @Override
+                                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                        audioWidget.controller().albumCoverBitmap(resource);
+                                    }
 
-                            });
-                }
-            });
+                                });
+                    }
+                });
+            }
         }else {
             handler.post(new Runnable() {
                 @Override
@@ -633,7 +665,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                             });
                 }
             });
-
         }
     }
 
@@ -980,6 +1011,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         updateService(QUEUE_CHANGED);
     }
 
+
     @Override
     public void smartplaylist(List<Song> smartplaylists) {
         if (smartplaylists != null && smartplaylists.size() > 0) {
@@ -1008,15 +1040,14 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         }
     }
 
-
     @Override
     public void trackingstart() {
-        handler.post(runnable);
+        widgetProgress();
     }
 
     @Override
     public void trackingstop() {
-        handler.removeCallbacks(runnable);
+        removeProgress();
     }
 
     @Override
@@ -1106,6 +1137,14 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             Virtualizers.EndVirtual();
             Loud.EndLoudnessEnhancer();
             Reverb.EndReverb();
+            Intent i = new Intent(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
+            if (Helper.isActivityPresent(this, i)){
+                i.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, audioSession());
+                i.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, this.getPackageName());
+                sendBroadcast(i);
+            }else {
+                Log.d(TAG, "no activity found");
+            }
         } else {
             Log.d(TAG, "permission not granted");
         }
@@ -1116,6 +1155,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         Extras.getInstance().eqSwitch(false);
         audioManager.abandonAudioFocus(this);
         stopMediaplayer();
+        removeProgress();
     }
 
 
@@ -1191,10 +1231,12 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     public void saveState(boolean yorno) {
         if (playList.size() > 0) {
             if (yorno) {
-                CommonDatabase commonDatabase = new CommonDatabase(this, Constants.Queue_TableName);
-                commonDatabase.removeAll();
-                commonDatabase.add(playList);
-                commonDatabase.close();
+                try {
+                    queue.removeAll();
+                    queue.add(playList);
+                }finally {
+                    queue.close();
+                }
             }
             songTitle = getsongTitle() == null ? SONG_TITLE : getsongTitle();
             songArtist = getsongTitle() == null ? SONG_ARTIST : getsongArtistName();
@@ -1208,9 +1250,14 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
     public void restoreState() {
         if (Extras.getInstance().getState(false)) {
-            CommonDatabase commonDatabase = new CommonDatabase(this, Constants.Queue_TableName);
-            List<Song> queueList = commonDatabase.readLimit(-1, null);
-            commonDatabase.close();
+            if (queue == null){
+                return;
+            }
+            try {
+                queueList = queue.readLimit(-1, null);
+            }finally {
+                queue.close();
+            }
             int restorepos = Extras.getInstance().getCurrentpos();
             String songname = Extras.getInstance().getSongTitle(songTitle);
             String songartist = Extras.getInstance().getSongArtist(songArtist);
@@ -1248,6 +1295,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         bundle.putLong(SONG_ID, getsongId());
         bundle.putString(SONG_PATH, getsongData());
         bundle.putInt(SONG_TRACK_NUMBER, getsongNumber());
+        bundle.putInt("position", returnpos());
         intent.putExtras(bundle);
         Log.d(TAG, "broadcast song metadata");
         sendBroadcast(intent);
@@ -1392,9 +1440,10 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         return audioWidget;
     }
 
+
     /*
-        * Remove Notification _/\_
-        */
+            * Remove Notification _/\_
+            */
     private void removeNotification() {
         NotificationManagerCompat.from(this).cancel(NotificationHandler.notificationID);
     }

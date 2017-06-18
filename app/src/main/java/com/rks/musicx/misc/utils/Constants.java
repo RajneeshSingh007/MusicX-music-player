@@ -31,6 +31,8 @@ public class Constants {
     public static final int OVERLAY_REQ = 1;
     public static final int WRITESETTINGS = 2;
     public static final int EQ = 3445;
+    public static final int IMAGECHOOSER = 2435;
+
     /*
     Sorting properties
      */
@@ -87,6 +89,14 @@ public class Constants {
     public static final String PLAYINGVIEW_TRACK = "isplayingView3";
     public static final String SETTINGS_TRACK = "settings_track";
     public static final String HD_ARTWORK = "hd_artwork";
+    public static final String EXTRACT_FOLDER = "extract_folder";
+    public static final String DONATION_TRACK = "donation_track";
+    public static final String QUEUE_NAME = "save_queue_name";
+    public static final String DOWNLOADED_ARTWORK = "downloaded_artwork";
+    public static final String REMOVE_TABLIST = "removeTablist";
+    public static final String TAG_METADATA = "MetaData";
+    public static final String AUDIO_FILTER = "audio_filter";
+
     /*
     Choices
      */
@@ -109,6 +119,9 @@ public class Constants {
     public static final String Fav_TableName = "Favorites";
     public static final int DbVersion = 2;
     public static final String Separator = ",";
+    public static final String DOWNLOAD_ARTWORK = "DownloadAlbum";
+    public static final String DOWNLOAD_ARTWORK2 = "DownloadArtwork";
+
     /*
     Equalizer
      */
@@ -183,7 +196,11 @@ public class Constants {
     public static final String ACTION_COMMAND2 = PACKAGENAME + "command2";
     public static final String ACTION_FAV = PACKAGENAME + "widget_fav";
     public static final String PLAYER_POS = PACKAGENAME + "player_pos";
-    public static final String AUDIO_ID = PACKAGENAME + "audioeffect_id";
+    public static final String PAUSE_SHORTCUTS = PACKAGENAME + "pause_shortcuts";
+    public static final String PLAY_SHORTCUTS = PACKAGENAME + "pause_shortcuts";
+    public static final String SHORTCUTS_TYPES = PACKAGENAME + "shortcuts_type";
+
+
     /**
      * Permissions Array
      */
@@ -194,15 +211,13 @@ public class Constants {
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.WRITE_SETTINGS,
             Manifest.permission.SYSTEM_ALERT_WINDOW};
-    /*
-    Instance
-     */
-    public static Extras sInstance = null;
+
     /**
      * network link
      */
     public static String vagUrl = "http://api.vagalume.com.br/";
     public static String lastFmUrl = "http://ws.audioscrobbler.com/2.0/";
+
 
     /**
      * Database table
@@ -210,15 +225,24 @@ public class Constants {
      * @param tableName
      * @return
      */
-    public static String DefaultColumn(String tableName) {
-        return "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
-                DefaultColumn._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + Separator +
-                DefaultColumn.SongId + " INTEGER UNIQUE" + Separator +
-                DefaultColumn.SongTitle + " TEXT" + Separator +
-                DefaultColumn.SongArtist + " TEXT" + Separator +
-                DefaultColumn.SongAlbum + " TEXT" + Separator +
-                DefaultColumn.SongAlbumId + " INTEGER" + Separator +
-                DefaultColumn.SongNumber + " INTEGER" + Separator +
-                DefaultColumn.SongPath + " TEXT" + " )";
+    public static String DefaultColumn(String tableName, boolean torf) {
+        if (torf){
+            return "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+                    DefaultColumn._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + Separator +
+                    DefaultColumn.SongId + " INTEGER UNIQUE" + Separator +
+                    DefaultColumn.SongTitle + " TEXT" + Separator +
+                    DefaultColumn.SongArtist + " TEXT" + Separator +
+                    DefaultColumn.SongAlbum + " TEXT" + Separator +
+                    DefaultColumn.SongAlbumId + " INTEGER" + Separator +
+                    DefaultColumn.SongNumber + " INTEGER" + Separator +
+                    DefaultColumn.SongPath + " TEXT" + " )";
+        }else {
+            return "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+                    DefaultColumn._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + Separator +
+                    DefaultColumn.ArtistId + " INTEGER UNIQUE" + Separator +
+                    DefaultColumn.ArtistTitle + " TEXT" + Separator +
+                    DefaultColumn.ArtistAlbumCount + " INTEGER" + Separator +
+                    DefaultColumn.ArtistTrackCount + " INTEGER" + " )";
+        }
     }
 }

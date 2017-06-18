@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
-import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -60,6 +59,8 @@ import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
+import static com.rks.musicx.R.id.lyrics;
+
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -95,7 +96,6 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
     private SmallBang mSmallBang;
     private FavHelper favhelper;
     private ImageView blur_artowrk, repeatButton, shuffleButton;
-    private Handler mHandler = new Handler();
     private ViewPager Pager;
     private PlayingPagerAdapter pagerAdapter;
     private List<View> Playing3PagerDetails;
@@ -104,18 +104,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
     private View coverView;
     private Helper helper;
     private List<Song> queueList = new ArrayList<>();
-
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            if (getMusicXService() != null && getMusicXService().isPlaying()) {
-                position = getMusicXService().getPlayerPos();
-                mSeekBar.setProgress(position);
-                CurrentDur.setText(Helper.durationCalculator(position));
-            }
-            mHandler.postDelayed(runnable, 1000);
-        }
-    };
+    private updateAlbumArt updatealbumArt;
 
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
@@ -189,19 +178,28 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
             return;
         }
         queueList = getMusicXService().getPlayList();
+        int pos = getMusicXService().returnpos();
         if (queueList != queueAdapter.getSnapshot() && queueList.size() > 0) {
-            mHandler.post(new Runnable() {
+            getHandler().post(new Runnable() {
                 @Override
                 public void run() {
                     queueAdapter.addDataList(queueList);
+                    queueAdapter.notifyDataSetChanged();
+                    if (pos >= 0 && pos < queueAdapter.getSnapshot().size()){
+                        queueAdapter.notifyItemChanged(pos);
+                        queuerv.smoothScrollToPosition(pos);
+                    }
                 }
             });
         }
-        queueAdapter.setSelection(getMusicXService().returnpos());
-        if (getMusicXService().returnpos() >=0 && getMusicXService().returnpos() < queueAdapter.getSnapshot().size()){
-            queuerv.scrollToPosition(getMusicXService().returnpos());
+        queueAdapter.notifyDataSetChanged();
+        queueAdapter.notifyItemChanged(pos);
+        if (pos >= 0 && pos < queueAdapter.getSnapshot().size()){
+            queueAdapter.notifyItemChanged(pos);
+            queuerv.smoothScrollToPosition(pos);
         }
     }
+
 
     public void like(View view) {
         favButton.setImageResource(R.drawable.ic_action_favorite);
@@ -230,7 +228,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
             ChangeAlbumCover(getImagePath());
             isalbumArtChanged = true;
         }
-        mHandler.post(runnable);
+        seekbarProgress();
     }
 
     @Override
@@ -241,7 +239,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
     @Override
     protected void metaConfig() {
         playingView();
-        mHandler.post(runnable);
+        seekbarProgress();
         if (isalbumArtChanged) {
             coverArtView();
             isalbumArtChanged = false;
@@ -259,6 +257,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
     @Override
     protected void onPaused() {
     }
+
 
     @Override
     protected void ui(View rootView) {
@@ -294,7 +293,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
         /**
          * Lyrics View
          */
-        lrcView = (TextView) lyricsView.findViewById(R.id.lyrics);
+        lrcView = (TextView) lyricsView.findViewById(lyrics);
 
         /**
          * Pager config
@@ -336,6 +335,16 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
                 }
                 getActivity().onBackPressed();
             }
+
+            @Override
+            public void singleClick() {
+
+            }
+
+            @Override
+            public void otherFunction() {
+
+            }
         });
         /**
          * SlidingPanel
@@ -365,6 +374,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
             }
         });
     }
+
 
     @Override
     protected void function() {
@@ -422,6 +432,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
             SongTitle.setSelected(true);
             SongTitle.setEllipsize(TextUtils.TruncateAt.MARQUEE);
             SongArtist.setText(artist);
+            Helper.rotationAnim(playpausebutton);
             Helper.rotationAnim(mAlbumCoverView);
             mSeekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
                 @Override
@@ -479,14 +490,23 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
         return lrcView;
     }
 
+    @Override
+    protected void updateProgress() {
+        if (getMusicXService() != null && getMusicXService().isPlaying()) {
+            position = getMusicXService().getPlayerPos();
+            mSeekBar.setProgress(position);
+            CurrentDur.setText(Helper.durationCalculator(position));
+        }
+    }
+
 
     private void ChangeAlbumCover(String finalPath) {
         if (getMusicXService() != null) {
             if (getChosenImages() != null) {
-                new updateAlbumArt(finalPath, getMusicXService().getsongData(), getContext(), getMusicXService().getsongAlbumID(), new changeAlbumArt() {
+                updatealbumArt = new updateAlbumArt(finalPath, getMusicXService().getsongData(), getContext(), getMusicXService().getsongAlbumID(), new changeAlbumArt() {
                     @Override
                     public void onPostWork() {
-                        ArtworkUtils.ArtworkLoader(getContext(), getMusicXService().getsongAlbumName(), finalPath, getMusicXService().getsongAlbumID(), new palette() {
+                        ArtworkUtils.ArtworkLoader(getContext(), 300, 600, getMusicXService().getsongAlbumName(), finalPath, getMusicXService().getsongAlbumID(), new palette() {
                             @Override
                             public void palettework(Palette palette) {
                                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -527,8 +547,8 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
                         });
                         queueAdapter.notifyDataSetChanged();
                     }
-                }).execute();
-
+                });
+                updatealbumArt.execute();
                 if (permissionManager.isAudioRecordGranted(getContext())){
                     Glide.with(getContext())
                             .load(finalPath)
@@ -572,7 +592,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ArtworkUtils.ArtworkLoader(getContext(), getMusicXService().getsongAlbumName(), null, getMusicXService().getsongAlbumID(), new palette() {
+                ArtworkUtils.ArtworkLoader(getContext(),  300, 600, getMusicXService().getsongAlbumName(), null, getMusicXService().getsongAlbumID(), new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -650,6 +670,15 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
         mItemTouchHelper.startDrag(viewHolder);
     }
 
+
+    @Override
+    public void onDestroy() {
+        if (updatealbumArt != null){
+            updatealbumArt.cancel(true);
+        }
+        removeCallback();
+        super.onDestroy();
+    }
 }
 
 

@@ -16,8 +16,6 @@ import com.rks.musicx.R;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 
-import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
-
 import static com.rks.musicx.misc.utils.Constants.BlackTheme;
 import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 import static com.rks.musicx.misc.utils.Constants.Four;
@@ -53,7 +51,6 @@ public abstract class BaseActivity extends ATEActivity {
     private int ContainerId;
     private Fragment fragment;
     private long updateTime = -1;
-    private CalligraphyConfig calligraphyConfig;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,7 +107,9 @@ public abstract class BaseActivity extends ATEActivity {
         return ContainerId;
     }
 
-
+    /**
+     * Font load using Calligraphy
+     */
     private void fontConfig() {
         switch (Extras.getInstance().fontConfig()) {
             case Zero:
@@ -178,7 +177,6 @@ public abstract class BaseActivity extends ATEActivity {
                 break;
         }
     }
-
 
     @Override
     protected void onStart() {
@@ -248,6 +246,9 @@ public abstract class BaseActivity extends ATEActivity {
         return getATEKey();
     }
 
+    /**
+     * Theme Config
+     */
     private void themeConfig() {
         if (!ATE.config(this, LightTheme).isConfigured(4)) {
             ATE.config(this, LightTheme)

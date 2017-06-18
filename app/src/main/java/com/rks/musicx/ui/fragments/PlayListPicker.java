@@ -104,6 +104,7 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
                 createplaylist.autoDismiss(true);
             }
         });
+        createplaylist.typeface(Helper.getFont(getContext()), Helper.getFont(getContext()));
         createplaylist.customView(layout, false);
         createplaylist.show();
 
@@ -131,6 +132,7 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
                                 refresh();
                             }
                         });
+                        builder.typeface(Helper.getFont(getContext()), Helper.getFont(getContext()));
                         builder.negativeText(R.string.cancel);
                         builder.show();
                         break;

@@ -1,7 +1,6 @@
 package com.rks.musicx.ui.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -19,7 +18,6 @@ import android.widget.TextView;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Song;
-import com.rks.musicx.interfaces.bitmap;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Extras;
@@ -49,8 +47,8 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
 
 
     private final SimpleItemTouchHelperCallback.OnStartDragListener mDragStartListener;
-    private int mLayoutId = R.layout.queue_songlist;
-    private int mSelectedItemPosition = -1;
+    private int mLayoutId = R.layout.song_list;
+    private int pos = -1;
 
     public QueueAdapter(@NonNull Context context, SimpleItemTouchHelperCallback.OnStartDragListener mDragStartListener) {
         super(context);
@@ -72,29 +70,18 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
     public void onBindViewHolder(QueueViewHolder holder, int position) {
         Song song = getItem(position);
         if (mLayoutId == R.layout.song_list) {
-            if (position == mSelectedItemPosition) {
+            if (position == pos) {
                 holder.itemView.setSelected(true);
             } else {
                 holder.itemView.setSelected(false);
-
             }
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            ArtworkUtils.ArtworkLoader(getContext(), song.getAlbum(), null, song.getAlbumId(), new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(),300, 600, song.getAlbum(), null, song.getAlbumId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
                 }
-            }, new bitmap() {
-                @Override
-                public void bitmapwork(Bitmap bitmap) {
-                    holder.queueArtwork.setImageBitmap(bitmap);
-                }
-
-                @Override
-                public void bitmapfailed(Bitmap bitmap) {
-                    holder.queueArtwork.setImageBitmap(bitmap);
-                }
-            });
+            }, holder.queueArtwork);
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             holder.queueArtwork.setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -121,40 +108,17 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
             }
         }
         if (mLayoutId == R.layout.gridqueue) {
-            if (position == mSelectedItemPosition) {
+            if (position == pos) {
                 holder.itemView.setSelected(true);
             } else {
                 holder.itemView.setSelected(false);
 
             }
-            ArtworkUtils.ArtworkLoader(getContext(), song.getAlbum(), null, song.getAlbumId(), new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600,song.getAlbum(), null, song.getAlbumId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
                 }
-            }, new bitmap() {
-                @Override
-                public void bitmapwork(Bitmap bitmap) {
-                    holder.queueArtworkgrid.setImageBitmap(bitmap);
-                }
-
-                @Override
-                public void bitmapfailed(Bitmap bitmap) {
-                    holder.queueArtworkgrid.setImageBitmap(bitmap);
-                }
-            });
-        }
-    }
-
-    public void setSelection(int position) {
-        int oldSelection = mSelectedItemPosition;
-        mSelectedItemPosition = position;
-
-        if (oldSelection >= 0 && oldSelection < data.size()) {
-            notifyItemChanged(oldSelection);
-        }
-
-        if (mSelectedItemPosition >= 0 && mSelectedItemPosition < data.size()) {
-            notifyItemChanged(mSelectedItemPosition);
+            }, holder.queueArtworkgrid);
         }
     }
 
@@ -171,10 +135,10 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
         }
         Collections.swap(data, fromPosition, toPosition);
 
-        if (mSelectedItemPosition == fromPosition) {
-            mSelectedItemPosition = toPosition;
-        } else if (mSelectedItemPosition == toPosition) {
-            mSelectedItemPosition = fromPosition;
+        if (pos == fromPosition) {
+            pos = toPosition;
+        } else if (pos == toPosition) {
+            pos = fromPosition;
         }
         notifyItemMoved(fromPosition, toPosition);
         return true;
@@ -225,17 +189,10 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
             if (mLayoutId == R.layout.song_list) {
                 itemView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.bgcolor));
             }
-            if (mLayoutId == R.layout.queue_songlist) {
-                itemView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.bgcolor));
-            }
-
         }
 
         @Override
         public void onItemClear() {
-            if (mLayoutId == R.layout.queue_songlist) {
-                itemView.setBackgroundColor(0);
-            }
             if (mLayoutId == R.layout.song_list) {
                 itemView.setBackgroundColor(0);
             }

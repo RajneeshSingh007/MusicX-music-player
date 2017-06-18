@@ -17,26 +17,30 @@
       tools:context=".ui.activities.MainActivity">
 
     <item android:id="@+id/clear_queue"
-        android:title="Clear Queue"/>
+        android:title="@string/clear_queue"/>
 
     <item
         android:id="@+id/action_eq"
-        android:title="Equalizer"
+        android:title="@string/equalizers"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/action_changeArt"
-        android:title="Change Artwork"
+        android:title="@string/change_artwork"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/action_lyrics"
-        android:title="Search Lyrics"
+        android:title="@string/search_lyrics"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/action_playlist"
         android:title="@string/action_add_to_playlist"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_savequeue"
+        android:title="@string/save_queue"
         app:showAsAction="never"/>
 
     <item
@@ -48,6 +52,7 @@
         android:id="@+id/action_ringtone"
         android:title="@string/action_set_ringtone"
         app:showAsAction="never"/>
+
 
     <item
         android:id="@+id/action_trackdetails"

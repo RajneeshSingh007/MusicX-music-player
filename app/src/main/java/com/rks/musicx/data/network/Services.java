@@ -37,4 +37,5 @@ public interface Services {
 
     @GET("?method=album.getinfo&api_key=658dd0ee3563543f1087e014b74be8a6&format=json")
     Call<Album> getalbum(@Query("album") String album, @Query("artist") String artist);
+
 }

@@ -46,6 +46,11 @@ public class CustomLayoutManager extends LinearLayoutManager {
                 return CustomLayoutManager.this.computeScrollVectorForPosition(targetPosition);
             }
 
+            @Override
+            protected int getVerticalSnapPreference() {
+                return LinearSmoothScroller.SNAP_TO_START;
+            }
+
             //This returns the milliseconds it takes to
             //scroll one pixel.
             @Override
@@ -63,6 +68,7 @@ public class CustomLayoutManager extends LinearLayoutManager {
     public boolean supportsPredictiveItemAnimations() {
         return false;
     }
+
 
 }
 

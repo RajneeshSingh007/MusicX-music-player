@@ -3,7 +3,6 @@ package com.rks.musicx.ui.adapters;
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -22,8 +21,6 @@ import android.widget.TextView;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Album;
-import com.rks.musicx.data.network.AlbumArtwork;
-import com.rks.musicx.interfaces.bitmap;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Extras;
@@ -76,21 +73,18 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
     @Override
     public void onBindViewHolder(AlbumListAdapter.AlbumViewHolder holder, int position) {
         Album albums = getItem(position);
-        if (!Extras.getInstance().saveData()){
-            AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), albums.getArtistName(), albums.getArtistName());
-            albumArtwork.execute();
-        }
         if (layoutID == R.layout.item_grid_view || layoutID == R.layout.recent_list) {
             int pos = holder.getAdapterPosition();
             if (lastpos < pos) {
                 for (Animator animator : Helper.getAnimator(holder.backgroundColor)) {
-                    animator.setDuration(duration).start();
+                    animator.setDuration(duration);
                     animator.setInterpolator(interpolator);
+                    animator.start();
                 }
             }
             holder.AlbumName.setText(albums.getAlbumName());
             holder.ArtistName.setText(albums.getArtistName());
-            ArtworkUtils.ArtworkLoader(getContext(), albums.getAlbumName(), null, albums.getId(), new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, albums.getAlbumName(), null, albums.getId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
                     final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -99,37 +93,17 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
                     holder.ArtistName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
                     Helper.animateViews(getContext(), holder.backgroundColor, colors[0]);
                 }
-            }, new bitmap() {
-                @Override
-                public void bitmapwork(Bitmap bitmap) {
-                    holder.AlbumArtwork.setImageBitmap(bitmap);
-                }
-
-                @Override
-                public void bitmapfailed(Bitmap bitmap) {
-                    holder.AlbumArtwork.setImageBitmap(bitmap);
-                }
-            });
+            }, holder.AlbumArtwork);
             holder.menu.setVisibility(View.GONE);
         }
         if (layoutID == R.layout.item_list_view) {
             holder.AlbumListName.setText(albums.getAlbumName());
             holder.ArtistListName.setText(albums.getArtistName());
-            ArtworkUtils.ArtworkLoader(getContext(), albums.getAlbumName(), null, albums.getId(), new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, albums.getAlbumName(), null, albums.getId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
                 }
-            }, new bitmap() {
-                @Override
-                public void bitmapwork(Bitmap bitmap) {
-                    holder.AlbumListArtwork.setImageBitmap(bitmap);
-                }
-
-                @Override
-                public void bitmapfailed(Bitmap bitmap) {
-                    holder.AlbumListArtwork.setImageBitmap(bitmap);
-                }
-            });
+            }, holder.AlbumListArtwork);
             if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 holder.AlbumListName.setTextColor(Color.WHITE);
                 holder.ArtistListName.setTextColor(ContextCompat.getColor(getContext(), R.color.darkthemeTextColor));

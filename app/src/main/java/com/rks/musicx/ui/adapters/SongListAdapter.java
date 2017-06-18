@@ -2,7 +2,6 @@ package com.rks.musicx.ui.adapters;
 
 import android.animation.Animator;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
@@ -22,8 +21,6 @@ import android.widget.TextView;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Song;
-import com.rks.musicx.data.network.AlbumArtwork;
-import com.rks.musicx.interfaces.bitmap;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Extras;
@@ -78,29 +75,15 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
     @Override
     public void onBindViewHolder(SongListAdapter.SongViewHolder holder, int position) {
         Song song = getItem(position);
-        if (!Extras.getInstance().saveData()){
-            AlbumArtwork albumArtwork = new AlbumArtwork(getContext(), song.getArtist(), song.getAlbum());
-            albumArtwork.execute();
-        }
         if (layout == R.layout.song_list) {
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            ArtworkUtils.ArtworkLoader(getContext(), song.getAlbum(), null, song.getAlbumId(), new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, song.getAlbum(), null, song.getAlbumId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
 
                 }
-            }, new bitmap() {
-                @Override
-                public void bitmapwork(Bitmap bitmap) {
-                    holder.SongArtwork.setImageBitmap(bitmap);
-                }
-
-                @Override
-                public void bitmapfailed(Bitmap bitmap) {
-                    holder.SongArtwork.setImageBitmap(bitmap);
-                }
-            });
+            }, holder.SongArtwork);
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             Drawable drawable = holder.menu.getDrawable();
             if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
@@ -135,13 +118,14 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             int pos = holder.getAdapterPosition();
             if (lastpos < pos) {
                 for (Animator animator : getAnimator(holder.songView)) {
-                    animator.setDuration(duration).start();
+                    animator.setDuration(duration);
                     animator.setInterpolator(interpolator);
+                    animator.start();
                 }
             }
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            ArtworkUtils.ArtworkLoader(getContext(), song.getAlbum(), null, song.getAlbumId(), new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, song.getAlbum(), null, song.getAlbumId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
                     final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -150,17 +134,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
                     holder.SongArtist.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
                     Helper.animateViews(getContext(), holder.itemView, colors[0]);
                 }
-            }, new bitmap() {
-                @Override
-                public void bitmapwork(Bitmap bitmap) {
-                    holder.songGridArtwork.setImageBitmap(bitmap);
-                }
-
-                @Override
-                public void bitmapfailed(Bitmap bitmap) {
-                    holder.songGridArtwork.setImageBitmap(bitmap);
-                }
-            });
+            }, holder.songGridArtwork);
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             holder.menu.setVisibility(View.VISIBLE);
             Drawable drawable = holder.menu.getDrawable();
@@ -169,6 +143,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             }
         }
     }
+
 
 
     public int getLayout() {

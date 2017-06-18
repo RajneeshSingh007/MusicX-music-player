@@ -72,7 +72,7 @@
     <string name="Continue">Continue</string>
     <string name="cancel_timer">Cancel Timer</string>
     <string name="stop_timer">Timer Stopped</string>
-    <string name="timer_info" formatted="false" tools:ignore="StringFormatInvalid">%02d:%02d</string>
+    <string name="timer_info" formatted="false" translatable="false" tools:ignore="StringFormatInvalid">%02d:%02d</string>
     <string name="action_sleeptimer">SleepTimer</string>
     <string name="minute">Minute</string>
     <string name="minutes">Minutes</string>
@@ -131,14 +131,13 @@
     <string name="Bass">BASS</string>
     <string name="testerName">Aashish Shinde</string>
     <string name="appcr">© 2017 MusicX.</string>
-    <string name="crash_toast_text">crash reported</string>
     <string name="hide_notification">hide notification</string>
     <string name="hide_notify">Notification</string>
     <string name="hide_lockscreenMedia">hide lockscreen mediaplayer</string>
     <string name="hide_lockscreen">Lockscreen</string>
     <string name="Rate">Rate us</string>
     <string name="restore_lastTab">Restore last Tab</string>
-    <string name="Tab">TabView</string>
+    <string name="Tab">Tab View</string>
     <string name="folder">Folder</string>
     <string name="reverb">REVERB</string>
     <string name="hqartist_artwork">HQ Artwork</string>
@@ -148,4 +147,56 @@
     <string name="donation">Donation</string>
     <string name="support">Support</string>
     <string name="shuffle_all">Shuffle All</string>
+    <string name="shortcuts">shortcuts</string>
+    <string name="remove_from_playlist">Remove from playlist</string>
+    <string name="more">More</string>
+    <string name="go_to_albums">Go to albums</string>
+    <string name="go_to_artists">Go to artists</string>
+    <string name="go_to_fav">Go to fav</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
+    <string name="hide_floatingwidget_summary">Hide floating widget</string>
+    <string name="floatin_widget_title">Floating Widget</string>
+    <string name="grid_song_view_summary">Grid song view</string>
+    <string name="song_view_title">Song View</string>
+    <string name="list_album_view_summary">List album view</string>
+    <string name="album_view_title">Album View</string>
+    <string name="list_artist_view_summary">List artist view</string>
+    <string name="artist_view_title">Artist View</string>
+    <string name="vizualizer_color_summary">Change color from albumart in playingView4</string>
+    <string name="visualizer_color_title">Visualizer Color</string>
+    <string name="color_adaptive_summary">Change color from albumart in playing views</string>
+    <string name="color_adaptive_title">Color Adaptive</string>
+    <string name="widget_color_summary">Set background color transparent</string>
+    <string name="widget_color_title">HomeScreen Widget Color</string>
+    <string name="hd_artwork_summary">Display full size artwork</string>
+    <string name="hd_artwork_title">Full Size Artwork</string>
+    <string name="download_artwork_summary">Display downloaded artwork</string>
+    <string name="download_artwork_title">Display Download Artwork</string>
+    <string name="change_font_summary">Change fonts of app</string>
+    <string name="change_font_title">Fonts</string>
+    <string name="blur_intensity_summary">Change blur intensity</string>
+    <string name="blur_intensity_title">Blur View</string>
+    <string name="remove_tabs_summary">Select tabs to remove</string>
+    <string name="remove_tabs_title">Remove Tabs</string>
+    <string name="directory_picker_title">Storage Chooser</string>
+    <string name="directory_picker_summary">Select storage</string>
+    <string name="fade_inout_summary">Enable fade in/out during play/pause</string>
+    <string name="fade_inout_title">Fade Volume</string>
+    <string name="fade_duration_summary">Fade Duration</string>
+    <string name="clear_queue">Clear Queue</string>
+    <string name="equalizers">Equalizer</string>
+    <string name="change_artwork">Change Artwork</string>
+    <string name="search_lyrics">Search Lyrics</string>
+    <string name="save_queue">Save Queue</string>
+    <string name="audio_filter_title">Audio Filter</string>
+    <string name="com.crashlytics.CrashSubmissionPromptTitle" translatable="false">Send Crash Report?</string>
+    <string name="com.crashlytics.CrashSubmissionPromptMessage" translatable="false">
+        Looks like we crashed! Please help us fix the problem
+          by sending a crash report.</string>
+    <string name="com.crashlytics.CrashSubmissionSendTitle" translatable="false">
+          Send</string>
+    <string name="com.crashlytics.CrashSubmissionAlwaysSendTitle" translatable="false">
+          Always Send</string>
+    <string name="com.crashlytics.CrashSubmissionCancelTitle" translatable="false">
+          Don\'t Send</string>
 </resources>

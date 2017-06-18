@@ -8,7 +8,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.PopupMenu;
@@ -19,9 +23,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.kbeanie.imagechooser.api.ChooserType;
 import com.kbeanie.imagechooser.api.ChosenImage;
@@ -39,6 +46,10 @@ import com.rks.musicx.ui.activities.PlayingActivity;
 import com.rks.musicx.ui.activities.SettingsActivity;
 import com.rks.musicx.ui.adapters.QueueAdapter;
 import com.rks.musicx.ui.fragments.TagEditorFragment;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 import static com.rks.musicx.misc.utils.Constants.ITEM_ADDED;
@@ -77,7 +88,9 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
     private ImageChooserManager imageChooserManager;
     private String mediaPath;
     private Helper helper;
-    int size;
+    private int size;
+    private CommonDatabase commonDatabase;
+    private static Handler handler;
 
     /**
      * Service Connection
@@ -98,6 +111,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
             mServiceBound = false;
         }
     };
+
     /**
      * BroadCast
      */
@@ -152,6 +166,10 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
 
     protected abstract TextView lyricsView();
 
+    protected abstract void updateProgress();
+
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(setLayout(), container, false);
@@ -159,6 +177,8 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         function();
         helper = new Helper(getContext());
         size = getResources().getDimensionPixelSize(R.dimen.cover_size);
+        commonDatabase = new CommonDatabase(getContext(), Queue_TableName, true);
+        handler = new Handler();
         return rootView;
     }
 
@@ -362,6 +382,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         menuInflater.inflate(R.menu.playing_menu, popupMenu.getMenu());
         popupMenu.getMenu().findItem(R.id.action_share).setVisible(torf);
         popupMenu.getMenu().findItem(R.id.action_eq).setVisible(torf);
+        popupMenu.getMenu().findItem(R.id.action_savequeue).setVisible(false);
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -371,8 +392,11 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                             queueAdapter.clear();
                             queueAdapter.notifyDataSetChanged();
                             musicXService.clearQueue();
-                            CommonDatabase commonDatabase = new CommonDatabase(getContext(), Queue_TableName);
-                            commonDatabase.removeAll();
+                            try {
+                                commonDatabase.removeAll();
+                            }finally {
+                                commonDatabase.close();
+                            }
                             Toast.makeText(getContext(), "Cleared Queue", Toast.LENGTH_SHORT).show();
                         }
                         break;
@@ -410,7 +434,6 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         getActivity().startActivity(intent);
                         break;
-
                 }
                 return false;
             }
@@ -419,6 +442,44 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
     }
 
 
+    /**
+     * for next update
+     */
+    private void saveQueue(){
+        List<String> queueName = new ArrayList<>();
+        View view1 = LayoutInflater.from(getContext()).inflate(R.layout.create_playlist, new LinearLayout(getContext()), false);
+        TextInputEditText editText = (TextInputEditText) view1.findViewById(R.id.playlist_name);
+        TextInputLayout inputLayout = (TextInputLayout) view1.findViewById(R.id.inputlayout);
+        inputLayout.setHint("Enter queue name");
+        new MaterialDialog.Builder(getContext())
+                .title("Save Queue")
+                .positiveText(android.R.string.ok)
+                .negativeText(android.R.string.cancel)
+                .autoDismiss(true)
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
+                    }
+                })
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                       if(editText.getText() != null){
+                           CommonDatabase commonDatabase = new CommonDatabase(getContext(), editText.getText().toString(), true);
+                           commonDatabase.add(musicXService.getPlayList());
+                           commonDatabase.close();
+                           queueName.add(editText.getText().toString());
+                           Extras.getInstance().saveQueueName(queueName);
+                           Toast.makeText(getContext(), "Saved Queue", Toast.LENGTH_SHORT).show();
+                           editText.getText().clear();
+                       }
+                    }
+                })
+                .customView(view1, false)
+                .build()
+                .show();
+    }
     /**
      * Queue Menu
      *
@@ -438,6 +499,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         popupMenu.getMenu().findItem(R.id.clear_queue).setVisible(false);
         popupMenu.getMenu().findItem(R.id.action_changeArt).setVisible(false);
         popupMenu.getMenu().findItem(R.id.action_settings).setVisible(false);
+        popupMenu.getMenu().findItem(R.id.action_savequeue).setVisible(false);
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -466,6 +528,39 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         popupMenu.show();
     }
 
+    private static class ProgressRunnable implements Runnable {
+
+        private final WeakReference<BasePlayingFragment> baseLoaderWeakReference;
+
+        public ProgressRunnable(BasePlayingFragment myClassInstance) {
+            baseLoaderWeakReference = new WeakReference<BasePlayingFragment> (myClassInstance);
+        }
+
+        @Override
+        public void run () {
+            BasePlayingFragment basePlayingFragment = baseLoaderWeakReference.get();
+            if (basePlayingFragment != null){
+                basePlayingFragment.updateProgress();
+            }
+            handler.postDelayed(ProgressRunnable.this,1000);
+        }
+    }
+
+    public void seekbarProgress(){
+        ProgressRunnable progressRunnable = new ProgressRunnable(BasePlayingFragment.this);
+        handler.post(progressRunnable);
+    }
+
+    public void removeCallback(){
+        ProgressRunnable progressRunnable = new ProgressRunnable(BasePlayingFragment.this);
+        handler.removeCallbacks(progressRunnable);
+        handler.removeCallbacksAndMessages(null);
+    }
+
+
+    public static Handler getHandler() {
+        return handler;
+    }
 
 
 }

@@ -13,11 +13,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.media.MediaScannerConnection;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -35,6 +38,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.PopupMenu;
@@ -52,7 +57,6 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.webkit.WebView;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,7 +66,6 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Album;
 import com.rks.musicx.data.model.Artist;
-import com.rks.musicx.data.model.FolderModel;
 import com.rks.musicx.data.model.Playlist;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.LyricsData;
@@ -97,6 +100,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -107,12 +111,12 @@ import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static com.rks.musicx.R.string.file_size;
 import static com.rks.musicx.misc.utils.Constants.BlackTheme;
 import static com.rks.musicx.misc.utils.Constants.DarkTheme;
+import static com.rks.musicx.misc.utils.Constants.Four;
 import static com.rks.musicx.misc.utils.Constants.LightTheme;
-import static com.rks.musicx.misc.utils.Constants.SONG_ALBUM;
-import static com.rks.musicx.misc.utils.Constants.SONG_ARTIST;
-import static com.rks.musicx.misc.utils.Constants.SONG_TITLE;
-import static com.rks.musicx.misc.utils.Constants.SONG_TRACK_NUMBER;
-import static com.rks.musicx.misc.utils.Constants.SONG_YEAR;
+import static com.rks.musicx.misc.utils.Constants.One;
+import static com.rks.musicx.misc.utils.Constants.Three;
+import static com.rks.musicx.misc.utils.Constants.Two;
+import static com.rks.musicx.misc.utils.Constants.Zero;
 
 /*
  * Created by Coolalien on 24/03/2017.
@@ -135,6 +139,7 @@ public class Helper {
 
     private Context context;
     private static ValueAnimator colorAnimation;
+    private static HashMap<String, Typeface> fontCache = new HashMap<>();
 
     public Helper(Context context) {
         this.context = context;
@@ -245,6 +250,7 @@ public class Helper {
                         .title(R.string.action_details)
                         .content(content)
                         .positiveText(R.string.okay)
+                        .typeface(getFont(context), getFont(context))
                         .onPositive((materialDialog, dialogAction) -> materialDialog.dismiss())
                         .show();
             } else {
@@ -299,35 +305,45 @@ public class Helper {
                 tag = new ID3v24Tag();
             }
             try {
-                String year = song.getYear() != null ? song.getYear() : SONG_YEAR;
-                String title = song.getTitle() != null ? song.getTitle() : SONG_TITLE;
-                String album = song.getAlbum() != null ? song.getArtist() : SONG_ALBUM;
-                String artist = song.getArtist() != null ? song.getArtist() : SONG_ARTIST;
-                String track = song.getTrackNumber() != 0 ? String.valueOf(song.getTrackNumber()) : SONG_TRACK_NUMBER;
-                String lyrics = song.getLyrics() != null ? song.getLyrics() : "No_Lyrics";
+                String year = song.getYear();
+                String title = song.getTitle();
+                String album = song.getAlbum();
+                String artist = song.getArtist();
+                String lyrics = song.getLyrics();
+
                 tag.deleteField(FieldKey.LYRICS);
-                tag.setField(FieldKey.TITLE, title);
-                tag.setField(FieldKey.YEAR,  year);
-                tag.setField(FieldKey.ARTIST, artist);
-                tag.setField(FieldKey.ALBUM, album);
-                tag.setField(FieldKey.TRACK, track);
                 tag.setField(FieldKey.LYRICS, lyrics);
                 ContentValues values = new ContentValues();
-                values.put(MediaStore.Audio.Media.TITLE, title);
-                values.put(MediaStore.Audio.Media.YEAR, year);
-                values.put(MediaStore.Audio.Media.ARTIST, artist);
-                values.put(MediaStore.Audio.Media.TRACK, track);
-                Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, new String[]{BaseColumns._ID,
-                                MediaStore.Audio.AlbumColumns.ALBUM, MediaStore.Audio.AlbumColumns.ALBUM_KEY,
-                                MediaStore.Audio.AlbumColumns.ARTIST}, MediaStore.Audio.AlbumColumns.ALBUM + " = ?",
-                        new String[]{album}, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+                if (title != null){
+                    tag.setField(FieldKey.TITLE, title);
+                    values.put(MediaStore.Audio.Media.TITLE, title);
+                }
+                if (artist != null){
+                    tag.setField(FieldKey.ARTIST, artist);
+                    values.put(MediaStore.Audio.Media.ARTIST, artist);
+                }
+                if (album != null){
+                    tag.setField(FieldKey.ALBUM, album);
+                    Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, new String[]{BaseColumns._ID,
+                                    MediaStore.Audio.AlbumColumns.ALBUM, MediaStore.Audio.AlbumColumns.ALBUM_KEY,
+                                    MediaStore.Audio.AlbumColumns.ARTIST}, MediaStore.Audio.AlbumColumns.ALBUM + " = ?",
+                            new String[]{album}, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
 
-                if (cursor != null && cursor.moveToFirst()) {
-                    long id = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
-                    values.put(MediaStore.Audio.Media.ALBUM_ID, id);
-                    cursor.close();
-                } else {
-                    values.put(MediaStore.Audio.Media.ALBUM, album);
+                    if (cursor != null && cursor.moveToFirst()) {
+                        long id = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
+                        values.put(MediaStore.Audio.Media.ALBUM_ID, id);
+                        cursor.close();
+                    } else {
+                        values.put(MediaStore.Audio.Media.ALBUM, album);
+                    }
+                }
+                if (song.getTrackNumber() != -1){
+                    tag.setField(FieldKey.TRACK, String.valueOf(song.getTrackNumber()));
+                    values.put(MediaStore.Audio.Media.TRACK, song.getTrackNumber());
+                }
+                if (year != null && year.length() > 0){
+                    tag.setField(FieldKey.YEAR,  "" + year);
+                    values.put(MediaStore.Audio.Media.YEAR, year);
                 }
                 if (values.size() > 0) {
                     context.getContentResolver().update(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values, android.provider.MediaStore.Audio.Media._ID + "=?", new String[]{String.valueOf(song.getId())});
@@ -490,15 +506,15 @@ public class Helper {
     /**
      * Rotate ImageView
      *
-     * @param imageView
+     * @param view
      */
-    public static void rotationAnim(ImageView imageView) {
+    public static void rotationAnim(@NonNull View view) {
         RotateAnimation rotateAnimation1 = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f,
                 Animation.RELATIVE_TO_SELF, 0.5f);
         rotateAnimation1.setInterpolator(new LinearInterpolator());
         rotateAnimation1.setDuration(300);
         rotateAnimation1.setRepeatCount(0);
-        imageView.startAnimation(rotateAnimation1);
+        view.startAnimation(rotateAnimation1);
     }
 
     /**
@@ -609,6 +625,7 @@ public class Helper {
         webView.loadUrl("file:///android_asset/Guidlines.html");
         builder.negativeText(android.R.string.cancel);
         builder.positiveText(android.R.string.ok);
+        builder.typeface(getFont(context),getFont(context));
         builder.onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -650,6 +667,7 @@ public class Helper {
                 builder.cancelable(true);
             }
         });
+        builder.typeface(getFont(context),getFont(context));
         builder.customView(webView, false);
         builder.build();
         builder.show();
@@ -715,6 +733,7 @@ public class Helper {
                         Uri.parse("https://play.google.com/store/apps/details?id=com.rks.musicx")));
             }
         });
+        builder.typeface(getFont(mContext),getFont(mContext));
         builder.onNegative(new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -767,6 +786,11 @@ public class Helper {
         return image;
     }
 
+    /**
+     * Duration Calculator
+     * @param id
+     * @return
+     */
     public static String durationCalculator(long id) {
         String finalTimerString = "";
         String secondsString = "";
@@ -865,12 +889,13 @@ public class Helper {
      * @param context
      */
     @SuppressLint("StringFormatInvalid")
-    private void DeleteTrack(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders,
+    public void DeleteTrack(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders,
                              Fragment fragment, String name, String path, Context context) {
         MaterialDialog.Builder dialog = new MaterialDialog.Builder(context);
         dialog.title(name);
         dialog.content(context.getString(R.string.delete_music, name));
         dialog.positiveText(android.R.string.ok);
+        dialog.typeface(getFont(context),getFont(context));
         dialog.onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -930,6 +955,9 @@ public class Helper {
         inflater.inflate(R.menu.song_list_item, popup.getMenu());
         Song song = songListAdapter.getItem(position);
         popup.getMenu().findItem(R.id.action_remove_playlist).setVisible(torf);
+        if (songLoaders == null || fragment == null || activity == null){
+            return;
+        }
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 
             @Override
@@ -1003,7 +1031,6 @@ public class Helper {
         });
         popup.show();
     }
-
 
     public static int parseToInt(String maybeInt, int defaultValue) {
         if (maybeInt == null) return defaultValue;
@@ -1251,6 +1278,7 @@ public class Helper {
         return Environment.getExternalStorageDirectory() + "/MusicX/" + "Lyrics/";
     }
 
+
     /**
      * Set fileName
      *
@@ -1309,16 +1337,16 @@ public class Helper {
         return filtersonglist;
     }
 
-    public List<FolderModel> filterFolder(List<FolderModel> modelList, String query){
+    public List<File> filterFolder(List<File> fileList, String query){
         query = query.toLowerCase().trim();
-        final List<FolderModel> folderModels = new ArrayList<>();
-        for (FolderModel folder : folderModels){
+        final List<File> files = new ArrayList<>();
+        for (File folder : fileList){
             final String text = folder.getName().toLowerCase().trim();
             if (text.contains(query)){
-                folderModels.add(folder);
+                files.add(folder);
             }
         }
-        return folderModels;
+        return fileList;
     }
 
     /**
@@ -1349,6 +1377,189 @@ public class Helper {
         }
         Intent intent = new Intent(context, sClass);
         context.startActivity(intent);
+    }
+
+    /**
+     * Delete Directory
+     * @param fileOrDirectory
+     */
+    public static void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory()) {
+            for (File child : fileOrDirectory.listFiles()) {
+                deleteRecursive(child);
+            }
+        }
+
+        fileOrDirectory.delete();
+    }
+
+    /**
+     * return Typeface
+     * @param context
+     * @return
+     */
+    public static Typeface getFont(Context context){
+        Typeface typeface = null;
+        try {
+            switch (Extras.getInstance().fontConfig()) {
+                case Zero:
+                    typeface = getTypeface(context, "RobotoLight.ttf");
+                    break;
+                case One:
+                    typeface = getTypeface(context, "Raleway.ttf");
+                    break;
+                case Two:
+                    typeface = getTypeface(context, "CormorantGaramond.ttf");
+                    break;
+                case Three:
+                    typeface = getTypeface(context, "CutiveMono.ttf");
+                    break;
+                case Four:
+                    typeface = getTypeface(context, "Timber.ttf");
+                    break;
+                case "5":
+                    typeface = getTypeface(context, "Snippet.ttf");
+                    break;
+                case "6":
+                    typeface = getTypeface(context, "Trench.ttf");
+                    break;
+                case "7":
+                    typeface = getTypeface(context, "Espacio.ttf");
+                    break;
+                case "8":
+                    typeface = getTypeface(context, "Rex.ttf");
+                    break;
+                case "9":
+                    typeface = getTypeface(context, "ExodusStriped.otf");
+                    break;
+                case "10":
+                    typeface = getTypeface(context, "GogiaRegular.otf");
+                    break;
+                case "11":
+                    typeface = getTypeface(context, "MavenPro.ttf");
+                    break;
+                case "12":
+                    typeface = getTypeface(context, "Vetka.otf");
+                    break;
+                case "13":
+                    typeface = getTypeface(context, "Lombok.otf");
+                    break;
+                case "14":
+                    typeface = getTypeface(context, "Circled.ttf");
+                    break;
+                case "15":
+                    typeface = getTypeface(context, "Franks.otf");
+                    break;
+                case "16":
+                    typeface = getTypeface(context, "Mountain.otf");
+                    break;
+                case "17":
+                    typeface = getTypeface(context, "Jakarta.ttf");
+                    break;
+                case "18":
+                    typeface = getTypeface(context, "Abyssopelagic.otf");
+                    break;
+                case "19":
+                    typeface = getTypeface(context, "Tesla.ttf");
+                    break;
+                case "20":
+                    typeface = Typeface.DEFAULT;
+                    break;
+
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return typeface;
+    }
+    
+
+    /**
+     * Typeface
+     * @param customFont
+     * @return
+     */
+    public static Typeface getTypeface(Context context, String customFont) {
+        Typeface tf = fontCache.get(customFont);
+        if(tf == null) {
+            try {
+                tf = Typeface.createFromAsset(context.getAssets(), customFont);
+            }
+            catch (Exception e) {
+                return null;
+            }
+            fontCache.put(customFont, tf);
+        }
+        return tf;
+    }
+
+    /**
+     * Rotate view 360
+     * @param view
+     */
+    public static void rotateFab(@NonNull View view){
+        ViewCompat.animate(view).
+                rotation(360f).
+                withLayer().
+                setDuration(300).
+                setInterpolator(new FastOutSlowInInterpolator()).
+                start();
+    }
+
+    /**
+     * check activity present or not in the device
+     * @param context
+     * @param intent
+     * @return
+     */
+    public static boolean isActivityPresent(Context context, Intent intent){
+        List<ResolveInfo> list = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        return list.size() > 0;
+    }
+
+    /**
+     * Set color to nav and status bar
+     * @param activity
+     * @param v
+     */
+    public static void setColor(@NonNull  Activity activity, int color,View v){
+        if (activity.getWindow() == null){
+            return;
+        }
+        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
+            activity.getWindow().setStatusBarColor(color);
+            v.setBackgroundColor(color);
+            activity.getWindow().setNavigationBarColor(color);
+        } else {
+            activity.getWindow().setStatusBarColor(color);
+            v.setBackgroundColor(color);
+            activity.getWindow().setNavigationBarColor(color);
+        }
+    }
+
+    public static String filterAudio(){
+        String filterAudio = null;
+        switch (Extras.getInstance().getAudioFilter()){
+            case Zero:
+                filterAudio = "30000"; //30sec
+                break;
+            case One:
+                filterAudio = "60000"; //1min
+                break;
+            case Two:
+                filterAudio = "120000"; //2min
+                break;
+            case Three:
+                filterAudio = "180000"; //3min
+                break;
+            case Four:
+                filterAudio = "240000"; //4min
+                break;
+            case "5":
+                filterAudio = "300000"; //5min
+                break;
+        }
+        return filterAudio;
     }
 
 }

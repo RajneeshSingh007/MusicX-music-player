@@ -35,7 +35,7 @@ public class RecentlyPlayedLoader extends BaseAsyncTaskLoader<List<Song>> {
 
     public RecentlyPlayedLoader(Context context, int limit) {
         super(context);
-        commonDatabase = new CommonDatabase(context, Constants.RecentlyPlayed_TableName);
+        commonDatabase = new CommonDatabase(context, Constants.RecentlyPlayed_TableName, true);
         this.limit = limit;
     }
 

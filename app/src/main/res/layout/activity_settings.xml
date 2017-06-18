@@ -43,14 +43,14 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <com.rks.musicx.misc.widgets.TextView
+                    <TextView
                         android:id="@+id/settings_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Settings"
                         android:textColor="@color/white"
                         android:textSize="24sp"
-                        app:textType="header"/>
+                        />
 
                 </LinearLayout>
 

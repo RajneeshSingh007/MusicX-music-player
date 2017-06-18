@@ -76,4 +76,7 @@
         <attr name="padding_offset" format="dimension"/>
     </declare-styleable>
 
+    <attr name="fontPath" format="string"/>
+
+
 </resources>

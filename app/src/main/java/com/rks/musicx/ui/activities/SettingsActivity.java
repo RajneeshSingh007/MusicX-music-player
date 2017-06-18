@@ -7,6 +7,7 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
@@ -14,10 +15,10 @@ import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.afollestad.materialdialogs.color.ColorChooserDialog;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseActivity;
-import com.rks.musicx.misc.widgets.TextView;
 import com.rks.musicx.ui.fragments.SettingsFragment;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -47,7 +48,6 @@ public class SettingsActivity extends BaseActivity implements ColorChooserDialog
 
     @Override
     protected void setUi() {
-        overridePendingTransition(R.anim.slide_in_up, R.anim.fade_back);
         settingstitle = (TextView) findViewById(R.id.settings_title);
     }
 
@@ -102,7 +102,6 @@ public class SettingsActivity extends BaseActivity implements ColorChooserDialog
         super.onBackPressed();
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        overridePendingTransition(R.anim.slide_in_up, R.anim.fade_forward);
         startActivity(intent);
     }
 }

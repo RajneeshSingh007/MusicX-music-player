@@ -1,6 +1,7 @@
 package com.rks.musicx.ui.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -9,12 +10,10 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
 import android.util.Pair;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.afollestad.appthemeengine.Config;
@@ -24,6 +23,8 @@ import com.rks.musicx.base.BaseRefreshFragment;
 import com.rks.musicx.data.loaders.ArtistLoader;
 import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.model.Artist;
+import com.rks.musicx.data.network.ArtistArtwork;
+import com.rks.musicx.database.CommonDatabase;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
@@ -34,6 +35,9 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.rks.musicx.misc.utils.Constants.DOWNLOAD_ARTWORK2;
+
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -59,6 +63,8 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
     private int artistLoader = -1;
     private List<Artist> artistlist;
     private SearchView searchView;
+    private ArtistArtwork artistArtwork;
+    private CommonDatabase commonDatabase;
 
     private BaseRecyclerViewAdapter.OnItemClickListener OnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
@@ -69,36 +75,15 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
                     Fragment fragments = ArtistFragment.newInstance(artistListAdapter.getItem(position));
                     ImageView listartwork = (ImageView) view.findViewById(R.id.album_artwork);
                     fragTransition(fragments, listartwork, "TransitionArtwork");
-                    rv.smoothScrollToPosition(position);
                     break;
             }
         }
     };
 
-    public static ArtistListFragment newInstance() {
-        return new ArtistListFragment();
-    }
 
     private void fragTransition(Fragment fragment, ImageView imageView, String transition) {
         ViewCompat.setTransitionName(imageView, transition);
         Helper.setFragmentTransition(getActivity(), ArtistListFragment.this, fragment, new Pair<View, String>(imageView, transition));
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.common_rv, container, false);
-        rv = (FastScrollRecyclerView) rootView.findViewById(R.id.commonrv);
-        artistListAdapter = new ArtistListAdapter(getContext());
-        int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
-        rv.setPopupBgColor(colorAccent);
-        rv.setHasFixedSize(true);
-        setHasOptionsMenu(true);
-        loadArtist();
-        artistView();
-        artistlist = new ArrayList<>();
-        rv.setAdapter(artistListAdapter);
-        artistListAdapter.setOnItemClickListener(OnClick);
-        return rootView;
     }
 
     @Override
@@ -183,6 +168,31 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
     }
 
     @Override
+    protected int setLayout() {
+        return R.layout.common_rv;
+    }
+
+    @Override
+    protected void ui(View view) {
+        rv = (FastScrollRecyclerView) view.findViewById(R.id.commonrv);
+    }
+
+    @Override
+    protected void funtion() {
+        artistListAdapter = new ArtistListAdapter(getContext());
+        int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
+        rv.setPopupBgColor(colorAccent);
+        rv.setHasFixedSize(true);
+        setHasOptionsMenu(true);
+        loadArtist();
+        artistView();
+        artistlist = new ArrayList<>();
+        rv.setAdapter(artistListAdapter);
+        artistListAdapter.setOnItemClickListener(OnClick);
+        commonDatabase = new CommonDatabase(getContext(), DOWNLOAD_ARTWORK2, false);
+    }
+
+    @Override
     public void load() {
         getLoaderManager().restartLoader(artistLoader, null, this);
     }
@@ -225,5 +235,39 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
             rv.addItemDecoration(new ItemOffsetDecoration(2));
             loadGridView();
         }
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (getActivity() == null) {
+            return;
+        }
+        Extras.getInstance().getThemevalue(getActivity());
+        commonDatabase.addArtist(artistlist);
+        artistlist = commonDatabase.readArtist();
+        if (artistlist == null){
+            return;
+        }
+        if (!Extras.getInstance().saveData()){
+            try {
+                for (Artist artist : artistlist){
+                     artistArtwork = new ArtistArtwork(getActivity(), artist.getName());
+                     artistArtwork.execute();
+                }
+            }finally {
+                commonDatabase.close();
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (!Extras.getInstance().saveData()){
+            if (artistArtwork != null){
+                artistArtwork.cancel(true);
+            }
+        }
+        super.onDestroy();
     }
 }

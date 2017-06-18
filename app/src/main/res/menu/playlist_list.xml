@@ -43,5 +43,7 @@
         app:showAsAction="never"/>
 
 
+    <item android:id="@+id/shuffle_all"
+        android:title="@string/shuffle_all"/>
 
 </menu>

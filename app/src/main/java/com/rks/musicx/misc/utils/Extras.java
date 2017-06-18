@@ -3,8 +3,8 @@ package com.rks.musicx.misc.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.preference.PreferenceManager;
-import android.util.DisplayMetrics;
 
 import com.afollestad.appthemeengine.ATE;
 import com.rks.musicx.data.loaders.SortOrder;
@@ -21,10 +21,14 @@ import static com.rks.musicx.misc.utils.Constants.ARTISTGRID;
 import static com.rks.musicx.misc.utils.Constants.ARTIST_ALBUM_SORT;
 import static com.rks.musicx.misc.utils.Constants.ARTIST_SORT_ORDER;
 import static com.rks.musicx.misc.utils.Constants.ARTWORKCOLOR;
+import static com.rks.musicx.misc.utils.Constants.AUDIO_FILTER;
 import static com.rks.musicx.misc.utils.Constants.BlackTheme;
 import static com.rks.musicx.misc.utils.Constants.CURRENTPOS;
+import static com.rks.musicx.misc.utils.Constants.DONATION_TRACK;
+import static com.rks.musicx.misc.utils.Constants.DOWNLOADED_ARTWORK;
 import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 import static com.rks.musicx.misc.utils.Constants.EQSWITCH;
+import static com.rks.musicx.misc.utils.Constants.EXTRACT_FOLDER;
 import static com.rks.musicx.misc.utils.Constants.FADEINOUT_DURATION;
 import static com.rks.musicx.misc.utils.Constants.FADETRACK;
 import static com.rks.musicx.misc.utils.Constants.FOLDERPATH;
@@ -45,7 +49,8 @@ import static com.rks.musicx.misc.utils.Constants.PLAYINGVIEW_TRACK;
 import static com.rks.musicx.misc.utils.Constants.PLAYLIST_ID;
 import static com.rks.musicx.misc.utils.Constants.PLAYLIST_SORT_ORDER;
 import static com.rks.musicx.misc.utils.Constants.PRESET_POS;
-import static com.rks.musicx.misc.utils.Constants.REMOVETABS;
+import static com.rks.musicx.misc.utils.Constants.QUEUE_NAME;
+import static com.rks.musicx.misc.utils.Constants.REMOVE_TABLIST;
 import static com.rks.musicx.misc.utils.Constants.REORDER_TAB;
 import static com.rks.musicx.misc.utils.Constants.REPEATMODE;
 import static com.rks.musicx.misc.utils.Constants.RESTORE_LASTTAB;
@@ -66,12 +71,12 @@ import static com.rks.musicx.misc.utils.Constants.SONG_YEAR;
 import static com.rks.musicx.misc.utils.Constants.SaveHeadset;
 import static com.rks.musicx.misc.utils.Constants.SaveLyrics;
 import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
+import static com.rks.musicx.misc.utils.Constants.TAG_METADATA;
 import static com.rks.musicx.misc.utils.Constants.TRYPEFACE_PATH;
 import static com.rks.musicx.misc.utils.Constants.TextFonts;
 import static com.rks.musicx.misc.utils.Constants.VIZCOLOR;
 import static com.rks.musicx.misc.utils.Constants.WIDGETTRACK;
 import static com.rks.musicx.misc.utils.Constants.WIDGET_COLOR;
-import static com.rks.musicx.misc.utils.Constants.sInstance;
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -92,34 +97,26 @@ import static com.rks.musicx.misc.utils.Constants.sInstance;
 
 public class Extras {
 
-    public SharedPreferences mPreferences;
-    public SharedPreferences metaData;
-    public SharedPreferences tagEditor;
-    private Context mcontext;
+    private SharedPreferences mPreferences;
+    private SharedPreferences metaData;
+    private static Context context;
+    private static Extras instance;
 
-    public Extras(Context context) {
+    public Extras(Context contexts) {
+        context = contexts;
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        metaData = context.getSharedPreferences("MetaData", MODE_PRIVATE);
-        tagEditor = context.getSharedPreferences("tagEditor", MODE_PRIVATE);
-        this.mcontext = context;
+        metaData = context.getSharedPreferences(TAG_METADATA, MODE_PRIVATE);
     }
 
-    public static void init(Context context) {
-        sInstance = new Extras(context);
+    public static Extras init(Context context){
+        if (instance == null){
+            instance = new Extras(context);
+        }
+        return instance;
     }
 
-    public static Extras getInstance() {
-        return sInstance;
-    }
-
-    public int px2Dp(int dp, Context c) {
-        DisplayMetrics displayMetrics = c.getResources().getDisplayMetrics();
-        return Math.round(dp * (displayMetrics.ydpi / DisplayMetrics.DENSITY_DEFAULT));
-    }
-
-    public int dp2px(Context context, float dpValue) {
-        final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (dpValue * scale + 0.5f);
+    public static Extras getInstance(){
+        return instance;
     }
 
     public SharedPreferences getmPreferences() {
@@ -132,18 +129,20 @@ public class Extras {
         editor.apply();
     }
 
+    /////////////////// Theme Pref //////////////////////
+
     public boolean getDarkTheme() {
-        return Extras.getInstance().mPreferences.getBoolean(DarkTheme, false);
+        return getmPreferences().getBoolean(DarkTheme, false);
     }
 
     public boolean getBlackTheme() {
-        return Extras.getInstance().mPreferences.getBoolean(BlackTheme, false);
+        return getmPreferences().getBoolean(BlackTheme, false);
     }
 
     public void getThemevalue(Activity activity) {
-        if (Extras.getInstance().getDarkTheme()) {
+        if (getDarkTheme()) {
             ATE.postApply(activity, DarkTheme);
-        } else if (Extras.getInstance().getBlackTheme()) {
+        } else if (getBlackTheme()) {
             ATE.postApply(activity, BlackTheme);
         } else {
             ATE.postApply(activity, LightTheme);
@@ -251,7 +250,7 @@ public class Extras {
     }
 
     public SharedPreferences saveEq() {
-        return mcontext.getSharedPreferences(SAVE_EQ, MODE_PRIVATE);
+        return context.getSharedPreferences(SAVE_EQ, MODE_PRIVATE);
     }
 
     public boolean saveData() {
@@ -295,6 +294,14 @@ public class Extras {
     }
 
     public boolean getHdArtwork(){return mPreferences.getBoolean(HD_ARTWORK, false);}
+
+    public boolean getDownloadedArtwork(){
+        return mPreferences.getBoolean(DOWNLOADED_ARTWORK, false);
+    }
+
+    public String getAudioFilter(){
+        return mPreferences.getString(AUDIO_FILTER, "0");
+    }
 
     ////////////////// folder pref //////////////////
 
@@ -493,12 +500,12 @@ public class Extras {
     ///////////////// Init Setup //////////////////
 
     public int getInitValue(String spName, String key) {
-        SharedPreferences sharedPreferences = mcontext.getSharedPreferences(spName, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(spName, MODE_PRIVATE);
         return sharedPreferences.getInt(key, 0);
     }
 
     public void setInitValue(int ammount, String spName, String key) {
-        SharedPreferences sharedPreferences = mcontext.getSharedPreferences(spName, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(spName, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(key, ammount);
         editor.commit();
@@ -525,12 +532,12 @@ public class Extras {
             s += i + ",";
         }
         SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString(REMOVETABS, s);
+        editor.putString(REMOVE_TABLIST, s);
         editor.commit();
     }
 
     public ArrayList<Integer> getRemoveTab() {
-        String s = mPreferences.getString(REMOVETABS , "");
+        String s = mPreferences.getString(REMOVE_TABLIST, "");
         StringTokenizer st = new StringTokenizer(s, ",");
         ArrayList<Integer> result = new ArrayList<Integer>();
         while (st.hasMoreTokens()) {
@@ -543,12 +550,12 @@ public class Extras {
 
     public void saveTypeface(String path){
         SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString(TRYPEFACE_PATH, path);
+        editor.putString(TRYPEFACE_PATH,path);
         editor.commit();
     }
 
     public String getTypeface(){
-        return mPreferences.getString(TRYPEFACE_PATH, null);
+        return mPreferences.getString(TRYPEFACE_PATH, Typeface.DEFAULT.toString());
     }
 
 
@@ -576,5 +583,50 @@ public class Extras {
         return mPreferences.getBoolean(PLAYINGVIEW_TRACK, false);
     }
 
+    /////////// Donation Track /////////////
+
+    public void donationTrack(boolean torf){
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(DONATION_TRACK, torf);
+        editor.commit();
+    }
+
+    public Boolean getDonationTrack(){
+        return mPreferences.getBoolean(DONATION_TRACK, false);
+    }
+
+    //////////// Save Queue Name /////////
+
+    public void saveQueueName(List<String> name){
+        String s = "";
+        for (String i : name) {
+            s += i + ",";
+        }
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putString(QUEUE_NAME, s);
+        editor.commit();
+    }
+
+    public ArrayList<String> getSavedQueueName(){
+        String s = mPreferences.getString(QUEUE_NAME, "");
+        StringTokenizer st = new StringTokenizer(s, ",");
+        ArrayList<String> result = new ArrayList<>();
+        while (st.hasMoreTokens()) {
+            result.add(st.nextToken());
+        }
+        return result;
+    }
+
+    ///////////// extract assets folder /////////////
+
+    public void saveExtractFolder(boolean torf){
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(EXTRACT_FOLDER, torf);
+        editor.apply();
+    }
+
+    public boolean getExtractFolder(){
+        return mPreferences.getBoolean(EXTRACT_FOLDER, false);
+    }
 
 }

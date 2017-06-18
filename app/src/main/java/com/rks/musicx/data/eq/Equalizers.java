@@ -30,7 +30,6 @@ public class Equalizers {
 
     private static Equalizer equalizer = null;
     private static short preset;
-    private static short[] bandLevels;
 
     public Equalizers() {
     }
@@ -39,21 +38,13 @@ public class Equalizers {
         EndEq();
         try {
             equalizer = new Equalizer(0, audioID);
-            bandLevels = new short[equalizer.getNumberOfBands()];
             preset = (short) Extras.getInstance().saveEq().getInt(SAVE_PRESET, 0);
-            if (preset < 0) {
+            if (preset < equalizer.getNumberOfPresets()){
+                usePreset(preset);
+            }else {
                 for (short b = 0; b < equalizer.getNumberOfBands(); b++) {
                     short level = (short) Extras.getInstance().saveEq().getInt(BAND_LEVEL + b, 0);
-                    setBandLevel(b, bandLevels[level]);
-                }
-            }else {
-                usePreset(preset);
-                short[] levels = equalizer.getProperties().bandLevels;
-                for(short i=0; i<levels.length; i++){
-                    SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
-                    editor.putInt(SAVE_PRESET, preset);
-                    editor.putInt(BAND_LEVEL + i, getBandLevel(i));
-                    editor.commit();
+                    setBandLevel(b, level);
                 }
             }
         } catch (Exception e) {
@@ -106,9 +97,6 @@ public class Equalizers {
 
     public static void setBandLevel(short band, short level) {
         if (equalizer != null) {
-            for (short k=0; k<equalizer.getNumberOfBands(); k++){
-                bandLevels[k] = level;
-            }
             equalizer.setBandLevel(band, level);
         }
     }
@@ -140,22 +128,12 @@ public class Equalizers {
         return 0;
     }
 
-    public static int getCurrentPreset(){
-        if (equalizer == null){
-            return 0;
-        }
-        return equalizer.getCurrentPreset() +1;
-    }
-
-    public static void savePrefs() {
+    public static void savePrefs(int band, int bandLevel) {
         if (equalizer == null) {
             return;
         }
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
-        editor.putInt(SAVE_PRESET, preset);
-        for (short b = 0; b < getNumberOfBands(); b++) {
-            editor.putInt(BAND_LEVEL + b, getBandLevel(b));
-        }
+        editor.putInt(BAND_LEVEL + band, bandLevel);
         editor.commit();
     }
 }

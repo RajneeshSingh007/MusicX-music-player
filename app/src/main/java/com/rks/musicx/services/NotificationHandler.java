@@ -100,7 +100,7 @@ public class NotificationHandler {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                ArtworkUtils.ArtworkLoader(musicXService, musicXService.getsongAlbumName(),null, musicXService.getsongAlbumID(), new palette() {
+                ArtworkUtils.ArtworkLoader(musicXService,  300, 300, musicXService.getsongAlbumName(),null, musicXService.getsongAlbumID(), new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         int colors[] = Helper.getAvailableColor(musicXService, palette);

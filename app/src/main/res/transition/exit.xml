@@ -12,8 +12,12 @@
   ~ limitations under the License.
   -->
 
-<translate xmlns:android="http://schemas.android.com/apk/res/android"
-           android:duration="@android:integer/config_mediumAnimTime"
-           android:fromYDelta="100%p"
-           android:toYDelta="0%p"
-           android:zAdjustment="top"/>
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
+    android:transitionOrdering="together">
+
+    <explode xmlns:android="http://schemas.android.com/apk/res/android">
+    </explode>
+    <fade>
+    </fade>
+
+</transitionSet>

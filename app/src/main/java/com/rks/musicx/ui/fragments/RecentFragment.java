@@ -1,7 +1,6 @@
 package com.rks.musicx.ui.fragments;
 
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
@@ -52,8 +51,8 @@ public class RecentFragment extends BaseLoaderFragment {
     private RecentPlayedFragment recentPlayedFragment;
     private RecentlyAddedFragment recentlyAddedFragment;
     private Helper helper;
-    private SongListAdapter recentlyPlayed, recentlyAdded;
-    private final int recentloader =3;
+    private SongListAdapter recentlyPlayed;
+    private final int recentloader = 5;
 
 
     private BaseRecyclerViewAdapter.OnItemClickListener onClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
@@ -79,10 +78,10 @@ public class RecentFragment extends BaseLoaderFragment {
             switch (view.getId()) {
                 case R.id.album_artwork:
                 case R.id.item_view:
-                    ((MainActivity) getActivity()).onSongSelected(recentlyAdded.getSnapshot(), position);
+                    ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
                     break;
                 case R.id.menu_button:
-                    helper.showMenu(false, trackloader, RecentFragment.this, RecentFragment.this, ((MainActivity) getActivity()), position, view, getContext(), recentlyAdded);
+                    helper.showMenu(false, trackloader, RecentFragment.this, RecentFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
                     break;
             }
         }
@@ -160,54 +159,38 @@ public class RecentFragment extends BaseLoaderFragment {
 
     @Override
     protected void background() {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                if (getActivity() != null){
-                    recentlyAdded = new SongListAdapter(getContext());
-                    recentlyPlayed = new SongListAdapter(getContext());
-                }
-                return null;
-            }
+        recentlyPlayed = new SongListAdapter(getContext());
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                if (getActivity() == null){
-                    return;
-                }
-                CustomLayoutManager customLayoutManager1 = new CustomLayoutManager(getContext());
-                customLayoutManager1.setSmoothScrollbarEnabled(true);
-                customLayoutManager1.setOrientation(LinearLayoutManager.HORIZONTAL);
+        CustomLayoutManager customLayoutManager1 = new CustomLayoutManager(getContext());
+        customLayoutManager1.setSmoothScrollbarEnabled(true);
+        customLayoutManager1.setOrientation(LinearLayoutManager.HORIZONTAL);
 
-                recentlyAdding.setLayoutManager(customLayoutManager1);
-                recentlyAdding.setNestedScrollingEnabled(false);
-                recentlyAdding.setVerticalScrollBarEnabled(false);
-                recentlyAdding.setHorizontalScrollBarEnabled(false);
-                recentlyAdded.setLayoutId(R.layout.recent_list);
-                recentlyAdding.setScrollBarSize(0);
-                recentlyAdding.setAdapter(recentlyAdded);
-                recentlyAdded.setOnItemClickListener(onClicks);
-                recentlyAdding.setItemAnimator(new DefaultItemAnimator());
-                recentlyAdding.setHasFixedSize(true);
-                getLoaderManager().initLoader(trackloader, null, RecentFragment.this);
+        recentlyAdding.setLayoutManager(customLayoutManager1);
+        recentlyAdding.setNestedScrollingEnabled(false);
+        recentlyAdding.setVerticalScrollBarEnabled(false);
+        recentlyAdding.setHorizontalScrollBarEnabled(false);
+        songListAdapter.setLayoutId(R.layout.recent_list);
+        recentlyAdding.setScrollBarSize(0);
+        recentlyAdding.setAdapter(songListAdapter);
+        songListAdapter.setOnItemClickListener(onClicks);
+        recentlyAdding.setItemAnimator(new DefaultItemAnimator());
+        recentlyAdding.setHasFixedSize(true);
+        getLoaderManager().initLoader(trackloader, null, RecentFragment.this);
 
-                CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
-                customLayoutManager.setSmoothScrollbarEnabled(true);
-                customLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-                recentlyPlaying.setLayoutManager(customLayoutManager);
-                recentlyPlaying.setNestedScrollingEnabled(false);
-                recentlyPlaying.setVerticalScrollBarEnabled(false);
-                recentlyPlaying.setHorizontalScrollBarEnabled(false);
-                recentlyPlayed.setLayoutId(R.layout.recent_list);
-                recentlyPlaying.setScrollBarSize(0);
-                recentlyPlaying.setAdapter(recentlyPlayed);
-                recentlyPlayed.setOnItemClickListener(onClick);
-                recentlyPlaying.setItemAnimator(new DefaultItemAnimator());
-                recentlyPlaying.setHasFixedSize(true);
-                getLoaderManager().initLoader(recentloader, null, recentPlaying);
-            }
-        }.execute();
+        CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
+        customLayoutManager.setSmoothScrollbarEnabled(true);
+        customLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        recentlyPlaying.setLayoutManager(customLayoutManager);
+        recentlyPlaying.setNestedScrollingEnabled(false);
+        recentlyPlaying.setVerticalScrollBarEnabled(false);
+        recentlyPlaying.setHorizontalScrollBarEnabled(false);
+        recentlyPlayed.setLayoutId(R.layout.recent_list);
+        recentlyPlaying.setScrollBarSize(0);
+        recentlyPlaying.setAdapter(recentlyPlayed);
+        recentlyPlayed.setOnItemClickListener(onClick);
+        recentlyPlaying.setItemAnimator(new DefaultItemAnimator());
+        recentlyPlaying.setHasFixedSize(true);
+        getLoaderManager().initLoader(recentloader, null, recentPlaying);
     }
 
     @Override
@@ -249,7 +232,7 @@ public class RecentFragment extends BaseLoaderFragment {
 
         @Override
         public void onLoadFinished(Loader<List<Song>> loader, List<Song> data) {
-            if (data == null) {
+            if (data == null){
                 return;
             }
             recentlyPlayed.addDataList(data);
@@ -263,14 +246,4 @@ public class RecentFragment extends BaseLoaderFragment {
     };
 
 
-
-    @Override
-    public void setAdapater(List<Song> data) {
-        recentlyAdded.addDataList(data);
-    }
-
-    @Override
-    public void notifyChanges() {
-        recentlyAdded.notifyDataSetChanged();
-    }
 }

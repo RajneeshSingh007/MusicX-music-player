@@ -13,11 +13,12 @@
   -->
 
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                 android:id="@+id/about_background"
-                                                 android:layout_width="match_parent"
-                                                 android:layout_height="match_parent"
-                                                 android:fitsSystemWindows="true">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/about_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -43,14 +44,14 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <com.rks.musicx.misc.widgets.TextView
+                    <TextView
                         android:id="@+id/about_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="About"
                         android:textColor="@color/white"
                         android:textSize="24sp"
-                        app:textType="header"/>
+                        />
 
                 </LinearLayout>
 
@@ -87,7 +88,7 @@
                         android:layout_gravity="center"
                         android:src="@mipmap/ic_launcher"/>
 
-                    <com.rks.musicx.misc.widgets.TextView
+                    <TextView
                         android:id="@+id/about_app_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -95,8 +96,10 @@
                         android:padding="5dp"
                         android:textColor="@color/white"
                         android:textSize="50sp"
+                        fontPath="Header.ttf"
+                        tools:ignore="MissingPrefix"
                         android:textStyle="bold"
-                        app:textType="header"/>
+                        />
 
                     <TextView
                         android:id="@+id/about_app_disc"
@@ -322,7 +325,7 @@
                         android:orientation="horizontal"
                         android:padding="2dp">
 
-                        <com.rks.musicx.misc.widgets.TextView
+                        <TextView
                             android:id="@+id/developer"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -330,7 +333,7 @@
                             android:text="Developer :"
                             android:textColor="@color/white"
                             android:textSize="20sp"
-                            app:textType="header"/>
+                            />
 
                         <TextView
                             android:id="@+id/developer_name"

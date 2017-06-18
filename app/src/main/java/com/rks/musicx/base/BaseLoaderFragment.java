@@ -26,14 +26,15 @@ import com.rks.musicx.data.loaders.FavoritesLoader;
 import com.rks.musicx.data.loaders.RecentlyPlayedLoader;
 import com.rks.musicx.data.loaders.TrackLoader;
 import com.rks.musicx.data.model.Song;
-import com.rks.musicx.interfaces.dataLoader;
+import com.rks.musicx.ui.adapters.SongListAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Coolalien on 5/17/2017.
  */
-public abstract class BaseLoaderFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Song>>, dataLoader {
+public abstract class BaseLoaderFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Song>>{
 
 
     protected abstract int setLayout();
@@ -48,14 +49,18 @@ public abstract class BaseLoaderFragment extends Fragment implements LoaderManag
     protected abstract boolean isFav();
     protected abstract int getLimit();
     abstract public void load();
-
+    public List<Song> songList;
 
     public final int trackloader = 1,recentlyplayed = 2, favloader = 3;
+
+    public SongListAdapter songListAdapter;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(setLayout(), container, false);
+        songListAdapter = new SongListAdapter(getContext());
+        songList = new ArrayList<>();
         ui(view);
         funtion();
         return view;
@@ -77,7 +82,6 @@ public abstract class BaseLoaderFragment extends Fragment implements LoaderManag
             FavoritesLoader favoritesLoader = new FavoritesLoader(getContext());
             return favoritesLoader;
         }
-
         return null;
     }
 
@@ -86,13 +90,17 @@ public abstract class BaseLoaderFragment extends Fragment implements LoaderManag
         if (data == null){
             return;
         }
-        setAdapater(data);
+        if (isTrack() || isFav() || isRecentPlayed()){
+            songListAdapter.addDataList(data);
+            songList = data;
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<List<Song>> loader) {
-        loader.reset();
-        notifyChanges();
+        if (isTrack() || isFav() || isRecentPlayed()){
+            songListAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -101,5 +109,8 @@ public abstract class BaseLoaderFragment extends Fragment implements LoaderManag
         load();
     }
 
+    public List<Song> getSongList() {
+        return songList;
+    }
 
 }

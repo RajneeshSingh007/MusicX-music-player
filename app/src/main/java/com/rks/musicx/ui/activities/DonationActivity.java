@@ -60,6 +60,7 @@ import javax.annotation.Nonnull;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
+
 /**
  * Created by Coolalien on 5/28/2017.
  */
@@ -77,7 +78,7 @@ public class DonationActivity extends BaseActivity implements ATEActivityThemeCu
     private static String DONATION2 = "your_product_id2";
     private static String DONATION3 = "your_product_id3";
     private static String DONATION4 = "your_product_id4";
-    private static String DONATION5 = "your_product_id5";
+	private static String DONATION5 = "your_product_id5";
 
     private static List<String> getInAppSkus() {
         final List<String> skus = new ArrayList<>();

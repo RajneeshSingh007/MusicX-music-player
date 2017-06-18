@@ -14,14 +14,13 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
-import com.rks.musicx.data.model.FolderModel;
+import com.rks.musicx.data.model.Folder;
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.Helper;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
-
-
 /*
  * Created by Coolalien on 6/28/2016.
  */
@@ -39,7 +38,8 @@ import java.util.List;
  * limitations under the License.
  */
 
-public class FolderAdapter extends BaseRecyclerViewAdapter<FolderModel, FolderAdapter.Folderviewholder> implements FastScrollRecyclerView.SectionedAdapter {
+public class FolderAdapter extends BaseRecyclerViewAdapter<Folder, FolderAdapter.Folderviewholder> implements FastScrollRecyclerView.SectionedAdapter {
+
 
     public FolderAdapter(@NonNull Context context) {
         super(context);
@@ -53,7 +53,7 @@ public class FolderAdapter extends BaseRecyclerViewAdapter<FolderModel, FolderAd
 
     @Override
     public void onBindViewHolder(FolderAdapter.Folderviewholder holder, int position) {
-        FolderModel file = getItem(position);
+        Folder file = getItem(position);
         Glide.with(getContext())
                 .load(R.drawable.folder)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -63,6 +63,7 @@ public class FolderAdapter extends BaseRecyclerViewAdapter<FolderModel, FolderAd
                 .error(R.drawable.folder)
                 .into(holder.thumbnail);
         holder.filename.setText(file.getName());
+        holder.filename.setTypeface(Helper.getFont(getContext()));
         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
             holder.filename.setTextColor(Color.WHITE);
         } else {
@@ -70,14 +71,14 @@ public class FolderAdapter extends BaseRecyclerViewAdapter<FolderModel, FolderAd
         }
     }
 
-    public void setFilter(List<FolderModel> filter) {
+    public void setFilter(List<Folder> filter) {
         data = new ArrayList<>();
         data.addAll(filter);
         notifyDataSetChanged();
     }
 
     @Override
-    public FolderModel getItem(int position) throws ArrayIndexOutOfBoundsException {
+    public Folder getItem(int position) throws ArrayIndexOutOfBoundsException {
         return data.size() > 0 ? data.get(position) : null;
     }
 
@@ -107,3 +108,6 @@ public class FolderAdapter extends BaseRecyclerViewAdapter<FolderModel, FolderAd
         }
     }
 }
+
+
+

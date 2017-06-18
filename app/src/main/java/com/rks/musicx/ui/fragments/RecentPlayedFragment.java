@@ -1,11 +1,16 @@
 package com.rks.musicx.ui.fragments;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.afollestad.appthemeengine.Config;
@@ -18,9 +23,9 @@ import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.MainActivity;
-import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -40,14 +45,14 @@ import java.util.List;
  * limitations under the License.
  */
 
-public class RecentPlayedFragment extends BaseLoaderFragment {
+public class RecentPlayedFragment extends BaseLoaderFragment implements SearchView.OnQueryTextListener {
 
     private FastScrollRecyclerView rv;
-    private SongListAdapter songListAdapter;
     private Helper helper;
     private int limit;
     private boolean isgridView;
     private Toolbar toolbar;
+    private SearchView searchView;
 
     private BaseRecyclerViewAdapter.OnItemClickListener onClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
 
@@ -106,7 +111,39 @@ public class RecentPlayedFragment extends BaseLoaderFragment {
         rv.setPopupBgColor(colorAccent);
         rv.setItemAnimator(new DefaultItemAnimator());
         rv.setHasFixedSize(true);
+        setHasOptionsMenu(true);
         background();
+        toolbar.showOverflowMenu();
+        songList = new ArrayList<>();
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null && activity.getSupportActionBar() != null){
+            activity.setSupportActionBar(toolbar);
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.song_sort_by, menu);
+        searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.song_search));
+        searchView.setOnQueryTextListener(this);
+        searchView.setQueryHint("Search song");
+        menu.findItem(R.id.grid_view).setVisible(false);
+        menu.findItem(R.id.menu_sort_by).setVisible(false);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (getActivity() == null){
+            return false;
+        }
+        switch (item.getItemId()) {
+            case R.id.shuffle_all:
+                ((MainActivity) getActivity()).onShuffleRequested(songList, true);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -116,7 +153,7 @@ public class RecentPlayedFragment extends BaseLoaderFragment {
 
     @Override
     protected String[] argument() {
-        return new String[0];
+        return null;
     }
 
     @Override
@@ -126,44 +163,27 @@ public class RecentPlayedFragment extends BaseLoaderFragment {
 
     @Override
     protected void background(){
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                if (getActivity() != null){
-                    songListAdapter = new SongListAdapter(getContext());
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                if (getActivity() == null){
-                    return;
-                }
-                CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
-                customLayoutManager.setSmoothScrollbarEnabled(true);
-                if (isgridView()) {
-                    rv.setLayoutManager(customLayoutManager);
-                    rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
-                    songListAdapter.setLayoutId(R.layout.song_list);
-                    toolbar.setVisibility(View.VISIBLE);
-                    loadTracks();
-                } else {
-                    customLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-                    rv.setLayoutManager(customLayoutManager);
-                    rv.setNestedScrollingEnabled(false);
-                    rv.setVerticalScrollBarEnabled(false);
-                    rv.setHorizontalScrollBarEnabled(false);
-                    songListAdapter.setLayoutId(R.layout.recent_list);
-                    toolbar.setVisibility(View.GONE);
-                    rv.setScrollBarSize(0);
-                    loadTracks();
-                }
-                rv.setAdapter(songListAdapter);
-                songListAdapter.setOnItemClickListener(onClick);
-            }
-        }.execute();
+        CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
+        customLayoutManager.setSmoothScrollbarEnabled(true);
+        if (isgridView()) {
+            rv.setLayoutManager(customLayoutManager);
+            rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
+            songListAdapter.setLayoutId(R.layout.song_list);
+            toolbar.setVisibility(View.VISIBLE);
+            loadTracks();
+        } else {
+            customLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+            rv.setLayoutManager(customLayoutManager);
+            rv.setNestedScrollingEnabled(false);
+            rv.setVerticalScrollBarEnabled(false);
+            rv.setHorizontalScrollBarEnabled(false);
+            songListAdapter.setLayoutId(R.layout.recent_list);
+            toolbar.setVisibility(View.GONE);
+            rv.setScrollBarSize(0);
+            loadTracks();
+        }
+        rv.setAdapter(songListAdapter);
+        songListAdapter.setOnItemClickListener(onClick);
     }
 
     @Override
@@ -209,9 +229,6 @@ public class RecentPlayedFragment extends BaseLoaderFragment {
     @Override
     public void load() {
         getLoaderManager().restartLoader(recentlyplayed, null, this);
-        if (getActivity() == null){
-            return;
-        }
     }
 
 
@@ -229,12 +246,15 @@ public class RecentPlayedFragment extends BaseLoaderFragment {
     }
 
     @Override
-    public void setAdapater(List<Song> data) {
-        songListAdapter.addDataList(data);
+    public boolean onQueryTextSubmit(String query) {
+        return false;
     }
 
     @Override
-    public void notifyChanges() {
-        songListAdapter.notifyDataSetChanged();
+    public boolean onQueryTextChange(String newText) {
+        final List<Song> filterlist = helper.filter(songList, newText);
+        songListAdapter.setFilter(filterlist);
+        return true;
     }
+
 }

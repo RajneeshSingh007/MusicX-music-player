@@ -13,6 +13,7 @@
 
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'io.fabric'
 
 android {
     signingConfigs {
@@ -26,15 +27,12 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.3"
 
-    lintOptions {
-        abortOnError false
-    }
     defaultConfig {
         applicationId "com.rks.musicx"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 61
-        versionName '1.4.1'
+        versionCode 62
+        versionName '1.4.2'
         vectorDrawables.useSupportLibrary = true
         renderscriptTargetApi 25
         renderscriptSupportModeEnabled true
@@ -48,6 +46,7 @@ android {
             debuggable false
             shrinkResources true
             zipAlignEnabled true
+            shrinkResources true
             signingConfig signingConfigs.config
             proguardFile 'E:/AndroidDevelopment/AppDevelopment/appDev/MusicX/app/proguard-rules.pro'
         }
@@ -71,6 +70,10 @@ android {
 }
 ext {
     supportVersion = "25.3.1"
+}
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
 }
 
 dependencies {
@@ -120,7 +123,6 @@ dependencies {
     compile 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.7.2'
     compile 'com.github.deano2390:MaterialShowcaseView:1.1.0'
     compile 'com.kbeanie:image-chooser-library:1.5.8@aar'
-    compile 'ch.acra:acra:4.9.0'
     compile 'com.github.codekidX:storage-chooser:1.0.33'
     compile ('com.afollestad.material-dialogs:commons:0.9.4.5@aar'){
         transitive = true
@@ -129,4 +131,7 @@ dependencies {
         transitive = true
     }
     compile 'org.solovyev.android:checkout:1.0.0'
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
+        transitive = true;
+    }
 }

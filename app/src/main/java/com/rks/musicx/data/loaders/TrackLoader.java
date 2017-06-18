@@ -8,6 +8,7 @@ import android.support.v4.content.PermissionChecker;
 
 import com.rks.musicx.base.BaseAsyncTaskLoader;
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.misc.utils.Helper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -109,7 +110,7 @@ public class TrackLoader extends BaseAsyncTaskLoader<List<Song>> {
     }
 
     public void filteralbumsong(String filter, String[] args) {
-        Where = filter + " AND " + MediaStore.Audio.Media.DURATION + ">= 30000"; // list song greater than 30sec duration
+        Where = filter + " AND " + MediaStore.Audio.Media.DURATION + ">=" + Helper.filterAudio(); // list song greater than 30sec duration
         selectionargs = args;
     }
 
@@ -120,4 +121,5 @@ public class TrackLoader extends BaseAsyncTaskLoader<List<Song>> {
     public void setFilter(String filter) {
         mFilter = filter;
     }
+
 }

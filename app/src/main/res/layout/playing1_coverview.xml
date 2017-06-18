@@ -103,7 +103,7 @@
             android:maxLines="1"
             android:paddingEnd="2dp"
             android:paddingStart="2dp"
-            android:text="/"
+            android:text="|"
             android:textColor="@color/white"
             android:textSize="24sp"/>
 

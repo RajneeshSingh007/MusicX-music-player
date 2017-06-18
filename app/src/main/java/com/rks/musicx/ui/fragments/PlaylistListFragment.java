@@ -11,7 +11,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -52,7 +51,7 @@ import java.util.List;
 public class PlaylistListFragment extends BaseRefreshFragment implements LoaderCallbacks<List<Playlist>> {
 
     private FastScrollRecyclerView rv;
-    private PlaylistListAdapter playlistListAdapter;
+    private PlaylistListAdapter playlistAdapter;
     private int playloader = -1;
 
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
@@ -60,20 +59,17 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
         public void onItemClick(int position, View view) {
             switch (view.getId()) {
                 case R.id.item_view:
-                    Extras.getInstance().savePlaylistId(playlistListAdapter.getItem(position).getId());
-                    PlaylistFragment fragment = PlaylistFragment.newInstance(playlistListAdapter.getItem(position));
+                    Extras.getInstance().savePlaylistId(playlistAdapter.getItem(position).getId());
+                    PlaylistFragment fragment = PlaylistFragment.newInstance(playlistAdapter.getItem(position));
                     ((MainActivity) getActivity()).setFragment(fragment);
                     break;
                 case R.id.delete_playlist:
-                    showMenu(view, playlistListAdapter.getItem(position));
+                    showMenu(view, playlistAdapter.getItem(position));
                     break;
             }
         }
     };
 
-    public static PlaylistListFragment newInstance() {
-        return new PlaylistListFragment();
-    }
 
     private void showMenu(View view, Playlist playlist) {
         PopupMenu popup = new PopupMenu(getActivity(), view);
@@ -97,6 +93,7 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
                                 load();
                             }
                         });
+                        builder.typeface(Helper.getFont(getContext()), Helper.getFont(getContext()));
                         builder.negativeText(R.string.cancel);
                         builder.show();
                         break;
@@ -108,39 +105,10 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.common_rv, container, false);
-        findbyid(rootView);
-        function();
-        return rootView;
-    }
-
-    private void findbyid(View rootView) {
-        rv = (FastScrollRecyclerView) rootView.findViewById(R.id.commonrv);
-    }
-
-
-    private void function() {
-        CustomLayoutManager customlayout = new CustomLayoutManager(getContext());
-        customlayout.setSmoothScrollbarEnabled(true);
-        rv.setLayoutManager(customlayout);
-        rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
-        playlistListAdapter = new PlaylistListAdapter(getContext());
-        playlistListAdapter.setOnItemClickListener(mOnClick);
-        rv.setAdapter(playlistListAdapter);
-        getLoaderManager().initLoader(playloader, null, this);
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.playlist_list, menu);
+        menu.findItem(R.id.shuffle_all).setVisible(false);
     }
 
     @Override
@@ -186,6 +154,7 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
                 createplaylist.autoDismiss(true);
             }
         });
+        createplaylist.typeface(Helper.getFont(getContext()), Helper.getFont(getContext()));
         createplaylist.customView(layout, false);
         createplaylist.show();
     }
@@ -206,16 +175,39 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
         if (data == null) {
             return;
         }
-        playlistListAdapter.addDataList(data);
+        playlistAdapter.addDataList(data);
     }
 
     @Override
     public void onLoaderReset(Loader<List<Playlist>> loader) {
         loader.reset();
-        playlistListAdapter.notifyDataSetChanged();
+        playlistAdapter.notifyDataSetChanged();
 
     }
 
+
+    @Override
+    protected int setLayout() {
+        return R.layout.common_rv;
+    }
+
+    @Override
+    protected void ui(View view) {
+        rv = (FastScrollRecyclerView) view.findViewById(R.id.commonrv);
+    }
+
+    @Override
+    protected void funtion() {
+        CustomLayoutManager customlayout = new CustomLayoutManager(getContext());
+        customlayout.setSmoothScrollbarEnabled(true);
+        rv.setLayoutManager(customlayout);
+        rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
+        playlistAdapter = new PlaylistListAdapter(getContext());
+        playlistAdapter.setOnItemClickListener(mOnClick);
+        rv.setAdapter(playlistAdapter);
+        setHasOptionsMenu(true);
+        getLoaderManager().initLoader(playloader, null, this);
+    }
 
     @Override
     public void load() {

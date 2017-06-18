@@ -14,7 +14,6 @@ import com.rks.musicx.ui.fragments.Playing1Fragment;
 import com.rks.musicx.ui.fragments.Playing2Fragment;
 import com.rks.musicx.ui.fragments.Playing3Fragment;
 import com.rks.musicx.ui.fragments.Playing4Fragment;
-
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 import static com.rks.musicx.misc.utils.Constants.One;
@@ -50,16 +49,15 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
 
     @Override
     protected void setUi() {
-        overridePendingTransition(R.anim.slide_in_up, R.anim.fade_back);
     }
 
     @Override
     protected void function() {
 
-        String playing1 = Extras.getInstance().mPreferences.getString(PlayingView, Zero);
-        String playing2 = Extras.getInstance().mPreferences.getString(PlayingView, One);
-        String playing3 = Extras.getInstance().mPreferences.getString(PlayingView, Two);
-        String playing4 = Extras.getInstance().mPreferences.getString(PlayingView, Three);
+        String playing1 = Extras.getInstance().getmPreferences().getString(PlayingView, Zero);
+        String playing2 = Extras.getInstance().getmPreferences().getString(PlayingView, One);
+        String playing3 = Extras.getInstance().getmPreferences().getString(PlayingView, Two);
+        String playing4 = Extras.getInstance().getmPreferences().getString(PlayingView, Three);
 
         Playing1Fragment playing1Fragment = new Playing1Fragment();
         Playing2Fragment playing2Fragment = new Playing2Fragment();
@@ -78,7 +76,7 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
         } else if (playing4.equals(Three)) {
             Extras.getInstance().savePlayingViewTrack(false);
             setFragment(playing4Fragment);
-        } else {
+        }else {
             setFragment(playing1Fragment);
         }
     }
@@ -86,7 +84,6 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
 
     @Override
     protected void onPause() {
-        overridePendingTransition(R.anim.fade_forward, R.anim.slide_out_down);
         super.onPause();
     }
 
@@ -95,7 +92,6 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
         super.onBackPressed();
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        overridePendingTransition(R.anim.slide_in_up, R.anim.fade_forward);
         startActivity(intent);
     }
 

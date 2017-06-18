@@ -29,10 +29,18 @@ public class MediaButtonReceiver extends android.support.v4.media.session.MediaB
     public void onReceive(Context context, Intent intent) {
         String intentAction = intent.getAction();
         String command = null;
-        KeyEvent event = (KeyEvent) intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
         if (intent.getAction() != null) {
-            if (intentAction.equals(Intent.ACTION_MEDIA_BUTTON) && event.getAction() == KeyEvent.ACTION_UP) {
-                switch (event.getKeyCode()) {
+            if (intentAction.equals(Intent.ACTION_MEDIA_BUTTON)) {
+                KeyEvent event = (KeyEvent) intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+
+                if (event == null) {
+                    return;
+                }
+
+                int keycode = event.getKeyCode();
+                int action = event.getAction();
+
+                switch (keycode) {
                     case KeyEvent.KEYCODE_MEDIA_STOP:
                         Log.d(TAG, "stop");
                         command = Constants.ACTION_STOP;
@@ -60,12 +68,16 @@ public class MediaButtonReceiver extends android.support.v4.media.session.MediaB
                         break;
                 }
                 startServices(context, command);
+                if (action == KeyEvent.ACTION_DOWN) {
+                    startServices(context, command);
+                }
             }
         }
     }
 
     public void startServices(Context context, String action) {
-        Intent intent1 = new Intent(action);
-        context.sendBroadcast(intent1);
+        Intent intent1 = new Intent(context, MusicXService.class);
+        intent1.setAction(action);
+        context.startService(intent1);
     }
 }

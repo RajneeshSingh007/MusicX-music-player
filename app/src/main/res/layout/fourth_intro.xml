@@ -29,7 +29,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <com.rks.musicx.misc.widgets.TextView
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="center"
@@ -40,7 +40,7 @@
                 android:text="Lyrics support and many more.."
                 android:textColor="@color/white"
                 android:textSize="28sp"
-                app:textType="header"/>
+                />
 
             <LinearLayout
                 android:layout_width="fill_parent"

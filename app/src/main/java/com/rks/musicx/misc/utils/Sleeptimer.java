@@ -65,7 +65,7 @@ public class Sleeptimer {
         ateKey = Helper.getATEKey(c);
         accentColor = Config.accentColor(c, ateKey);
         int primary = Config.primaryColor(c, ateKey);
-        if (Extras.getInstance().mPreferences.getBoolean("dark_theme", false)) {
+        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
             mcircularSeekBar.setPointerHaloColor(accentColor);
             mcircularSeekBar.setCircleProgressColor(accentColor);
             mcircularSeekBar.setPointerHaloColor(accentColor);

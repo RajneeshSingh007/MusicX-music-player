@@ -1,6 +1,5 @@
 package com.rks.musicx.ui.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -42,6 +41,7 @@ import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
+import static android.app.Activity.RESULT_OK;
 import static com.rks.musicx.R.id.artist;
 import static com.rks.musicx.misc.utils.Helper.editSongTags;
 
@@ -69,6 +69,8 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
     private ChosenImage chosenImages;
     private ImageChooserManager imageChooserManager;
     private MediaScannerConnection mediaScannerConnection;
+    private updateAlbumArt updatealbumArt;
+    private saveData save;
 
     public static TagEditorFragment getInstance() {
         return new TagEditorFragment();
@@ -124,7 +126,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
         mYearEditText.setText(song.getYear());
         mLyricsEditText.setText(song.getLyrics());
         saveTags.setImageBitmap(Helper.textAsBitmap("Save", 40, Color.WHITE));
-        ArtworkUtils.ArtworkLoader(getContext(), album, null, id, new palette() {
+        ArtworkUtils.ArtworkLoader(getContext(),  300, 600, album, null, id, new palette() {
             @Override
             public void palettework(Palette palette) {
                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -147,46 +149,18 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
             }
         });
         int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
-        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
-            getActivity().getWindow().setStatusBarColor(colorAccent);
-            toolbar.setBackgroundColor(colorAccent);
-        } else {
-            getActivity().getWindow().setStatusBarColor(colorAccent);
-            toolbar.setBackgroundColor(colorAccent);
+        if (getActivity() == null){
+            return;
         }
+        Helper.setColor(getActivity(), colorAccent, toolbar);
+        save = new saveData(getContext(), song);
         saveTags.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new AsyncTask<Object, Object, Boolean>() {
-
-                    @Override
-                    protected Boolean doInBackground(Object... params) {
-                        return storeData(getContext());
-                    }
-
-                    @Override
-                    protected void onPostExecute(Boolean b) {
-                        super.onPostExecute(b);
-                        if (b) {
-                            Toast.makeText(getContext(), "Tag Edit Success", Toast.LENGTH_SHORT).show();
-                            mediaScannerConnection = new MediaScannerConnection(getContext(),
-                                    new MediaScannerConnection.MediaScannerConnectionClient() {
-
-                                        public void onScanCompleted(String path, Uri uri) {
-                                            mediaScannerConnection.disconnect();
-                                        }
-
-                                        public void onMediaScannerConnected() {
-                                            mediaScannerConnection.scanFile(song.getmSongPath(), "audio/*");
-                                        }
-                                    });
-                        } else {
-                            Toast.makeText(getContext(), "Tag Edit Failed", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }.execute();
+                save.execute();
             }
         });
+
         albumArtwork.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -207,6 +181,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
                 materialShowcaseView.hide();
             }
         });
+        Helper.rotateFab(saveTags);
     }
 
     public boolean storeData(Context context) {
@@ -229,7 +204,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
         try {
             mediaPath = imageChooserManager.choose();
         } catch (Exception e) {
-            e.printStackTrace();
+           e.printStackTrace();
         }
     }
 
@@ -237,7 +212,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(getClass().getName(), requestCode + "");
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
+        if (resultCode == RESULT_OK) {
             if (imageChooserManager == null) {
                 imageChooserManager = new ImageChooserManager(this, requestCode, true);
                 imageChooserManager.setImageChooserListener(this);
@@ -245,6 +220,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
             }
             imageChooserManager.submit(requestCode, data);
         }
+
     }
 
     @Override
@@ -266,18 +242,18 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
 
     private void ChangeAlbumCover(String finalPath, String path, long key) {
         if (chosenImages != null) {
-            new updateAlbumArt(finalPath, path, getContext(), key, new changeAlbumArt() {
+            updatealbumArt = new updateAlbumArt(finalPath, path, getContext(), key, new changeAlbumArt() {
                 @Override
                 public void onPostWork() {
-                    ArtworkUtils.ArtworkLoader(getContext(), song.getAlbum(), path, song.getAlbumId(), new palette() {
+                    ArtworkUtils.ArtworkLoader(getContext(), 300, 600, song.getAlbum(), finalPath, song.getAlbumId(), new palette() {
                         @Override
                         public void palettework(Palette palette) {
                             final int[] colors = Helper.getAvailableColor(getContext(), palette);
-                            if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
-                                getActivity().getWindow().setStatusBarColor(colors[0]);
-                            } else {
-                                getActivity().getWindow().setStatusBarColor(colors[0]);
+                            if (getActivity() == null){
+                                return;
                             }
+                            Helper.setColor(getActivity(), colors[0], toolbar);
+                            Helper.animateViews(getContext(), toolbar, colors[0]);
                         }
                     }, new bitmap() {
                         @Override
@@ -291,7 +267,8 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
                         }
                     });
                 }
-            }).execute();
+            });
+            updatealbumArt.execute();
         }
     }
 
@@ -305,4 +282,55 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
 
     }
 
+    @Override
+    public void onDestroy() {
+        if (updatealbumArt != null){
+            updatealbumArt.cancel(true);
+        }
+        if (getActivity() == null){
+            return;
+        }
+        super.onDestroy();
+    }
+
+    private class saveData extends AsyncTask<Object, Object, Boolean> {
+
+        private Song song;
+        private Context context;
+
+        public saveData(Context context, Song song){
+            this.context = context;
+            this.song = song;
+        }
+
+        @Override
+        protected Boolean doInBackground(Object... params) {
+
+            return storeData(context);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean b) {
+            super.onPostExecute(b);
+            if (b) {
+                if(song == null){
+                    return;
+                }
+                Toast.makeText(context, "Tag Edit Success", Toast.LENGTH_SHORT).show();
+                mediaScannerConnection = new MediaScannerConnection(getContext(),
+                        new MediaScannerConnection.MediaScannerConnectionClient() {
+
+                            public void onScanCompleted(String path, Uri uri) {
+                                mediaScannerConnection.disconnect();
+                            }
+
+                            public void onMediaScannerConnected() {
+                                mediaScannerConnection.scanFile(song.getmSongPath(), "audio/*");
+                            }
+                        });
+            } else {
+                Toast.makeText(getContext(), "Tag Edit Failed", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }

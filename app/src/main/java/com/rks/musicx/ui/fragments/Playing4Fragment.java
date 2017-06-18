@@ -5,7 +5,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.audiofx.Visualizer;
-import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -89,7 +88,6 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
     private TextView songArtist, songTitle, currentDur, totalDur;
     private TextView lrcview;
     private SeekBar seekbar;
-    private Handler handler = new Handler();
     private ImageButton favButton, moreMenu;
     private SmallBang mSmallBang;
     private FavHelper favhelper;
@@ -104,18 +102,7 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
     private PlayingPagerAdapter pagerAdapter;
     private List<View> Playing4PagerDetails;
     private List<Song> queueList = new ArrayList<>();
-
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            if (getMusicXService() != null && getMusicXService().isPlaying()) {
-                pos = getMusicXService().getPlayerPos();
-                seekbar.setProgress(pos);
-                currentDur.setText(Helper.durationCalculator(pos));
-            }
-            handler.postDelayed(runnable, 1000);
-        }
-    };
+    private updateAlbumArt updatealbumArt;
 
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
@@ -247,6 +234,7 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
             songArtist.setText(artist);
             isalbumArtChanged = true;
             Helper.rotationAnim(albumArtwork);
+            Helper.rotationAnim(playpausebutton);
             if (permissionManager.isAudioRecordGranted(getContext())) {
                 mVisualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
                     @Override
@@ -319,23 +307,39 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
         return lrcview;
     }
 
+    @Override
+    protected void updateProgress() {
+        if (getMusicXService() != null && getMusicXService().isPlaying()) {
+            pos = getMusicXService().getPlayerPos();
+            seekbar.setProgress(pos);
+            currentDur.setText(Helper.durationCalculator(pos));
+        }
+    }
+
 
     private void updateQueue() {
         if (getMusicXService() == null) {
             return;
         }
         queueList = getMusicXService().getPlayList();
+        int pos = getMusicXService().returnpos();
         if (queueList != queueAdapter.getSnapshot() && queueList.size() > 0) {
-            handler.post(new Runnable() {
+            getHandler().post(new Runnable() {
                 @Override
                 public void run() {
                     queueAdapter.addDataList(queueList);
+                    if (pos >= 0 && pos < queueAdapter.getSnapshot().size()){
+                        queueAdapter.notifyItemChanged(pos);
+                        queuerv.smoothScrollToPosition(pos);
+                    }
                 }
             });
         }
-        queueAdapter.setSelection(getMusicXService().returnpos());
-        if (getMusicXService().returnpos() >=0 && getMusicXService().returnpos() < queueAdapter.getSnapshot().size()){
-            queuerv.scrollToPosition(getMusicXService().returnpos());
+        queueAdapter.notifyDataSetChanged();
+        queueAdapter.notifyItemChanged(pos);
+        if (pos >= 0 && pos < queueAdapter.getSnapshot().size()){
+            queueAdapter.notifyItemChanged(pos);
+            queuerv.smoothScrollToPosition(pos);
         }
     }
 
@@ -378,7 +382,7 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ArtworkUtils.ArtworkLoader(getContext(), getMusicXService().getsongAlbumName(), null, getMusicXService().getsongAlbumID(), new palette() {
+                ArtworkUtils.ArtworkLoader(getContext(),  300, 600, getMusicXService().getsongAlbumName(), null, getMusicXService().getsongAlbumID(), new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -448,14 +452,6 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
 
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mVisualizer != null) {
-            mVisualizer.release();
-        }
-        mVisualizer = null;
-    }
 
     @Override
     protected void reload() {
@@ -470,7 +466,7 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
             ChangeAlbumCover(getImagePath());
             isalbumArtChanged = true;
         }
-        handler.post(runnable);
+        seekbarProgress();
     }
 
     @Override
@@ -481,7 +477,7 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
     @Override
     protected void metaConfig() {
         playingView();
-        handler.post(runnable);
+        seekbarProgress();
         if (isalbumArtChanged) {
             coverArtView();
             isalbumArtChanged = false;
@@ -495,10 +491,10 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
     private void ChangeAlbumCover(String finalPath) {
         if (getMusicXService() != null) {
             if (getChosenImages() != null) {
-                new updateAlbumArt(finalPath, getMusicXService().getsongData(), getContext(), getMusicXService().getsongAlbumID(), new changeAlbumArt() {
+                updatealbumArt = new updateAlbumArt(finalPath, getMusicXService().getsongData(), getContext(), getMusicXService().getsongAlbumID(), new changeAlbumArt() {
                     @Override
                     public void onPostWork() {
-                        ArtworkUtils.ArtworkLoader(getContext(), getMusicXService().getsongAlbumName(), finalPath, getMusicXService().getsongAlbumID(), new palette() {
+                        ArtworkUtils.ArtworkLoader(getContext(),  300, 600, getMusicXService().getsongAlbumName(), finalPath, getMusicXService().getsongAlbumID(), new palette() {
                             @Override
                             public void palettework(Palette palette) {
                                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -538,7 +534,8 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
                         });
                         queueAdapter.notifyDataSetChanged();
                     }
-                }).execute();
+                });
+                updatealbumArt.execute();
                 if (permissionManager.isAudioRecordGranted(getContext())){
                     Glide.with(getContext())
                             .load(finalPath)
@@ -669,8 +666,28 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
                 }
                 getActivity().onBackPressed();
             }
+            @Override
+            public void singleClick() {
+
+            }
+
+            @Override
+            public void otherFunction() {
+
+            }
         });
     }
 
-
+    @Override
+    public void onDestroy() {
+        if (mVisualizer != null) {
+            mVisualizer.release();
+            mVisualizer = null;
+        }
+        if (updatealbumArt != null){
+            updatealbumArt.cancel(true);
+        }
+        removeCallback();
+        super.onDestroy();
+    }
 }

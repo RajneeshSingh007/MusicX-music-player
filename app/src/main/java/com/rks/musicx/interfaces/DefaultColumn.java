@@ -28,4 +28,11 @@ public interface DefaultColumn extends BaseColumns {
     String SongId = "SongId";
     String SongAlbumId = "SongAlbumId";
     String SongPath = "SongPath";
+
+
+    String ArtistTitle = "ArtistTitle";
+    String ArtistId = "ArtistId";
+    String ArtistAlbumCount = "ArtistAlbumCount";
+    String ArtistTrackCount = "ArtistTrackCount";
+
 }

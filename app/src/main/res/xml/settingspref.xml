@@ -84,8 +84,8 @@
             android:defaultValue="false"
             android:key="floating_view"
             android:persistent="true"
-            android:summary="Hide FloatingWidget"
-            android:title="Floating Widget"
+            android:summary="@string/hide_floatingwidget_summary"
+            android:title="@string/floatin_widget_title"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
 
@@ -93,8 +93,8 @@
             android:defaultValue="false"
             android:key="gridlist_songview"
             android:persistent="true"
-            android:summary="Grid SongView"
-            android:title="Song View"
+            android:summary="@string/grid_song_view_summary"
+            android:title="@string/song_view_title"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
 
@@ -102,8 +102,8 @@
             android:defaultValue="false"
             android:key="gridlist_albumview"
             android:persistent="true"
-            android:summary="List AlbumView"
-            android:title="Album View"
+            android:summary="@string/list_album_view_summary"
+            android:title="@string/album_view_title"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
 
@@ -111,8 +111,8 @@
             android:defaultValue="false"
             android:key="gridlist_artistview"
             android:persistent="true"
-            android:summary="List ArtistView"
-            android:title="Artist View"
+            android:summary="@string/list_artist_view_summary"
+            android:title="@string/artist_view_title"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
 
@@ -129,8 +129,8 @@
             android:defaultValue="false"
             android:key="vizualizer_color"
             android:persistent="true"
-            android:summary="change color from albumart in playingView4"
-            android:title="Visualizer Color"
+            android:summary="@string/vizualizer_color_summary"
+            android:title="@string/visualizer_color_title"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
 
@@ -138,8 +138,8 @@
             android:defaultValue="false"
             android:key="artwork_adaptive"
             android:persistent="true"
-            android:summary="change color from albumart in PlayingViews"
-            android:title="Color Adaptive"
+            android:summary="@string/color_adaptive_summary"
+            android:title="@string/color_adaptive_title"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
 
@@ -147,8 +147,8 @@
             android:defaultValue="false"
             android:key="widget_color"
             android:persistent="true"
-            android:summary="set background color transparent"
-            android:title="HomeScreen Widget Color"
+            android:summary="@string/widget_color_summary"
+            android:title="@string/widget_color_title"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
 
@@ -156,34 +156,42 @@
             android:defaultValue="false"
             android:key="hd_artwork"
             android:persistent="true"
-            android:summary="Load album artwork in full size,Caution : use on high end devices"
-            android:title="Artwork Loader"
+            android:summary="@string/hd_artwork_summary"
+            android:title="@string/hd_artwork_title"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
 
+        <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
+            android:defaultValue="false"
+            android:key="downloaded_artwork"
+            android:persistent="true"
+            android:summary="@string/download_artwork_summary"
+            android:title="@string/download_artwork_title"
+            android:widgetLayout="@layout/ate_preference_checkbox"
+            app:ateKey_pref_checkBox="?ate_key"/>
 
-        <com.afollestad.appthemeengine.prefs.ATEListPreference
+        <com.rks.musicx.misc.utils.fontPreview
             android:defaultValue="11"
             android:entries="@array/fontChoice"
             android:entryValues="@array/selectedFont"
             android:key="change_fonts"
-            android:summary="change fonts of Text"
-            android:title="Fonts"
-            app:ateKey_pref_list="?ateKey_pref_list"/>
+            android:summary="@string/change_font_summary"
+            android:title="@string/change_font_title"/>
 
         <com.afollestad.appthemeengine.prefs.ATEListPreference
             android:defaultValue="2"
             android:entries="@array/blurChoice"
             android:entryValues="@array/selectedblur"
             android:key="blur_view"
-            android:summary="change blur intensity"
-            android:title="Playing BlurView"
+            android:summary="@string/blur_intensity_summary"
+            android:title="@string/blur_intensity_title"
             app:ateKey_pref_list="?ateKey_pref_list"/>
 
-        <Preference
-            android:title="Remove Tabs"
+        <com.afollestad.appthemeengine.prefs.ATEPreference
+            android:title="@string/remove_tabs_title"
             android:key="remove_tabs"
-            android:summary="select tabs to remove"/>
+            android:summary="@string/remove_tabs_summary"
+            app:ateKey_pref="?ateKey_pref"/>
 
     </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
 
@@ -237,10 +245,11 @@
     <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory android:title="@string/storage"
       app:ateKey_prefCategory_textColor="?ate_key">
 
-        <Preference
-          android:title="Directory Chooser"
+        <com.afollestad.appthemeengine.prefs.ATEPreference
+          android:title="@string/directory_picker_title"
           android:key="directory_picker"
-          android:summary="select storage"/>
+          android:summary="@string/directory_picker_summary"
+            app:ateKey_pref="?ateKey_pref"/>
 
     </com.afollestad.appthemeengine.prefs.ATEPreferenceCategory>
     <com.afollestad.appthemeengine.prefs.ATEPreferenceCategory
@@ -282,19 +291,28 @@
 
         <com.afollestad.appthemeengine.prefs.ATEListPreference
             android:defaultValue="0"
+            android:entries="@array/audioFilter"
+            android:entryValues="@array/audioFilterChoice"
+            android:key="audio_filter"
+            android:persistent="true"
+            android:title="@string/audio_filter_title"
+            app:ateKey_pref_list="?ate_key"/>
+
+        <com.afollestad.appthemeengine.prefs.ATEListPreference
+            android:defaultValue="0"
             android:entries="@array/fadeDuration"
             android:entryValues="@array/fadeDurationChoice"
             android:key="fadein_fadeout_seekbar"
             android:persistent="true"
-            android:title="Fade Duration"
+            android:title="@string/fade_duration_summary"
             app:ateKey_pref_list="?ate_key"/>
 
         <com.afollestad.appthemeengine.prefs.ATECheckBoxPreference
             android:defaultValue="false"
             android:key="fade_inout"
             android:persistent="true"
-            android:summary="enable fade in/out during play/pause"
-            android:title="Enable Fade"
+            android:summary="@string/fade_inout_summary"
+            android:title="@string/fade_inout_title"
             android:widgetLayout="@layout/ate_preference_checkbox"
             app:ateKey_pref_checkBox="?ate_key"/>
 

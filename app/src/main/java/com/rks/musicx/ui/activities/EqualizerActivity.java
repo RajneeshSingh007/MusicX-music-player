@@ -3,7 +3,6 @@ package com.rks.musicx.ui.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.annotation.StyleRes;
 import android.support.v4.app.Fragment;
@@ -46,8 +45,6 @@ public class EqualizerActivity extends BaseActivity implements ATEActivityThemeC
 
     @Override
     protected void setUi() {
-        getWindow().setStatusBarColor(Color.TRANSPARENT);
-        overridePendingTransition(R.anim.slide_in_up, R.anim.fade_back);
     }
 
     @Override
@@ -57,17 +54,10 @@ public class EqualizerActivity extends BaseActivity implements ATEActivityThemeC
     }
 
     @Override
-    protected void onPause() {
-        overridePendingTransition(R.anim.fade_forward, R.anim.slide_out_down);
-        super.onPause();
-    }
-
-    @Override
     public void onBackPressed() {
         super.onBackPressed();
         Intent intent = new Intent(this, PlayingActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        overridePendingTransition(R.anim.fadein, R.anim.slide_out_down);
         startActivity(intent);
     }
 

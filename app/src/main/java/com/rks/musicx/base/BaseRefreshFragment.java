@@ -1,6 +1,11 @@
 package com.rks.musicx.base;
 
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -21,11 +26,25 @@ import android.support.v4.app.Fragment;
 
 public abstract class BaseRefreshFragment extends Fragment {
 
+    protected abstract int setLayout();
+    protected abstract void ui(View view);
+    protected abstract void funtion();
     abstract public void load();
+
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(setLayout(), container, false);
+        ui(view);
+        funtion();
+        return view;
+    }
 
     @Override
     public void onResume() {
         super.onResume();
         load();
     }
+
 }

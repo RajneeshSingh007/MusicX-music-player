@@ -32,6 +32,7 @@ public abstract class GestureListerner implements View.OnTouchListener {
     @Override
     public boolean onTouch(final View v, final MotionEvent event) {
         gestureDetector.onTouchEvent(event);
+        otherFunction();
         return true;
     }
 
@@ -71,6 +72,12 @@ public abstract class GestureListerner implements View.OnTouchListener {
             }
             return true;
         }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            singleClick();
+            return true;
+        }
     }
 
 
@@ -84,6 +91,10 @@ public abstract class GestureListerner implements View.OnTouchListener {
     public abstract void onTopToBottom();
 
     public abstract void doubleClick();
+
+    public abstract void singleClick();
+
+    public abstract void otherFunction();
 
 
 }

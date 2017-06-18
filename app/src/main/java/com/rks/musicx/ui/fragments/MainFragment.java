@@ -3,28 +3,22 @@ package com.rks.musicx.ui.fragments;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRefreshFragment;
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.PagerAdapter;
 import com.rks.musicx.ui.activities.MainActivity;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 
 /*
@@ -52,59 +46,25 @@ public class MainFragment extends BaseRefreshFragment {
     private Toolbar toolbar;
     private List<Fragment> fragmentList;
     private List<String> tabTitles;
+    private RecentFragment recentFragment;
+    private FolderFragment folderFragment;
+    private SongListFragment songListFragment;
+    private AlbumListFragment albumListFragment;
+    private ArtistListFragment artistListFragment;
+    private PlaylistListFragment playlistListFragment;
 
     public static MainFragment newInstance() {
         return new MainFragment();
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        tabLayout = (TabLayout) rootView.findViewById(R.id.tab_layout);
-        mViewPager = (ViewPager) rootView.findViewById(R.id.pager);
-        toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        function();
-        return rootView;
-    }
-
-    private void function() {
-        fragmentList = new ArrayList<>();
-        tabTitles = new ArrayList<>();
-        addPages();
-        pagerAdapter = new PagerAdapter(getChildFragmentManager(), fragmentList, tabTitles);
-        mViewPager.setAdapter(pagerAdapter);
-        tabLayout.setupWithViewPager(mViewPager);
-        toolbar.setTitle("");
-        mViewPager.setOffscreenPageLimit(6);
-        toolbar.showOverflowMenu();
-        DrawerLayout mDrawerLayout = ((MainActivity) getActivity()).getDrawerLayout();
-        ((MainActivity) getActivity()).setSupportActionBar(toolbar);
-        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawerLayout.addDrawerListener(mDrawerToggle);
-        mDrawerToggle.syncState();
-        if (Extras.getInstance().restoreLastTab()) {
-            mViewPager.setCurrentItem(Integer.valueOf(Extras.getInstance().getTabIndex()), true);
-        }
-        for (int pos : Extras.getInstance().getRemoveTab()){
-            pagerAdapter.removeTabPage(pos);
-        }
-    }
-
     private void addPages(){
         // Add fragments
-        fragmentList.add(RecentFragment.newInstance());
-        fragmentList.add(FolderFragment.newInstance());
-        fragmentList.add(SongListFragment.newInstance());
-        fragmentList.add(AlbumListFragment.newInstance());
-        fragmentList.add(ArtistListFragment.newInstance());
-        fragmentList.add(PlaylistListFragment.newInstance());
+        fragmentList.add(recentFragment);
+        fragmentList.add(folderFragment);
+        fragmentList.add(songListFragment);
+        fragmentList.add(albumListFragment);
+        fragmentList.add(artistListFragment);
+        fragmentList.add(playlistListFragment);
 
         // Add Tab Titles
         Locale l = Locale.getDefault();
@@ -132,6 +92,49 @@ public class MainFragment extends BaseRefreshFragment {
     }
 
     @Override
+    protected int setLayout() {
+        return R.layout.fragment_main;
+    }
+
+    @Override
+    protected void ui(View view) {
+        tabLayout = (TabLayout) view.findViewById(R.id.tab_layout);
+        mViewPager = (ViewPager) view.findViewById(R.id.pager);
+        toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+    }
+
+    @Override
+    protected void funtion() {
+        folderFragment = new FolderFragment();
+        songListFragment = new SongListFragment();
+        recentFragment = new RecentFragment();
+        albumListFragment = new AlbumListFragment();
+        artistListFragment = new ArtistListFragment();
+        playlistListFragment = new PlaylistListFragment();
+
+        fragmentList = new ArrayList<>();
+        tabTitles = new ArrayList<>();
+        addPages();
+        pagerAdapter = new PagerAdapter(MainFragment.this, getChildFragmentManager(), fragmentList, tabTitles);
+        mViewPager.setAdapter(pagerAdapter);
+        tabLayout.setupWithViewPager(mViewPager);
+        toolbar.setTitle("");
+        mViewPager.setOffscreenPageLimit(6);
+        toolbar.showOverflowMenu();
+        DrawerLayout mDrawerLayout = ((MainActivity) getActivity()).getDrawerLayout();
+        ((MainActivity) getActivity()).setSupportActionBar(toolbar);
+        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
+        if (Extras.getInstance().restoreLastTab()) {
+            mViewPager.setCurrentItem(Integer.valueOf(Extras.getInstance().getTabIndex()), true);
+        }
+        for (int pos =0; pos < Extras.getInstance().getRemoveTab().size(); pos ++){
+            pagerAdapter.removeTabPage(Extras.getInstance().getRemoveTab().get(pos));
+        }
+    }
+
+    @Override
     public void load() {
         int fragmentCount = pagerAdapter.getCount();
         for (int pos = 0; pos < fragmentCount; pos++) {
@@ -142,84 +145,5 @@ public class MainFragment extends BaseRefreshFragment {
             }
         }
     }
-
-
-    public class PagerAdapter extends FragmentStatePagerAdapter {
-
-        private Map<Integer, String> mFragmentTags;
-        private List<Fragment> mFragmentList = new ArrayList<>();
-        private List<String> tabTitles = new ArrayList<>();
-
-        public PagerAdapter(FragmentManager fm, List<Fragment> fragmentList, List<String> tabTitles) {
-            super(fm);
-            mFragmentTags = new HashMap<>();
-            this.mFragmentList = fragmentList;
-            this.tabTitles = tabTitles;
-        }
-
-
-        @Override
-        public Fragment getItem(int position) {
-            Extras.getInstance().setTabIndex(position);
-            return mFragmentList.get(position);
-        }
-
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return tabTitles.get(position);
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            Object obj = super.instantiateItem(container, position);
-            if (obj instanceof Fragment) {
-                Fragment f = (Fragment) obj;
-                String tag = f.getTag();
-                mFragmentTags.put(position, tag);
-            }
-            return obj;
-        }
-
-        @Override
-        public int getItemPosition(Object object) {
-            if (fragmentList.contains(object)) return fragmentList.indexOf(object);
-            else return POSITION_NONE;
-        }
-
-        public Fragment getFragment(int position) {
-            String tag = mFragmentTags.get(position);
-            if (tag == null) {
-                return null;
-            }
-            return getChildFragmentManager().findFragmentByTag(tag);
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            if (position >= getCount()) {
-                FragmentManager manager = ((Fragment) object).getFragmentManager();
-                FragmentTransaction trans = manager.beginTransaction();
-                trans.remove((Fragment) object);
-                trans.commit();
-            }
-        }
-
-        public void removeTabPage(int position) {
-            if (position < fragmentList.size() && position < tabTitles.size()){
-                fragmentList.remove(position);
-                tabTitles.remove(position);
-                notifyDataSetChanged();
-            }
-        }
-
-
-    }
-
 
 }

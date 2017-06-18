@@ -44,9 +44,9 @@ import static com.rks.musicx.misc.utils.Constants.HQ_ARTISTARTWORK;
 import static com.rks.musicx.misc.utils.Constants.LightTheme;
 import static com.rks.musicx.misc.utils.Constants.PlayingView;
 import static com.rks.musicx.misc.utils.Constants.REMOVETABS;
+import static com.rks.musicx.misc.utils.Constants.REMOVE_TABLIST;
 import static com.rks.musicx.misc.utils.Constants.SaveHeadset;
 import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
-import static com.rks.musicx.misc.utils.Constants.TextFonts;
 import static com.rks.musicx.misc.utils.Constants.Three;
 import static com.rks.musicx.misc.utils.Constants.Zero;
 
@@ -71,7 +71,7 @@ import static com.rks.musicx.misc.utils.Constants.Zero;
 public class SettingsFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
     private String mAteKey;
-    private ATEListPreference fontsPref, playingScreenPref, blurseek;
+    private ATEListPreference /*fontsPref,*/ playingScreenPref, blurseek;
     private FavoritesLoader favoritesLoader;
     private RecentlyPlayedLoader recentlyPlayedLoader;
     private int accentcolor;
@@ -83,9 +83,6 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.settingspref);
-        fontsPref = (ATEListPreference) findPreference(TextFonts);
-        if (fontsPref.getValue() == null)
-            fontsPref.setValue(Zero);
         playingScreenPref = (ATEListPreference) findPreference(PlayingView);
         if (playingScreenPref.getValue() == null)
             playingScreenPref.setValue(Zero);
@@ -191,7 +188,8 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                 return true;
             }
         });
-        findPreference("directory_picker").setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        ATEPreference picker = (ATEPreference) findPreference("directory_picker");
+        picker.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 StorageChooserView.setScSecondaryActionColor(accentcolor);
@@ -244,20 +242,18 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
             navBarPref.setSummary(R.string.not_available_below_lollipop);
         }
 
-        findPreference(REMOVETABS).setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        ATEPreference removeTabs = (ATEPreference) findPreference(REMOVETABS);
+        removeTabs.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Extras.getInstance().getmPreferences().edit().remove(REMOVETABS).commit();
+                Extras.getInstance().getmPreferences().edit().remove(REMOVE_TABLIST).commit();
                 integerList.clear();
                 new MaterialDialog.Builder(getActivity())
                         .title("Remove Tabs")
                         .items(R.array.removetabsName)
                         .autoDismiss(true)
                         .itemsCallbackMultiChoice(null, (dialog, which, text) -> {
-                            if (dialog.getSelectedIndices().length == 0){
-                                return false;
-                            }
-                            for (int index : dialog.getSelectedIndices()){
+                            for (int index : which){
                                 integerList.add(index);
                                 Log.d("SettingsFragment", String.valueOf(dialog.getSelectedIndex()));
                             }
@@ -265,15 +261,13 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                             return true;
                         })
                         .buttonRippleColor(accentcolor)
-                        //.onPositive((dialog, which) -> {Extras.getInstance().saveRemoveTab(integerList);dialog.clearSelectedIndices();})
                         .onNeutral((dialog, which) -> dialog.clearSelectedIndices())
                         .positiveText(R.string.okay)
-                        //.negativeText(R.string.cancel)
-                        //.alwaysCallMultiChoiceCallback()
                         .show();
                 return true;
             }
         });
+
         ATEPreference atePreference = (ATEPreference) findPreference(ClearFav);
         atePreference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
@@ -337,8 +331,8 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         if (hqArtwork.isChecked()){
             try {
                 if (file.isDirectory() && file1.isDirectory() ){
-                    deleteRecursive(file);
-                    deleteRecursive(file1);
+                    Helper.deleteRecursive(file);
+                    Helper.deleteRecursive(file1);
                 }
             }catch (Exception e){
                 e.printStackTrace();
@@ -349,8 +343,8 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         }else {
             try {
                 if (file.isDirectory() && file1.isDirectory() ){
-                    deleteRecursive(file);
-                    deleteRecursive(file1);
+                    Helper.deleteRecursive(file);
+                    Helper.deleteRecursive(file1);
                 }
             }catch (Exception e){
                 e.printStackTrace();
@@ -366,17 +360,6 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
             Extras.getInstance().getmPreferences().edit().putBoolean(FADETRACK, false).commit();
         }
     }
-
-    public void deleteRecursive(File fileOrDirectory) {
-        if (fileOrDirectory.isDirectory()) {
-            for (File child : fileOrDirectory.listFiles()) {
-                deleteRecursive(child);
-            }
-        }
-
-        fileOrDirectory.delete();
-    }
-
 
 
     @Override

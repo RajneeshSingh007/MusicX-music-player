@@ -6,21 +6,18 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.rks.musicx.misc.utils.ArtworkUtils;
+import com.crashlytics.android.Crashlytics;
 import com.rks.musicx.misc.utils.Encryption;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.permissionManager;
 
-import org.acra.ACRA;
-import org.acra.ReportField;
-import org.acra.ReportingInteractionMode;
-import org.acra.annotation.ReportsCrashes;
-import org.acra.sender.HttpSender;
 import org.solovyev.android.checkout.Billing;
 import org.solovyev.android.checkout.PlayStoreListener;
 
 import javax.annotation.Nonnull;
+
+import io.fabric.sdk.android.Fabric;
 
 
 /*
@@ -39,17 +36,6 @@ import javax.annotation.Nonnull;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-@ReportsCrashes(formUri = "https://coolalienx.cloudant.com/acra-musicx/_design/acra-storage/_update/report",
-        reportType = HttpSender.Type.JSON,
-        httpMethod = HttpSender.Method.POST,
-        formUriBasicAuthLogin = "hishorybrentraolutterece",
-        formUriBasicAuthPassword = "7a6a382cba5e7a20e8aec27a2311d9aa4d83c5cb", customReportContent = {
-        ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME,
-        ReportField.ANDROID_VERSION, ReportField.PHONE_MODEL,
-        ReportField.BRAND, ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE,
-        ReportField.CUSTOM_DATA, ReportField.STACK_TRACE, ReportField.LOGCAT},
-        mode = ReportingInteractionMode.TOAST, resToastText = R.string.crash_toast_text)
 
 
 public class MusicXApplication extends Application {
@@ -71,19 +57,17 @@ public class MusicXApplication extends Application {
         @Override
         public String getPublicKey() {
             final String s = "use your key";
-            return Encryption.xor(s, "decryption string");
-        }
+			return Encryption.xor(s, "decryption string");
+		}
     });
 
     @Override
     public void onCreate() {
-        mContext = getApplicationContext();
         super.onCreate();
-        Extras.init(this);
-        ArtworkUtils.init(this);
+        mContext = getApplicationContext();
         instance = this;
         createDirectory();
-        ACRA.init(this);
+        Extras.init(this);
         Extras.getInstance().setwidgetPosition(100);
         Extras.getInstance().eqSwitch(false);
         mBilling.addPlayStoreListener(new PlayStoreListener() {
@@ -92,6 +76,7 @@ public class MusicXApplication extends Application {
                 Toast.makeText(MusicXApplication.this, "Play Store: purchases have changed!", Toast.LENGTH_LONG).show();
             }
         });
+        Fabric.with(this, new Crashlytics());
     }
 
 
@@ -109,6 +94,7 @@ public class MusicXApplication extends Application {
     public Billing getmBilling() {
         return mBilling;
     }
+
 
     public static MusicXApplication get(Activity activity) {
         return (MusicXApplication) activity.getApplication();

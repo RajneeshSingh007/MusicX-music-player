@@ -5,7 +5,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.rks.musicx.base.BaseAsyncTaskLoader;
-import com.rks.musicx.data.model.FolderModel;
+import com.rks.musicx.data.model.Folder;
 import com.rks.musicx.misc.utils.permissionManager;
 
 import java.util.ArrayList;
@@ -25,18 +25,18 @@ import java.util.List;
  * limitations under the License.
  */
 
-public class FolderLoader extends BaseAsyncTaskLoader<List<FolderModel>> {
+public class FolderLoader extends BaseAsyncTaskLoader<List<Folder>> {
 
-    private FolderModel folderModels;
+    private Folder folderModels;
 
-    public FolderLoader(Context context, FolderModel folderModel) {
+    public FolderLoader(Context context, Folder folderModel) {
         super(context);
         folderModels = folderModel;
     }
 
     @Override
-    public List<FolderModel> loadInBackground() {
-        List<FolderModel> files = new ArrayList<>();
+    public List<Folder> loadInBackground() {
+        List<Folder> files = new ArrayList<>();
         if (permissionManager.isExternalReadStorageGranted(getContext())) {
             files = folderModels.listFilesSorted();
             return files;

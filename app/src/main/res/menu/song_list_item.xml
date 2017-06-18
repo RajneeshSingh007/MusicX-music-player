@@ -15,7 +15,7 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
   <item android:id="@+id/action_remove_playlist"
-      android:title="Remove from playlist"
+      android:title="@string/remove_from_playlist"
       app:showAsAction="never"
       android:visible="false"/>
 
@@ -62,7 +62,7 @@
 
   <item
     android:id="@+id/more"
-    android:title="More"
+    android:title="@string/more"
     app:showAsAction="never">
 
     <menu>
@@ -70,16 +70,16 @@
       <item
           android:id="@+id/go_to_album"
           app:showAsAction="never"
-          android:title="Go to albums"/>
+          android:title="@string/go_to_albums"/>
 
       <item
           android:id="@+id/go_to_artist"
           app:showAsAction="never"
-          android:title="Go to artists"/>
+          android:title="@string/go_to_artists"/>
 
       <item
         android:id="@+id/action_fav"
-        android:title="Go to fav"
+        android:title="@string/go_to_fav"
         app:showAsAction="never"/>
 
       <item
@@ -89,7 +89,7 @@
 
       <item
         android:id="@+id/action_removeFav"
-        android:title="Remove from favorites"
+        android:title="@string/remove_from_favorites"
         app:showAsAction="never"/>
 
     </menu>

@@ -5,16 +5,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.graphics.Palette;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -30,7 +27,12 @@ import com.rks.musicx.interfaces.bitmap;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.widgets.BlurArtwork;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 import static com.rks.musicx.misc.utils.Constants.BlurView;
 
@@ -54,55 +56,89 @@ import static com.rks.musicx.misc.utils.Constants.BlurView;
 public class ArtworkUtils {
 
 
-    private static ArtworkUtils sInstance;
-    private Context mcontext;
+    private static ArtworkUtils sInstance = null;
 
-    public ArtworkUtils(Context context) {
-        this.mcontext = context;
-    }
-
-    public static void init(Context context) {
-        sInstance = new ArtworkUtils(context);
+    public ArtworkUtils() {
+        if (sInstance == null){
+            sInstance = new ArtworkUtils();
+        }
     }
 
     public static ArtworkUtils getInstance() {
         return sInstance;
     }
 
+    /**
+     * Artwork
+     * @param key
+     * @return
+     */
     public static Uri uri(long key) {
         Uri albumCover = Uri.parse("content://media/external/audio/albumart");
         return ContentUris.withAppendedId(albumCover, key);
     }
 
-
-    public static Bitmap getEmbedArtwork(String path) {
-        MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-        byte[] art;
-        Bitmap bitmap = null;
-        mediaMetadataRetriever.setDataSource(path);
-        try {
-            art = mediaMetadataRetriever.getEmbeddedPicture();
-            bitmap = BitmapFactory.decodeByteArray(art, 0, art.length);
-        } catch (Exception e) {
-            Log.d("AlbumArtwork", "oops Error Buddy", e);
-        }
-        return bitmap;
-    }
-
+    /**
+     * Artwork from musicx/.albumArtwork folder
+     * @param context
+     * @param album
+     * @return
+     */
     public static File getAlbumCoverPath(Context context, String album) {
         String albumImagePath = new Helper(context).loadAlbumImage(album);
         File file = new File(albumImagePath);
         return file;
     }
 
+    /**
+     * Artist artwork from musicx/.artistArtwork folder
+     * @param context
+     * @param artist
+     * @return
+     */
     public static File getArtistCoverPath(Context context, String artist) {
         String artistImagePath = new Helper(context).loadArtistImage(artist);
         File file = new File(artistImagePath);
         return file;
     }
 
+    /**
+     * Return albumArtwork name
+     * @param context
+     * @param album
+     * @return
+     */
+    public static String getAlbumFileName(Context context, String album){
+        String filename = getAlbumCoverPath(context, album).getName();
+        int pos = filename.lastIndexOf(".");
+        String justName = pos > 0 ? filename.substring(0, pos) : filename;
+        return justName;
+    }
 
-    private static Target loadArtwork(Context context, String path, palette palettework, bitmap bitmapwork) {
+    /**
+     * Return artistArtwork name
+     * @param context
+     * @param artist
+     * @return
+     */
+    public static String getArtistFileName(Context context, String artist){
+        String filename = getArtistCoverPath(context, artist).getName();
+        int pos = filename.lastIndexOf(".");
+        String justName = pos > 0 ? filename.substring(0, pos) : filename;
+        return justName;
+    }
+
+    /**
+     * Bitmap Artwork with path
+     * @param context
+     * @param size
+     * @param bigsize
+     * @param path
+     * @param palettework
+     * @param bitmapwork
+     * @return
+     */
+    private static Target loadArtwork(Context context, int size, int bigsize, String path, palette palettework, bitmap bitmapwork) {
         if (Extras.getInstance().getHdArtwork()){
             return Glide.with(context)
                     .load(path)
@@ -113,7 +149,7 @@ public class ArtworkUtils {
                     .error(R.mipmap.ic_launcher)
                     .format(DecodeFormat.PREFER_ARGB_8888)
                     .fitCenter()
-                    .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                    .override(bigsize, bigsize)
                     .listener(GlidePalette.with(path).intoCallBack(new BitmapPalette.CallBack() {
                         @Override
                         public void onPaletteLoaded(@Nullable Palette palette) {
@@ -123,7 +159,7 @@ public class ArtworkUtils {
                     .into(new SimpleTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            bitmapwork.bitmapwork(resource);
+                            bitmapwork.bitmapwork(optimizeBitmap(resource, bigsize));
                         }
 
                         @Override
@@ -142,7 +178,7 @@ public class ArtworkUtils {
                     .error(R.mipmap.ic_launcher)
                     .format(DecodeFormat.PREFER_ARGB_8888)
                     .fitCenter()
-                    .override(300, 300)
+                    .override(size, size)
                     .listener(GlidePalette.with(path).intoCallBack(new BitmapPalette.CallBack() {
                         @Override
                         public void onPaletteLoaded(@Nullable Palette palette) {
@@ -152,7 +188,7 @@ public class ArtworkUtils {
                     .into(new SimpleTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            bitmapwork.bitmapwork(resource);
+                            bitmapwork.bitmapwork(optimizeBitmap(resource, size));
                         }
 
                         @Override
@@ -164,14 +200,24 @@ public class ArtworkUtils {
         }
     }
 
-    private static Target<Bitmap> loadArtwork(Context context, long key, palette palettework, bitmap bitmapwork) {
+    /**
+     * Bitmap Artwork with albumID
+     * @param context
+     * @param size
+     * @param bigsize
+     * @param key
+     * @param palettework
+     * @param bitmapwork
+     * @return
+     */
+    private static Target loadArtwork(Context context, int size, int bigsize, long key, palette palettework, bitmap bitmapwork) {
         if (Extras.getInstance().getHdArtwork()){
            return Glide.with(context)
                    .load(uri(key))
                    .asBitmap()
                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                    .skipMemoryCache(true)
-                   .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                   .override(bigsize, bigsize)
                     .error(R.mipmap.ic_launcher)
                     .placeholder(R.mipmap.ic_launcher)
                     .fitCenter()
@@ -185,7 +231,7 @@ public class ArtworkUtils {
                     .into(new SimpleTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            bitmapwork.bitmapwork(resource);
+                            bitmapwork.bitmapwork(optimizeBitmap(resource, bigsize));
                         }
 
                         @Override
@@ -199,7 +245,8 @@ public class ArtworkUtils {
                     .load(uri(key))
                     .asBitmap()
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true).override(300, 300)
+                    .skipMemoryCache(true)
+                    .override(size, size)
                     .error(R.mipmap.ic_launcher)
                     .placeholder(R.mipmap.ic_launcher)
                     .fitCenter()
@@ -213,7 +260,7 @@ public class ArtworkUtils {
                     .into(new SimpleTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            bitmapwork.bitmapwork(resource);
+                            bitmapwork.bitmapwork(optimizeBitmap(resource, size));
                         }
 
                         @Override
@@ -222,6 +269,108 @@ public class ArtworkUtils {
                         }
 
                     });
+        }
+    }
+
+
+    /**
+     * Load Artwork
+     * @param context
+     * @param size
+     * @param bigsize
+     * @param key
+     * @param palettework
+     * @param imageView
+     * @return
+     */
+    private static Target loadArtwork(Context context, int size, int bigsize, long key, palette palettework, ImageView imageView) {
+        if (Extras.getInstance().getHdArtwork()){
+            return Glide.with(context)
+                    .load(uri(key))
+                    .asBitmap()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .override(bigsize, bigsize)
+                    .error(R.mipmap.ic_launcher)
+                    .placeholder(R.mipmap.ic_launcher)
+                    .fitCenter()
+                    .format(DecodeFormat.PREFER_ARGB_8888)
+                    .listener(GlidePalette.with(uri(key).toString()).intoCallBack(new BitmapPalette.CallBack() {
+                        @Override
+                        public void onPaletteLoaded(@Nullable Palette palette) {
+                            palettework.palettework(palette);
+                        }
+                    }))
+                    .into(imageView);
+        }else {
+            return Glide.with(context)
+                    .load(uri(key))
+                    .asBitmap()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .override(size, size)
+                    .error(R.mipmap.ic_launcher)
+                    .placeholder(R.mipmap.ic_launcher)
+                    .fitCenter()
+                    .format(DecodeFormat.PREFER_ARGB_8888)
+                    .listener(GlidePalette.with(uri(key).toString()).intoCallBack(new BitmapPalette.CallBack() {
+                        @Override
+                        public void onPaletteLoaded(@Nullable Palette palette) {
+                            palettework.palettework(palette);
+                        }
+                    }))
+                    .into(imageView);
+        }
+    }
+
+
+    /**
+     * Load Artwork
+     * @param context
+     * @param size
+     * @param bigsize
+     * @param path
+     * @param palettework
+     * @param imageView
+     * @return
+     */
+    private static Target loadArtwork(Context context, int size, int bigsize, String path, palette palettework, ImageView imageView) {
+        if (Extras.getInstance().getHdArtwork()){
+            return Glide.with(context)
+                    .load(path)
+                    .asBitmap()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
+                    .format(DecodeFormat.PREFER_ARGB_8888)
+                    .fitCenter()
+                    .override(bigsize, bigsize)
+                    .listener(GlidePalette.with(path).intoCallBack(new BitmapPalette.CallBack() {
+                        @Override
+                        public void onPaletteLoaded(@Nullable Palette palette) {
+                            palettework.palettework(palette);
+                        }
+                    }))
+                    .into(imageView);
+        }else {
+            return Glide.with(context)
+                    .load(path)
+                    .asBitmap()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
+                    .format(DecodeFormat.PREFER_ARGB_8888)
+                    .fitCenter()
+                    .override(size, size)
+                    .listener(GlidePalette.with(path).intoCallBack(new BitmapPalette.CallBack() {
+                        @Override
+                        public void onPaletteLoaded(@Nullable Palette palette) {
+                            palettework.palettework(palette);
+                        }
+                    }))
+                    .into(imageView);
         }
     }
 
@@ -234,44 +383,87 @@ public class ArtworkUtils {
      * @param palettework
      * @param bitmapwork
      */
-    public static void ArtworkLoader(Context context, String album, String path, long key, palette palettework, bitmap bitmapwork) {
-        if (album != null && key != -1 && path == null){
+    public static void ArtworkLoader(Context context, int size, int bigsize, String album, String path, long key, palette palettework, bitmap bitmapwork) {
+        if (Extras.getInstance().getDownloadedArtwork()){
             if (getAlbumCoverPath(context, album).exists()) {
-                loadArtwork(context, getAlbumCoverPath(context, album).getAbsolutePath(), palettework, bitmapwork);
-            } else {
-                loadArtwork(context, key, palettework, bitmapwork);
+                // fix mistmatch artwork
+                if (getAlbumFileName(context, album).equalsIgnoreCase(album)){
+                    loadArtwork(context, size, bigsize, getAlbumCoverPath(context, album).getAbsolutePath(), palettework, bitmapwork);
+                }
             }
-        } else {
-            loadArtwork(context, path, palettework, bitmapwork);
+        }else {
+            if (path == null){
+                loadArtwork(context, size, bigsize, key, palettework, bitmapwork);
+            }else {
+                loadArtwork(context, size, bigsize, path, palettework, bitmapwork);
+            }
+        }
+    }
+
+    /**
+     * Album Artwork Loader
+     *
+     * @param context
+     * @param album
+     * @param key
+     * @param palettework
+     * @param imageView
+     */
+    public static void ArtworkLoader(Context context, int size, int bigsize, String album, String path, long key, palette palettework, ImageView imageView) {
+        if (Extras.getInstance().getDownloadedArtwork()){
+            if (getAlbumCoverPath(context, album).exists()) {
+                // fix mistmatch artwork
+                if (getAlbumFileName(context, album).equalsIgnoreCase(album)){
+                    loadArtwork(context, size, bigsize, getAlbumCoverPath(context, album).getAbsolutePath(), palettework, imageView);
+                }
+            }
+        }else {
+            if (path == null){
+                loadArtwork(context, size, bigsize, key, palettework, imageView);
+            }else {
+                loadArtwork(context, size, bigsize, path, palettework, imageView);
+            }
         }
     }
 
 
-    public static AsyncTask<String, Void, String> getBlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView, float scale) {
+    /**
+     * Artist Artwork Loader
+     *
+     * @param context
+     * @param path
+     * @param palettework
+     * @param imageView
+     */
+    public static void ArtworkLoader(Context context, int size, int bigsize,String path, palette palettework, ImageView imageView) {
+        loadArtwork(context, size, bigsize, path, palettework, imageView);
+    }
+
+    public static AsyncTask<Drawable, Void, Drawable> getBlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView, int scale) {
         BlurArtwork blurArtwork = new BlurArtwork(context, radius, bitmap, imageView, scale);
-        return blurArtwork.execute("Executed");
+        return blurArtwork.execute();
     }
 
     public static void blurPreferances(Context context, Bitmap blurBitmap, ImageView imageView) {
         String blurView = Extras.getInstance().getmPreferences().getString(BlurView, Constants.Two);
         switch (blurView) {
             case Constants.Zero:
-                getBlurArtwork(context, radius(), blurBitmap, imageView, 1.0f);
+                getBlurArtwork(context, radius(), blurBitmap, imageView, 1);
                 break;
             case Constants.One:
-                getBlurArtwork(context, radius(), blurBitmap, imageView, 0.8f);
+                getBlurArtwork(context, radius(), blurBitmap, imageView, 2);
                 break;
             case Constants.Two:
-                getBlurArtwork(context, radius(), blurBitmap, imageView, 0.6f);
+                getBlurArtwork(context, radius(), blurBitmap, imageView, 3);
                 break;
             case Constants.Three:
-                getBlurArtwork(context, radius(), blurBitmap, imageView, 0.4f);
+                getBlurArtwork(context, radius(), blurBitmap, imageView, 4);
                 break;
             case Constants.Four:
-                getBlurArtwork(context, radius(), blurBitmap, imageView, 0.2f);
+                getBlurArtwork(context, radius(), blurBitmap, imageView, 5);
                 break;
             default:
-                getBlurArtwork(context, 25, blurBitmap, imageView, 0.2f);
+                getBlurArtwork(context, 25, blurBitmap, imageView, 6);
                 break;
         }
     }
@@ -322,24 +514,59 @@ public class ArtworkUtils {
         return bitmap;
     }
 
+    /**
+     * optimize bitmap
+     * @param bitmap
+     * @return
+     */
+    private static Bitmap optimizeBitmap(@NonNull Bitmap bitmap, int size) {
+        // convert bitmap into inputStream
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        // bitmap compress
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        // bytes into array
+        InputStream is = new ByteArrayInputStream(stream.toByteArray());
+        BufferedInputStream imageFileStream = new BufferedInputStream(is);
+        try {
+            // Phase 1: Get a reduced size image. In this part we will do a rough scale down
+            int sampleSize = 1;
+            if (size> 0 && size > 0) {
+                final BitmapFactory.Options decodeBoundsOptions = new BitmapFactory.Options();
+                decodeBoundsOptions.inJustDecodeBounds = true;
+                imageFileStream.mark(64 * 1024);
+                BitmapFactory.decodeStream(imageFileStream, null, decodeBoundsOptions);
+                imageFileStream.reset();
+                final int originalWidth = decodeBoundsOptions.outWidth;
+                final int originalHeight = decodeBoundsOptions.outHeight;
+                // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
+                sampleSize = Math.max(1, Math.max(originalWidth /size, originalHeight / size));
+            }
+            BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
+            decodeBitmapOptions.inSampleSize = sampleSize;
+            //decodeBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565; // Uses 2-bytes instead of default 4 per pixel
 
-    public static Bitmap scaleBitmap(Bitmap bitmap, int newWidth, int newHeight) {
-        Bitmap scaledBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
+            // Get the roughly scaled-down image
+            Bitmap bmp = BitmapFactory.decodeStream(imageFileStream, null, decodeBitmapOptions);
 
-        float scaleX = newWidth / (float) bitmap.getWidth();
-        float scaleY = newHeight / (float) bitmap.getHeight();
-        float pivotX = 0;
-        float pivotY = 0;
+            // Phase 2: Get an exact-size image - no dimension will exceed the desired value
+            float ratio = Math.min((float)size/ (float)bmp.getWidth(), (float)size/ (float)bmp.getHeight());
+            int w =(int) ((float)bmp.getWidth() * ratio);
+            int h =(int) ((float)bmp.getHeight() * ratio);
 
-        Matrix scaleMatrix = new Matrix();
-        scaleMatrix.setScale(scaleX, scaleY, pivotX, pivotY);
+            // finally scaled bitmap
+            return Bitmap.createScaledBitmap(bmp, w,h, true);
 
-        Canvas canvas = new Canvas(scaledBitmap);
-        canvas.setMatrix(scaleMatrix);
-        canvas.drawBitmap(bitmap, 0, 0, new Paint(Paint.FILTER_BITMAP_FLAG));
-
-        return scaledBitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                imageFileStream.close();
+            } catch (IOException ignored) {
+            }
+        }
+        return null;
     }
+
 
 }
 

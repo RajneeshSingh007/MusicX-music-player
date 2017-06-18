@@ -103,4 +103,6 @@ class RemoveWidgetView extends View {
         }
         sizeAnimator.start();
     }
+
+
 }

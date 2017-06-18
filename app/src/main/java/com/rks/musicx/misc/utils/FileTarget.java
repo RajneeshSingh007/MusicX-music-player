@@ -14,6 +14,7 @@ package com.rks.musicx.misc.utils;
  */
 
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -27,41 +28,40 @@ import java.io.IOException;
 public class FileTarget extends SimpleTarget<Bitmap> {
 
     String fileName;
-    Bitmap.CompressFormat format;
-    int quality;
 
     public FileTarget(String fileName, int width, int height) {
-        this(fileName, width, height, Bitmap.CompressFormat.JPEG, 100);
-    }
-
-    public FileTarget(String fileName, int width, int height, Bitmap.CompressFormat format, int quality) {
         super(width, height);
         this.fileName = fileName;
-        this.format = format;
-        this.quality = quality;
-    }
-
-
-    public void onFileSaved() {
-        // do nothing, should be overriden (optional)
-    }
-
-    public void onSaveException(Exception e) {
-        // do nothing, should be overriden (optional)
     }
 
 
     @Override
     public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-        try {
-            FileOutputStream out = new FileOutputStream(fileName);
-            resource.compress(format, quality, out);
-            out.flush();
-            out.close();
-            onFileSaved();
-        } catch (IOException e) {
-            e.printStackTrace();
-            onSaveException(e);
-        }
+        new AsyncTask<Void, Void, Void>() {
+            FileOutputStream outputStream = null;
+            @Override
+            protected Void doInBackground(Void... voids) {
+                if (resource != null){
+                    try {
+                        outputStream = new FileOutputStream(fileName);
+                        resource.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                        outputStream.flush();
+                        outputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }finally {
+                        try {
+                            if (outputStream != null){
+                                outputStream.close();
+                                outputStream = null;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                return null;
+            }
+        }.execute();
     }
 }

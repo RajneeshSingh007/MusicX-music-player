@@ -35,7 +35,7 @@ public class FavoritesLoader extends BaseAsyncTaskLoader<List<Song>> {
 
     public FavoritesLoader(Context context) {
         super(context);
-        commonDatabase = new CommonDatabase(context, Constants.Fav_TableName);
+        commonDatabase = new CommonDatabase(context, Constants.Fav_TableName, true);
     }
 
     @Override

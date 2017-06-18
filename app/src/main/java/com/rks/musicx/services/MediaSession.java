@@ -62,7 +62,7 @@ public class MediaSession {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    ArtworkUtils.ArtworkLoader(musicXService, musicXService.getsongAlbumName(), null, musicXService.getsongAlbumID(), new palette() {
+                    ArtworkUtils.ArtworkLoader(musicXService,  300, 300, musicXService.getsongAlbumName(), null, musicXService.getsongAlbumID(), new palette() {
                         @Override
                         public void palettework(Palette palette) {
 

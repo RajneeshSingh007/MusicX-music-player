@@ -1,7 +1,13 @@
 package com.rks.musicx.ui.fragments;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.afollestad.appthemeengine.Config;
@@ -9,12 +15,13 @@ import com.rks.musicx.R;
 import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.database.CommonDatabase;
+import com.rks.musicx.misc.utils.Constants;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.MainActivity;
-import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.List;
@@ -36,19 +43,21 @@ import java.util.List;
  * limitations under the License.
  */
 
-public class FavFragment extends BaseLoaderFragment {
+public class FavFragment extends BaseLoaderFragment implements SearchView.OnQueryTextListener{
 
     private FastScrollRecyclerView rv;
-    private SongListAdapter playlistViewAdapter;
     private Helper helper;
+    private SearchView searchView;
+    private Toolbar toolbar;
+    private CommonDatabase commonDatabase;
 
     private BaseRecyclerViewAdapter.OnItemClickListener onClick = (position, view) -> {
         switch (view.getId()) {
             case R.id.item_view:
-                ((MainActivity) getActivity()).onSongSelected(playlistViewAdapter.getSnapshot(), position);
+                ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
                 break;
             case R.id.menu_button:
-                helper.showMenu(false, favloader, FavFragment.this, FavFragment.this, ((MainActivity) getActivity()), position, view, getContext(), playlistViewAdapter);
+                helper.showMenu(false, favloader, FavFragment.this, FavFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
                 break;
         }
     };
@@ -65,17 +74,30 @@ public class FavFragment extends BaseLoaderFragment {
     @Override
     protected void ui(View view) {
         rv = (FastScrollRecyclerView) view.findViewById(R.id.favrv);
+        toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+
     }
 
     @Override
     protected void funtion() {
+        background();
         setHasOptionsMenu(true);
         rv.hasFixedSize();
         String ateKey = Helper.getATEKey(getContext());
         int colorAccent = Config.accentColor(getContext(), ateKey);
         rv.setPopupBgColor(colorAccent);
         helper = new Helper(getContext());
-        background();
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null && activity.getSupportActionBar() != null){
+            activity.setSupportActionBar(toolbar);
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        commonDatabase = new CommonDatabase(getContext(), Constants.Fav_TableName, true);
+        try {
+            songList = commonDatabase.readLimit(-1, null);
+        }finally {
+            commonDatabase.close();
+        }
     }
 
     @Override
@@ -85,7 +107,7 @@ public class FavFragment extends BaseLoaderFragment {
 
     @Override
     protected String[] argument() {
-        return new String[0];
+        return null;
     }
 
     @Override
@@ -95,31 +117,38 @@ public class FavFragment extends BaseLoaderFragment {
 
     @Override
     protected void background() {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                if (getActivity() != null){
-                    playlistViewAdapter = new SongListAdapter(getContext());
-                }
-                return null;
-            }
+        CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
+        customLayoutManager.setSmoothScrollbarEnabled(true);
+        rv.setLayoutManager(customLayoutManager);
+        rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
+        songListAdapter.setLayoutId(R.layout.song_list);
+        songListAdapter.setOnItemClickListener(onClick);
+        rv.setAdapter(songListAdapter);
+        loadTracks();
+    }
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                if (getActivity() == null){
-                    return;
-                }
-                CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
-                customLayoutManager.setSmoothScrollbarEnabled(true);
-                rv.setLayoutManager(customLayoutManager);
-                rv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
-                playlistViewAdapter.setLayoutId(R.layout.song_list);
-                playlistViewAdapter.setOnItemClickListener(onClick);
-                rv.setAdapter(playlistViewAdapter);
-                loadTracks();
-            }
-        }.execute();
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.song_sort_by, menu);
+        searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.song_search));
+        searchView.setOnQueryTextListener(this);
+        searchView.setQueryHint("Search song");
+        menu.findItem(R.id.grid_view).setVisible(false);
+        menu.findItem(R.id.menu_sort_by).setVisible(false);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (getActivity() == null){
+            return false;
+        }
+        switch (item.getItemId()) {
+            case R.id.shuffle_all:
+                ((MainActivity) getActivity()).onShuffleRequested(songList, true);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -144,7 +173,7 @@ public class FavFragment extends BaseLoaderFragment {
 
     @Override
     public void load() {
-
+        getLoaderManager().restartLoader(favloader, null, this);
     }
 
     /*
@@ -165,18 +194,15 @@ public class FavFragment extends BaseLoaderFragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        getLoaderManager().restartLoader(favloader, null, this);
+    public boolean onQueryTextSubmit(String query) {
+        return false;
     }
 
     @Override
-    public void setAdapater(List<Song> data) {
-        playlistViewAdapter.addDataList(data);
+    public boolean onQueryTextChange(String newText) {
+        final List<Song> filterlist = helper.filter(songList, newText);
+        songListAdapter.setFilter(filterlist);
+        return true;
     }
 
-    @Override
-    public void notifyChanges() {
-        playlistViewAdapter.notifyDataSetChanged();
-    }
 }

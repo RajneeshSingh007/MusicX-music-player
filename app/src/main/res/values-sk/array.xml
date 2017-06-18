@@ -120,4 +120,21 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+    <string-array name="audioFilter">
+        <item>30 second</item>
+        <item>1 min</item>
+        <item>2 min</item>
+        <item>3 min</item>
+        <item>4 min</item>
+        <item>5 min</item>
+    </string-array>
+
+    <string-array name="audioFilterChoice">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
 </resources>

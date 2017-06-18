@@ -2,19 +2,20 @@ package com.rks.musicx.misc.utils;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.PermissionChecker;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.rks.musicx.R;
 
 import java.util.ArrayList;
@@ -63,28 +64,36 @@ public class permissionManager {
 
     public static void widgetPermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(activity)) {
-            DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (which == DialogInterface.BUTTON_POSITIVE) {
-                        Intent intent;
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                            intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.fromParts("package", activity.getPackageName(), null));
-                            activity.startActivityForResult(intent, OVERLAY_REQ);
-                        }
-                    } else if (which == DialogInterface.BUTTON_NEGATIVE) {
-                        Toast.makeText(activity, R.string.toast_permissions_not_granted, Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
-                    }
-                }
-            };
-            new AlertDialog.Builder(activity)
-                    .setTitle(R.string.permissions_title)
-                    .setMessage(R.string.draw_over_permissions_message)
-                    .setPositiveButton(R.string.btn_continue, listener)
-                    .setNegativeButton(R.string.btn_cancel, listener)
-                    .setCancelable(false)
+             new MaterialDialog.Builder(activity)
+                    .title(R.string.permissions_title)
+                    .content(R.string.draw_over_permissions_message)
+                    .positiveText(R.string.btn_continue)
+                    .negativeText(R.string.btn_cancel)
+                    .autoDismiss(true)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                         @Override
+                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.fromParts("package", activity.getPackageName(), null));
+                                 activity.startActivityForResult(intent, OVERLAY_REQ);
+                             }
+                         }
+                     })
+                     .onNegative(new MaterialDialog.SingleButtonCallback() {
+                         @Override
+                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                             Toast.makeText(activity, R.string.toast_permissions_not_granted, Toast.LENGTH_SHORT).show();
+                             dialog.dismiss();
+                         }
+                     })
+                     .neutralText("Never show again")
+                     .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                         @Override
+                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                             Extras.getInstance().setWidgetTrack(true);
+                             dialog.dismiss();
+                         }
+                     })
                     .show();
         }
     }
@@ -92,28 +101,36 @@ public class permissionManager {
     public static void settingPermission(Activity activity) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(activity)) {
-            DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (which == DialogInterface.BUTTON_POSITIVE) {
-                        Intent intent;
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                            intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.fromParts("package", activity.getPackageName(), null));
-                            activity.startActivityForResult(intent, WRITESETTINGS);
+            new MaterialDialog.Builder(activity)
+                    .title(R.string.permissions_title)
+                    .content(R.string.writesetting)
+                    .positiveText(R.string.btn_continue)
+                    .negativeText(R.string.btn_cancel)
+                    .autoDismiss(true)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                               Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.fromParts("package", activity.getPackageName(), null));
+                                activity.startActivityForResult(intent, WRITESETTINGS);
+                            }
                         }
-                    } else if (which == DialogInterface.BUTTON_NEGATIVE) {
-                        Toast.makeText(activity, R.string.toast_permissions_not_granted, Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
-                    }
-                }
-            };
-            new AlertDialog.Builder(activity)
-                    .setTitle(R.string.permissions_title)
-                    .setMessage(R.string.writesetting)
-                    .setPositiveButton(R.string.btn_continue, listener)
-                    .setNegativeButton(R.string.btn_cancel, listener)
-                    .setCancelable(false)
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Toast.makeText(activity, R.string.toast_permissions_not_granted, Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        }
+                    })
+                    .neutralText("Never show again")
+                    .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Extras.getInstance().setSettings(true);
+                            dialog.dismiss();
+                        }
+                    })
                     .show();
         }
     }
