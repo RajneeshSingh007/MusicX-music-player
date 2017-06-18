@@ -1,1 +1,17 @@
 
+- <a href="https://github.com/bumptech/glide"><b>Glide</b></a>
+- <a href="http://square.github.io/retrofit/"><b>Retrofit 2</b></a>
+- <a href="https://github.com/timusus/RecyclerView-FastScroll"><b>FastScroll RecyclerView</b></a>
+- <a href="https://github.com/afollestad/app-theme-engine"><b>AppThemeEngine</b></a>
+- <a href="https://github.com/afollestad/material-dialogs"><b>MaterialDialogs</b></a>
+- <a href="https://github.com/Cleveroad/MusicBobber"><b>MusicBobber</b></a>
+- <a href="https://github.com/Cleveroad/PlayWidget"><b>PlayWidget</b></a>
+- <a href="https://github.com/chrisjenx/Calligraphy"><b>Calligraphy</b></a>
+- <a href="https://github.com/h6ah4i/android-verticalseekbar"><b>VerticalSeekBar</b></a>
+- <a href="https://github.com/deano2390/MaterialShowcaseView"><b>MaterialShowcaseView</b></a>
+- <a href="https://github.com/florent37/DiagonalLayout"><b>DiagonalLayout</b></a>
+- <a href="https://github.com/codekidX/storage-chooser"><b>Storage Chooser</b></a>
+- <a href="https://bitbucket.org/ijabz/jaudiotagger"></a><b>Jaudiotagger library</b></a>
+- <a href="https://github.com/paolorotolo/AppIntro"><b>AppIntro</b></a>
+- <a href="https://github.com/HudsonAndroid/CircleVisualizerFFTView"><b>CircleVisualizerFFTView</b></a>
+- <a href="https://github.com/serso/android-checkout"><b>Android Checkout</b></a>
