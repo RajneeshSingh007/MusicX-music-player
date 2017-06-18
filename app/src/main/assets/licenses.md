@@ -11,7 +11,7 @@
 - <a href="https://github.com/deano2390/MaterialShowcaseView"><b>MaterialShowcaseView</b></a>
 - <a href="https://github.com/florent37/DiagonalLayout"><b>DiagonalLayout</b></a>
 - <a href="https://github.com/codekidX/storage-chooser"><b>Storage Chooser</b></a>
-- <a href="https://bitbucket.org/ijabz/jaudiotagger"></a><b>Jaudiotagger library</b></a>
+- <a href="https://bitbucket.org/ijabz/jaudiotagger"><b>Jaudiotagger</b></a>
 - <a href="https://github.com/paolorotolo/AppIntro"><b>AppIntro</b></a>
 - <a href="https://github.com/HudsonAndroid/CircleVisualizerFFTView"><b>CircleVisualizerFFTView</b></a>
 - <a href="https://github.com/serso/android-checkout"><b>Android Checkout</b></a>
