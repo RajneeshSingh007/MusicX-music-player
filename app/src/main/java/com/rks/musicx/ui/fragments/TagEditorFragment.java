@@ -153,10 +153,10 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
             return;
         }
         Helper.setColor(getActivity(), colorAccent, toolbar);
-        save = new saveData(getContext(), song);
         saveTags.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                save = new saveData(getContext(), song);
                 save.execute();
             }
         });
