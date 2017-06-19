@@ -135,11 +135,37 @@ import static com.rks.musicx.misc.utils.Constants.Zero;
  * limitations under the License.
  */
 
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * ©2017 Rajneesh Singh
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 public class Helper {
 
-    private Context context;
     private static ValueAnimator colorAnimation;
     private static HashMap<String, Typeface> fontCache = new HashMap<>();
+    private Context context;
 
     public Helper(Context context) {
         this.context = context;
@@ -375,6 +401,9 @@ public class Helper {
      * @return
      */
     public static String getInbuiltLyrics(String path) {
+        if (path == null) {
+            return null;
+        }
         File file = new File(path);
         if (file.exists()) {
             AudioFile audioFile = null;
@@ -878,6 +907,258 @@ public class Helper {
 
     }
 
+    public static int parseToInt(String maybeInt, int defaultValue) {
+        if (maybeInt == null) return defaultValue;
+        maybeInt = maybeInt.trim();
+        if (maybeInt.isEmpty()) return defaultValue;
+        return Integer.parseInt(maybeInt);
+    }
+
+    /**
+     * Animate view's background color
+     *
+     * @param view
+     * @param colorBg
+     */
+    public static void animateViews(Context context, View view, int colorBg) {
+        colorAnimation = setAnimator(0xffe5e5e5, colorBg);
+        colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+
+            @Override
+            public void onAnimationUpdate(ValueAnimator animator) {
+                view.setBackgroundColor((Integer) animator.getAnimatedValue());
+            }
+
+        });
+        colorAnimation.start();
+    }
+
+    private static ValueAnimator setAnimator(int colorFrom, int colorTo) {
+        ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
+        long duration = 300;
+        colorAnimation.setDuration(duration);
+        return colorAnimation;
+    }
+
+    /**
+     * Font
+     *
+     * @param context
+     * @param path
+     */
+    public static void getCalligraphy(Context context, String path) {
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath(path)
+                .addCustomStyle(AppCompatTextView.class, android.R.attr.textViewStyle)
+                .addCustomStyle(TextView.class, android.R.attr.textViewStyle)
+                .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
+                .setFontAttrId(R.attr.fontPath)
+                .build());
+        Extras.getInstance().saveTypeface(path);
+    }
+
+    /**
+     * Start Activity
+     *
+     * @param context
+     * @param sClass
+     * @param <S>
+     */
+    public static <S> void startActivity(Activity context, Class<S> sClass) {
+        if (context == null) {
+            return;
+        }
+        Intent intent = new Intent(context, sClass);
+        context.startActivity(intent);
+    }
+
+    /**
+     * Delete Directory
+     *
+     * @param fileOrDirectory
+     */
+    public static void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory()) {
+            for (File child : fileOrDirectory.listFiles()) {
+                deleteRecursive(child);
+            }
+        }
+
+        fileOrDirectory.delete();
+    }
+
+    /**
+     * return Typeface
+     *
+     * @param context
+     * @return
+     */
+    public static Typeface getFont(Context context) {
+        Typeface typeface = null;
+        try {
+            switch (Extras.getInstance().fontConfig()) {
+                case Zero:
+                    typeface = getTypeface(context, "RobotoLight.ttf");
+                    break;
+                case One:
+                    typeface = getTypeface(context, "Raleway.ttf");
+                    break;
+                case Two:
+                    typeface = getTypeface(context, "CormorantGaramond.ttf");
+                    break;
+                case Three:
+                    typeface = getTypeface(context, "CutiveMono.ttf");
+                    break;
+                case Four:
+                    typeface = getTypeface(context, "Timber.ttf");
+                    break;
+                case "5":
+                    typeface = getTypeface(context, "Snippet.ttf");
+                    break;
+                case "6":
+                    typeface = getTypeface(context, "Trench.ttf");
+                    break;
+                case "7":
+                    typeface = getTypeface(context, "Espacio.ttf");
+                    break;
+                case "8":
+                    typeface = getTypeface(context, "Rex.ttf");
+                    break;
+                case "9":
+                    typeface = getTypeface(context, "ExodusStriped.otf");
+                    break;
+                case "10":
+                    typeface = getTypeface(context, "GogiaRegular.otf");
+                    break;
+                case "11":
+                    typeface = getTypeface(context, "MavenPro.ttf");
+                    break;
+                case "12":
+                    typeface = getTypeface(context, "Vetka.otf");
+                    break;
+                case "13":
+                    typeface = getTypeface(context, "Lombok.otf");
+                    break;
+                case "14":
+                    typeface = getTypeface(context, "Circled.ttf");
+                    break;
+                case "15":
+                    typeface = getTypeface(context, "Franks.otf");
+                    break;
+                case "16":
+                    typeface = getTypeface(context, "Mountain.otf");
+                    break;
+                case "17":
+                    typeface = getTypeface(context, "Jakarta.ttf");
+                    break;
+                case "18":
+                    typeface = getTypeface(context, "Abyssopelagic.otf");
+                    break;
+                case "19":
+                    typeface = getTypeface(context, "Tesla.ttf");
+                    break;
+                case "20":
+                    typeface = Typeface.DEFAULT;
+                    break;
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return typeface;
+    }
+
+    /**
+     * Typeface
+     *
+     * @param customFont
+     * @return
+     */
+    public static Typeface getTypeface(Context context, String customFont) {
+        Typeface tf = fontCache.get(customFont);
+        if (tf == null) {
+            try {
+                tf = Typeface.createFromAsset(context.getAssets(), customFont);
+            } catch (Exception e) {
+                return null;
+            }
+            fontCache.put(customFont, tf);
+        }
+        return tf;
+    }
+
+    /**
+     * Rotate view 360
+     *
+     * @param view
+     */
+    public static void rotateFab(@NonNull View view) {
+        ViewCompat.animate(view).
+                rotation(360f).
+                withLayer().
+                setDuration(300).
+                setInterpolator(new FastOutSlowInInterpolator()).
+                start();
+    }
+
+    /**
+     * check activity present or not in the device
+     *
+     * @param context
+     * @param intent
+     * @return
+     */
+    public static boolean isActivityPresent(Context context, Intent intent) {
+        List<ResolveInfo> list = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        return list.size() > 0;
+    }
+
+    /**
+     * Set color to nav and status bar
+     *
+     * @param activity
+     * @param v
+     */
+    public static void setColor(@NonNull Activity activity, int color, View v) {
+        if (activity.getWindow() == null) {
+            return;
+        }
+        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
+            activity.getWindow().setStatusBarColor(color);
+            v.setBackgroundColor(color);
+            activity.getWindow().setNavigationBarColor(color);
+        } else {
+            activity.getWindow().setStatusBarColor(color);
+            v.setBackgroundColor(color);
+            activity.getWindow().setNavigationBarColor(color);
+        }
+    }
+
+    public static String filterAudio() {
+        String filterAudio = null;
+        switch (Extras.getInstance().getAudioFilter()) {
+            case Zero:
+                filterAudio = "30000"; //30sec
+                break;
+            case One:
+                filterAudio = "60000"; //1min
+                break;
+            case Two:
+                filterAudio = "120000"; //2min
+                break;
+            case Three:
+                filterAudio = "180000"; //3min
+                break;
+            case Four:
+                filterAudio = "240000"; //4min
+                break;
+            case "5":
+                filterAudio = "300000"; //5min
+                break;
+        }
+        return filterAudio;
+    }
+
     /**
      * Delete Track
      *
@@ -1030,13 +1311,6 @@ public class Helper {
             }
         });
         popup.show();
-    }
-
-    public static int parseToInt(String maybeInt, int defaultValue) {
-        if (maybeInt == null) return defaultValue;
-        maybeInt = maybeInt.trim();
-        if (maybeInt.isEmpty()) return defaultValue;
-        return Integer.parseInt(maybeInt);
     }
 
     /**
@@ -1278,7 +1552,6 @@ public class Helper {
         return Environment.getExternalStorageDirectory() + "/MusicX/" + "Lyrics/";
     }
 
-
     /**
      * Set fileName
      *
@@ -1290,32 +1563,6 @@ public class Helper {
             title = context.getString(R.string.unknown);
         }
         return title;
-    }
-
-    /**
-     * Animate view's background color
-     *
-     * @param view
-     * @param colorBg
-     */
-    public static void animateViews(Context context, View view, int colorBg) {
-        colorAnimation = setAnimator(0xffe5e5e5, colorBg);
-        colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-
-            @Override
-            public void onAnimationUpdate(ValueAnimator animator) {
-                view.setBackgroundColor((Integer) animator.getAnimatedValue());
-            }
-
-        });
-        colorAnimation.start();
-    }
-
-    private static ValueAnimator setAnimator(int colorFrom, int colorTo) {
-        ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-        long duration = 300;
-        colorAnimation.setDuration(duration);
-        return colorAnimation;
     }
 
     /**
@@ -1347,219 +1594,6 @@ public class Helper {
             }
         }
         return fileList;
-    }
-
-    /**
-     * Font
-     * @param context
-     * @param path
-     */
-    public static void getCalligraphy (Context context, String path){
-         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
-                .setDefaultFontPath(path)
-                .addCustomStyle(AppCompatTextView.class, android.R.attr.textViewStyle)
-                .addCustomStyle(TextView.class, android.R.attr.textViewStyle)
-                .addCustomStyle(EditText.class, android.R.attr.editTextStyle)
-                .setFontAttrId(R.attr.fontPath)
-                .build());
-        Extras.getInstance().saveTypeface(path);
-    }
-
-    /**
-     * Start Activity
-     * @param context
-     * @param sClass
-     * @param <S>
-     */
-    public static <S> void startActivity(Activity context, Class<S> sClass){
-        if (context == null){
-            return;
-        }
-        Intent intent = new Intent(context, sClass);
-        context.startActivity(intent);
-    }
-
-    /**
-     * Delete Directory
-     * @param fileOrDirectory
-     */
-    public static void deleteRecursive(File fileOrDirectory) {
-        if (fileOrDirectory.isDirectory()) {
-            for (File child : fileOrDirectory.listFiles()) {
-                deleteRecursive(child);
-            }
-        }
-
-        fileOrDirectory.delete();
-    }
-
-    /**
-     * return Typeface
-     * @param context
-     * @return
-     */
-    public static Typeface getFont(Context context){
-        Typeface typeface = null;
-        try {
-            switch (Extras.getInstance().fontConfig()) {
-                case Zero:
-                    typeface = getTypeface(context, "RobotoLight.ttf");
-                    break;
-                case One:
-                    typeface = getTypeface(context, "Raleway.ttf");
-                    break;
-                case Two:
-                    typeface = getTypeface(context, "CormorantGaramond.ttf");
-                    break;
-                case Three:
-                    typeface = getTypeface(context, "CutiveMono.ttf");
-                    break;
-                case Four:
-                    typeface = getTypeface(context, "Timber.ttf");
-                    break;
-                case "5":
-                    typeface = getTypeface(context, "Snippet.ttf");
-                    break;
-                case "6":
-                    typeface = getTypeface(context, "Trench.ttf");
-                    break;
-                case "7":
-                    typeface = getTypeface(context, "Espacio.ttf");
-                    break;
-                case "8":
-                    typeface = getTypeface(context, "Rex.ttf");
-                    break;
-                case "9":
-                    typeface = getTypeface(context, "ExodusStriped.otf");
-                    break;
-                case "10":
-                    typeface = getTypeface(context, "GogiaRegular.otf");
-                    break;
-                case "11":
-                    typeface = getTypeface(context, "MavenPro.ttf");
-                    break;
-                case "12":
-                    typeface = getTypeface(context, "Vetka.otf");
-                    break;
-                case "13":
-                    typeface = getTypeface(context, "Lombok.otf");
-                    break;
-                case "14":
-                    typeface = getTypeface(context, "Circled.ttf");
-                    break;
-                case "15":
-                    typeface = getTypeface(context, "Franks.otf");
-                    break;
-                case "16":
-                    typeface = getTypeface(context, "Mountain.otf");
-                    break;
-                case "17":
-                    typeface = getTypeface(context, "Jakarta.ttf");
-                    break;
-                case "18":
-                    typeface = getTypeface(context, "Abyssopelagic.otf");
-                    break;
-                case "19":
-                    typeface = getTypeface(context, "Tesla.ttf");
-                    break;
-                case "20":
-                    typeface = Typeface.DEFAULT;
-                    break;
-
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return typeface;
-    }
-    
-
-    /**
-     * Typeface
-     * @param customFont
-     * @return
-     */
-    public static Typeface getTypeface(Context context, String customFont) {
-        Typeface tf = fontCache.get(customFont);
-        if(tf == null) {
-            try {
-                tf = Typeface.createFromAsset(context.getAssets(), customFont);
-            }
-            catch (Exception e) {
-                return null;
-            }
-            fontCache.put(customFont, tf);
-        }
-        return tf;
-    }
-
-    /**
-     * Rotate view 360
-     * @param view
-     */
-    public static void rotateFab(@NonNull View view){
-        ViewCompat.animate(view).
-                rotation(360f).
-                withLayer().
-                setDuration(300).
-                setInterpolator(new FastOutSlowInInterpolator()).
-                start();
-    }
-
-    /**
-     * check activity present or not in the device
-     * @param context
-     * @param intent
-     * @return
-     */
-    public static boolean isActivityPresent(Context context, Intent intent){
-        List<ResolveInfo> list = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        return list.size() > 0;
-    }
-
-    /**
-     * Set color to nav and status bar
-     * @param activity
-     * @param v
-     */
-    public static void setColor(@NonNull  Activity activity, int color,View v){
-        if (activity.getWindow() == null){
-            return;
-        }
-        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
-            activity.getWindow().setStatusBarColor(color);
-            v.setBackgroundColor(color);
-            activity.getWindow().setNavigationBarColor(color);
-        } else {
-            activity.getWindow().setStatusBarColor(color);
-            v.setBackgroundColor(color);
-            activity.getWindow().setNavigationBarColor(color);
-        }
-    }
-
-    public static String filterAudio(){
-        String filterAudio = null;
-        switch (Extras.getInstance().getAudioFilter()){
-            case Zero:
-                filterAudio = "30000"; //30sec
-                break;
-            case One:
-                filterAudio = "60000"; //1min
-                break;
-            case Two:
-                filterAudio = "120000"; //2min
-                break;
-            case Three:
-                filterAudio = "180000"; //3min
-                break;
-            case Four:
-                filterAudio = "240000"; //4min
-                break;
-            case "5":
-                filterAudio = "300000"; //5min
-                break;
-        }
-        return filterAudio;
     }
 
 }

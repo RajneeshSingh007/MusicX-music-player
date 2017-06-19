@@ -64,3 +64,5 @@
 -assumenosideeffects class org.solovyev.android.checkout.Check {
     static *;
 }
+-keep class com.crashlytics.** { *; }
+-dontwarn com.crashlytics.**
