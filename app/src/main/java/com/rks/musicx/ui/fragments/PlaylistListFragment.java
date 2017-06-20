@@ -25,6 +25,7 @@ import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
+import com.rks.musicx.misc.utils.PlaylistHelper;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.PlaylistListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -57,11 +58,17 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
+            if (getActivity() == null) {
+                return;
+            }
+            Playlist playlist = playlistAdapter.getItem(position);
             switch (view.getId()) {
                 case R.id.item_view:
-                    Extras.getInstance().savePlaylistId(playlistAdapter.getItem(position).getId());
-                    PlaylistFragment fragment = PlaylistFragment.newInstance(playlistAdapter.getItem(position));
-                    ((MainActivity) getActivity()).setFragment(fragment);
+                    if (playlistAdapter.getSnapshot().size() > 0 && position < playlistAdapter.getSnapshot().size()) {
+                        Extras.getInstance().savePlaylistId(playlist.getId());
+                        PlaylistFragment fragment = PlaylistFragment.newInstance(playlist);
+                        ((MainActivity) getActivity()).setFragment(fragment);
+                    }
                     break;
                 case R.id.delete_playlist:
                     showMenu(view, playlistAdapter.getItem(position));
@@ -88,7 +95,7 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
                         builder.onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                Helper.deletePlaylist(getContext(), playlist.getName());
+                                PlaylistHelper.deletePlaylist(getContext(), playlist.getName());
                                 Toast.makeText(getContext(), playlist.getName() + " Deleted", Toast.LENGTH_SHORT).show();
                                 load();
                             }
@@ -143,7 +150,7 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
         createplaylist.onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                new Helper(getContext()).createPlaylist(getContext().getContentResolver(), editText.getText().toString());
+                PlaylistHelper.createPlaylist(getContext().getContentResolver(), editText.getText().toString());
                 load();
             }
         });
@@ -164,7 +171,7 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
     public Loader<List<Playlist>> onCreateLoader(int id, Bundle args) {
         PlaylistLoaders playlistloader = new PlaylistLoaders(getContext());
         if (id == playloader) {
-            playlistloader.setSortOrder(Extras.getInstance().getPlaylistSort());
+            playlistloader.setSortOrder(null);
             return playlistloader;
         }
         return null;

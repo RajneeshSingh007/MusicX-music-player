@@ -184,21 +184,24 @@ public class EqFragment extends Fragment {
         appCompatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Extras.getInstance().savePresetPos(position);
-                final short[] range = Equalizers.getBandLevelRange();
-                if (position < Equalizers.getPresetNo()) {
-                    short presetPosition = (short) position;
-                    Equalizers.usePreset(presetPosition);
-                    for (short i = 0; i < Equalizers.getNumberOfBands(); i++) {
-                        if (range != null) {
-                            seekBarFinal[i].setProgress(Equalizers.getBandLevel(i)  - range[0]);
+                if (position < getPresetNames().size()) {
+                    Extras.getInstance().savePresetPos(position);
+                    if (position < Equalizers.getPresetNo()) {
+                        short presetPosition = (short) position;
+                        Equalizers.usePreset(presetPosition);
+                        for (short i = 0; i < Equalizers.getNumberOfBands(); i++) {
+                            final short[] range = Equalizers.getBandLevelRange();
+                            if (range != null) {
+                                seekBarFinal[i].setProgress(Equalizers.getBandLevel(i) - range[0]);
+                            }
                         }
-                    }
-                } else {
-                    Log.d(TAG, "Error buddy");
-                    for (int i = 0; i < Equalizers.getNumberOfBands(); i++) {
-                        if (range != null) {
-                            seekBarFinal[i].setProgress(Extras.getInstance().saveEq().getInt(BAND_LEVEL + i, 0) -  range[0]);
+                    } else {
+                        Log.d(TAG, "Error buddy");
+                        for (int i = 0; i < Equalizers.getNumberOfBands(); i++) {
+                            final short[] range = Equalizers.getBandLevelRange();
+                            if (range != null) {
+                                seekBarFinal[i].setProgress(Extras.getInstance().saveEq().getInt(BAND_LEVEL + i, 0) - range[0]);
+                            }
                         }
                     }
                 }

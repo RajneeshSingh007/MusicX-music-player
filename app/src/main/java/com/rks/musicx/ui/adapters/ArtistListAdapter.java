@@ -117,6 +117,11 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
 
     }
 
+    @Override
+    public Artist getItem(int position) throws ArrayIndexOutOfBoundsException {
+        return data.size() > 0 ? data.get(position) : null;
+    }
+
     @NonNull
     @Override
     public String getSectionName(int position) {

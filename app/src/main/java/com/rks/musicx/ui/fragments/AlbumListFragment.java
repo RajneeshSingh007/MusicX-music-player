@@ -61,11 +61,14 @@ public class AlbumListFragment extends BaseRefreshFragment implements LoaderCall
     private BaseRecyclerViewAdapter.OnItemClickListener OnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
+            Album album = albumListAdapter.getItem(position);
             switch (view.getId()) {
                 case R.id.album_artwork:
                 case R.id.item_view:
-                    ImageView Listartwork = (ImageView) view.findViewById(R.id.album_artwork);
-                    fragTransition(albumListAdapter.getItem(position), Listartwork, "TransitionArtwork");
+                    if (albumListAdapter.getSnapshot().size() > 0 && position < albumListAdapter.getSnapshot().size()) {
+                        ImageView Listartwork = (ImageView) view.findViewById(R.id.album_artwork);
+                        fragTransition(album, Listartwork, "TransitionArtwork");
+                    }
                     break;
             }
         }

@@ -21,6 +21,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.appthemeengine.Config;
 import com.bumptech.glide.Glide;
@@ -214,6 +215,9 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(queueAdapter);
         mItemTouchHelper = new ItemTouchHelper(callback);
         mItemTouchHelper.attachToRecyclerView(queuerv);
+        if (getActivity() == null && getActivity().getWindow() == null) {
+            return;
+        }
         getActivity().getWindow().setStatusBarColor(accentColor);
         initVisualizer();
     }
@@ -235,23 +239,7 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
             isalbumArtChanged = true;
             Helper.rotationAnim(albumArtwork);
             Helper.rotationAnim(playpausebutton);
-            if (permissionManager.isAudioRecordGranted(getContext())) {
-                mVisualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
-                    @Override
-                    public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform,
-                                                      int samplingRate) {
-                    }
-
-                    @Override
-                    public void onFftDataCapture(Visualizer visualizer, byte[] fft,
-                                                 int samplingRate) {
-                        vizualview.updateVisualizer(fft);
-                    }
-                }, Visualizer.getMaxCaptureRate() / 2, true, true);
-                mVisualizer.setEnabled(true);
-            } else {
-                Log.d("Playing4Fragment", "permission not granted");
-            }
+            mVisualizer.setEnabled(true);
             int dur = getMusicXService().getDuration();
             seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
@@ -435,7 +423,20 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
             mVisualizer = new Visualizer(MediaPlayerSingleton.getInstance().getMediaPlayer().getAudioSessionId());
             mVisualizer.setEnabled(false);
             mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+            mVisualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
+                @Override
+                public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform,
+                                                  int samplingRate) {
+                }
+
+                @Override
+                public void onFftDataCapture(Visualizer visualizer, byte[] fft,
+                                             int samplingRate) {
+                    vizualview.updateVisualizer(fft);
+                }
+            }, Visualizer.getMaxCaptureRate() / 2, true, true);
         } else {
+            Toast.makeText(getContext(), "AudioRecord permission not granted for visualizer", Toast.LENGTH_SHORT).show();
             Log.d("Playing4Fragment", "permission not granted");
         }
 

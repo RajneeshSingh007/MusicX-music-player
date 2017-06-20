@@ -28,6 +28,7 @@ import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
+import com.rks.musicx.misc.utils.PlaylistHelper;
 import com.rks.musicx.ui.adapters.PlaylistListAdapter;
 
 import java.util.List;
@@ -92,7 +93,7 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
         createplaylist.onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                new Helper(getContext()).createPlaylist(getContext().getContentResolver(), editText.getText().toString());
+                PlaylistHelper.createPlaylist(getContext().getContentResolver(), editText.getText().toString());
                 Toast.makeText(getContext(), "Playlist Created", Toast.LENGTH_LONG).show();
                 refresh();
             }
@@ -127,7 +128,7 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
                         builder.onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                Helper.deletePlaylist(getContext(), playlist.getName());
+                                PlaylistHelper.deletePlaylist(getContext(), playlist.getName());
                                 Toast.makeText(getContext(), playlist.getName() + " Deleted", Toast.LENGTH_SHORT).show();
                                 refresh();
                             }

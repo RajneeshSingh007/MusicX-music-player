@@ -113,7 +113,7 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
 
     @Override
     public Album getItem(int position) throws ArrayIndexOutOfBoundsException {
-        return super.getItem(position);
+        return data.size() > 0 ? data.get(position) : null;
     }
 
     @NonNull

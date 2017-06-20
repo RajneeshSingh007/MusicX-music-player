@@ -18,7 +18,7 @@ import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Playlist;
 import com.rks.musicx.misc.utils.Extras;
-import com.rks.musicx.misc.utils.Helper;
+import com.rks.musicx.misc.utils.PlaylistHelper;
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -53,9 +53,8 @@ public class PlaylistListAdapter extends BaseRecyclerViewAdapter<Playlist, Playl
     public void onBindViewHolder(PlaylistViewHolder holder, int position) {
         Playlist playlist = getItem(position);
         holder.PlaylistName.setText(playlist.getName());
-        Helper helper = new Helper(getContext());
         Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlist.getId());
-        int songCount = helper.getSongCount(getContext().getContentResolver(), uri);
+        int songCount = PlaylistHelper.getSongCount(getContext().getContentResolver(), uri);
         holder.SongCount.setText(String.valueOf(songCount) + " " + getContext().getString(R.string.titles));
         holder.deletePlaylist.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
         Drawable drawable = holder.deletePlaylist.getDrawable();

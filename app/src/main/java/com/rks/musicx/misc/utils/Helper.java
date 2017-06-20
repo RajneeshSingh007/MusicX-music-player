@@ -6,7 +6,6 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -21,6 +20,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.media.MediaScannerConnection;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -41,6 +41,8 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.graphics.Palette;
+import android.support.v7.view.ActionMode;
+import android.support.v7.view.StandaloneActionMode;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.PopupMenu;
 import android.text.TextUtils;
@@ -66,17 +68,14 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Album;
 import com.rks.musicx.data.model.Artist;
-import com.rks.musicx.data.model.Playlist;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.LyricsData;
 import com.rks.musicx.database.FavHelper;
-import com.rks.musicx.interfaces.playlistPicked;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.rks.musicx.ui.fragments.AlbumFragment;
 import com.rks.musicx.ui.fragments.ArtistFragment;
 import com.rks.musicx.ui.fragments.FavFragment;
-import com.rks.musicx.ui.fragments.PlayListPicker;
 import com.rks.musicx.ui.fragments.TagEditorFragment;
 
 import org.jaudiotagger.audio.AudioFile;
@@ -99,6 +98,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -120,32 +120,6 @@ import static com.rks.musicx.misc.utils.Constants.Zero;
 
 /*
  * Created by Coolalien on 24/03/2017.
- */
-
-/*
- * ©2017 Rajneesh Singh
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *     http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/*
- * ©2017 Rajneesh Singh
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *     http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 /*
@@ -845,68 +819,6 @@ public class Helper {
         return finalTimerString;
     }
 
-    /**
-     * Delete Playlist Track
-     *
-     * @param context
-     * @param playlistId
-     * @param audioId
-     */
-    public static void deletePlaylistTrack(Context context, long playlistId, long audioId) {
-        ContentResolver resolver = context.getContentResolver();
-        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
-        String filter = MediaStore.Audio.Playlists.Members.AUDIO_ID + " = " + audioId;
-        resolver.delete(uri, filter, null);
-    }
-
-    /**
-     * Delete playlist
-     *
-     * @param context
-     * @param selectedplaylist
-     */
-    public static void deletePlaylist(Context context, String selectedplaylist) {
-        String playlistid = getPlayListId(context, selectedplaylist);
-        ContentResolver resolver = context.getContentResolver();
-        String where = MediaStore.Audio.Playlists._ID + "=?";
-        String[] whereVal = {playlistid};
-        resolver.delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, where, whereVal);
-    }
-
-    /**
-     * Return Playlist Id
-     *
-     * @param context
-     * @param playlist
-     * @return
-     */
-    private static String getPlayListId(Context context, String playlist) {
-        int recordcount;
-        Uri newuri = MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI;
-        final String playlistid = MediaStore.Audio.Playlists._ID;
-        final String playlistname = MediaStore.Audio.Playlists.NAME;
-        String where = MediaStore.Audio.Playlists.NAME + "=?";
-        String[] whereVal = {playlist};
-        String[] projection = {playlistid, playlistname};
-        ContentResolver resolver = context.getContentResolver();
-        Cursor cursor = resolver.query(newuri, projection, where, whereVal, null);
-        if (cursor != null) {
-            recordcount = cursor.getCount();
-            String foundplaylistid = "";
-            if (recordcount > 0) {
-                cursor.moveToFirst();
-                int idColumn = cursor.getColumnIndex(playlistid);
-                foundplaylistid = cursor.getString(idColumn);
-                cursor.close();
-            }
-            cursor.close();
-            return foundplaylistid;
-        } else {
-            return "";
-        }
-
-    }
-
     public static int parseToInt(String maybeInt, int defaultValue) {
         if (maybeInt == null) return defaultValue;
         maybeInt = maybeInt.trim();
@@ -942,7 +854,6 @@ public class Helper {
 
     /**
      * Font
-     *
      * @param context
      * @param path
      */
@@ -959,7 +870,6 @@ public class Helper {
 
     /**
      * Start Activity
-     *
      * @param context
      * @param sClass
      * @param <S>
@@ -974,7 +884,6 @@ public class Helper {
 
     /**
      * Delete Directory
-     *
      * @param fileOrDirectory
      */
     public static void deleteRecursive(File fileOrDirectory) {
@@ -989,7 +898,6 @@ public class Helper {
 
     /**
      * return Typeface
-     *
      * @param context
      * @return
      */
@@ -1070,7 +978,6 @@ public class Helper {
 
     /**
      * Typeface
-     *
      * @param customFont
      * @return
      */
@@ -1089,7 +996,6 @@ public class Helper {
 
     /**
      * Rotate view 360
-     *
      * @param view
      */
     public static void rotateFab(@NonNull View view) {
@@ -1103,7 +1009,6 @@ public class Helper {
 
     /**
      * check activity present or not in the device
-     *
      * @param context
      * @param intent
      * @return
@@ -1115,7 +1020,6 @@ public class Helper {
 
     /**
      * Set color to nav and status bar
-     *
      * @param activity
      * @param v
      */
@@ -1160,6 +1064,22 @@ public class Helper {
     }
 
     /**
+     *
+     * @param actionMode
+     * @param color
+     */
+    public static void setActionModeBackgroundColor(ActionMode actionMode, int color) {
+        try {
+            StandaloneActionMode standaloneActionMode = (StandaloneActionMode) actionMode;
+            Field mContextView = StandaloneActionMode.class.getDeclaredField("mContextView");
+            mContextView.setAccessible(true);
+            Object value = mContextView.get(standaloneActionMode);
+            ((View) value).setBackground(new ColorDrawable(color));
+        } catch (Throwable ignore) {
+        }
+    }
+
+    /**
      * Delete Track
      *
      * @param id
@@ -1171,7 +1091,7 @@ public class Helper {
      */
     @SuppressLint("StringFormatInvalid")
     public void DeleteTrack(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders,
-                             Fragment fragment, String name, String path, Context context) {
+                            Fragment fragment, String name, String path, Context context) {
         MaterialDialog.Builder dialog = new MaterialDialog.Builder(context);
         dialog.title(name);
         dialog.content(context.getString(R.string.delete_music, name));
@@ -1245,7 +1165,7 @@ public class Helper {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_remove_playlist:
-                        deletePlaylistTrack(context, Extras.getInstance().getPlaylistId(), song.getId());
+                        PlaylistHelper.deletePlaylistTrack(context, Extras.getInstance().getPlaylistId(), song.getId());
                         Toast.makeText(context, "Removed from playlist", Toast.LENGTH_SHORT).show();
                         fragment.getLoaderManager().restartLoader(id, null, songLoaders);
                         break;
@@ -1258,7 +1178,7 @@ public class Helper {
                         Toast.makeText(context, "Added to next", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.action_add_to_playlist:
-                        PlaylistChooser(fragment, context, song.getId());
+                        PlaylistHelper.PlaylistChooser(fragment, context, song.getId());
                         break;
                     case R.id.action_addFav:
                         new FavHelper(context).addFavorite(song.getId());
@@ -1311,88 +1231,6 @@ public class Helper {
             }
         });
         popup.show();
-    }
-
-    /**
-     * Playlist Chooser
-     *
-     * @param fragment
-     * @param context
-     * @param song
-     */
-    public void PlaylistChooser(Fragment fragment, Context context, long song) {
-        PlayListPicker playListPicker = new PlayListPicker();
-        playListPicker.setPicked(new playlistPicked() {
-            @Override
-            public void onPlaylistPicked(Playlist playlist) {
-                addSongToPlaylist(context.getContentResolver(), playlist.getId(), song);
-                Toast.makeText(context, "Song is added ", Toast.LENGTH_SHORT).show();
-            }
-        });
-        playListPicker.show(fragment.getFragmentManager(), null);
-    }
-
-    /**
-     * Add songs to playlist
-     *
-     * @param resolver
-     * @param playlistId
-     * @param songId
-     */
-    public void addSongToPlaylist(ContentResolver resolver, long playlistId, long songId) {
-        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
-        final int base = getSongCount(resolver, uri);
-        insert(resolver, uri, songId, base + 1);
-    }
-
-    /**
-     * Return song Count
-     *
-     * @param resolver
-     * @param uri
-     * @return
-     */
-    public int getSongCount(ContentResolver resolver, Uri uri) {
-        String[] cols = new String[]{"count(*)"};
-        Cursor cur = resolver.query(uri, cols, null, null, null);
-        if (cur != null) {
-            cur.moveToFirst();
-            final int count = cur.getInt(0);
-            cur.close();
-            return count;
-        } else {
-            return 0;
-        }
-    }
-
-    /**
-     * Create Playlist
-     *
-     * @param resolver
-     * @param playlistName
-     * @return
-     */
-    public Uri createPlaylist(ContentResolver resolver, String playlistName) {
-        Uri uri = MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI;
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Audio.Playlists.NAME, playlistName);
-        return resolver.insert(uri, values);
-    }
-
-    /**
-     * Return Playlist
-     *
-     * @param resolver
-     * @param uri
-     * @param songId
-     * @param index
-     */
-    private void insert(ContentResolver resolver, Uri uri, long songId, int index) {
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, index);
-        values.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, songId);
-        resolver.insert(uri, values);
-
     }
 
     /**

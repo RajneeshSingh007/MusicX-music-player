@@ -170,6 +170,27 @@ class PlayPauseButton extends ImageView implements PlaybackState.PlaybackStateLi
         });
     }
 
+    public static Bitmap drawableToBitmap(@NonNull Drawable drawable) {
+        Bitmap bitmap;
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if (bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
+            }
+        }
+
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565); // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.RGB_565);
+        }
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int size = MeasureSpec.makeMeasureSpec((int) (radius * 4), MeasureSpec.EXACTLY);
@@ -271,9 +292,11 @@ class PlayPauseButton extends ImageView implements PlaybackState.PlaybackStateLi
             canvas.drawCircle(cx, cy, radius, buttonPaint);
             albumCover.setBounds((int) (cx - radius), (int) (cy - radius), (int) (cx + radius), (int) (cy + radius));
             albumCover.draw(canvas);
-            Boolean isNeedToFillAlbumCover = isNeedToFillAlbumCoverMap.get(albumCover.hashCode());
-            if (isNeedToFillAlbumCover != null && isNeedToFillAlbumCover) {
-                canvas.drawCircle(cx, cy, radius, albumPlaceholderPaint);
+            if (albumCover.hashCode() > 0) {
+                Boolean isNeedToFillAlbumCover = isNeedToFillAlbumCoverMap.get(albumCover.hashCode());
+                if (isNeedToFillAlbumCover != null && isNeedToFillAlbumCover) {
+                    canvas.drawCircle(cx, cy, radius, albumPlaceholderPaint);
+                }
             }
         }
 
@@ -366,8 +389,8 @@ class PlayPauseButton extends ImageView implements PlaybackState.PlaybackStateLi
         if (albumCover.hashCode() == 0) {
             return;
         }
-        if (albumCover instanceof BitmapDrawable && !isNeedToFillAlbumCoverMap.containsKey(albumCover.hashCode())) {
-            Bitmap bitmap = ((BitmapDrawable) albumCover).getBitmap();
+        if (!isNeedToFillAlbumCoverMap.containsKey(albumCover.hashCode())) {
+            Bitmap bitmap = drawableToBitmap(albumCover);
             if (bitmap != null && !bitmap.isRecycled()) {
                 if (lastPaletteAsyncTask != null && !lastPaletteAsyncTask.isCancelled()) {
                     lastPaletteAsyncTask.cancel(true);
@@ -382,7 +405,6 @@ class PlayPauseButton extends ImageView implements PlaybackState.PlaybackStateLi
                 });
             }
         }
-        postInvalidate();
     }
 
     private static final class BoundsCheckerImpl extends AudioWidget.BoundsCheckerWithOffset {

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -40,6 +41,7 @@ import com.rks.musicx.data.model.Song;
 import com.rks.musicx.database.CommonDatabase;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
+import com.rks.musicx.misc.utils.PlaylistHelper;
 import com.rks.musicx.services.MusicXService;
 import com.rks.musicx.ui.activities.EqualizerActivity;
 import com.rks.musicx.ui.activities.PlayingActivity;
@@ -79,6 +81,7 @@ import static com.rks.musicx.misc.utils.Constants.Queue_TableName;
 
 public abstract class BasePlayingFragment extends Fragment implements ImageChooserListener {
 
+    private static Handler handler;
     public boolean isalbumArtChanged;
     private MusicXService musicXService;
     private Intent mServiceIntent;
@@ -90,7 +93,8 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
     private Helper helper;
     private int size;
     private CommonDatabase commonDatabase;
-    private static Handler handler;
+    private Drawable shuffleOff, shuffleOn, repeatAll, repeatOne, noRepeat;
+
 
     /**
      * Service Connection
@@ -140,6 +144,10 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         }
     };
 
+    public static Handler getHandler() {
+        return handler;
+    }
+
     protected abstract void reload();
 
     protected abstract void playbackConfig();
@@ -168,8 +176,6 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
 
     protected abstract void updateProgress();
 
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(setLayout(), container, false);
@@ -179,6 +185,11 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         size = getResources().getDimensionPixelSize(R.dimen.cover_size);
         commonDatabase = new CommonDatabase(getContext(), Queue_TableName, true);
         handler = new Handler();
+        shuffleOff = ContextCompat.getDrawable(getContext(), R.drawable.shuf_off);
+        shuffleOn = ContextCompat.getDrawable(getContext(), R.drawable.shuf_on);
+        repeatOne = ContextCompat.getDrawable(getContext(), R.drawable.rep_one);
+        repeatAll = ContextCompat.getDrawable(getContext(), R.drawable.rep_all);
+        noRepeat = ContextCompat.getDrawable(getContext(), R.drawable.rep_no);
         return rootView;
     }
 
@@ -271,7 +282,6 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         Extras.getInstance().getThemevalue(getActivity());
     }
 
-
     @Override
     public void onImageChosen(ChosenImage chosenImage) {
         chosenImages = chosenImage;
@@ -287,7 +297,6 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
             }
         });
     }
-
 
     @Override
     public void onError(String s) {
@@ -348,9 +357,9 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
     public void updateShuffleButton() {
         boolean shuffle = musicXService.isShuffleEnabled();
         if (shuffle) {
-            shuffleButton().setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.shuf_on));
+            shuffleButton().setImageDrawable(shuffleOn);
         } else {
-            shuffleButton().setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.shuf_off));
+            shuffleButton().setImageDrawable(shuffleOff);
         }
     }
 
@@ -360,11 +369,11 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
     public void updateRepeatButton() {
         int mode = musicXService.getRepeatMode();
         if (mode == getMusicXService().getNoRepeat()) {
-            repeatButton().setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_no));
+            repeatButton().setImageDrawable(noRepeat);
         } else if (mode == getMusicXService().getRepeatCurrent()) {
-            repeatButton().setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_all));
+            repeatButton().setImageDrawable(repeatAll);
         } else if (mode == getMusicXService().getRepeatAll()) {
-            repeatButton().setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_one));
+            repeatButton().setImageDrawable(repeatOne);
         }
     }
 
@@ -405,7 +414,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                         isalbumArtChanged = false;
                         break;
                     case R.id.action_playlist:
-                        helper.PlaylistChooser(BasePlayingFragment.this, getContext(), musicXService.getsongId());
+                        PlaylistHelper.PlaylistChooser(BasePlayingFragment.this, getContext(), musicXService.getsongId());
                         break;
                     case R.id.action_lyrics:
                         helper.searchLyrics(getContext(), musicXService.getsongTitle(), musicXService.getsongArtistName(), musicXService.getsongData(), lyricsView());
@@ -441,7 +450,6 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         popupMenu.show();
     }
 
-
     /**
      * for next update
      */
@@ -465,21 +473,22 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                       if(editText.getText() != null){
-                           CommonDatabase commonDatabase = new CommonDatabase(getContext(), editText.getText().toString(), true);
-                           commonDatabase.add(musicXService.getPlayList());
-                           commonDatabase.close();
-                           queueName.add(editText.getText().toString());
-                           Extras.getInstance().saveQueueName(queueName);
-                           Toast.makeText(getContext(), "Saved Queue", Toast.LENGTH_SHORT).show();
-                           editText.getText().clear();
-                       }
+                        if (editText.getText() != null) {
+                            CommonDatabase commonDatabase = new CommonDatabase(getContext(), editText.getText().toString(), true);
+                            commonDatabase.add(musicXService.getPlayList());
+                            commonDatabase.close();
+                            queueName.add(editText.getText().toString());
+                            Extras.getInstance().saveQueueName(queueName);
+                            Toast.makeText(getContext(), "Saved Queue", Toast.LENGTH_SHORT).show();
+                            editText.getText().clear();
+                        }
                     }
                 })
                 .customView(view1, false)
                 .build()
                 .show();
     }
+
     /**
      * Queue Menu
      *
@@ -505,7 +514,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_playlist:
-                        helper.PlaylistChooser(BasePlayingFragment.this, getContext(), queue.getId());
+                        PlaylistHelper.PlaylistChooser(BasePlayingFragment.this, getContext(), queue.getId());
                         break;
                     case R.id.action_edit_tags:
                         Extras.getInstance().saveMetaData(queue);
@@ -528,6 +537,17 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         popupMenu.show();
     }
 
+    public void seekbarProgress() {
+        ProgressRunnable progressRunnable = new ProgressRunnable(BasePlayingFragment.this);
+        handler.post(progressRunnable);
+    }
+
+    public void removeCallback() {
+        ProgressRunnable progressRunnable = new ProgressRunnable(BasePlayingFragment.this);
+        handler.removeCallbacks(progressRunnable);
+        handler.removeCallbacksAndMessages(null);
+    }
+
     private static class ProgressRunnable implements Runnable {
 
         private final WeakReference<BasePlayingFragment> baseLoaderWeakReference;
@@ -544,22 +564,6 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
             }
             handler.postDelayed(ProgressRunnable.this,1000);
         }
-    }
-
-    public void seekbarProgress(){
-        ProgressRunnable progressRunnable = new ProgressRunnable(BasePlayingFragment.this);
-        handler.post(progressRunnable);
-    }
-
-    public void removeCallback(){
-        ProgressRunnable progressRunnable = new ProgressRunnable(BasePlayingFragment.this);
-        handler.removeCallbacks(progressRunnable);
-        handler.removeCallbacksAndMessages(null);
-    }
-
-
-    public static Handler getHandler() {
-        return handler;
     }
 
 

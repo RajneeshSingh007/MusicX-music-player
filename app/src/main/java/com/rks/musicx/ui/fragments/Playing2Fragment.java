@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.appthemeengine.Config;
 import com.bumptech.glide.Glide;
@@ -301,12 +302,14 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
         accentColor = Config.accentColor(getContext(), ateKey);
         mPlayLayout.setPlayButtonBackgroundTintList(ColorStateList.valueOf(accentColor));
         moreMenu.setOnClickListener(mOnClickListener);
+        if (getActivity() == null || getActivity().getWindow() == null) {
+            return;
+        }
         moreMenu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
         favhelper = new FavHelper(getContext());
         mSmallBang = SmallBang.attach2Window(getActivity());
         favButton.setOnClickListener(mOnClickListener);
-        startVisualiser();
-        CustomLayoutManager customlayoutmanager = new CustomLayoutManager(getActivity());
+        CustomLayoutManager customlayoutmanager = new CustomLayoutManager(getContext());
         customlayoutmanager.setOrientation(LinearLayoutManager.HORIZONTAL);
         queuerv.setLayoutManager(customlayoutmanager);
         queuerv.setHasFixedSize(true);
@@ -321,9 +324,6 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
             mPlayLayout.setProgressLineColor(ContextCompat.getColor(getContext(), R.color.translucent_white_8p));
         } else {
             mPlayLayout.setProgressLineColor(ContextCompat.getColor(getContext(), R.color.translucent_white_8p));
-        }
-        if (getActivity() == null || getActivity().getWindow() == null){
-            return;
         }
         getActivity().getWindow().setStatusBarColor(accentColor);
         /**
@@ -341,6 +341,7 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
             }
         });
         sequence.start();
+        startVisualiser();
     }
 
     @Override
@@ -400,7 +401,7 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
                 public void onPreSetProgress() {
                     if (getMusicXService() != null) {
                         try {
-                           removeCallback();
+                            removeCallback();
                         } catch (Exception c){
                             c.printStackTrace();
                         }finally {
@@ -451,6 +452,7 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
             mPlayLayout.setShadowProvider(visualizerShadowChanger);
             Log.i("startVisualiser", "startVisualiser " + MediaPlayerSingleton.getInstance().getMediaPlayer().getAudioSessionId());
         } else {
+            Toast.makeText(getContext(), "AudioRecord permission not granted for visualizer", Toast.LENGTH_SHORT).show();
             Log.d("PlayingFragment2", "Permission not granted");
         }
 

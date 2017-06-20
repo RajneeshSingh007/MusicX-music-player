@@ -69,12 +69,15 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
     private BaseRecyclerViewAdapter.OnItemClickListener OnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
+            Artist artist = artistListAdapter.getItem(position);
             switch (view.getId()) {
                 case R.id.album_artwork:
                 case R.id.item_view:
-                    Fragment fragments = ArtistFragment.newInstance(artistListAdapter.getItem(position));
-                    ImageView listartwork = (ImageView) view.findViewById(R.id.album_artwork);
-                    fragTransition(fragments, listartwork, "TransitionArtwork");
+                    if (artistListAdapter.getSnapshot().size() > 0 && position < artistListAdapter.getSnapshot().size()) {
+                        Fragment fragments = ArtistFragment.newInstance(artist);
+                        ImageView listartwork = (ImageView) view.findViewById(R.id.album_artwork);
+                        fragTransition(fragments, listartwork, "TransitionArtwork");
+                    }
                     break;
             }
         }
@@ -252,8 +255,8 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
         if (!Extras.getInstance().saveData()){
             try {
                 for (Artist artist : artistlist){
-                     artistArtwork = new ArtistArtwork(getActivity(), artist.getName());
-                     artistArtwork.execute();
+                    artistArtwork = new ArtistArtwork(getActivity(), artist.getName());
+                    artistArtwork.execute();
                 }
             }finally {
                 commonDatabase.close();
