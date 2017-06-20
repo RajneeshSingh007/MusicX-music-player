@@ -64,36 +64,40 @@ public class permissionManager {
 
     public static void widgetPermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(activity)) {
-             new MaterialDialog.Builder(activity)
+            new MaterialDialog.Builder(activity)
                     .title(R.string.permissions_title)
                     .content(R.string.draw_over_permissions_message)
                     .positiveText(R.string.btn_continue)
                     .negativeText(R.string.btn_cancel)
                     .autoDismiss(true)
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
-                         @Override
-                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.fromParts("package", activity.getPackageName(), null));
-                                 activity.startActivityForResult(intent, OVERLAY_REQ);
-                             }
-                         }
-                     })
-                     .onNegative(new MaterialDialog.SingleButtonCallback() {
-                         @Override
-                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                             Toast.makeText(activity, R.string.toast_permissions_not_granted, Toast.LENGTH_SHORT).show();
-                             dialog.dismiss();
-                         }
-                     })
-                     .neutralText("Never show again")
-                     .onNeutral(new MaterialDialog.SingleButtonCallback() {
-                         @Override
-                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                             Extras.getInstance().setWidgetTrack(true);
-                             dialog.dismiss();
-                         }
-                     })
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.fromParts("package", activity.getPackageName(), null));
+                                if (Helper.isActivityPresent(activity, intent)) {
+                                    activity.startActivityForResult(intent, OVERLAY_REQ);
+                                } else {
+                                    Toast.makeText(activity, "No app found to handle floating widget enable permission", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Toast.makeText(activity, R.string.toast_permissions_not_granted, Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        }
+                    })
+                    .neutralText("Never show again")
+                    .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Extras.getInstance().setWidgetTrack(true);
+                            dialog.dismiss();
+                        }
+                    })
                     .show();
         }
     }
@@ -111,8 +115,12 @@ public class permissionManager {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                               Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.fromParts("package", activity.getPackageName(), null));
-                                activity.startActivityForResult(intent, WRITESETTINGS);
+                                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.fromParts("package", activity.getPackageName(), null));
+                                if (Helper.isActivityPresent(activity, intent)) {
+                                    activity.startActivityForResult(intent, WRITESETTINGS);
+                                } else {
+                                    Toast.makeText(activity, "No app found to handle settings write permission", Toast.LENGTH_SHORT).show();
+                                }
                             }
                         }
                     })
