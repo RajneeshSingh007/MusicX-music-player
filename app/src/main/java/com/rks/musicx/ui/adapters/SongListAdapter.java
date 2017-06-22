@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,10 +58,14 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
     private int duration = 300;
     private Interpolator interpolator = new LinearInterpolator();
     private int lastpos = -1;
+    private SparseBooleanArray storeChecked = new SparseBooleanArray();
+    private boolean isMultiselect;
+    private int itemSelected;
 
     public SongListAdapter(@NonNull Context context) {
         super(context);
     }
+
 
     public void setLayoutId(int layoutId) {
         layout = layoutId;
@@ -90,10 +95,12 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
                 drawable.setTint(Color.WHITE);
                 holder.SongTitle.setTextColor(Color.WHITE);
                 holder.SongArtist.setTextColor(ContextCompat.getColor(getContext(), R.color.darkthemeTextColor));
+                holder.itemView.setBackgroundColor(storeChecked.get(position) ? ContextCompat.getColor(getContext(), R.color.translucent_white_8p) : Color.TRANSPARENT);
             } else {
                 drawable.setTint(ContextCompat.getColor(getContext(), R.color.MaterialGrey));
                 holder.SongTitle.setTextColor(Color.BLACK);
                 holder.SongArtist.setTextColor(Color.DKGRAY);
+                holder.itemView.setBackgroundColor(storeChecked.get(position) ? ContextCompat.getColor(getContext(), R.color.cardview_dark_background) : Color.TRANSPARENT);
             }
         }
         if (layout == R.layout.detail_list) {
@@ -145,7 +152,6 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
     }
 
 
-
     public int getLayout() {
         return layout;
     }
@@ -167,7 +173,26 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
         notifyDataSetChanged();
     }
 
-    public class SongViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public void exitMultiselectMode() {
+        isMultiselect = false;
+        itemSelected = 0;
+        storeChecked.clear();
+        notifyDataSetChanged();
+    }
+
+    public List<Integer> getSelectedItems() {
+        List<Integer> items = new ArrayList<>(storeChecked.size());
+        for (int i = 0; i < storeChecked.size(); ++i) {
+            items.add(storeChecked.keyAt(i));
+        }
+        return items;
+    }
+
+    public boolean isMultiselect() {
+        return isMultiselect;
+    }
+
+    public class SongViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         private TextView SongTitle, SongArtist, number;
         private CircleImageView SongArtwork;
@@ -186,6 +211,8 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
                 songView = (LinearLayout) itemView.findViewById(R.id.item_view);
                 itemView.setOnClickListener(this);
                 menu.setOnClickListener(this);
+                itemView.setLongClickable(true);
+                itemView.setOnLongClickListener(this);
             }
             if (layout == R.layout.detail_list) {
                 SongTitle = (TextView) itemView.findViewById(R.id.title);
@@ -212,8 +239,31 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
         @Override
         public void onClick(View v) {
             int position = getAdapterPosition();
-            triggerOnItemClickListener(position, v);
+            if (isMultiselect) {
+                boolean currentState = storeChecked.get(getAdapterPosition());
+                storeChecked.put(getAdapterPosition(), !currentState);
+                notifyItemChanged(getAdapterPosition());
+                if (currentState) {
+                    triggerOnItemClickListener(--itemSelected, v);
+                    storeChecked.delete(position);
+                } else {
+                    triggerOnItemClickListener(++itemSelected, v);
+                }
+            } else {
+                triggerOnItemClickListener(position, v);
+            }
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            if (!isMultiselect) {
+                isMultiselect = true;
+                storeChecked.put(getAdapterPosition(), true);
+                notifyItemChanged(getAdapterPosition());
+                triggerOnLongClickListener(++itemSelected);
+                return true;
+            }
+            return false;
         }
     }
-
 }

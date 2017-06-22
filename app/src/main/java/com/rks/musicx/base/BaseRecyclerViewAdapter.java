@@ -34,6 +34,7 @@ public abstract class BaseRecyclerViewAdapter<TData, TViewHolder extends Recycle
     private final LayoutInflater inflater;
     public List<TData> data = new ArrayList<TData>();
     private OnItemClickListener mOnItemClickListener;
+    private OnLongClickListener onLongClickListener;
 
     public BaseRecyclerViewAdapter(@NonNull final Context context) {
         this.context = context.getApplicationContext();
@@ -97,13 +98,27 @@ public abstract class BaseRecyclerViewAdapter<TData, TViewHolder extends Recycle
         mOnItemClickListener = listener;
     }
 
+    public void setOnLongClickListener(OnLongClickListener onLongClickListener) {
+        this.onLongClickListener = onLongClickListener;
+    }
+
     public void triggerOnItemClickListener(int position, View view) {
         if (mOnItemClickListener != null) {
             mOnItemClickListener.onItemClick(position, view);
         }
     }
 
+    public void triggerOnLongClickListener(int pos) {
+        if (onLongClickListener != null) {
+            onLongClickListener.onLongItemClick(pos);
+        }
+    }
+
     public interface OnItemClickListener {
         void onItemClick(int position, View view);
+    }
+
+    public interface OnLongClickListener {
+        void onLongItemClick(int pos);
     }
 }

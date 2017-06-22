@@ -1089,9 +1089,7 @@ public class Helper {
      * @param path
      * @param context
      */
-    @SuppressLint("StringFormatInvalid")
-    public void DeleteTrack(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders,
-                            Fragment fragment, String name, String path, Context context) {
+    public void DeleteTrack(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders, Fragment fragment, String name, String path, Context context) {
         MaterialDialog.Builder dialog = new MaterialDialog.Builder(context);
         dialog.title(name);
         dialog.content(context.getString(R.string.delete_music, name));
@@ -1116,8 +1114,7 @@ public class Helper {
                                     fragment.getLoaderManager().restartLoader(id, null, songLoaders);
                                 }
                             });
-                            fragment.getLoaderManager().restartLoader(id, null, songLoaders);
-                            Toast.makeText(context, "Track deleted", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "Song deleted", Toast.LENGTH_SHORT).show();
                         } else {
                             Log.e("-->", "file not Deleted :" + name);
                             fragment.getLoaderManager().restartLoader(id, null, songLoaders);
@@ -1131,6 +1128,67 @@ public class Helper {
                     Log.d("Helper", "Path not found");
                 }
 
+            }
+        });
+        dialog.negativeText(R.string.cancel);
+        dialog.show();
+    }
+
+    /**
+     * Multi file delete
+     *
+     * @param id
+     * @param songLoaders
+     * @param fragment
+     * @param songList
+     * @param context
+     */
+    public void multiDeleteTrack(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders, Fragment fragment, List<Song> songList, Context context) {
+        if (songList.size() == 0) {
+            return;
+        }
+        MaterialDialog.Builder dialog = new MaterialDialog.Builder(context);
+        dialog.title("Delete Tracks");
+        dialog.content(context.getString(R.string.delete_music));
+        dialog.positiveText(android.R.string.ok);
+        dialog.typeface(getFont(context), getFont(context));
+        dialog.onPositive(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                boolean confirm = false;
+                for (Song song : songList) {
+                    String path = song.getmSongPath();
+                    if (path != null) {
+                        File file = new File(path);
+                        if (file.exists()) {
+                            if (file.delete()) {
+                                confirm = true;
+                                MediaScannerConnection.scanFile(context, new String[]{file.getAbsolutePath()}, new String[]{"audio/*"}, new MediaScannerConnection.MediaScannerConnectionClient() {
+                                    @Override
+                                    public void onMediaScannerConnected() {
+
+                                    }
+
+                                    @Override
+                                    public void onScanCompleted(String s, Uri uri) {
+                                        fragment.getLoaderManager().restartLoader(id, null, songLoaders);
+                                    }
+                                });
+                            } else {
+                                confirm = false;
+                            }
+
+                        }
+                    }
+                }
+                if (confirm) {
+                    Log.e("Helper", "files are Deleted");
+                    Toast.makeText(context, "All Songs deleted", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.e("Helper", "files are not Deleted");
+                    fragment.getLoaderManager().restartLoader(id, null, songLoaders);
+                    Toast.makeText(context, "Failed to delete song", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         dialog.negativeText(R.string.cancel);

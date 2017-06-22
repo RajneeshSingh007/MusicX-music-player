@@ -3,6 +3,7 @@ package com.rks.musicx.ui.fragments;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
@@ -10,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
@@ -24,6 +26,7 @@ import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.ItemOffsetDecoration;
+import com.rks.musicx.misc.utils.PlaylistHelper;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
@@ -56,38 +59,124 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
     private SearchView searchView;
     private AlbumArtwork albumArtwork;
     private CommonDatabase commonDatabase;
-
+    private android.support.v7.view.ActionMode mActionMode;
     private BaseRecyclerViewAdapter.OnItemClickListener onClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
 
         @Override
         public void onItemClick(int position, View view) {
-            if (songListAdapter.getLayout() == R.layout.song_list) {
-                switch (view.getId()) {
-                    case R.id.item_view:
-                        ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
-                        Extras.getInstance().saveSeekServices(0);
-                        break;
-                    case R.id.menu_button:
-                        helper.showMenu(false, trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
-                        break;
-
+            if (songListAdapter.isMultiselect()) {
+                if (position > 0) {
+                    if (mActionMode != null) {
+                        mActionMode.setTitle(position + " selected");
+                    }
+                } else {
+                    if (mActionMode != null) {
+                        mActionMode.finish();
+                    }
                 }
-            } else if (songListAdapter.getLayout() == R.layout.item_grid_view) {
-                switch (view.getId()) {
-                    case R.id.album_artwork:
-                    case R.id.album_info:
-                        ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
-                        Extras.getInstance().saveSeekServices(0);
-                        break;
-                    case R.id.menu_button:
-                        helper.showMenu(false, trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
-                        break;
+            } else {
+                if (songListAdapter.getLayout() == R.layout.song_list) {
+                    switch (view.getId()) {
+                        case R.id.item_view:
+                            ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
+                            Extras.getInstance().saveSeekServices(0);
+                            break;
+                        case R.id.menu_button:
+                            helper.showMenu(false, trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                            break;
 
+                    }
+                } else if (songListAdapter.getLayout() == R.layout.item_grid_view) {
+                    switch (view.getId()) {
+                        case R.id.album_artwork:
+                        case R.id.album_info:
+                            ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
+                            Extras.getInstance().saveSeekServices(0);
+                            break;
+                        case R.id.menu_button:
+                            helper.showMenu(false, trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                            break;
+
+                    }
                 }
             }
         }
     };
+    private android.support.v7.view.ActionMode.Callback mActionModeCallback = new android.support.v7.view.ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(android.support.v7.view.ActionMode mode, Menu menu) {
+            MenuInflater menuInflater = mode.getMenuInflater();
+            menuInflater.inflate(R.menu.multi_select, menu);
+            return true;
+        }
 
+        @Override
+        public boolean onPrepareActionMode(android.support.v7.view.ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(android.support.v7.view.ActionMode mode, MenuItem item) {
+
+            switch (item.getItemId()) {
+                case R.id.action_add_to_playlist:
+                    if (getSelectedSong().size() > 0) {
+                        PlaylistHelper.PlaylistMultiChooser(SongListFragment.this, getContext(), getSelectedSong());
+                    }
+                    break;
+                case R.id.action_add_to_queue:
+                    if (getSelectedSong().size() > 0) {
+                        try {
+                            for (Song song : getSelectedSong()) {
+                                ((MainActivity) getActivity()).addToQueue(song);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            Toast.makeText(getContext(), "Added to queue", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                    break;
+                case R.id.action_play:
+                    if (getSelectedSong().size() > 0) {
+                        ((MainActivity) getActivity()).onSongSelected(getSelectedSong(), 0);
+                    }
+                    break;
+                case R.id.action_delete:
+                    if (getSelectedSong().size() > 0) {
+                        helper.multiDeleteTrack(trackloader, SongListFragment.this, SongListFragment.this, getSelectedSong(), getContext());
+                    }
+                    break;
+            }
+            return true;
+        }
+
+        @Override
+        public void onDestroyActionMode(android.support.v7.view.ActionMode mode) {
+            mActionMode.setTitle("");
+            mActionMode.finish();
+            mActionMode = null;
+            songListAdapter.exitMultiselectMode();
+        }
+
+    };
+    private BaseRecyclerViewAdapter.OnLongClickListener onLongClick = new BaseRecyclerViewAdapter.OnLongClickListener() {
+        @Override
+        public void onLongItemClick(int position) {
+            mActionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(mActionModeCallback);
+            Helper.setActionModeBackgroundColor(mActionMode, Config.primaryColor(getContext(), Helper.getATEKey(getContext())));
+            if (position > 0) {
+                if (mActionMode != null) {
+                    mActionMode.setTitle(position + " selected");
+                }
+            } else {
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
+            }
+        }
+    };
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -174,7 +263,7 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
         }
         try {
             if (!Extras.getInstance().saveData()){
-               for (Song song : songList){
+                for (Song song : songList) {
                     albumArtwork = new AlbumArtwork(getActivity(), song.getArtist(), song.getAlbum());
                     albumArtwork.execute();
                 }
@@ -233,6 +322,8 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
         songView();
         rv.setAdapter(songListAdapter);
         songListAdapter.setOnItemClickListener(onClick);
+        songListAdapter.setOnLongClickListener(onLongClick);
+
     }
 
     @Override
@@ -313,5 +404,23 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
         }
         super.onDestroy();
     }
+
+    /**
+     * MultiSelection SongList
+     *
+     * @return
+     */
+    private List<Song> getSelectedSong() {
+        List<Integer> selectedPos = songListAdapter.getSelectedItems();
+        List<Song> songList = new ArrayList<>();
+        int pos;
+        for (int i = selectedPos.size() - 1; i >= 0; i--) {
+            pos = selectedPos.get(i);
+            Song song = songListAdapter.getItem(pos);
+            songList.add(song);
+        }
+        return songList;
+    }
+
 
 }
