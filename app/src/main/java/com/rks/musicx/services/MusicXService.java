@@ -118,6 +118,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         AudioWidget.OnControlsClickListener, AudioWidget.OnWidgetStateChangedListener, AudioManager.OnAudioFocusChangeListener{
 
 
+    private static Handler handler;
     public final int NO_REPEAT = 1;
     public final int REPEAT_ALL = 2;
     public final int REPEAT_CURRENT = 3;
@@ -152,40 +153,10 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     private int volume;
     private boolean mLostAudioFocus = false;
     private boolean mIsDucked = false;
-    private static Handler handler;
     private int trackDuration;
     private CommonDatabase recent, queue;
     private List<Song> queueList = new ArrayList<>();
-
-    private static class ProgressRunnable implements Runnable {
-
-        private final WeakReference<MusicXService>  musicxService;
-
-        public ProgressRunnable(MusicXService musicXService) {
-            musicxService = new WeakReference<MusicXService>(musicXService);
-        }
-
-        @Override
-        public void run () {
-            MusicXService musicXService = musicxService.get();
-            if (musicXService != null){
-                if (musicXService.audioWidget != null && musicXService.isPlaying() && musicXService.returnpos() < musicXService.playList.size()){
-                    musicXService.audioWidget.controller().position(musicXService.getPlayerPos());
-                }
-            }
-            handler.postDelayed(this,1000);
-        }
-    }
-
-    private void widgetProgress(){
-        handler.post(new ProgressRunnable(this));
-    }
-
-    private void removeProgress(){
-        handler.removeCallbacks(new ProgressRunnable(this));
-        handler.removeCallbacksAndMessages(null);
-    }
-
+    private boolean onPlayNotify = false;
     private PhoneStateListener phoneStateListener = new PhoneStateListener() {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
@@ -216,6 +187,15 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
         }
     };
+
+    private void widgetProgress() {
+        handler.post(new ProgressRunnable(this));
+    }
+
+    private void removeProgress() {
+        handler.removeCallbacks(new ProgressRunnable(this));
+        handler.removeCallbacksAndMessages(null);
+    }
 
     @Override
     public void onCreate() {
@@ -284,7 +264,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         favHelper = new FavHelper(this);
         handler = new Handler();
     }
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -364,7 +343,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         return musicXBinder;
     }
 
-
     @Override
     public boolean onUnbind(Intent intent) {
         saveState(true);
@@ -399,13 +377,11 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         Extras.getInstance().saveSeekServices(0);
     }
 
-
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Log.d(TAG, String.valueOf(what) + String.valueOf(extra));
         return true;
     }
-
 
     @Override
     public void onPrepared(MediaPlayer mp) {
@@ -482,7 +458,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     public void onAlbumLongClicked() {
 
     }
-
 
     @Override
     public void onWidgetStateChanged(@NonNull AudioWidget.State state) {
@@ -569,6 +544,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         if (!successfullyRetrievedAudioFocus()) {
             return;
         }
+        onPlayNotify = true;
         Log.d(TAG, "Play");
         if (repeatMode != REPEAT_CURRENT && getDuration() > 2000 && getPlayerPos() >= getDuration() - 2000) {
             playnext(true);
@@ -802,7 +778,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         }
     }
 
-
     public int getNoRepeat() {
         return NO_REPEAT;
     }
@@ -917,7 +892,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         seekto(seekpos);
     }
 
-
     @Override
     public int fadeDurationValue() {
         int fadeDuration = 0;
@@ -1010,7 +984,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         }
         updateService(QUEUE_CHANGED);
     }
-
 
     @Override
     public void smartplaylist(List<Song> smartplaylists) {
@@ -1158,7 +1131,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         removeProgress();
     }
 
-
     public boolean isPaused() {
         return paused;
     }
@@ -1303,15 +1275,16 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
             musicxWidget.notifyChange(this, updateservices);
             musicXwidget4x4.notifyChange(this, updateservices);
             musicXWidget5x5.notifyChange(this, updateservices);
-            if (!Extras.getInstance().hideNotify()) {
-                NotificationHandler.buildNotification(MusicXService.this, updateservices);
+            if (onPlayNotify) {
+                if (!Extras.getInstance().hideNotify()) {
+                    NotificationHandler.buildNotification(MusicXService.this, updateservices);
+                }
             }
             if (!Extras.getInstance().hideLockscreen()) {
                 MediaSession.lockscreenMedia(getMediaSession(), MusicXService.this, updateservices);
             }
         }
     }
-
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
@@ -1321,7 +1294,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     public boolean isPlaying() {
         return isPlaying;
     }
-
 
     @Override
     public String getsongTitle() {
@@ -1440,7 +1412,6 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         return audioWidget;
     }
 
-
     /*
             * Remove Notification _/\_
             */
@@ -1487,6 +1458,26 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                 break;
             default:
                 Log.d(TAG, "Unknown focus");
+        }
+    }
+
+    private static class ProgressRunnable implements Runnable {
+
+        private final WeakReference<MusicXService> musicxService;
+
+        public ProgressRunnable(MusicXService musicXService) {
+            musicxService = new WeakReference<MusicXService>(musicXService);
+        }
+
+        @Override
+        public void run() {
+            MusicXService musicXService = musicxService.get();
+            if (musicXService != null) {
+                if (musicXService.audioWidget != null && musicXService.isPlaying() && musicXService.returnpos() < musicXService.playList.size()) {
+                    musicXService.audioWidget.controller().position(musicXService.getPlayerPos());
+                }
+            }
+            handler.postDelayed(this, 1000);
         }
     }
 
