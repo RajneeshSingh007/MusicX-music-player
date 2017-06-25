@@ -70,16 +70,16 @@ public class RoundRectImageView extends ImageView {
         mMaskPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
     }
 
-    public void setColor(@ColorInt int color) {
-        mColor = color;
-        mCirclePaint.setColor(color);
-        mColorAlpha = Color.alpha(color);
-    }
-
     public
     @ColorInt
     int getColor() {
         return mColor;
+    }
+
+    public void setColor(@ColorInt int color) {
+        mColor = color;
+        mCirclePaint.setColor(color);
+        mColorAlpha = Color.alpha(color);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class RoundRectImageView extends ImageView {
                 canvas.drawCircle(mRectF.left + halfSize, mRectF.top + halfSize, halfSize, mCirclePaint);
             }
         }
-        if (mAnimationMaskCanvas != null) {
+        if (mAnimationMaskCanvas != null && !mAnimationMaskBitmap.isRecycled()) {
             mAnimationMaskCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             mAnimationMaskCanvas.drawRoundRect(mRectF,
                     (canvas.getWidth() - getPaddingLeft() - getPaddingRight()) * mRadiusPercentage / 2.0f,
@@ -137,7 +137,6 @@ public class RoundRectImageView extends ImageView {
     protected void onDetachedFromWindow() {
         mAnimationMaskCanvas = null;
         if (mAnimationMaskBitmap != null) {
-            mAnimationMaskBitmap.recycle();
             mAnimationMaskBitmap = null;
         }
         super.onDetachedFromWindow();
