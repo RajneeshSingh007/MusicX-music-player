@@ -13,9 +13,8 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="com.rks.musicx"
-          android:installLocation="auto">
+    package="com.rks.musicx"
+    android:installLocation="auto">
 
     <!--- Permissions -->
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
@@ -105,8 +104,8 @@
 
         <receiver
             android:name=".services.MediaButtonReceiver"
-            android:exported="false"
-            android:enabled="true">
+            android:enabled="true"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON"/>
             </intent-filter>
@@ -126,42 +125,19 @@
                 <category android:name="android.intent.category.APP_MUSIC"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="file" />
                 <data android:mimeType="audio/*" />
                 <data android:mimeType="application/ogg" />
                 <data android:mimeType="application/x-ogg" />
                 <data android:mimeType="application/itunes" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="http" />
-                <data android:mimeType="audio/*" />
-                <data android:mimeType="application/ogg" />
-                <data android:mimeType="application/x-ogg" />
-                <data android:mimeType="application/itunes" />
-            </intent-filter>
-            <intent-filter android:priority="-1">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="content" />
-                <data android:mimeType="audio/*" />
-                <data android:mimeType="application/ogg" />
-                <data android:mimeType="application/x-ogg" />
-                <data android:mimeType="application/itunes" />
             </intent-filter>
-
         </activity>
 
         <activity

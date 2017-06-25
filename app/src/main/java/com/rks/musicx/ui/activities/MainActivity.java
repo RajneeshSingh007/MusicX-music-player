@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.audiofx.AudioEffect;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -114,28 +115,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     private RequestManager mRequestManager;
     private Handler songProgressHandler;
     private RelativeLayout logoLayout;
-
-    private static class ProgressRunnable implements Runnable {
-
-        private final WeakReference<MainActivity> activityWeakReference;
-
-        public ProgressRunnable(MainActivity myClassInstance) {
-            activityWeakReference = new WeakReference<MainActivity>(myClassInstance);
-        }
-
-        @Override
-        public void run () {
-            MainActivity mainActivity = activityWeakReference.get();
-            if (mainActivity != null)
-                mainActivity.updateProgress();
-        }
-    }
-
-
-    private void finalProgress(){
-        songProgressHandler.postDelayed(new ProgressRunnable(this), 1000);
-    }
-
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -144,6 +123,14 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             mService = true;
             if (musicXService != null) {
                 MiniPlayerUpdate();
+            }
+            Uri data = getIntent().getData();
+            if (data != null) {
+                getIntent().setData(null);
+                try {
+                    openFile(data);
+                } catch (Exception ignored) {
+                }
             }
         }
 
@@ -168,6 +155,22 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             }
         }
     };
+
+    private void finalProgress() {
+        songProgressHandler.postDelayed(new ProgressRunnable(this), 1000);
+    }
+
+    /**
+     * play song from outside of the app
+     *
+     * @param data
+     */
+    private void openFile(Uri data) {
+        List<Song> playList = Helper.getSongMetaData(MainActivity.this, data.getPath());
+        if (playList.size() > 0) {
+            onSongSelected(playList, 0);
+        }
+    }
 
     @Override
     protected void onStart() {
@@ -254,7 +257,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         songProgressHandler = new Handler();
     }
 
-
     @Override
     public Fragment setFragment() {
         return MainFragment.newInstance();
@@ -269,7 +271,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     protected void fragmentLoader(int ContainerId, Fragment fragment) {
         super.fragmentLoader(ContainerId, fragment);
     }
-
 
     public void showFavorites() {
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
@@ -324,7 +325,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         musicXService.setPlaylist(songList, pos, true);
     }
 
-
     @Override
     public void onShuffleRequested(List<Song> songList, boolean play) {
         if (musicXService == null) {
@@ -359,7 +359,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             }
         }
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -638,7 +637,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
 
     }
 
-
     private void updateconfig() {
         playpausetoggle();
         if (musicXService.isPlaying()) {
@@ -651,6 +649,22 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    private static class ProgressRunnable implements Runnable {
+
+        private final WeakReference<MainActivity> activityWeakReference;
+
+        public ProgressRunnable(MainActivity myClassInstance) {
+            activityWeakReference = new WeakReference<MainActivity>(myClassInstance);
+        }
+
+        @Override
+        public void run() {
+            MainActivity mainActivity = activityWeakReference.get();
+            if (mainActivity != null)
+                mainActivity.updateProgress();
+        }
     }
 
 }

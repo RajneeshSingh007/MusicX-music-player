@@ -66,6 +66,7 @@ import com.afollestad.appthemeengine.Config;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.rks.musicx.R;
+import com.rks.musicx.data.loaders.DefaultSongLoader;
 import com.rks.musicx.data.model.Album;
 import com.rks.musicx.data.model.Artist;
 import com.rks.musicx.data.model.Song;
@@ -117,6 +118,7 @@ import static com.rks.musicx.misc.utils.Constants.One;
 import static com.rks.musicx.misc.utils.Constants.Three;
 import static com.rks.musicx.misc.utils.Constants.Two;
 import static com.rks.musicx.misc.utils.Constants.Zero;
+import static com.rks.musicx.misc.utils.Constants.fileExtensions;
 
 /*
  * Created by Coolalien on 24/03/2017.
@@ -1077,6 +1079,29 @@ public class Helper {
             ((View) value).setBackground(new ColorDrawable(color));
         } catch (Throwable ignore) {
         }
+    }
+
+    /**
+     * return song metadata from path
+     * @param context
+     * @param path
+     * @return
+     */
+    public static List<Song> getSongMetaData(Context context, String path) {
+        List<Song> songList = new ArrayList<>();
+        DefaultSongLoader defaultSongLoader = new DefaultSongLoader(context);
+        defaultSongLoader.setProvider(true);
+        defaultSongLoader.setUri(Uri.parse(String.valueOf(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)));
+        defaultSongLoader.setQueryTable(null);
+        for (String ext : fileExtensions) {
+            if (path.toLowerCase().endsWith(ext)) {
+                defaultSongLoader.setSelection(MediaStore.Audio.Media.DATA + " like ? ");
+                defaultSongLoader.setQueryTable2(new String[]{"%" + path + "%"});
+                defaultSongLoader.setSortOrder(Extras.getInstance().getSongSortOrder());
+                songList.add(defaultSongLoader.getSongData());
+            }
+        }
+        return songList;
     }
 
     /**

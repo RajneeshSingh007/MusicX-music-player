@@ -200,7 +200,12 @@ public class Constants {
     public static final String PLAY_SHORTCUTS = PACKAGENAME + "pause_shortcuts";
     public static final String SHORTCUTS_TYPES = PACKAGENAME + "shortcuts_type";
 
-
+    /**
+     * Files filter
+     */
+    public static final String fileExtensions[] = new String[]{
+            ".aac", ".mp3", ".wav", ".ogg", ".midi", ".3gp", ".mp4", ".m4a", ".amr", ".flac"
+    };
     /**
      * Permissions Array
      */
