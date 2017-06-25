@@ -9,6 +9,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -157,6 +158,13 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
         if (data == null) {
             return;
         }
+        try {
+            commonDatabase.addArtist(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            commonDatabase.close();
+        }
         artistlist = data;
         artistListAdapter.addDataList(data);
     }
@@ -247,20 +255,22 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
             return;
         }
         Extras.getInstance().getThemevalue(getActivity());
-        commonDatabase.addArtist(artistlist);
-        artistlist = commonDatabase.readArtist();
-        if (artistlist == null){
-            return;
-        }
-        if (!Extras.getInstance().saveData()){
-            try {
-                for (Artist artist : artistlist){
-                    artistArtwork = new ArtistArtwork(getActivity(), artist.getName());
-                    artistArtwork.execute();
+        //download artwork
+        CommonDatabase commonDatabase = new CommonDatabase(getContext(), DOWNLOAD_ARTWORK2, false);
+        List<Artist> downloadList = commonDatabase.readArtist();
+        try {
+            if (!Extras.getInstance().saveData()) {
+                if (downloadList == null || getActivity() == null) {
+                    return;
                 }
-            }finally {
-                commonDatabase.close();
+                for (Artist artist : downloadList) {
+                    artistArtwork = new ArtistArtwork(getContext(), artist.getName());
+                    artistArtwork.execute();
+                    Log.e("Artist_MetaData", artist.getName());
+                }
             }
+        } finally {
+            commonDatabase.close();
         }
     }
 

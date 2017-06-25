@@ -189,14 +189,4 @@
     <string name="search_lyrics">Search Lyrics</string>
     <string name="save_queue">Save Queue</string>
     <string name="audio_filter_title">Audio Filter</string>
-    <string name="com.crashlytics.CrashSubmissionPromptTitle" translatable="false">Send Crash Report?</string>
-    <string name="com.crashlytics.CrashSubmissionPromptMessage" translatable="false">
-        Looks like we crashed! Please help us fix the problem
-          by sending a crash report.</string>
-    <string name="com.crashlytics.CrashSubmissionSendTitle" translatable="false">
-          Send</string>
-    <string name="com.crashlytics.CrashSubmissionAlwaysSendTitle" translatable="false">
-          Always Send</string>
-    <string name="com.crashlytics.CrashSubmissionCancelTitle" translatable="false">
-          Don\'t Send</string>
 </resources>

@@ -11,6 +11,7 @@ import android.support.v4.database.DatabaseUtilsCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Pair;
@@ -42,6 +43,7 @@ import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.GestureListerner;
 import com.rks.musicx.misc.utils.Helper;
+import com.rks.musicx.misc.utils.StartSnapHelper;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.AlbumListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -207,6 +209,7 @@ public class ArtistFragment extends BaseLoaderFragment {
         bioView = (FrameLayout) rootView.findViewById(R.id.artistview_bio);
         albumrv = (RecyclerView) rootView.findViewById(R.id.artist_albumrv);
     }
+
     @Override
     protected void funtion() {
         background();
@@ -367,11 +370,16 @@ public class ArtistFragment extends BaseLoaderFragment {
     @Override
     protected void background() {
         songListAdapter.setLayoutId(R.layout.song_list);
+
         albumListAdapter = new AlbumListAdapter(getContext());
         albumListAdapter.setLayoutID(R.layout.recent_list);
+
+        SnapHelper startSnapHelper = new StartSnapHelper();
+
         CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
         customLayoutManager.setSmoothScrollbarEnabled(true);
         customLayoutManager.setOrientation(CustomLayoutManager.HORIZONTAL);
+
         albumrv.setAdapter(albumListAdapter);
         albumrv.setLayoutManager(customLayoutManager);
         albumrv.setHasFixedSize(true);
@@ -379,6 +387,7 @@ public class ArtistFragment extends BaseLoaderFragment {
         albumrv.setVerticalScrollBarEnabled(false);
         albumrv.setHorizontalScrollBarEnabled(false);
         albumrv.setScrollBarSize(0);
+        startSnapHelper.attachToRecyclerView(albumrv);
 
         CustomLayoutManager c = new CustomLayoutManager(getContext());
         c.setSmoothScrollbarEnabled(true);
@@ -432,23 +441,21 @@ public class ArtistFragment extends BaseLoaderFragment {
     * ArtistCover
     */
     private void artistCover() {
-       if (!Extras.getInstance().saveData()){
-           artistArtwork = new ArtistArtwork(getContext(), artist.getName());
-           artistArtwork.execute();
-       }
-        if (ArtworkUtils.getArtistFileName(getContext(), artist.getName()).equalsIgnoreCase(artist.getName())){
-            ArtworkUtils.ArtworkLoader(getContext(), 300, 600,ArtworkUtils.getArtistCoverPath(getContext(),artist.getName()).getAbsolutePath(), new palette() {
-                @Override
-                public void palettework(Palette palette) {
-                    final int[] colors = Helper.getAvailableColor(getContext(), palette);
-                    if (getActivity() == null) {
-                        return;
-                    }
-                    Helper.setColor(getActivity(), colors[0], toolbar);
-                    Helper.animateViews(getContext(), toolbar, colors[0]);
-                }
-            }, artworkView);
+        if (!Extras.getInstance().saveData()) {
+            artistArtwork = new ArtistArtwork(getContext(), artist.getName());
+            artistArtwork.execute();
         }
+        ArtworkUtils.ArtworkLoader(getContext(), 300, 600, helper.loadArtistImage(artist.getName()), new palette() {
+            @Override
+            public void palettework(Palette palette) {
+                final int[] colors = Helper.getAvailableColor(getContext(), palette);
+                if (getActivity() == null) {
+                    return;
+                }
+                Helper.setColor(getActivity(), colors[0], toolbar);
+                Helper.animateViews(getContext(), toolbar, colors[0]);
+            }
+        }, artworkView);
 
     }
 
@@ -539,9 +546,9 @@ public class ArtistFragment extends BaseLoaderFragment {
     @Override
     public void onDestroy() {
         if (!Extras.getInstance().saveData()){
-           if (artistArtwork != null){
-               artistArtwork.cancel(true);
-           }
+            if (artistArtwork != null) {
+                artistArtwork.cancel(true);
+            }
         }
         super.onDestroy();
     }

@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -58,7 +59,6 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
     private Helper helper;
     private SearchView searchView;
     private AlbumArtwork albumArtwork;
-    private CommonDatabase commonDatabase;
     private android.support.v7.view.ActionMode mActionMode;
     private BaseRecyclerViewAdapter.OnItemClickListener onClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
 
@@ -256,16 +256,18 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
             return;
         }
         Extras.getInstance().getThemevalue(getActivity());
-        commonDatabase.add(getSongList());
-        songList = commonDatabase.readLimit(-1, null);
-        if (songList == null){
-            return;
-        }
+        //download artwork
+        CommonDatabase commonDatabase = new CommonDatabase(getContext(), DOWNLOAD_ARTWORK, true);
+        List<Song> downloadList = commonDatabase.readLimit(-1, null);
         try {
+            if (downloadList == null || getActivity() == null) {
+                return;
+            }
             if (!Extras.getInstance().saveData()){
-                for (Song song : songList) {
+                for (Song song : downloadList) {
                     albumArtwork = new AlbumArtwork(getActivity(), song.getArtist(), song.getAlbum());
                     albumArtwork.execute();
+                    Log.e("MetaData", song.getTitle());
                 }
             }
         }finally {
@@ -296,9 +298,7 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
         rv.setPopupBgColor(colorAccent);
         rv.setItemAnimator(new DefaultItemAnimator());
         helper = new Helper(getContext());
-        songList = new ArrayList<>();
         background();
-        commonDatabase = new CommonDatabase(getContext(), DOWNLOAD_ARTWORK, true);
     }
 
     @Override
@@ -323,7 +323,6 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
         rv.setAdapter(songListAdapter);
         songListAdapter.setOnItemClickListener(onClick);
         songListAdapter.setOnLongClickListener(onLongClick);
-
     }
 
     @Override
@@ -407,7 +406,6 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
 
     /**
      * MultiSelection SongList
-     *
      * @return
      */
     private List<Song> getSelectedSong() {

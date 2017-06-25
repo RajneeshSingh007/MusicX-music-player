@@ -73,6 +73,7 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
     @Override
     public void onBindViewHolder(ArtistViewHolder holder, int position) {
         Artist artists = getItem(position);
+        Helper helper = new Helper(getContext());
         if (layoutID == R.layout.item_grid_view) {
             int pos = holder.getAdapterPosition();
             if (lastpos < pos) {
@@ -84,31 +85,27 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
             }
             holder.ArtistName.setText(getContext().getResources().getQuantityString(R.plurals.albums_count, artists.getAlbumCount(), artists.getAlbumCount()));
             holder.AlbumCount.setText(artists.getName());
-            if (ArtworkUtils.getArtistFileName(getContext(), artists.getName()).equalsIgnoreCase(artists.getName())){
-                ArtworkUtils.ArtworkLoader(getContext(), 300, 600, ArtworkUtils.getArtistCoverPath(getContext(), artists.getName()).getAbsolutePath(), new palette() {
-                    @Override
-                    public void palettework(Palette palette) {
-                        final int[] colors = Helper.getAvailableColor(getContext(), palette);
-                        holder.backgroundColor.setBackgroundColor(colors[0]);
-                        holder.ArtistName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
-                        holder.AlbumCount.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
-                        Helper.animateViews(getContext(), holder.backgroundColor, colors[0]);
-                    }
-                }, holder.ArtistsArtwork);
-            }
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, helper.loadArtistImage(artists.getName()), new palette() {
+                @Override
+                public void palettework(Palette palette) {
+                    final int[] colors = Helper.getAvailableColor(getContext(), palette);
+                    holder.backgroundColor.setBackgroundColor(colors[0]);
+                    holder.ArtistName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
+                    holder.AlbumCount.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
+                    Helper.animateViews(getContext(), holder.backgroundColor, colors[0]);
+                }
+            }, holder.ArtistsArtwork);
             holder.menu.setVisibility(View.GONE);
         }
         if (layoutID == R.layout.item_list_view) {
             holder.ArtistListName.setText(artists.getName());
             holder.ArtistListAlbumCount.setText(getContext().getResources().getQuantityString(R.plurals.albums_count, artists.getAlbumCount(), artists.getAlbumCount()));
-            if (ArtworkUtils.getArtistFileName(getContext(), artists.getName()).equalsIgnoreCase(artists.getName())){
-                ArtworkUtils.ArtworkLoader(getContext(),300, 600, ArtworkUtils.getArtistCoverPath(getContext(), artists.getName()).getAbsolutePath(), new palette() {
-                    @Override
-                    public void palettework(Palette palette) {
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, helper.loadArtistImage(artists.getName()), new palette() {
+                @Override
+                public void palettework(Palette palette) {
 
-                    }
-                }, holder.ArtistListArtwork);
-            }
+                }
+            }, holder.ArtistListArtwork);
             if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 holder.ArtistListName.setTextColor(Color.WHITE);
                 holder.ArtistListAlbumCount.setTextColor(ContextCompat.getColor(getContext(), R.color.darkthemeTextColor));

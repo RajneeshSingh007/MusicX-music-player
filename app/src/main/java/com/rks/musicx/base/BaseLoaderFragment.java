@@ -26,10 +26,13 @@ import com.rks.musicx.data.loaders.FavoritesLoader;
 import com.rks.musicx.data.loaders.RecentlyPlayedLoader;
 import com.rks.musicx.data.loaders.TrackLoader;
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.database.CommonDatabase;
 import com.rks.musicx.ui.adapters.SongListAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.rks.musicx.misc.utils.Constants.DOWNLOAD_ARTWORK;
 
 /**
  * Created by Coolalien on 5/17/2017.
@@ -37,23 +40,34 @@ import java.util.List;
 public abstract class BaseLoaderFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Song>>{
 
 
-    protected abstract int setLayout();
-    protected abstract void ui(View view);
-    protected abstract void funtion();
-    protected abstract String filter();
-    protected abstract String[] argument();
-    protected abstract String sortOder();
-    protected abstract void background();
-    protected abstract boolean isTrack ();
-    protected abstract boolean isRecentPlayed();
-    protected abstract boolean isFav();
-    protected abstract int getLimit();
-    abstract public void load();
+    public final int trackloader = 1, recentlyplayed = 2, favloader = 3;
     public List<Song> songList;
-
-    public final int trackloader = 1,recentlyplayed = 2, favloader = 3;
-
     public SongListAdapter songListAdapter;
+    private CommonDatabase commonDatabase;
+
+    protected abstract int setLayout();
+
+    protected abstract void ui(View view);
+
+    protected abstract void funtion();
+
+    protected abstract String filter();
+
+    protected abstract String[] argument();
+
+    protected abstract String sortOder();
+
+    protected abstract void background();
+
+    protected abstract boolean isTrack ();
+
+    protected abstract boolean isRecentPlayed();
+
+    protected abstract boolean isFav();
+
+    protected abstract int getLimit();
+
+    abstract public void load();
 
     @Nullable
     @Override
@@ -63,6 +77,7 @@ public abstract class BaseLoaderFragment extends Fragment implements LoaderManag
         songList = new ArrayList<>();
         ui(view);
         funtion();
+        commonDatabase = new CommonDatabase(getContext(), DOWNLOAD_ARTWORK, true);
         return view;
     }
 
@@ -91,6 +106,13 @@ public abstract class BaseLoaderFragment extends Fragment implements LoaderManag
             return;
         }
         if (isTrack() || isFav() || isRecentPlayed()){
+            try {
+                commonDatabase.add(data);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                commonDatabase.close();
+            }
             songListAdapter.addDataList(data);
             songList = data;
         }

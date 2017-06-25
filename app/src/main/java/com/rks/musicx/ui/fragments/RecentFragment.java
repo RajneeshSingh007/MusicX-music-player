@@ -8,6 +8,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SnapHelper;
 import android.view.View;
 import android.widget.TextView;
 
@@ -20,6 +21,7 @@ import com.rks.musicx.data.model.Song;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
+import com.rks.musicx.misc.utils.StartSnapHelper;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.SongListAdapter;
 
@@ -44,6 +46,7 @@ import java.util.List;
 
 public class RecentFragment extends BaseLoaderFragment {
 
+    private final int recentloader = 5;
     private TextView recentName, recentPlayed, More, RecentlyAddedMore;
     private int accentcolor;
     private RecyclerView recentlyPlaying;
@@ -52,9 +55,6 @@ public class RecentFragment extends BaseLoaderFragment {
     private RecentlyAddedFragment recentlyAddedFragment;
     private Helper helper;
     private SongListAdapter recentlyPlayed;
-    private final int recentloader = 5;
-
-
     private BaseRecyclerViewAdapter.OnItemClickListener onClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
 
         @Override
@@ -86,11 +86,34 @@ public class RecentFragment extends BaseLoaderFragment {
             }
         }
     };
+    private LoaderManager.LoaderCallbacks<List<Song>> recentPlaying = new LoaderManager.LoaderCallbacks<List<Song>>() {
+        @Override
+        public Loader<List<Song>> onCreateLoader(int id, Bundle args) {
+            RecentlyPlayedLoader playedLoader = new RecentlyPlayedLoader(getContext(), 9);
+            if (id == recentloader) {
+                return playedLoader;
+            }
+            return null;
+        }
+
+        @Override
+        public void onLoadFinished(Loader<List<Song>> loader, List<Song> data) {
+            if (data == null) {
+                return;
+            }
+            recentlyPlayed.addDataList(data);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<Song>> loader) {
+            loader.reset();
+            recentlyPlayed.notifyDataSetChanged();
+        }
+    };
 
     public static RecentFragment newInstance() {
         return new RecentFragment();
     }
-
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -164,6 +187,7 @@ public class RecentFragment extends BaseLoaderFragment {
         CustomLayoutManager customLayoutManager1 = new CustomLayoutManager(getContext());
         customLayoutManager1.setSmoothScrollbarEnabled(true);
         customLayoutManager1.setOrientation(LinearLayoutManager.HORIZONTAL);
+        SnapHelper startSnapHelper = new StartSnapHelper();
 
         recentlyAdding.setLayoutManager(customLayoutManager1);
         recentlyAdding.setNestedScrollingEnabled(false);
@@ -175,6 +199,7 @@ public class RecentFragment extends BaseLoaderFragment {
         songListAdapter.setOnItemClickListener(onClicks);
         recentlyAdding.setItemAnimator(new DefaultItemAnimator());
         recentlyAdding.setHasFixedSize(true);
+        startSnapHelper.attachToRecyclerView(recentlyAdding);
         getLoaderManager().initLoader(trackloader, null, RecentFragment.this);
 
         CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
@@ -190,6 +215,7 @@ public class RecentFragment extends BaseLoaderFragment {
         recentlyPlayed.setOnItemClickListener(onClick);
         recentlyPlaying.setItemAnimator(new DefaultItemAnimator());
         recentlyPlaying.setHasFixedSize(true);
+        startSnapHelper.attachToRecyclerView(recentlyPlaying);
         getLoaderManager().initLoader(recentloader, null, recentPlaying);
     }
 
@@ -213,37 +239,11 @@ public class RecentFragment extends BaseLoaderFragment {
         return 0;
     }
 
-
     @Override
     public void load() {
         getLoaderManager().restartLoader(recentloader, null, recentPlaying);
         getLoaderManager().restartLoader(trackloader, null, this);
     }
-
-    private LoaderManager.LoaderCallbacks<List<Song>> recentPlaying = new LoaderManager.LoaderCallbacks<List<Song>>() {
-        @Override
-        public Loader<List<Song>> onCreateLoader(int id, Bundle args) {
-            RecentlyPlayedLoader playedLoader = new RecentlyPlayedLoader(getContext(), 9);
-            if (id == recentloader) {
-                return playedLoader;
-            }
-            return null;
-        }
-
-        @Override
-        public void onLoadFinished(Loader<List<Song>> loader, List<Song> data) {
-            if (data == null){
-                return;
-            }
-            recentlyPlayed.addDataList(data);
-        }
-
-        @Override
-        public void onLoaderReset(Loader<List<Song>> loader) {
-            loader.reset();
-            recentlyPlayed.notifyDataSetChanged();
-        }
-    };
 
 
 }

@@ -212,12 +212,12 @@ public class ArtworkUtils {
      */
     private static Target loadArtwork(Context context, int size, int bigsize, long key, palette palettework, bitmap bitmapwork) {
         if (Extras.getInstance().getHdArtwork()){
-           return Glide.with(context)
-                   .load(uri(key))
-                   .asBitmap()
-                   .diskCacheStrategy(DiskCacheStrategy.NONE)
-                   .skipMemoryCache(true)
-                   .override(bigsize, bigsize)
+            return Glide.with(context)
+                    .load(uri(key))
+                    .asBitmap()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .override(bigsize, bigsize)
                     .error(R.mipmap.ic_launcher)
                     .placeholder(R.mipmap.ic_launcher)
                     .fitCenter()
@@ -227,7 +227,7 @@ public class ArtworkUtils {
                         public void onPaletteLoaded(@Nullable Palette palette) {
                             palettework.palettework(palette);
                         }
-                     }))
+                    }))
                     .into(new SimpleTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
@@ -385,12 +385,8 @@ public class ArtworkUtils {
      */
     public static void ArtworkLoader(Context context, int size, int bigsize, String album, String path, long key, palette palettework, bitmap bitmapwork) {
         if (Extras.getInstance().getDownloadedArtwork()){
-            if (getAlbumCoverPath(context, album).exists()) {
-                // fix mistmatch artwork
-                if (getAlbumFileName(context, album).equalsIgnoreCase(album)){
-                    loadArtwork(context, size, bigsize, getAlbumCoverPath(context, album).getAbsolutePath(), palettework, bitmapwork);
-                }
-            }
+            Helper helper = new Helper(context);
+            loadArtwork(context, size, bigsize, helper.loadAlbumImage(album), palettework, bitmapwork);
         }else {
             if (path == null){
                 loadArtwork(context, size, bigsize, key, palettework, bitmapwork);
@@ -411,12 +407,8 @@ public class ArtworkUtils {
      */
     public static void ArtworkLoader(Context context, int size, int bigsize, String album, String path, long key, palette palettework, ImageView imageView) {
         if (Extras.getInstance().getDownloadedArtwork()){
-            if (getAlbumCoverPath(context, album).exists()) {
-                // fix mistmatch artwork
-                if (getAlbumFileName(context, album).equalsIgnoreCase(album)){
-                    loadArtwork(context, size, bigsize, getAlbumCoverPath(context, album).getAbsolutePath(), palettework, imageView);
-                }
-            }
+            Helper helper = new Helper(context);
+            loadArtwork(context, size, bigsize, helper.loadAlbumImage(album), palettework, imageView);
         }else {
             if (path == null){
                 loadArtwork(context, size, bigsize, key, palettework, imageView);
@@ -565,6 +557,7 @@ public class ArtworkUtils {
             }
         }
         return null;
+
     }
 
 
