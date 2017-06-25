@@ -162,7 +162,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
 
     /**
      * play song from outside of the app
-     *
      * @param data
      */
     private void openFile(Uri data) {
