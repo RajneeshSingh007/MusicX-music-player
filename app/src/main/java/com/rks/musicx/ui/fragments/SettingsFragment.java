@@ -9,6 +9,7 @@ import android.preference.PreferenceFragment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
@@ -246,24 +247,13 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         removeTabs.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Extras.getInstance().getmPreferences().edit().remove(REMOVE_TABLIST).commit();
-                integerList.clear();
-                new MaterialDialog.Builder(getActivity())
-                        .title("Remove Tabs")
-                        .items(R.array.removetabsName)
-                        .autoDismiss(true)
-                        .itemsCallbackMultiChoice(null, (dialog, which, text) -> {
-                            for (int index : which){
-                                integerList.add(index);
-                                Log.d("SettingsFragment", String.valueOf(dialog.getSelectedIndex()));
-                            }
-                            Extras.getInstance().saveRemoveTab(integerList);
-                            return true;
-                        })
-                        .buttonRippleColor(accentcolor)
-                        .onNeutral((dialog, which) -> dialog.clearSelectedIndices())
-                        .positiveText(R.string.okay)
-                        .show();
+                try {
+                    Toast.makeText(getActivity(), "slide left to remove tab", Toast.LENGTH_LONG).show();
+                    Extras.getInstance().getmPreferences().edit().remove(REMOVE_TABLIST).commit();
+                } finally {
+                    TabRemoveFragment tabRemoveFragment = new TabRemoveFragment();
+                    tabRemoveFragment.show(getActivity().getFragmentManager(), null);
+                }
                 return true;
             }
         });
@@ -360,7 +350,6 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
             Extras.getInstance().getmPreferences().edit().putBoolean(FADETRACK, false).commit();
         }
     }
-
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object o) {

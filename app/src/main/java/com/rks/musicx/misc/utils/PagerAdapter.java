@@ -90,7 +90,7 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        if (position >= getCount()) {
+        if (position <= getCount()) {
             FragmentManager manager = ((Fragment) object).getFragmentManager();
             FragmentTransaction trans = manager.beginTransaction();
             trans.remove((Fragment) object);
