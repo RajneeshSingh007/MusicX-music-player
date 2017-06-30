@@ -13,29 +13,12 @@ package com.rks.musicx.data.network;
  * limitations under the License.
  */
 
-import com.rks.musicx.data.network.VagModel.Vag;
-import com.rks.musicx.data.network.model.Album;
-import com.rks.musicx.data.network.model.Artist;
-
-import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Query;
-
 /**
  * Created by Coolalien on 5/7/2017.
  */
 public interface Services {
 
-    @GET("search.php?apikey=b8308eb4f31bb04e4644e8c2a467bb37")
-    Call<Vag> getLyrics(@Query("art") String artist, @Query("mus") String song);
-
-    @GET("search.php?extra=alb&apikey=b8308eb4f31bb04e4644e8c2a467bb37&extra=alb&nolyrics=1")
-    Call<Vag> getAlbumart(@Query("art") String artist, @Query("mus") String song);
-
-    @GET("?method=artist.getinfo&api_key=658dd0ee3563543f1087e014b74be8a6&format=json")
-    Call<Artist> getartist(@Query("artist") String artist);
-
-    @GET("?method=album.getinfo&api_key=658dd0ee3563543f1087e014b74be8a6&format=json")
-    Call<Album> getalbum(@Query("album") String album, @Query("artist") String artist);
+    String lastFmApi = "658dd0ee3563543f1087e014b74be8a6";
+    String lyricsApi = "b8308eb4f31bb04e4644e8c2a467bb37";
 
 }

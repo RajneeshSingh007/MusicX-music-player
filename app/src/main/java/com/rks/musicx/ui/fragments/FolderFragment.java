@@ -5,12 +5,14 @@ import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
@@ -20,6 +22,7 @@ import com.rks.musicx.data.loaders.FolderLoader;
 import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.model.Folder;
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.interfaces.Action;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
@@ -58,19 +61,64 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
     private FolderAdapter fileadapter;
     private Helper helper;
     private SearchView searchView;
+    private android.support.v7.view.ActionMode mActionMode;
 
+    /**
+     * onLongClick
+     */
+    private BaseRecyclerViewAdapter.OnLongClickListener onLongClick = new BaseRecyclerViewAdapter.OnLongClickListener() {
+        @Override
+        public void onLongItemClick(int position) {
+            mActionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(Helper.getActionCallback(FolderFragment.this, ((MainActivity) getActivity()), trackloader, getContext(), FolderFragment.this, new Action() {
+                @Override
+                public void clear() {
+                    if (mActionMode != null) {
+                        mActionMode.setTitle("");
+                        mActionMode.finish();
+                        mActionMode = null;
+                    }
+                }
+            }, songListAdapter));
+            Helper.setActionModeBackgroundColor(mActionMode, Config.primaryColor(getContext(), Helper.getATEKey(getContext())));
+            if (position > 0) {
+                if (mActionMode != null) {
+                    mActionMode.setTitle(position + " selected");
+                }
+            } else {
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
+            }
+        }
+    };
+
+    /**
+     * Single Click
+     */
     private BaseRecyclerViewAdapter.OnItemClickListener songOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
-            switch (view.getId()) {
-                case R.id.item_view:
-                    ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
-                    Extras.getInstance().saveSeekServices(0);
-                    break;
-                case R.id.menu_button:
-                    helper.showMenu(false, trackloader, FolderFragment.this, FolderFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
-                    break;
+            if (songListAdapter.isMultiselect()) {
+                if (position > 0) {
+                    if (mActionMode != null) {
+                        mActionMode.setTitle(position + " selected");
+                    }
+                } else {
+                    if (mActionMode != null) {
+                        mActionMode.finish();
+                    }
+                }
+            } else {
+                switch (view.getId()) {
+                    case R.id.item_view:
+                        ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
+                        Extras.getInstance().saveSeekServices(0);
+                        break;
+                    case R.id.menu_button:
+                        helper.showMenu(false, trackloader, FolderFragment.this, FolderFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                        break;
 
+                }   
             }
         }
     };
@@ -101,13 +149,15 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
         }
     };
 
+    /**
+     * Folder click
+     */
     private BaseRecyclerViewAdapter.OnItemClickListener onClik = new BaseRecyclerViewAdapter.OnItemClickListener() {
 
         @Override
         public void onItemClick(int position, View view) {
-            folderrv.smoothScrollToPosition(position);
             switch (view.getId()) {
-                case R.id.folder_view:
+                case R.id.item_view:
                     if (fileadapter.getSnapshot().size() > 0) {
                         adapterLoader(fileadapter.getItem(position));
                     }
@@ -115,6 +165,7 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
             }
         }
     };
+
 
     private void adapterLoader(Folder folderModel) {
         currentDir = new Folder(folderModel.getPath());
@@ -181,6 +232,7 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
         fileadapter.setOnItemClickListener(onClik);
         folderrv.setHasFixedSize(true);
         initLoader();
+        songListAdapter.setOnLongClickListener(onLongClick);
         songListAdapter.setOnItemClickListener(songOnClick);
         folderrv.setAdapter(fileadapter);
         getLoaderManager().initLoader(folderloader, null, folderLoaderCallback);
@@ -220,10 +272,10 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
     }
 
 
-
     public Folder getCurrentDir() {
         return currentDir;
     }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -238,6 +290,11 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.shuffle_all:
+                if (songListAdapter.getSnapshot().size() > 0) {
+                    ((MainActivity) getActivity()).onShuffleRequested(songListAdapter.getSnapshot(), true);
+                }
+                break;
             case R.id.menu_sort_by_az:
                 Extras.getInstance().setSongSortOrder(SortOrder.SongSortOrder.SONG_A_Z);
                 load();
@@ -284,9 +341,15 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
 
     @Override
     public boolean onQueryTextChange(String newText) {
+
         final List<Song> filterlist = helper.filter(songList, newText);
-        songListAdapter.setFilter(filterlist);
-        return true;
+        if (filterlist.size() > 0) {
+            songListAdapter.setFilter(filterlist);
+            return true;
+        } else {
+            Toast.makeText(getContext(), "No data found...", Toast.LENGTH_SHORT).show();
+            return false;
+        }
     }
 
 }

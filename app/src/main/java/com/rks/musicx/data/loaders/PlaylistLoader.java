@@ -35,10 +35,10 @@ public class PlaylistLoader extends BaseAsyncTaskLoader<List<Song>> {
 
     private static final String[] sProjection = {
             MediaStore.Audio.Playlists.Members.AUDIO_ID,
-            MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.ALBUM_ID,
-            MediaStore.Audio.Media.ARTIST_ID, MediaStore.Audio.Media.TRACK,
-            MediaStore.Audio.Media.DATA
+            MediaStore.Audio.Playlists.Members.TITLE, MediaStore.Audio.Playlists.Members.ARTIST,
+            MediaStore.Audio.Playlists.Members.ALBUM, MediaStore.Audio.Playlists.Members.ALBUM_ID,
+            MediaStore.Audio.Playlists.Members.ARTIST_ID, MediaStore.Audio.Playlists.Members.TRACK,
+            MediaStore.Audio.Playlists.Members.DATA
     };
 
     private long mPlaylistId;
@@ -52,25 +52,22 @@ public class PlaylistLoader extends BaseAsyncTaskLoader<List<Song>> {
     public List<Song> loadInBackground() {
         List<Song> playlist = new ArrayList<>();
         String sortorder = MediaStore.Audio.Playlists.Members.PLAY_ORDER;
+        if (mPlaylistId == 0) {
+            return null;
+        }
         if (PermissionChecker.checkCallingOrSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED) {
             Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylistId), sProjection, null, null, sortorder);
             if (cursor != null && cursor.moveToFirst()) {
-                int idCol = cursor
-                        .getColumnIndex(MediaStore.Audio.Playlists.Members.AUDIO_ID);
+                int idCol = cursor.getColumnIndex(MediaStore.Audio.Playlists.Members.AUDIO_ID);
                 if (idCol == -1) {
-                    idCol = cursor.getColumnIndex(MediaStore.Audio.Media._ID);
+                    idCol = cursor.getColumnIndex(MediaStore.Audio.Playlists.Members._ID);
                 }
-                int titleCol = cursor
-                        .getColumnIndex(MediaStore.Audio.Media.TITLE);
-                int artistCol = cursor
-                        .getColumnIndex(MediaStore.Audio.Media.ARTIST);
-                int albumCol = cursor
-                        .getColumnIndex(MediaStore.Audio.Media.ALBUM);
-                int albumIdCol = cursor
-                        .getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
-                int trackCol = cursor
-                        .getColumnIndex(MediaStore.Audio.Media.TRACK);
-                int datacol = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+                int titleCol = cursor.getColumnIndex(MediaStore.Audio.Playlists.Members.TITLE);
+                int artistCol = cursor.getColumnIndex(MediaStore.Audio.Playlists.Members.ARTIST);
+                int albumCol = cursor.getColumnIndex(MediaStore.Audio.Playlists.Members.ALBUM);
+                int albumIdCol = cursor.getColumnIndex(MediaStore.Audio.Playlists.Members.ALBUM_ID);
+                int trackCol = cursor.getColumnIndex(MediaStore.Audio.Playlists.Members.TRACK);
+                int datacol = cursor.getColumnIndex(MediaStore.Audio.Playlists.Members.DATA);
                 do {
                     long id = cursor.getLong(idCol);
                     String title = cursor.getString(titleCol);

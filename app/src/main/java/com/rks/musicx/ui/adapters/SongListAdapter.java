@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Song;
@@ -83,7 +84,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
         if (layout == R.layout.song_list) {
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, song.getAlbum(), null, song.getAlbumId(), new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, song.getAlbum(), song.getAlbumId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
 
@@ -91,6 +92,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             }, holder.SongArtwork);
             holder.menu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
             Drawable drawable = holder.menu.getDrawable();
+            int accentColor = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
             if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
                 drawable.setTint(Color.WHITE);
                 holder.SongTitle.setTextColor(Color.WHITE);
@@ -100,7 +102,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
                 drawable.setTint(ContextCompat.getColor(getContext(), R.color.MaterialGrey));
                 holder.SongTitle.setTextColor(Color.BLACK);
                 holder.SongArtist.setTextColor(Color.DKGRAY);
-                holder.itemView.setBackgroundColor(storeChecked.get(position) ? ContextCompat.getColor(getContext(), R.color.cardview_dark_background) : Color.TRANSPARENT);
+                holder.itemView.setBackgroundColor(storeChecked.get(position) ? Helper.getColorWithAplha(accentColor, 0.7f) : Color.TRANSPARENT);
             }
         }
         if (layout == R.layout.detail_list) {
@@ -132,7 +134,7 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             }
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, song.getAlbum(), null, song.getAlbumId(), new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, song.getAlbum(), song.getAlbumId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
                     final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -150,7 +152,6 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
             }
         }
     }
-
 
     public int getLayout() {
         return layout;

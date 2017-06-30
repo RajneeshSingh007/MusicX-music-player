@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
+import com.rks.musicx.BuildConfig;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseActivity;
 import com.rks.musicx.misc.utils.Extras;
@@ -78,7 +79,7 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
         guide_detail.setOnClickListener(view -> Helper.GuidLines(AboutActivity.this));
         contact_detail.setText(Html.fromHtml("<a href=\"mailto:developerrajneeshsingh@gmail.com\">Mail us</a>"));
         contact_detail.setMovementMethod(LinkMovementMethod.getInstance());
-        about_app_ver.setText("v 1.4.2");
+        about_app_ver.setText("v." + BuildConfig.VERSION_NAME);
         developer_name.setText(DEVELOPER_NAME);
         licenses_detail.setText("Licenses");
         testerName.setText(getString(R.string.testerName));

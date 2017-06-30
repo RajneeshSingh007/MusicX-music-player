@@ -69,4 +69,23 @@
         android:title="@string/action_share"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/more"
+        android:title="@string/more"
+        app:showAsAction="never">
+
+        <menu>
+
+            <item
+                android:id="@+id/go_to_album"
+                android:title="@string/go_to_albums"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/go_to_artist"
+                android:title="@string/go_to_artists"
+                app:showAsAction="never" />
+
+        </menu>
+    </item>
 </menu>

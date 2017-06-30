@@ -14,6 +14,7 @@ import com.rks.musicx.ui.fragments.Playing1Fragment;
 import com.rks.musicx.ui.fragments.Playing2Fragment;
 import com.rks.musicx.ui.fragments.Playing3Fragment;
 import com.rks.musicx.ui.fragments.Playing4Fragment;
+
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 import static com.rks.musicx.misc.utils.Constants.One;

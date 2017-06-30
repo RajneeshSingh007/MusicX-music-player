@@ -31,8 +31,8 @@ android {
         applicationId "com.rks.musicx"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 62
-        versionName '1.4.2'
+        versionCode 63
+        versionName '1.4.3'
         vectorDrawables.useSupportLibrary = true
         renderscriptTargetApi 25
         renderscriptSupportModeEnabled true
@@ -46,7 +46,6 @@ android {
             debuggable false
             shrinkResources true
             zipAlignEnabled true
-            shrinkResources true
             signingConfig signingConfigs.config
             proguardFile 'E:/AndroidDevelopment/AppDevelopment/appDev/MusicX/app/proguard-rules.pro'
         }
@@ -84,6 +83,7 @@ dependencies {
                 Dialog
                  */
     compile files('libs/jaudiotagger.jar')
+
     /*
                 Google Package
                  */
@@ -105,12 +105,7 @@ dependencies {
                 Intro
                  */
     compile 'com.github.paolorotolo:appintro:4.0.0'
-    /*
-                Networking
-                 */
-    compile 'com.squareup.retrofit2:retrofit:2.3.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
-    compile 'com.google.code.gson:gson:2.7'
+
     /*
                 ImageLoader
                 */
@@ -134,4 +129,5 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
     }
+    compile 'com.amitshekhar.android:android-networking:1.0.0'
 }

@@ -38,7 +38,7 @@ public class FolderLoader extends BaseAsyncTaskLoader<List<Folder>> {
     public List<Folder> loadInBackground() {
         List<Folder> files = new ArrayList<>();
         if (permissionManager.isExternalReadStorageGranted(getContext())) {
-            files = folderModels.listFilesSorted();
+            files = folderModels.listFilesSorted(getContext());
             return files;
         } else {
             Log.d("Folder", "Permission not granted");

@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
@@ -206,6 +207,9 @@ public class RecentPlayedFragment extends BaseLoaderFragment implements SearchVi
         return limit;
     }
 
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -231,12 +235,6 @@ public class RecentPlayedFragment extends BaseLoaderFragment implements SearchVi
         getLoaderManager().restartLoader(recentlyplayed, null, this);
     }
 
-
-
-    public void setLimit(int limit) {
-        this.limit = limit;
-    }
-
     public boolean isgridView() {
         return isgridView;
     }
@@ -252,9 +250,15 @@ public class RecentPlayedFragment extends BaseLoaderFragment implements SearchVi
 
     @Override
     public boolean onQueryTextChange(String newText) {
+
         final List<Song> filterlist = helper.filter(songList, newText);
-        songListAdapter.setFilter(filterlist);
-        return true;
+        if (filterlist.size() > 0) {
+            songListAdapter.setFilter(filterlist);
+            return true;
+        } else {
+            Toast.makeText(getContext(), "No data found...", Toast.LENGTH_SHORT).show();
+            return false;
+        }
     }
 
 }

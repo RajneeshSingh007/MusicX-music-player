@@ -54,6 +54,7 @@ public class FolderAdapter extends BaseRecyclerViewAdapter<Folder, FolderAdapter
     @Override
     public void onBindViewHolder(FolderAdapter.Folderviewholder holder, int position) {
         Folder file = getItem(position);
+        holder.filename.setTypeface(Helper.getFont(getContext()));
         Glide.with(getContext())
                 .load(R.drawable.folder)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -98,7 +99,6 @@ public class FolderAdapter extends BaseRecyclerViewAdapter<Folder, FolderAdapter
             thumbnail = (ImageView) itemView.findViewById(R.id.thumbnail);
             filename = (TextView) itemView.findViewById(R.id.filename);
             itemView.setOnClickListener(this);
-            itemView.findViewById(R.id.folder_view).setOnClickListener(this);
         }
 
         @Override

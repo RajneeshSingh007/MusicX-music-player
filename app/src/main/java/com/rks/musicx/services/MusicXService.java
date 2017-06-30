@@ -157,6 +157,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     private CommonDatabase recent, queue;
     private List<Song> queueList = new ArrayList<>();
     private boolean onPlayNotify = false;
+    private Helper helper;
     private PhoneStateListener phoneStateListener = new PhoneStateListener() {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
@@ -263,6 +264,7 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
         }
         favHelper = new FavHelper(this);
         handler = new Handler();
+        helper = new Helper(this);
     }
 
     @Override
@@ -576,39 +578,37 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     private void widgetCover() {
         int size = getResources().getDimensionPixelSize(R.dimen.cover_size);
         if (Extras.getInstance().getDownloadedArtwork()){
-            if (ArtworkUtils.getAlbumCoverPath(MusicXService.this, getsongAlbumName()).exists()) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Glide.with(MusicXService.this)
-                                .load(ArtworkUtils.getAlbumCoverPath(MusicXService.this, getsongAlbumName()))
-                                .asBitmap()
-                                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                .skipMemoryCache(true)
-                                .placeholder(R.mipmap.ic_launcher)
-                                .error(R.mipmap.ic_launcher)
-                                .format(DecodeFormat.PREFER_ARGB_8888)
-                                .override(size, size)
-                                .transform(new CropCircleTransformation(MusicXService.this))
-                                .into(new SimpleTarget<Bitmap>() {
-                                    @Override
-                                    public void onLoadStarted(Drawable placeholder) {
-                                    }
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Glide.with(MusicXService.this)
+                            .load(helper.loadAlbumImage(getsongAlbumName()))
+                            .asBitmap()
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
+                            .placeholder(R.mipmap.ic_launcher)
+                            .error(R.mipmap.ic_launcher)
+                            .format(DecodeFormat.PREFER_ARGB_8888)
+                            .override(size, size)
+                            .transform(new CropCircleTransformation(MusicXService.this))
+                            .into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onLoadStarted(Drawable placeholder) {
+                                }
 
-                                    @Override
-                                    public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                                        audioWidget.controller().albumCoverBitmap(ArtworkUtils.drawableToBitmap(errorDrawable));
-                                    }
+                                @Override
+                                public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                    audioWidget.controller().albumCoverBitmap(ArtworkUtils.drawableToBitmap(errorDrawable));
+                                }
 
-                                    @Override
-                                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                                        audioWidget.controller().albumCoverBitmap(resource);
-                                    }
+                                @Override
+                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                    audioWidget.controller().albumCoverBitmap(resource);
+                                }
 
-                                });
-                    }
-                });
-            }
+                            });
+                }
+            });
         }else {
             handler.post(new Runnable() {
                 @Override
@@ -1203,12 +1203,9 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
     public void saveState(boolean yorno) {
         if (playList.size() > 0) {
             if (yorno) {
-                try {
-                    queue.removeAll();
-                    queue.add(playList);
-                }finally {
-                    queue.close();
-                }
+                queue.removeAll();
+                queue.add(playList);
+                queue.close();
             }
             songTitle = getsongTitle() == null ? SONG_TITLE : getsongTitle();
             songArtist = getsongTitle() == null ? SONG_ARTIST : getsongArtistName();
@@ -1222,14 +1219,11 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
 
     public void restoreState() {
         if (Extras.getInstance().getState(false)) {
-            if (queue == null){
+            if (queueList.size() < 0) {
                 return;
             }
-            try {
-                queueList = queue.readLimit(-1, null);
-            }finally {
-                queue.close();
-            }
+            queueList = queue.readLimit(-1, null);
+            queue.close();
             int restorepos = Extras.getInstance().getCurrentpos();
             String songname = Extras.getInstance().getSongTitle(songTitle);
             String songartist = Extras.getInstance().getSongArtist(songArtist);
@@ -1280,9 +1274,9 @@ public class MusicXService extends Service implements playInterface, MediaPlayer
                     NotificationHandler.buildNotification(MusicXService.this, updateservices);
                 }
             }
-            if (!Extras.getInstance().hideLockscreen()) {
-                MediaSession.lockscreenMedia(getMediaSession(), MusicXService.this, updateservices);
-            }
+        }
+        if (!Extras.getInstance().hideLockscreen()) {
+            MediaSession.lockscreenMedia(getMediaSession(), MusicXService.this, updateservices);
         }
     }
 

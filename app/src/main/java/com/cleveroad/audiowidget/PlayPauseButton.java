@@ -390,6 +390,7 @@ class PlayPauseButton extends ImageView implements PlaybackState.PlaybackStateLi
             return;
         }
         if (!isNeedToFillAlbumCoverMap.containsKey(albumCover.hashCode())) {
+            //Bitmap bitmap = ((BitmapDrawable) albumCover).getBitmap();
             Bitmap bitmap = drawableToBitmap(albumCover);
             if (bitmap != null && !bitmap.isRecycled()) {
                 if (lastPaletteAsyncTask != null && !lastPaletteAsyncTask.isCancelled()) {
@@ -403,6 +404,7 @@ class PlayPauseButton extends ImageView implements PlaybackState.PlaybackStateLi
                         postInvalidate();
                     }
                 });
+                // postInvalidate();
             }
         }
     }

@@ -69,7 +69,7 @@ public class fontPreview extends ListPreference {
                         tf = Helper.getTypeface(getContext(), "Raleway.ttf");
                         break;
                     case 2:
-                        tf = Helper.getTypeface(getContext(), "CormorantGaramond.ttf");
+                        tf = Helper.getTypeface(getContext(), "Knul.otf");
                         break;
                     case 3:
                         tf = Helper.getTypeface(getContext(), "CutiveMono.ttf");
@@ -84,7 +84,7 @@ public class fontPreview extends ListPreference {
                         tf = Helper.getTypeface(getContext(), "Trench.ttf");
                         break;
                     case 7:
-                        tf = Helper.getTypeface(getContext(), "Espacio.ttf");
+                        tf = Helper.getTypeface(getContext(), "Monad.otf");
                         break;
                     case 8:
                         tf = Helper.getTypeface(getContext(), "Rex.ttf");
@@ -99,7 +99,7 @@ public class fontPreview extends ListPreference {
                         tf = Helper.getTypeface(getContext(), "MavenPro.ttf");
                         break;
                     case 12:
-                        tf = Helper.getTypeface(getContext(), "Vetka.otf");
+                        tf = Helper.getTypeface(getContext(), "Vow.ttf");
                         break;
                     case 13:
                         tf = Helper.getTypeface(getContext(), "Lombok.otf");

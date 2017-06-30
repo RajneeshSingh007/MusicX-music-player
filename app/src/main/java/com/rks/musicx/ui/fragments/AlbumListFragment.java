@@ -26,6 +26,7 @@ import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.ItemOffsetDecoration;
+import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.AlbumListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
@@ -76,7 +77,10 @@ public class AlbumListFragment extends BaseRefreshFragment implements LoaderCall
 
     private void fragTransition(Album album, ImageView imageView, String transition) {
         ViewCompat.setTransitionName(imageView, transition);
-        Helper.setFragmentTransition(getActivity(), AlbumListFragment.this, AlbumFragment.newInstance(album), new Pair<View, String>(imageView, transition));
+        if (((MainActivity) getActivity()).getMusicXService() == null) {
+            return;
+        }
+        Helper.setFragmentTransition(getActivity(), AlbumListFragment.this, AlbumFragment.newInstance(album, ((MainActivity) getActivity()).getMusicXService()), new Pair<View, String>(imageView, transition));
     }
 
     @Override

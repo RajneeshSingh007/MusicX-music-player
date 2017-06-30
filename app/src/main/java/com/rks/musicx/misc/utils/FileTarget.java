@@ -41,7 +41,7 @@ public class FileTarget extends SimpleTarget<Bitmap> {
             FileOutputStream outputStream = null;
             @Override
             protected Void doInBackground(Void... voids) {
-                if (resource != null){
+                if (resource != null && !resource.isRecycled()) {
                     try {
                         outputStream = new FileOutputStream(fileName);
                         resource.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
@@ -61,6 +61,19 @@ public class FileTarget extends SimpleTarget<Bitmap> {
                     }
                 }
                 return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                try {
+                    if (outputStream != null) {
+                        outputStream.close();
+                        outputStream = null;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }.execute();
     }

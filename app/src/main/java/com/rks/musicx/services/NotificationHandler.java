@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
@@ -48,7 +49,7 @@ import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
 public class NotificationHandler {
 
     public static final int notificationID = 1127;
-    private static Handler handler = new Handler();
+    private static Handler handler = new Handler(Looper.getMainLooper());
 
     public static void buildNotification(MusicXService musicXService, String what) {
         if (musicXService == null) {
@@ -75,32 +76,32 @@ public class NotificationHandler {
         remoteViews.setTextViewText(R.id.artist, musicXService.getsongArtistName());
         smallremoteView.setTextViewText(R.id.small_title, musicXService.getsongTitle());
         smallremoteView.setTextViewText(R.id.small_artist, musicXService.getsongArtistName());
-        if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
-            builder.setSmallIcon(R.drawable.aw_ic_play);
-        } else {
-            builder.setSmallIcon(R.drawable.aw_ic_pause);
-        }
         FavHelper favHelper = new FavHelper(musicXService);
         if (favHelper.isFavorite(Extras.getInstance().getSongId(musicXService.getsongId()))) {
             remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite);
         } else {
             remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite_outline);
         }
-       if (PLAYSTATE_CHANGED.equals(what)){
-           if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
-               remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
-               smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_pause);
-               builder.setOngoing(true);
-           } else {
-               remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
-               smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_play);
-               builder.setOngoing(false);
-           }
-       }
+        if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
+            builder.setSmallIcon(R.drawable.aw_ic_play);
+        } else {
+            builder.setSmallIcon(R.drawable.aw_ic_pause);
+        }
+        if (PLAYSTATE_CHANGED.equals(what)) {
+            if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
+                remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
+                smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_pause);
+                builder.setOngoing(true);
+            } else {
+                remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
+                smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_play);
+                builder.setOngoing(false);
+            }
+        }
         handler.post(new Runnable() {
             @Override
             public void run() {
-                ArtworkUtils.ArtworkLoader(musicXService,  300, 300, musicXService.getsongAlbumName(),null, musicXService.getsongAlbumID(), new palette() {
+                ArtworkUtils.ArtworkLoader(musicXService, 300, 300, musicXService.getsongAlbumName(), musicXService.getsongAlbumID(), new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         int colors[] = Helper.getAvailableColor(musicXService, palette);

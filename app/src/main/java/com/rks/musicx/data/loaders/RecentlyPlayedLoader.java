@@ -48,5 +48,6 @@ public class RecentlyPlayedLoader extends BaseAsyncTaskLoader<List<Song>> {
 
     public void clearDb() {
         commonDatabase.removeAll();
+        commonDatabase.close();
     }
 }

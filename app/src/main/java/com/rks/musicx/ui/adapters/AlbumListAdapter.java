@@ -84,7 +84,7 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
             }
             holder.AlbumName.setText(albums.getAlbumName());
             holder.ArtistName.setText(albums.getArtistName());
-            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, albums.getAlbumName(), null, albums.getId(), new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, albums.getAlbumName(), albums.getId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
                     final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -99,7 +99,7 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
         if (layoutID == R.layout.item_list_view) {
             holder.AlbumListName.setText(albums.getAlbumName());
             holder.ArtistListName.setText(albums.getArtistName());
-            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, albums.getAlbumName(), null, albums.getId(), new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, albums.getAlbumName(), albums.getId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
                 }

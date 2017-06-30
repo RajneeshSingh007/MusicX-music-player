@@ -43,7 +43,6 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
 import static android.app.Activity.RESULT_OK;
 import static com.rks.musicx.R.id.artist;
-import static com.rks.musicx.misc.utils.Helper.editSongTags;
 
 /*
  * ©2017 Rajneesh Singh
@@ -70,7 +69,6 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
     private ImageChooserManager imageChooserManager;
     private MediaScannerConnection mediaScannerConnection;
     private updateAlbumArt updatealbumArt;
-    private saveData save;
 
     public static TagEditorFragment getInstance() {
         return new TagEditorFragment();
@@ -126,16 +124,14 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
         mYearEditText.setText(song.getYear());
         mLyricsEditText.setText(song.getLyrics());
         saveTags.setImageBitmap(Helper.textAsBitmap("Save", 40, Color.WHITE));
-        ArtworkUtils.ArtworkLoader(getContext(),  300, 600, album, null, id, new palette() {
+        ArtworkUtils.ArtworkLoader(getContext(), 300, 600, album, id, new palette() {
             @Override
             public void palettework(Palette palette) {
                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
-                toolbar.setBackgroundColor(colors[0]);
-                if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
-                    getActivity().getWindow().setStatusBarColor(colors[0]);
-                } else {
-                    getActivity().getWindow().setStatusBarColor(colors[0]);
+                if (getActivity() == null || getActivity().getWindow() == null) {
+                    return;
                 }
+                Helper.setColor(getActivity(), colors[0], toolbar);
             }
         }, new bitmap() {
             @Override
@@ -149,15 +145,14 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
             }
         });
         int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
-        if (getActivity() == null){
+        if (getActivity() == null || getActivity().getWindow() == null) {
             return;
         }
         Helper.setColor(getActivity(), colorAccent, toolbar);
         saveTags.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                save = new saveData(getContext(), song);
-                save.execute();
+                new saveData(getContext(), song).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         });
 
@@ -195,7 +190,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
         newData.setmSongPath(song.getmSongPath());
         newData.setId(song.getId());
         newData.setAlbumId(song.getAlbumId());
-        return editSongTags(context, newData);
+        return Helper.editSongTags(context, newData);
     }
 
     private void pickNupdateArtwork() {
@@ -245,11 +240,11 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
             updatealbumArt = new updateAlbumArt(finalPath, path, getContext(), key, new changeAlbumArt() {
                 @Override
                 public void onPostWork() {
-                    ArtworkUtils.ArtworkLoader(getContext(), 300, 600, song.getAlbum(), finalPath, song.getAlbumId(), new palette() {
+                    ArtworkUtils.ArtworkLoader(getContext(), 300, 600, finalPath, song.getAlbumId(), new palette() {
                         @Override
                         public void palettework(Palette palette) {
                             final int[] colors = Helper.getAvailableColor(getContext(), palette);
-                            if (getActivity() == null){
+                            if (getActivity() == null || getActivity().getWindow() == null) {
                                 return;
                             }
                             Helper.setColor(getActivity(), colors[0], toolbar);
@@ -286,9 +281,6 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
     public void onDestroy() {
         if (updatealbumArt != null){
             updatealbumArt.cancel(true);
-        }
-        if (getActivity() == null){
-            return;
         }
         super.onDestroy();
     }

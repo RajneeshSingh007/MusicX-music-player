@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
@@ -200,9 +201,15 @@ public class FavFragment extends BaseLoaderFragment implements SearchView.OnQuer
 
     @Override
     public boolean onQueryTextChange(String newText) {
+
         final List<Song> filterlist = helper.filter(songList, newText);
-        songListAdapter.setFilter(filterlist);
-        return true;
+        if (filterlist.size() > 0) {
+            songListAdapter.setFilter(filterlist);
+            return true;
+        } else {
+            Toast.makeText(getContext(), "No data found...", Toast.LENGTH_SHORT).show();
+            return false;
+        }
     }
 
 }

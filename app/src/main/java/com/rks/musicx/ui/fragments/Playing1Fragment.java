@@ -59,8 +59,6 @@ import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
-import static com.rks.musicx.R.id.lyrics;
-
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -159,7 +157,6 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
             if (getMusicXService() == null) {
                 return;
             }
-            queuerv.scrollToPosition(position);
             switch (view.getId()) {
                 case R.id.item_view:
                     getMusicXService().setdataPos(position, true);
@@ -293,7 +290,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
         /**
          * Lyrics View
          */
-        lrcView = (TextView) lyricsView.findViewById(lyrics);
+        lrcView = (TextView) lyricsView.findViewById(R.id.lyrics);
 
         /**
          * Pager config
@@ -394,7 +391,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
         repeatButton.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.rep_no));
         moreMenu.setOnClickListener(mOnClickListener);
         moreMenu.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_menu));
-        CustomLayoutManager customlayoutmanager = new CustomLayoutManager(getActivity());
+        CustomLayoutManager customlayoutmanager = new CustomLayoutManager(getContext());
         customlayoutmanager.setOrientation(LinearLayoutManager.VERTICAL);
         customlayoutmanager.setSmoothScrollbarEnabled(true);
         queuerv.setLayoutManager(customlayoutmanager);
@@ -464,7 +461,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
                     favButton.setImageResource(R.drawable.ic_action_favorite_outline);
                 }
             }
-            helper.LoadLyrics(title, artist, getMusicXService().getsongData(), lrcView);
+            helper.LoadLyrics(getContext(), title, artist, getMusicXService().getsongData(), lrcView);
             updateQueue();
         }
     }
@@ -506,7 +503,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
                 updatealbumArt = new updateAlbumArt(finalPath, getMusicXService().getsongData(), getContext(), getMusicXService().getsongAlbumID(), new changeAlbumArt() {
                     @Override
                     public void onPostWork() {
-                        ArtworkUtils.ArtworkLoader(getContext(), 300, 600, getMusicXService().getsongAlbumName(), finalPath, getMusicXService().getsongAlbumID(), new palette() {
+                        ArtworkUtils.ArtworkLoader(getContext(), 300, 600, finalPath, getMusicXService().getsongAlbumID(), new palette() {
                             @Override
                             public void palettework(Palette palette) {
                                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -592,7 +589,7 @@ public class Playing1Fragment extends BasePlayingFragment implements SimpleItemT
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ArtworkUtils.ArtworkLoader(getContext(),  300, 600, getMusicXService().getsongAlbumName(), null, getMusicXService().getsongAlbumID(), new palette() {
+                ArtworkUtils.ArtworkLoader(getContext(), 300, 600, getMusicXService().getsongAlbumName(), getMusicXService().getsongAlbumID(), new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         final int[] colors = Helper.getAvailableColor(getContext(), palette);

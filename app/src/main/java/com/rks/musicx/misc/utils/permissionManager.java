@@ -105,7 +105,7 @@ public class permissionManager {
     public static void settingPermission(Activity activity) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(activity)) {
-            new MaterialDialog.Builder(activity)
+            MaterialDialog.Builder builder = new MaterialDialog.Builder(activity)
                     .title(R.string.permissions_title)
                     .content(R.string.writesetting)
                     .positiveText(R.string.btn_continue)
@@ -138,8 +138,10 @@ public class permissionManager {
                             Extras.getInstance().setSettings(true);
                             dialog.dismiss();
                         }
-                    })
-                    .show();
+                    });
+            if (activity.hasWindowFocus()) {
+                builder.show();
+            }
         }
     }
 

@@ -3,9 +3,12 @@ package com.rks.musicx;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.androidnetworking.AndroidNetworking;
 import com.crashlytics.android.Crashlytics;
 import com.rks.musicx.misc.utils.Encryption;
 import com.rks.musicx.misc.utils.Extras;
@@ -18,6 +21,9 @@ import org.solovyev.android.checkout.PlayStoreListener;
 import javax.annotation.Nonnull;
 
 import io.fabric.sdk.android.Fabric;
+
+import static com.rks.musicx.misc.utils.Constants.SAVE_EQ;
+import static com.rks.musicx.misc.utils.Constants.TAG_METADATA;
 
 
 /*
@@ -40,8 +46,34 @@ import io.fabric.sdk.android.Fabric;
 
 public class MusicXApplication extends Application {
 
+    private static SharedPreferences mPreferences, metaData, eqPref;
+    @Nonnull
+    private final Billing mBilling = new Billing(this, new Billing.DefaultConfiguration() {
+        @Nonnull
+        @Override
+        public String getPublicKey() {
+            final String s = "use your key";
+            return Encryption.xor(s, "decryption string");
+        }
+    });
     private MusicXApplication instance;
     private Context mContext;
+
+    public static MusicXApplication get(Activity activity) {
+        return (MusicXApplication) activity.getApplication();
+    }
+
+    public static SharedPreferences getmPreferences() {
+        return mPreferences;
+    }
+
+    public static SharedPreferences getMetaData() {
+        return metaData;
+    }
+
+    public static SharedPreferences getEqPref() {
+        return eqPref;
+    }
 
     public Context getContext() {
         return mContext;
@@ -51,23 +83,16 @@ public class MusicXApplication extends Application {
         return instance;
     }
 
-    @Nonnull
-    private final Billing mBilling = new Billing(this, new Billing.DefaultConfiguration() {
-        @Nonnull
-        @Override
-        public String getPublicKey() {
-            final String s = "use your key";
-			return Encryption.xor(s, "decryption string");
-		}
-    });
-
     @Override
     public void onCreate() {
         super.onCreate();
         mContext = getApplicationContext();
         instance = this;
         createDirectory();
-        Extras.init(this);
+        Extras.init();
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        metaData = mContext.getSharedPreferences(TAG_METADATA, MODE_PRIVATE);
+        eqPref = mContext.getSharedPreferences(SAVE_EQ, MODE_PRIVATE);
         Extras.getInstance().setwidgetPosition(100);
         Extras.getInstance().eqSwitch(false);
         mBilling.addPlayStoreListener(new PlayStoreListener() {
@@ -77,8 +102,8 @@ public class MusicXApplication extends Application {
             }
         });
         Fabric.with(this, new Crashlytics());
+        AndroidNetworking.initialize(this);
     }
-
 
     private void createDirectory() {
         if (permissionManager.writeExternalStorageGranted(mContext)) {
@@ -93,10 +118,5 @@ public class MusicXApplication extends Application {
     @Nonnull
     public Billing getmBilling() {
         return mBilling;
-    }
-
-
-    public static MusicXApplication get(Activity activity) {
-        return (MusicXApplication) activity.getApplication();
     }
 }

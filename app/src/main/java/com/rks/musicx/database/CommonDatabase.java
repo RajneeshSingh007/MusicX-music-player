@@ -33,8 +33,8 @@ import java.util.List;
 public class CommonDatabase extends SQLiteOpenHelper implements DefaultColumn{
 
 
-    private SQLiteDatabase sqLiteDatabase;
     public String tableName;
+    private SQLiteDatabase sqLiteDatabase;
     private List<Song> songList;
     private List<Artist> artistList;
     private boolean torf;
@@ -193,9 +193,6 @@ public class CommonDatabase extends SQLiteOpenHelper implements DefaultColumn{
                         song.setTitle(title);
                         songList.add(song);
                     } while (cursor.moveToNext());
-                }
-
-                if (cursor != null) {
                     cursor.close();
                 }
             } else {
@@ -233,9 +230,6 @@ public class CommonDatabase extends SQLiteOpenHelper implements DefaultColumn{
                         song.setTitle(title);
                         songList.add(song);
                     } while (cursor.moveToNext());
-                }
-
-                if (cursor != null) {
                     cursor.close();
                 }
 
@@ -248,8 +242,8 @@ public class CommonDatabase extends SQLiteOpenHelper implements DefaultColumn{
 
     public boolean exists(long songId) {
         boolean result = false;
+        sqLiteDatabase = getReadableDatabase();
         try {
-            sqLiteDatabase = getReadableDatabase();
             Cursor cursor = sqLiteDatabase.query(getTableName(), null, SongId + "= ?", new String[]{String.valueOf(songId)}, null, null, null, "1");
             if (cursor != null && cursor.moveToFirst()) {
                 result = true;
@@ -264,8 +258,8 @@ public class CommonDatabase extends SQLiteOpenHelper implements DefaultColumn{
     }
 
     public void delete(long songId) {
-       try {
-           sqLiteDatabase = getWritableDatabase();
+        sqLiteDatabase = getWritableDatabase();
+        try {
            sqLiteDatabase.delete(getTableName(), SongId + "= ?", new String[]{String.valueOf(songId)});
        }finally {
            sqLiteDatabase.close();

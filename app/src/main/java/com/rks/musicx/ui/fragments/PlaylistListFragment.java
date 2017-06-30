@@ -171,7 +171,7 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
     public Loader<List<Playlist>> onCreateLoader(int id, Bundle args) {
         PlaylistLoaders playlistloader = new PlaylistLoaders(getContext());
         if (id == playloader) {
-            playlistloader.setSortOrder(null);
+            playlistloader.setSortOrder(Extras.getInstance().getPlaylistSort());
             return playlistloader;
         }
         return null;

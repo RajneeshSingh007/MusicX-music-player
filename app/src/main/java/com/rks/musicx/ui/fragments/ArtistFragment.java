@@ -24,6 +24,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.afollestad.appthemeengine.Config;
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
@@ -31,10 +35,8 @@ import com.rks.musicx.data.loaders.AlbumLoader;
 import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.model.Album;
 import com.rks.musicx.data.model.Artist;
-import com.rks.musicx.data.network.ArtistArtwork;
-import com.rks.musicx.data.network.Clients;
+import com.rks.musicx.data.network.NetworkHelper;
 import com.rks.musicx.data.network.Services;
-import com.rks.musicx.data.network.model.Artist__;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Constants;
@@ -44,15 +46,16 @@ import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.GestureListerner;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.StartSnapHelper;
+import com.rks.musicx.services.MusicXService;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.AlbumListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
@@ -76,6 +79,7 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
 public class ArtistFragment extends BaseLoaderFragment {
 
+    private static MusicXService musicXService;
     private final int albumLoaders = 4;
     public String selection;
     private FastScrollRecyclerView rv;
@@ -89,13 +93,13 @@ public class ArtistFragment extends BaseLoaderFragment {
     private RecyclerView albumrv;
     private AlbumListAdapter albumListAdapter;
     private String[] selectionArgs;
-    private ArtistArtwork artistArtwork;
-
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = (position, view) -> {
+        if (musicXService == null) {
+            return;
+        }
         switch (view.getId()) {
             case R.id.item_view:
-                ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
-                rv.smoothScrollToPosition(position);
+                musicXService.setPlaylist(songListAdapter.getSnapshot(), position, true);
                 Extras.getInstance().saveSeekServices(0);
                 break;
             case R.id.menu_button:
@@ -120,9 +124,12 @@ public class ArtistFragment extends BaseLoaderFragment {
 
 
     private View.OnClickListener mOnClickListener = v -> {
+        if (musicXService == null) {
+            return;
+        }
         switch (v.getId()) {
             case R.id.shuffle_fab:
-                ((MainActivity) getActivity()).onShuffleRequested(songListAdapter.getSnapshot(), true);
+                musicXService.setPlaylistandShufle(songListAdapter.getSnapshot(), true);
                 Extras.getInstance().saveSeekServices(0);
                 break;
         }
@@ -163,7 +170,7 @@ public class ArtistFragment extends BaseLoaderFragment {
 
     };
 
-    public static ArtistFragment newInstance(Artist artist) {
+    public static ArtistFragment newInstance(Artist artist, MusicXService musicXServices) {
         ArtistFragment fragment = new ArtistFragment();
         Bundle args = new Bundle();
         args.putLong(Constants.ARTIST_ARTIST_ID, artist.getId());
@@ -171,12 +178,16 @@ public class ArtistFragment extends BaseLoaderFragment {
         args.putInt(Constants.ARTIST_ALBUM_COUNT, artist.getAlbumCount());
         args.putInt(Constants.ARTIST_TRACK_COUNT, artist.getTrackCount());
         fragment.setArguments(args);
+        musicXService = musicXServices;
         return fragment;
     }
 
     private void fragTransition(Album album, ImageView imageView, String transition) {
         ViewCompat.setTransitionName(imageView, transition);
-        Helper.setFragmentTransition(getActivity(), ArtistFragment.this, AlbumFragment.newInstance(album), new Pair<View, String>(imageView, "TransitionArtwork"));
+        if (((MainActivity) getActivity()).getMusicXService() == null) {
+            return;
+        }
+        Helper.setFragmentTransition(getActivity(), ArtistFragment.this, AlbumFragment.newInstance(album, ((MainActivity) getActivity()).getMusicXService()), new Pair<View, String>(imageView, "TransitionArtwork"));
     }
 
 
@@ -442,8 +453,7 @@ public class ArtistFragment extends BaseLoaderFragment {
     */
     private void artistCover() {
         if (!Extras.getInstance().saveData()) {
-            artistArtwork = new ArtistArtwork(getContext(), artist.getName());
-            artistArtwork.execute();
+            NetworkHelper.downloadArtistArtwork(getContext(), artist.getName());
         }
         ArtworkUtils.ArtworkLoader(getContext(), 300, 600, helper.loadArtistImage(artist.getName()), new palette() {
             @Override
@@ -460,31 +470,38 @@ public class ArtistFragment extends BaseLoaderFragment {
     }
 
     private void artistBio() {
-        Clients last = new Clients(getContext(), Constants.lastFmUrl);
-        Services lastFmServices = last.createService(Services.class);
-        Call<com.rks.musicx.data.network.model.Artist> artistCall = lastFmServices.getartist(artist.getName());
-        artistCall.enqueue(new Callback<com.rks.musicx.data.network.model.Artist>() {
-            @Override
-            public void onResponse(Call<com.rks.musicx.data.network.model.Artist> call, Response<com.rks.musicx.data.network.model.Artist> response) {
-                com.rks.musicx.data.network.model.Artist getartist = response.body();
-                if (response.isSuccessful() && getartist != null) {
-                    final Artist__ artist1 = getartist.getArtist();
-                    if (artist1 != null && artist1.getImage() != null && artist1.getImage().size() > 0) {
-                        artistBio.setText(artist1.getBio().getSummary());
-                    } else {
-                        Log.d("haha", "bio load failed");
-                        artistBio.setText("No bio found");
+        AndroidNetworking.get(Constants.lastFmUrl + "?method=artist.getinfo&format=json&api_key=" + Services.lastFmApi)
+                .addQueryParameter("artist", artist.getName())
+                .setTag("ArtistArtwork")
+                .setPriority(Priority.MEDIUM)
+                .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        if (response.length() > 0) {
+                            try {
+                                JSONObject json = response.getJSONObject("artist");
+                                JSONObject jsonObject = json.getJSONObject("bio");
+                                if (jsonObject != null) {
+                                    String bio = jsonObject.getString("summary");
+                                    if (bio != null) {
+                                        Log.e("kool", bio);
+                                        artistBio.setText(bio);
+                                    } else {
+                                        artistBio.setText("No bio found");
+                                    }
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
-                } else {
-                    Log.d("haha", "bio load failed");
-                }
-            }
 
-            @Override
-            public void onFailure(Call<com.rks.musicx.data.network.model.Artist> call, Throwable t) {
-                Log.d("ArtistFrag", "error", t);
-            }
-        });
+                    @Override
+                    public void onError(ANError anError) {
+                        anError.printStackTrace();
+                    }
+                });
     }
 
     /*
@@ -542,14 +559,4 @@ public class ArtistFragment extends BaseLoaderFragment {
         return super.onOptionsItemSelected(item);
     }
 
-
-    @Override
-    public void onDestroy() {
-        if (!Extras.getInstance().saveData()){
-            if (artistArtwork != null) {
-                artistArtwork.cancel(true);
-            }
-        }
-        super.onDestroy();
-    }
 }

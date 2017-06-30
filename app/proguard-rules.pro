@@ -27,18 +27,9 @@
 }
 -keep class android.support.v7.widget.SearchView { *; }
 -dontwarn java.lang.invoke.*
--dontwarn retrofit2.**
--keep class retrofit2.** { *; }
--dontwarn com.squareup.okhttp.**
 -dontwarn okio.**
 -dontwarn rx.**
 -dontwarn javax.annotation.**
--keep class com.squareup.okhttp.** { *; }
--keep class retrofit.** { *; }
--keep interface com.squareup.okhttp.** { *; }
--keepclasseswithmembers class * {
-    @retrofit.http.* <methods>;
-}
 -keep public class * implements com.bumptech.glide.module.GlideModule
 -keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
   **[] $VALUES;

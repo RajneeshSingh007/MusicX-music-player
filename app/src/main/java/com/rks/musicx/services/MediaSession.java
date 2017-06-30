@@ -3,6 +3,7 @@ package com.rks.musicx.services;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -34,7 +35,7 @@ import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
 
 public class MediaSession {
 
-    private static Handler handler = new Handler();
+    private static Handler handler = new Handler(Looper.getMainLooper());
 
     public static void lockscreenMedia(MediaSessionCompat mediaSessionCompat, MusicXService musicXService, String what) {
         if (musicXService == null) {
@@ -62,7 +63,7 @@ public class MediaSession {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    ArtworkUtils.ArtworkLoader(musicXService,  300, 300, musicXService.getsongAlbumName(), null, musicXService.getsongAlbumID(), new palette() {
+                    ArtworkUtils.ArtworkLoader(musicXService, 300, 300, musicXService.getsongAlbumName(), musicXService.getsongAlbumID(), new palette() {
                         @Override
                         public void palettework(Palette palette) {
 

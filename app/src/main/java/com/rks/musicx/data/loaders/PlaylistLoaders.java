@@ -32,14 +32,6 @@ import java.util.List;
 
 public class PlaylistLoaders extends BaseAsyncTaskLoader<List<Playlist>> {
 
-    final String[] tableQuery = {
-            MediaStore.Audio.Playlists._ID,
-            MediaStore.Audio.Playlists.NAME,
-            MediaStore.Audio.Playlists.DATE_ADDED,
-            MediaStore.Audio.Playlists.DATE_MODIFIED,
-            MediaStore.Audio.Playlists._COUNT,
-            MediaStore.Audio.Playlists.DATA
-    };
     private String sortorder;
 
     public PlaylistLoaders(Context context) {

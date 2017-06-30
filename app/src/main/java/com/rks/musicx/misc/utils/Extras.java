@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.preference.PreferenceManager;
 
 import com.afollestad.appthemeengine.ATE;
+import com.rks.musicx.MusicXApplication;
 import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.model.Song;
 
@@ -28,7 +28,6 @@ import static com.rks.musicx.misc.utils.Constants.DONATION_TRACK;
 import static com.rks.musicx.misc.utils.Constants.DOWNLOADED_ARTWORK;
 import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 import static com.rks.musicx.misc.utils.Constants.EQSWITCH;
-import static com.rks.musicx.misc.utils.Constants.EXTRACT_FOLDER;
 import static com.rks.musicx.misc.utils.Constants.FADEINOUT_DURATION;
 import static com.rks.musicx.misc.utils.Constants.FADETRACK;
 import static com.rks.musicx.misc.utils.Constants.FOLDERPATH;
@@ -49,13 +48,11 @@ import static com.rks.musicx.misc.utils.Constants.PLAYINGVIEW_TRACK;
 import static com.rks.musicx.misc.utils.Constants.PLAYLIST_ID;
 import static com.rks.musicx.misc.utils.Constants.PLAYLIST_SORT_ORDER;
 import static com.rks.musicx.misc.utils.Constants.PRESET_POS;
-import static com.rks.musicx.misc.utils.Constants.QUEUE_NAME;
 import static com.rks.musicx.misc.utils.Constants.REMOVE_TABLIST;
 import static com.rks.musicx.misc.utils.Constants.REORDER_TAB;
 import static com.rks.musicx.misc.utils.Constants.REPEATMODE;
 import static com.rks.musicx.misc.utils.Constants.RESTORE_LASTTAB;
 import static com.rks.musicx.misc.utils.Constants.SAVE_DATA;
-import static com.rks.musicx.misc.utils.Constants.SAVE_EQ;
 import static com.rks.musicx.misc.utils.Constants.SETTINGS_TRACK;
 import static com.rks.musicx.misc.utils.Constants.SHUFFLEMODE;
 import static com.rks.musicx.misc.utils.Constants.SONGGRID;
@@ -71,7 +68,6 @@ import static com.rks.musicx.misc.utils.Constants.SONG_YEAR;
 import static com.rks.musicx.misc.utils.Constants.SaveHeadset;
 import static com.rks.musicx.misc.utils.Constants.SaveLyrics;
 import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
-import static com.rks.musicx.misc.utils.Constants.TAG_METADATA;
 import static com.rks.musicx.misc.utils.Constants.TRYPEFACE_PATH;
 import static com.rks.musicx.misc.utils.Constants.TextFonts;
 import static com.rks.musicx.misc.utils.Constants.VIZCOLOR;
@@ -97,20 +93,20 @@ import static com.rks.musicx.misc.utils.Constants.WIDGET_COLOR;
 
 public class Extras {
 
-    private SharedPreferences mPreferences;
-    private SharedPreferences metaData;
-    private static Context context;
+    /*private SharedPreferences MusicXApplication.getmPreferences();
+    private SharedPreferences MusicXApplication.getMetaData();
+    private static Context context;*/
     private static Extras instance;
 
-    public Extras(Context contexts) {
-        context = contexts;
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        metaData = context.getSharedPreferences(TAG_METADATA, MODE_PRIVATE);
+    public Extras() {
+        //context = contexts;
+        //MusicXApplication.getmPreferences() = PreferenceManager.getDefaultSharedPreferences(context);
+        //MusicXApplication.getMetaData() = context.getSharedPreferences(TAG_METADATA, MODE_PRIVATE);
     }
 
-    public static Extras init(Context context){
+    public static Extras init() {
         if (instance == null){
-            instance = new Extras(context);
+            instance = new Extras();
         }
         return instance;
     }
@@ -120,11 +116,11 @@ public class Extras {
     }
 
     public SharedPreferences getmPreferences() {
-        return mPreferences;
+        return MusicXApplication.getmPreferences();
     }
 
     public void putString(String key, String value) {
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putString(key, value);
         editor.apply();
     }
@@ -151,7 +147,7 @@ public class Extras {
 
     //////////////////// Sorting ////////////////////////
     public String getSongSortOrder() {
-        return mPreferences.getString(SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_A_Z);
+        return MusicXApplication.getmPreferences().getString(SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_A_Z);
     }
 
     public void setSongSortOrder(String value) {
@@ -159,7 +155,7 @@ public class Extras {
     }
 
     public String getArtistSortOrder() {
-        return mPreferences.getString(ARTIST_SORT_ORDER, SortOrder.ArtistSortOrder.ARTIST_A_Z);
+        return MusicXApplication.getmPreferences().getString(ARTIST_SORT_ORDER, SortOrder.ArtistSortOrder.ARTIST_A_Z);
     }
 
     public void setArtistSortOrder(String value) {
@@ -167,7 +163,7 @@ public class Extras {
     }
 
     public String getAlbumSortOrder() {
-        return mPreferences.getString(ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_A_Z);
+        return MusicXApplication.getmPreferences().getString(ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_A_Z);
     }
 
     public void setAlbumSortOrder(String value) {
@@ -179,7 +175,7 @@ public class Extras {
     }
 
     public String getArtistAlbumSort(String value) {
-        return mPreferences.getString(ARTIST_ALBUM_SORT, value);
+        return MusicXApplication.getmPreferences().getString(ARTIST_ALBUM_SORT, value);
     }
 
     public void setPlaylistSortOrder(String value) {
@@ -187,133 +183,135 @@ public class Extras {
     }
 
     public String getPlaylistSort() {
-        return mPreferences.getString(PLAYLIST_SORT_ORDER, SortOrder.PlaylistSortOrder.PLAYLIST_A_Z);
+        return MusicXApplication.getmPreferences().getString(PLAYLIST_SORT_ORDER, SortOrder.PlaylistSortOrder.PLAYLIST_A_Z);
     }
 
     ////////////////////////// Preferences /////////////////////////
 
     public void setwidgetPosition(int pos) {
-        SharedPreferences.Editor sharededitor = mPreferences.edit();
+        SharedPreferences.Editor sharededitor = MusicXApplication.getmPreferences().edit();
         sharededitor.putInt(KEY_POSITION_X, pos);
         sharededitor.putInt(KEY_POSITION_Y, pos);
         sharededitor.apply();
     }
 
     public int getwidgetPositionX() {
-        return mPreferences.getInt(KEY_POSITION_X, 100);
+        return MusicXApplication.getmPreferences().getInt(KEY_POSITION_X, 100);
     }
 
     public int getwidgetPositionY() {
-        return mPreferences.getInt(KEY_POSITION_Y, 100);
+        return MusicXApplication.getmPreferences().getInt(KEY_POSITION_Y, 100);
     }
 
     public String getTabIndex() {
-        return mPreferences.getString(REORDER_TAB, "0");
+        return MusicXApplication.getmPreferences().getString(REORDER_TAB, "0");
     }
 
     public void setTabIndex(final int index) {
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putString(REORDER_TAB, String.valueOf(index));
         editor.apply();
     }
 
     public boolean saveLyrics() {
-        return mPreferences.getBoolean(SaveLyrics, true);
+        return MusicXApplication.getmPreferences().getBoolean(SaveLyrics, true);
     }
 
     public boolean songView() {
-        return mPreferences.getBoolean(GridViewSong, false);
+        return MusicXApplication.getmPreferences().getBoolean(GridViewSong, false);
     }
 
     public boolean albumView() {
-        return mPreferences.getBoolean(GridViewAlbum, false);
+        return MusicXApplication.getmPreferences().getBoolean(GridViewAlbum, false);
     }
 
     public boolean artistView() {
-        return mPreferences.getBoolean(GridViewArtist, false);
+        return MusicXApplication.getmPreferences().getBoolean(GridViewArtist, false);
     }
 
     public boolean floatingWidget() {
-        return mPreferences.getBoolean(FloatingView, false);
+        return MusicXApplication.getmPreferences().getBoolean(FloatingView, false);
     }
 
     public String fontConfig() {
-        return mPreferences.getString(TextFonts, "11");
+        return MusicXApplication.getmPreferences().getString(TextFonts, "11");
     }
 
     public boolean headsetConfig() {
-        return mPreferences.getBoolean(SaveHeadset, true);
+        return MusicXApplication.getmPreferences().getBoolean(SaveHeadset, true);
     }
 
     public boolean phonecallConfig() {
-        return mPreferences.getBoolean(SaveTelephony, true);
+        return MusicXApplication.getmPreferences().getBoolean(SaveTelephony, true);
     }
 
     public SharedPreferences saveEq() {
-        return context.getSharedPreferences(SAVE_EQ, MODE_PRIVATE);
+        return MusicXApplication.getEqPref();
     }
 
     public boolean saveData() {
-        return mPreferences.getBoolean(SAVE_DATA, true);
+        return MusicXApplication.getmPreferences().getBoolean(SAVE_DATA, true);
     }
 
     public boolean hideNotify() {
-        return mPreferences.getBoolean(HIDE_NOTIFY, false);
+        return MusicXApplication.getmPreferences().getBoolean(HIDE_NOTIFY, false);
     }
 
     public boolean hideLockscreen() {
-        return mPreferences.getBoolean(HIDE_LOCKSCREEEN, false);
+        return MusicXApplication.getmPreferences().getBoolean(HIDE_LOCKSCREEEN, false);
     }
 
     public boolean restoreLastTab() {
-        return mPreferences.getBoolean(RESTORE_LASTTAB, false);
+        return MusicXApplication.getmPreferences().getBoolean(RESTORE_LASTTAB, false);
     }
 
     public boolean hqArtistArtwork() {
-        return mPreferences.getBoolean(HQ_ARTISTARTWORK, false);
+        return MusicXApplication.getmPreferences().getBoolean(HQ_ARTISTARTWORK, false);
     }
 
     public boolean vizColor() {
-        return mPreferences.getBoolean(VIZCOLOR, false);
+        return MusicXApplication.getmPreferences().getBoolean(VIZCOLOR, false);
     }
 
     public boolean artworkColor() {
-        return mPreferences.getBoolean(ARTWORKCOLOR, false);
+        return MusicXApplication.getmPreferences().getBoolean(ARTWORKCOLOR, false);
     }
 
     public String getFadeDuration() {
-        return mPreferences.getString(FADEINOUT_DURATION, "0");
+        return MusicXApplication.getmPreferences().getString(FADEINOUT_DURATION, "0");
     }
 
     public boolean getFadeTrack() {
-        return mPreferences.getBoolean(FADETRACK, false);
+        return MusicXApplication.getmPreferences().getBoolean(FADETRACK, false);
     }
 
     public boolean getWigetColor(){
-        return mPreferences.getBoolean(WIDGET_COLOR, false);
+        return MusicXApplication.getmPreferences().getBoolean(WIDGET_COLOR, false);
     }
 
-    public boolean getHdArtwork(){return mPreferences.getBoolean(HD_ARTWORK, false);}
+    public boolean getHdArtwork() {
+        return MusicXApplication.getmPreferences().getBoolean(HD_ARTWORK, false);
+    }
 
     public boolean getDownloadedArtwork(){
-        return mPreferences.getBoolean(DOWNLOADED_ARTWORK, false);
+        return MusicXApplication.getmPreferences().getBoolean(DOWNLOADED_ARTWORK, false);
     }
 
     public String getAudioFilter(){
-        return mPreferences.getString(AUDIO_FILTER, "0");
+        return MusicXApplication.getmPreferences().getString(AUDIO_FILTER, "0");
     }
 
     ////////////////// folder pref //////////////////
 
     public void saveFolderPath(String path) {
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putString(FOLDERPATH, path);
         editor.apply();
     }
 
 
     public String getFolderPath() {
-        return mPreferences.getString(FOLDERPATH, null);
+        return MusicXApplication.getmPreferences().getString(FOLDERPATH, null);
     }
 
     //////////////////// eq switch track //////////////////
@@ -333,7 +331,7 @@ public class Extras {
     ///////////////////// MusicX Service pref /////////////////////////
 
     public void saveServices(boolean savestate, int pos, int repeat, boolean shuffle, String songTitle, String songArtist, String path, long songID, long albumID) {
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putInt(CURRENTPOS, pos);
         editor.putInt(REPEATMODE, repeat);
         editor.putBoolean(SHUFFLEMODE, shuffle);
@@ -347,51 +345,51 @@ public class Extras {
     }
 
     public void saveSeekServices(int playerPos){
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putInt(PLAYER_POS, playerPos);
         editor.commit();
     }
 
     public int getCurrentpos() {
-        return mPreferences.getInt(CURRENTPOS, 0);
+        return MusicXApplication.getmPreferences().getInt(CURRENTPOS, 0);
     }
 
     public int getRepeatMode(int repeatmode) {
-        return mPreferences.getInt(REPEATMODE, repeatmode);
+        return MusicXApplication.getmPreferences().getInt(REPEATMODE, repeatmode);
     }
 
     public boolean getShuffle(boolean shuffle) {
-        return mPreferences.getBoolean(SHUFFLEMODE, shuffle);
+        return MusicXApplication.getmPreferences().getBoolean(SHUFFLEMODE, shuffle);
     }
 
     public boolean getState(boolean state) {
-        return mPreferences.getBoolean(PLAYINGSTATE, state);
+        return MusicXApplication.getmPreferences().getBoolean(PLAYINGSTATE, state);
     }
 
     public String getSongTitle(String songtitle) {
-        return mPreferences.getString(SONG_TITLE, songtitle);
+        return MusicXApplication.getmPreferences().getString(SONG_TITLE, songtitle);
     }
 
     public String getSongArtist(String artist) {
-        return mPreferences.getString(SONG_ARTIST, artist);
+        return MusicXApplication.getmPreferences().getString(SONG_ARTIST, artist);
     }
 
     public long getSongId(long id) {
-        return mPreferences.getLong(SONG_ID, id);
+        return MusicXApplication.getmPreferences().getLong(SONG_ID, id);
     }
 
     public long getAlbumId(long albumid) {
-        return mPreferences.getLong(SONG_ALBUM_ID, albumid);
+        return MusicXApplication.getmPreferences().getLong(SONG_ALBUM_ID, albumid);
     }
 
     public String getSongPath(String path) {
-        return mPreferences.getString(SONG_PATH, path);
+        return MusicXApplication.getmPreferences().getString(SONG_PATH, path);
     }
 
     //////////////////// Save Metadata pref ////////////////////////
 
     public void saveMetaData(Song song) {
-        SharedPreferences.Editor editor = metaData.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getMetaData().edit();
         editor.putString(Constants.SONG_TITLE, song.getTitle());
         editor.putString(Constants.SONG_ARTIST, song.getArtist());
         editor.putString(Constants.SONG_ALBUM, song.getAlbum());
@@ -404,46 +402,46 @@ public class Extras {
     }
 
     public String getTitle() {
-        return metaData.getString(SONG_TITLE, null);
+        return MusicXApplication.getMetaData().getString(SONG_TITLE, null);
     }
 
     public String getArtist() {
-        return metaData.getString(SONG_ARTIST, null);
+        return MusicXApplication.getMetaData().getString(SONG_ARTIST, null);
     }
 
     public String getAlbum() {
-        return metaData.getString(SONG_ALBUM, null);
+        return MusicXApplication.getMetaData().getString(SONG_ALBUM, null);
     }
 
     public String getPath() {
-        return metaData.getString(SONG_PATH, null);
+        return MusicXApplication.getMetaData().getString(SONG_PATH, null);
     }
 
     public int getNo() {
-        return metaData.getInt(SONG_TRACK_NUMBER, 0);
+        return MusicXApplication.getMetaData().getInt(SONG_TRACK_NUMBER, 0);
     }
 
     public long getAlbumID() {
-        return metaData.getLong(SONG_ALBUM_ID, 0);
+        return MusicXApplication.getMetaData().getLong(SONG_ALBUM_ID, 0);
     }
 
     public long getId() {
-        return metaData.getLong(SONG_ID, 0);
+        return MusicXApplication.getMetaData().getLong(SONG_ID, 0);
     }
 
     public String getYear() {
-        return metaData.getString(SONG_YEAR, null);
+        return MusicXApplication.getMetaData().getString(SONG_YEAR, null);
     }
 
 
     //////////////////////// Album GridView///////////////////
 
     public int getAlbumGrid() {
-        return mPreferences.getInt(ALBUMGRID, 2);
+        return MusicXApplication.getmPreferences().getInt(ALBUMGRID, 2);
     }
 
     public void setAlbumGrid(int value) {
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putInt(ALBUMGRID, value);
         editor.commit();
     }
@@ -451,11 +449,11 @@ public class Extras {
     //////////////////////// Artist GridView///////////////////
 
     public int getArtistGrid() {
-        return mPreferences.getInt(ARTISTGRID, 2);
+        return MusicXApplication.getmPreferences().getInt(ARTISTGRID, 2);
     }
 
     public void setArtistGrid(int value) {
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putInt(ARTISTGRID, value);
         editor.commit();
     }
@@ -464,11 +462,11 @@ public class Extras {
     //////////////////////// Song GridView///////////////////
 
     public int getSongGrid() {
-        return mPreferences.getInt(SONGGRID, 2);
+        return MusicXApplication.getmPreferences().getInt(SONGGRID, 2);
     }
 
     public void setSongGrid(int value) {
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putInt(SONGGRID, value);
         editor.commit();
     }
@@ -476,11 +474,11 @@ public class Extras {
     ///////////////// widgetTracking ///////////////
 
     public boolean getWidgetTrack() {
-        return mPreferences.getBoolean(WIDGETTRACK, false);
+        return MusicXApplication.getmPreferences().getBoolean(WIDGETTRACK, false);
     }
 
     public void setWidgetTrack(boolean torf) {
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putBoolean(WIDGETTRACK, torf);
         editor.commit();
     }
@@ -488,23 +486,23 @@ public class Extras {
     /////////////// Settings Permission /////////////
 
     public boolean getSettings(){
-        return mPreferences.getBoolean(SETTINGS_TRACK, false);
+        return MusicXApplication.getmPreferences().getBoolean(SETTINGS_TRACK, false);
     }
 
     public void setSettings(boolean torf){
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putBoolean(SETTINGS_TRACK, torf);
         editor.commit();
     }
 
     ///////////////// Init Setup //////////////////
 
-    public int getInitValue(String spName, String key) {
+    public int getInitValue(Context context, String spName, String key) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(spName, MODE_PRIVATE);
         return sharedPreferences.getInt(key, 0);
     }
 
-    public void setInitValue(int ammount, String spName, String key) {
+    public void setInitValue(Context context, int ammount, String spName, String key) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(spName, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(key, ammount);
@@ -514,13 +512,13 @@ public class Extras {
     ///////////////// save Playlist Id /////////////
 
     public void savePlaylistId(long id) {
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putLong(PLAYLIST_ID, id);
         editor.apply();
     }
 
     public long getPlaylistId() {
-        return mPreferences.getLong(PLAYLIST_ID, 0);
+        return MusicXApplication.getmPreferences().getLong(PLAYLIST_ID, 0);
     }
 
 
@@ -531,13 +529,13 @@ public class Extras {
         for (Integer i : list) {
             s += i + ",";
         }
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putString(REMOVE_TABLIST, s);
         editor.commit();
     }
 
     public ArrayList<Integer> getRemoveTab() {
-        String s = mPreferences.getString(REMOVE_TABLIST, "");
+        String s = MusicXApplication.getmPreferences().getString(REMOVE_TABLIST, "");
         StringTokenizer st = new StringTokenizer(s, ",");
         ArrayList<Integer> result = new ArrayList<Integer>();
         while (st.hasMoreTokens()) {
@@ -549,84 +547,51 @@ public class Extras {
     ///////////////// Typeface path /////////////
 
     public void saveTypeface(String path){
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putString(TRYPEFACE_PATH,path);
         editor.commit();
     }
 
     public String getTypeface(){
-        return mPreferences.getString(TRYPEFACE_PATH, Typeface.DEFAULT.toString());
+        return MusicXApplication.getmPreferences().getString(TRYPEFACE_PATH, Typeface.DEFAULT.toString());
     }
 
 
     //////////// Preset Pos ///////////////
 
     public void savePresetPos(int position){
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putInt(PRESET_POS, position);
         editor.commit();
     }
 
     public int getPresetPos(){
-        return mPreferences.getInt(PRESET_POS, 0);
+        return MusicXApplication.getmPreferences().getInt(PRESET_POS, 0);
     }
 
     ///////////// PlayingView Track ///////////
 
     public void savePlayingViewTrack(boolean torf){
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putBoolean(PLAYINGVIEW_TRACK, torf);
         editor.commit();
     }
 
     public boolean getPlayingViewTrack(){
-        return mPreferences.getBoolean(PLAYINGVIEW_TRACK, false);
+        return MusicXApplication.getmPreferences().getBoolean(PLAYINGVIEW_TRACK, false);
     }
 
     /////////// Donation Track /////////////
 
     public void donationTrack(boolean torf){
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
         editor.putBoolean(DONATION_TRACK, torf);
         editor.commit();
     }
 
     public Boolean getDonationTrack(){
-        return mPreferences.getBoolean(DONATION_TRACK, false);
+        return MusicXApplication.getmPreferences().getBoolean(DONATION_TRACK, false);
     }
 
-    //////////// Save Queue Name /////////
-
-    public void saveQueueName(List<String> name){
-        String s = "";
-        for (String i : name) {
-            s += i + ",";
-        }
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString(QUEUE_NAME, s);
-        editor.commit();
-    }
-
-    public ArrayList<String> getSavedQueueName(){
-        String s = mPreferences.getString(QUEUE_NAME, "");
-        StringTokenizer st = new StringTokenizer(s, ",");
-        ArrayList<String> result = new ArrayList<>();
-        while (st.hasMoreTokens()) {
-            result.add(st.nextToken());
-        }
-        return result;
-    }
-
-    ///////////// extract assets folder /////////////
-
-    public void saveExtractFolder(boolean torf){
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putBoolean(EXTRACT_FOLDER, torf);
-        editor.apply();
-    }
-
-    public boolean getExtractFolder(){
-        return mPreferences.getBoolean(EXTRACT_FOLDER, false);
-    }
 
 }

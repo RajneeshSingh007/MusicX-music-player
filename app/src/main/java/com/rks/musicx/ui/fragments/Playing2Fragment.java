@@ -9,6 +9,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.util.Log;
@@ -42,6 +43,7 @@ import com.rks.musicx.misc.utils.GestureListerner;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.PlayingPagerAdapter;
 import com.rks.musicx.misc.utils.SimpleItemTouchHelperCallback;
+import com.rks.musicx.misc.utils.StartSnapHelper;
 import com.rks.musicx.misc.utils.permissionManager;
 import com.rks.musicx.misc.widgets.changeAlbumArt;
 import com.rks.musicx.misc.widgets.updateAlbumArt;
@@ -97,6 +99,7 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
     private ItemTouchHelper mItemTouchHelper;
     private List<Song> queueList = new ArrayList<>();
     private updateAlbumArt updatealbumArt;
+    private Helper helper;
 
     private BaseRecyclerViewAdapter.OnItemClickListener onClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
@@ -104,7 +107,6 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
             if (getMusicXService() == null) {
                 return;
             }
-            queuerv.scrollToPosition(position);
             switch (view.getId()) {
                 case R.id.item_view:
                     getMusicXService().setdataPos(position, true);
@@ -150,7 +152,7 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ArtworkUtils.ArtworkLoader(getContext(),  300, 600, getMusicXService().getsongAlbumName(), null, getMusicXService().getsongAlbumID(), new palette() {
+                ArtworkUtils.ArtworkLoader(getContext(), 300, 600, getMusicXService().getsongAlbumName(), getMusicXService().getsongAlbumID(), new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -312,6 +314,8 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
         CustomLayoutManager customlayoutmanager = new CustomLayoutManager(getContext());
         customlayoutmanager.setOrientation(LinearLayoutManager.HORIZONTAL);
         queuerv.setLayoutManager(customlayoutmanager);
+        SnapHelper startSnapHelper = new StartSnapHelper();
+        startSnapHelper.attachToRecyclerView(queuerv);
         queuerv.setHasFixedSize(true);
         queueAdapter = new QueueAdapter(getContext(), this);
         queueAdapter.setLayoutId(R.layout.gridqueue);
@@ -341,6 +345,7 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
             }
         });
         sequence.start();
+        helper = new Helper(getContext());
         startVisualiser();
     }
 
@@ -431,7 +436,7 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
             if (dur != -1) {
                 mPlayLayout.getDur().setText(Helper.durationCalculator(dur));
             }
-            new Helper(getContext()).LoadLyrics(title, artist, getMusicXService().getsongData(), lrcView);
+            helper.LoadLyrics(getContext(), title, artist, getMusicXService().getsongData(), lrcView);
         }
     }
 
@@ -601,7 +606,7 @@ public class Playing2Fragment extends BasePlayingFragment implements SimpleItemT
                 updatealbumArt = new updateAlbumArt(finalPath, getMusicXService().getsongData(), getContext(), getMusicXService().getsongAlbumID(), new changeAlbumArt() {
                     @Override
                     public void onPostWork() {
-                        ArtworkUtils.ArtworkLoader(getContext(),  300, 600, getMusicXService().getsongAlbumName(), finalPath, getMusicXService().getsongAlbumID(), new palette() {
+                        ArtworkUtils.ArtworkLoader(getContext(), 300, 600, finalPath, getMusicXService().getsongAlbumID(), new palette() {
                             @Override
                             public void palettework(Palette palette) {
                                 final int[] colors = Helper.getAvailableColor(getContext(), palette);

@@ -1,9 +1,14 @@
 package com.rks.musicx.data.model;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.provider.MediaStore;
+
+import com.rks.musicx.misc.utils.Constants;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -23,7 +28,6 @@ import java.util.List;
 
 public class Folder implements Comparable<Folder> {
 
-    private static final List<String> fileExtensions = new ArrayList<>(Arrays.asList("aac", "mp4", "flac", "m4a", "mp3", "ogg"));
     private final File mFile;
     private final FileModelComparator mFileModelComparator;
     private final FileExtensionFilter mFileExtensionFilter;
@@ -31,7 +35,7 @@ public class Folder implements Comparable<Folder> {
     public Folder(File file) {
         mFile = file;
         mFileModelComparator = new FileModelComparator();
-        mFileExtensionFilter = new FileExtensionFilter(fileExtensions);
+        mFileExtensionFilter = new FileExtensionFilter(Constants.fileExtensions);
     }
 
 
@@ -39,7 +43,7 @@ public class Folder implements Comparable<Folder> {
         mFile = new File(filePath);
 
         mFileModelComparator = new FileModelComparator();
-        mFileExtensionFilter = new FileExtensionFilter(fileExtensions);
+        mFileExtensionFilter = new FileExtensionFilter(Constants.fileExtensions);
     }
 
 
@@ -84,7 +88,7 @@ public class Folder implements Comparable<Folder> {
         return mFile;
     }
 
-    public List<Folder> listFilesSorted() {
+    public List<Folder> listFilesSorted(Context context) {
         List<Folder> files = new ArrayList<>();
         File[] filesArray = mFile.listFiles(mFileExtensionFilter);
 
@@ -96,12 +100,28 @@ public class Folder implements Comparable<Folder> {
                 files.clear();
                 break;
             }
-            files.add(new Folder(file));
+            if (countFile(context, file.getAbsolutePath()) != 0) {
+                files.add(new Folder(file));
+            }
         }
         Collections.sort(files, mFileModelComparator);
         return files;
     }
 
+    public int countFile(Context context, String filePath) {
+        int count = 0;
+        Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.Audio.Media.DATA}, MediaStore.Audio.Media.DATA + " like ? ", new String[]{"%" + filePath + "%"}, null);
+        try {
+            if (cursor != null) {
+                count = cursor.getCount();
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return count;
+    }
 
     @Override
     public boolean equals(Object model) {
@@ -143,9 +163,9 @@ public class Folder implements Comparable<Folder> {
 
     private class FileExtensionFilter implements FilenameFilter {
 
-        private List<String> mExtensions;
+        private String[] mExtensions;
 
-        public FileExtensionFilter(List<String> extensions) {
+        public FileExtensionFilter(String[] extensions) {
             mExtensions = extensions;
         }
 
@@ -159,24 +179,13 @@ public class Folder implements Comparable<Folder> {
                 return true;
             }
             if (scan.isFile() && scan.exists()){
-                if (!mExtensions.isEmpty()) {
-                    String ext = getFileExtension(filename);
-                    if (mExtensions.contains(ext)) {
+                for (String ext : mExtensions) {
+                    if (scan.getAbsolutePath().endsWith(ext)) {
                         return true;
                     }
                 }
             }
             return false;
-        }
-
-        private String getFileExtension(String filename) {
-
-            String ext = null;
-            int i = filename.lastIndexOf('.');
-            if (i != -1 && i < filename.length()) {
-                ext = filename.substring(i + 1).toLowerCase();
-            }
-            return ext;
         }
 
     }

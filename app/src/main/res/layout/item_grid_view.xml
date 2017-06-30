@@ -18,8 +18,9 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_margin="4dp"
-              android:background="?android:attr/selectableItemBackground"
-              android:elevation="@dimen/toolbarelevation"
+    android:background="?android:attr/selectableItemBackground"
+    android:elevation="4dp"
+    android:foreground="?android:attr/selectableItemBackground"
               android:orientation="vertical">
 
     <com.rks.musicx.misc.widgets.SquareImageView
@@ -87,6 +88,5 @@
             android:visibility="gone"
             app:srcCompat="@drawable/ic_menu"/>
     </LinearLayout>
-
 
 </LinearLayout>

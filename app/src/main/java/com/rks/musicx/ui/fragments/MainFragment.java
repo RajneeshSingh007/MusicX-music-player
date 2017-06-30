@@ -52,6 +52,7 @@ public class MainFragment extends BaseRefreshFragment {
     private AlbumListFragment albumListFragment;
     private ArtistListFragment artistListFragment;
     private PlaylistListFragment playlistListFragment;
+    private boolean added = false;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -74,6 +75,8 @@ public class MainFragment extends BaseRefreshFragment {
         tabTitles.add(getString(R.string.albums).toUpperCase(l));
         tabTitles.add(getString(R.string.artists).toUpperCase(l));
         tabTitles.add(getString(R.string.playlists).toUpperCase(l));
+
+        added = true;
     }
 
     @Override
@@ -129,8 +132,11 @@ public class MainFragment extends BaseRefreshFragment {
         if (Extras.getInstance().restoreLastTab()) {
             mViewPager.setCurrentItem(Integer.valueOf(Extras.getInstance().getTabIndex()), true);
         }
-        for (int pos =0; pos < Extras.getInstance().getRemoveTab().size(); pos ++){
-            pagerAdapter.removeTabPage(Extras.getInstance().getRemoveTab().get(pos));
+        if (added) {
+            for (int pos : Extras.getInstance().getRemoveTab()) {
+                pagerAdapter.removeTabPage(pos);
+                Log.e("Main", String.valueOf(pos));
+            }
         }
     }
 

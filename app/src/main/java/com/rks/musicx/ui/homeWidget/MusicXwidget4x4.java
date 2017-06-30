@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.graphics.Palette;
 import android.widget.RemoteViews;
 
@@ -53,7 +54,7 @@ public class MusicXwidget4x4 extends AppWidgetProvider {
 
 
     private static MusicXwidget4x4 sInstance;
-    private Handler handler = new Handler();
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     public static synchronized MusicXwidget4x4 getInstance() {
         if (sInstance == null) {
@@ -76,7 +77,7 @@ public class MusicXwidget4x4 extends AppWidgetProvider {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                ArtworkUtils.ArtworkLoader(musicXService,  300, 600,  musicXService.getsongAlbumName(),null, musicXService.getsongAlbumID(), new palette() {
+                ArtworkUtils.ArtworkLoader(musicXService, 300, 600, musicXService.getsongAlbumName(), musicXService.getsongAlbumID(), new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         int colors[] = Helper.getAvailableColor(musicXService, palette);

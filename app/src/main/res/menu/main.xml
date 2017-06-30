@@ -22,4 +22,9 @@
         android:id="@+id/system_eq"
         android:title="System Eq"/>
 
+
+    <item
+        android:id="@+id/play_save_queue"
+        android:title="Play Saved Queue" />
+
 </menu>

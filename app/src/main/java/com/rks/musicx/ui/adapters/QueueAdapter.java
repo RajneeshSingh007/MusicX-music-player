@@ -77,7 +77,7 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
             }
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
-            ArtworkUtils.ArtworkLoader(getContext(),300, 600, song.getAlbum(), null, song.getAlbumId(), new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, song.getAlbum(), song.getAlbumId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
                 }
@@ -108,13 +108,7 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
             }
         }
         if (mLayoutId == R.layout.gridqueue) {
-            if (position == pos) {
-                holder.itemView.setSelected(true);
-            } else {
-                holder.itemView.setSelected(false);
-
-            }
-            ArtworkUtils.ArtworkLoader(getContext(), 300, 600,song.getAlbum(), null, song.getAlbumId(), new palette() {
+            ArtworkUtils.ArtworkLoader(getContext(), 300, 600, song.getAlbum(), song.getAlbumId(), new palette() {
                 @Override
                 public void palettework(Palette palette) {
                 }

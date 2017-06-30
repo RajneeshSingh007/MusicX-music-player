@@ -16,6 +16,7 @@
              android:id="@+id/item_view"
              android:layout_width="wrap_content"
              android:layout_height="wrap_content"
+    android:elevation="8dp"
              android:foreground="?android:attr/selectableItemBackground">
 
     <com.rks.musicx.misc.widgets.SquareImageView

@@ -1,6 +1,5 @@
 
 - <a href="https://github.com/bumptech/glide"><b>Glide</b></a>
-- <a href="http://square.github.io/retrofit/"><b>Retrofit 2</b></a>
 - <a href="https://github.com/timusus/RecyclerView-FastScroll"><b>FastScroll RecyclerView</b></a>
 - <a href="https://github.com/afollestad/app-theme-engine"><b>AppThemeEngine</b></a>
 - <a href="https://github.com/afollestad/material-dialogs"><b>MaterialDialogs</b></a>

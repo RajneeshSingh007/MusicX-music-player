@@ -9,7 +9,6 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,13 +23,14 @@ import com.rks.musicx.base.BaseRefreshFragment;
 import com.rks.musicx.data.loaders.ArtistLoader;
 import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.model.Artist;
-import com.rks.musicx.data.network.ArtistArtwork;
+import com.rks.musicx.data.network.NetworkHelper;
 import com.rks.musicx.database.CommonDatabase;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.ItemOffsetDecoration;
+import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.ArtistListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
@@ -64,18 +64,20 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
     private int artistLoader = -1;
     private List<Artist> artistlist;
     private SearchView searchView;
-    private ArtistArtwork artistArtwork;
     private CommonDatabase commonDatabase;
 
     private BaseRecyclerViewAdapter.OnItemClickListener OnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
             Artist artist = artistListAdapter.getItem(position);
+            if (((MainActivity) getActivity()).getMusicXService() == null) {
+                return;
+            }
             switch (view.getId()) {
                 case R.id.album_artwork:
                 case R.id.item_view:
                     if (artistListAdapter.getSnapshot().size() > 0 && position < artistListAdapter.getSnapshot().size()) {
-                        Fragment fragments = ArtistFragment.newInstance(artist);
+                        Fragment fragments = ArtistFragment.newInstance(artist, ((MainActivity) getActivity()).getMusicXService());
                         ImageView listartwork = (ImageView) view.findViewById(R.id.album_artwork);
                         fragTransition(fragments, listartwork, "TransitionArtwork");
                     }
@@ -203,6 +205,23 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
         commonDatabase = new CommonDatabase(getContext(), DOWNLOAD_ARTWORK2, false);
     }
 
+    public void downloadArtwork() {
+        //download artwork
+        List<Artist> downloadList = commonDatabase.readArtist();
+        try {
+            if (!Extras.getInstance().saveData()) {
+                if (downloadList == null) {
+                    return;
+                }
+                for (Artist artist : downloadList) {
+                    NetworkHelper.downloadArtistArtwork(getContext(), artist.getName());
+                }
+            }
+        } finally {
+            commonDatabase.close();
+        }
+    }
+
     @Override
     public void load() {
         getLoaderManager().restartLoader(artistLoader, null, this);
@@ -255,32 +274,7 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
             return;
         }
         Extras.getInstance().getThemevalue(getActivity());
-        //download artwork
-        CommonDatabase commonDatabase = new CommonDatabase(getContext(), DOWNLOAD_ARTWORK2, false);
-        List<Artist> downloadList = commonDatabase.readArtist();
-        try {
-            if (!Extras.getInstance().saveData()) {
-                if (downloadList == null || getActivity() == null) {
-                    return;
-                }
-                for (Artist artist : downloadList) {
-                    artistArtwork = new ArtistArtwork(getContext(), artist.getName());
-                    artistArtwork.execute();
-                    Log.e("Artist_MetaData", artist.getName());
-                }
-            }
-        } finally {
-            commonDatabase.close();
-        }
+        downloadArtwork();
     }
 
-    @Override
-    public void onDestroy() {
-        if (!Extras.getInstance().saveData()){
-            if (artistArtwork != null){
-                artistArtwork.cancel(true);
-            }
-        }
-        super.onDestroy();
-    }
 }

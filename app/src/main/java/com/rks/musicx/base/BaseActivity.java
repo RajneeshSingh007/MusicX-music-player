@@ -119,7 +119,7 @@ public abstract class BaseActivity extends ATEActivity {
                 Helper.getCalligraphy(this,"Raleway.ttf");
                 break;
             case Two:
-                Helper.getCalligraphy(this,"CormorantGaramond.ttf");
+                Helper.getCalligraphy(this, "Knul.otf");
                 break;
             case Three:
                 Helper.getCalligraphy(this,"CutiveMono.ttf");
@@ -134,7 +134,7 @@ public abstract class BaseActivity extends ATEActivity {
                 Helper.getCalligraphy(this,"Trench.ttf");
                 break;
             case "7":
-                Helper.getCalligraphy(this,"Espacio.ttf");
+                Helper.getCalligraphy(this, "Monad.otf");
                 break;
             case "8":
                 Helper.getCalligraphy(this,"Rex.ttf");
@@ -149,7 +149,7 @@ public abstract class BaseActivity extends ATEActivity {
                 Helper.getCalligraphy(this,"MavenPro.ttf");
                 break;
             case "12":
-                Helper.getCalligraphy(this,"Vetka.otf");
+                Helper.getCalligraphy(this, "Vow.ttf");
                 break;
             case "13":
                 Helper.getCalligraphy(this,"Lombok.otf");

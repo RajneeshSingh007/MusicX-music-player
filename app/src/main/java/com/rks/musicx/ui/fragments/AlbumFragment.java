@@ -14,13 +14,14 @@ import com.rks.musicx.R;
 import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Album;
-import com.rks.musicx.data.network.AlbumArtwork;
+import com.rks.musicx.data.network.NetworkHelper;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
+import com.rks.musicx.services.MusicXService;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
@@ -49,27 +50,33 @@ import static com.rks.musicx.misc.utils.Constants.ALBUM_YEAR;
 
 public class AlbumFragment extends BaseLoaderFragment {
 
+    private static MusicXService musicXService;
     private ImageView artworkView;
     private Album mAlbum;
     private FastScrollRecyclerView rv;
     private Toolbar toolbar;
     private Helper helper;
     private FloatingActionButton shuffle;
-    private AlbumArtwork albumArtwork;
 
     private View.OnClickListener mOnClickListener = v -> {
+        if (musicXService == null) {
+            return;
+        }
         switch (v.getId()) {
             case R.id.shuffle_fab:
-                ((MainActivity) getActivity()).onShuffleRequested(songListAdapter.getSnapshot(), true);
+                musicXService.setPlaylistandShufle(songListAdapter.getSnapshot(), true);
                 Extras.getInstance().saveSeekServices(0);
                 break;
         }
     };
 
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = (position, view) -> {
+        if (musicXService == null) {
+            return;
+        }
         switch (view.getId()) {
             case R.id.item_view:
-                ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
+                musicXService.setPlaylist(songListAdapter.getSnapshot(), position, true);
                 Extras.getInstance().saveSeekServices(0);
                 break;
             case R.id.menu_button:
@@ -78,7 +85,7 @@ public class AlbumFragment extends BaseLoaderFragment {
         }
     };
 
-    public static AlbumFragment newInstance(Album album) {
+    public static AlbumFragment newInstance(Album album, MusicXService musicXServices) {
         AlbumFragment fragment = new AlbumFragment();
         Bundle args = new Bundle();
         args.putLong(ALBUM_ID, album.getId());
@@ -87,6 +94,7 @@ public class AlbumFragment extends BaseLoaderFragment {
         args.putInt(ALBUM_YEAR, album.getYear());
         args.putInt(ALBUM_TRACK_COUNT, album.getTrackCount());
         fragment.setArguments(args);
+        musicXService = musicXServices;
         return fragment;
     }
 
@@ -196,10 +204,9 @@ public class AlbumFragment extends BaseLoaderFragment {
 
     private void AlbumCover() {
         if (!Extras.getInstance().saveData()){
-            albumArtwork = new AlbumArtwork(getContext(), mAlbum.getArtistName(), mAlbum.getArtistName());
-            albumArtwork.execute();
+            NetworkHelper.downloadAlbumArtwork(getContext(), mAlbum.getArtistName(), mAlbum.getArtistName());
         }
-        ArtworkUtils.ArtworkLoader(getContext(), 300, 600, mAlbum.getAlbumName(), null, mAlbum.getId(), new palette() {
+        ArtworkUtils.ArtworkLoader(getContext(), 300, 600, mAlbum.getAlbumName(), mAlbum.getId(), new palette() {
             @Override
             public void palettework(Palette palette) {
                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -212,14 +219,4 @@ public class AlbumFragment extends BaseLoaderFragment {
         },artworkView);
     }
 
-
-    @Override
-    public void onDestroy() {
-        if (!Extras.getInstance().saveData()){
-            if (albumArtwork != null){
-                albumArtwork.cancel(true);
-            }
-        }
-        super.onDestroy();
-    }
 }

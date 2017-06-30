@@ -104,6 +104,7 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
     private List<View> Playing4PagerDetails;
     private List<Song> queueList = new ArrayList<>();
     private updateAlbumArt updatealbumArt;
+    private Helper helper;
 
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
@@ -111,7 +112,6 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
             if (getMusicXService() == null) {
                 return;
             }
-            queuerv.scrollToPosition(position);
             switch (view.getId()) {
                 case R.id.item_view:
                     getMusicXService().setdataPos(position, true);
@@ -220,6 +220,7 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
         }
         getActivity().getWindow().setStatusBarColor(accentColor);
         initVisualizer();
+        helper = new Helper(getContext());
     }
 
     @Override
@@ -271,7 +272,7 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
                 }
             }
             updateQueue();
-            new Helper(getContext()).LoadLyrics(title, artist, getMusicXService().getsongData(), lrcview);
+            helper.LoadLyrics(getContext(), title, artist, getMusicXService().getsongData(), lrcview);
         }
     }
 
@@ -370,7 +371,7 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ArtworkUtils.ArtworkLoader(getContext(),  300, 600, getMusicXService().getsongAlbumName(), null, getMusicXService().getsongAlbumID(), new palette() {
+                ArtworkUtils.ArtworkLoader(getContext(), 300, 600, getMusicXService().getsongAlbumName(), getMusicXService().getsongAlbumID(), new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         final int[] colors = Helper.getAvailableColor(getContext(), palette);
@@ -495,7 +496,7 @@ public class Playing4Fragment extends BasePlayingFragment implements SimpleItemT
                 updatealbumArt = new updateAlbumArt(finalPath, getMusicXService().getsongData(), getContext(), getMusicXService().getsongAlbumID(), new changeAlbumArt() {
                     @Override
                     public void onPostWork() {
-                        ArtworkUtils.ArtworkLoader(getContext(),  300, 600, getMusicXService().getsongAlbumName(), finalPath, getMusicXService().getsongAlbumID(), new palette() {
+                        ArtworkUtils.ArtworkLoader(getContext(), 300, 600, finalPath, getMusicXService().getsongAlbumID(), new palette() {
                             @Override
                             public void palettework(Palette palette) {
                                 final int[] colors = Helper.getAvailableColor(getContext(), palette);

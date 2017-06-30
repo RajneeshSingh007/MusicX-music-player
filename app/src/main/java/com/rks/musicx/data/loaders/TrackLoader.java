@@ -33,10 +33,10 @@ import java.util.List;
 
 public class TrackLoader extends BaseAsyncTaskLoader<List<Song>> {
 
-    private String Where;
-    private String sortorder;
-    private String[] selectionargs;
-    private String mFilter;
+    private String Where = null;
+    private String sortorder = null;
+    private String[] selectionargs = null;
+    private String mFilter = null;
 
     private String[] datacol = {MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST,

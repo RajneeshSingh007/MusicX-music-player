@@ -248,7 +248,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 try {
-                    Toast.makeText(getActivity(), "slide left to remove tab", Toast.LENGTH_LONG).show();
+                    Toast.makeText(((SettingsActivity) getActivity()), "slide left to remove tab/Select ok without selection to restore all tabs", Toast.LENGTH_LONG).show();
                     Extras.getInstance().getmPreferences().edit().remove(REMOVE_TABLIST).commit();
                 } finally {
                     TabRemoveFragment tabRemoveFragment = new TabRemoveFragment();

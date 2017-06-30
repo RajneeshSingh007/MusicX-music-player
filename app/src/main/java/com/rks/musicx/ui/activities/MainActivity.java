@@ -40,6 +40,8 @@ import android.widget.Toast;
 
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DecodeFormat;
@@ -51,6 +53,7 @@ import com.palette.GlidePalette;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseActivity;
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.database.CommonDatabase;
 import com.rks.musicx.interfaces.MetaDatas;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Extras;
@@ -64,6 +67,7 @@ import com.rks.musicx.ui.fragments.FavFragment;
 import com.rks.musicx.ui.fragments.MainFragment;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -114,6 +118,8 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     private ImageView BackgroundArt;
     private RequestManager mRequestManager;
     private Handler songProgressHandler;
+    private Helper helper;
+    private Drawable pause, play;
     private RelativeLayout logoLayout;
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
@@ -124,20 +130,23 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             if (musicXService != null) {
                 MiniPlayerUpdate();
             }
-            Uri data = getIntent().getData();
-            if (data != null) {
-                getIntent().setData(null);
-                try {
-                    openFile(data);
-                } catch (Exception ignored) {
+            if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
+                Uri data = getIntent().getData();
+                if (data != null) {
+                    getIntent().setData(null);
+                    try {
+                        openFile(data);
+                    } catch (Exception ignored) {
+                        ignored.printStackTrace();
+                    }
                 }
             }
+
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mService = false;
-
         }
     };
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -225,13 +234,13 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         if (mNavigationView != null) {
             mNavigationView.setNavigationItemSelectedListener(MainActivity.this);
         }
-        count = Extras.getInstance().getInitValue("first", "last");
+        count = Extras.getInstance().getInitValue(MainActivity.this, "first", "last");
         if (count == 0) {
             Intent intent = new Intent();
             intent.setClass(MainActivity.this, IntroActivity.class);
             startActivity(intent);
             count++;
-            Extras.getInstance().setInitValue(count, "first", "last");
+            Extras.getInstance().setInitValue(MainActivity.this, count, "first", "last");
         }
         songDetail.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -254,6 +263,9 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         SongTitle.setTypeface(Helper.getFont(MainActivity.this));
         SongArtist.setTypeface(Helper.getFont(MainActivity.this));
         songProgressHandler = new Handler();
+        helper = new Helper(this);
+        pause = ContextCompat.getDrawable(MainActivity.this, R.drawable.aw_ic_pause);
+        play = ContextCompat.getDrawable(MainActivity.this, R.drawable.aw_ic_play);
     }
 
     @Override
@@ -311,8 +323,69 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                 }else {
                     Toast.makeText(this, "No app found to handle equalizer", Toast.LENGTH_SHORT).show();
                 }
+                break;
+            case R.id.play_save_queue:
+                multiQueuePlay();
+                break;
+
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * paly Multi Saved Queue
+     */
+    private void multiQueuePlay() {
+        List<Song> mixList = new ArrayList<>();
+        List<String> savedQueue = new ArrayList<>();
+        savedQueue = Helper.getSavedQueueList(MainActivity.this);
+        if (savedQueue == null) {
+            return;
+        }
+        new MaterialDialog.Builder(this)
+                .title("Play Saved Queue")
+                .items(savedQueue)
+                .typeface(Helper.getFont(this), Helper.getFont(this))
+                .itemsCallbackMultiChoice(null, new MaterialDialog.ListCallbackMultiChoice() {
+                    @Override
+                    public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
+                        if (dialog.getItems() != null) {
+                            List<Song> queueList = new ArrayList<>();
+                            for (CharSequence name : text) {
+                                CommonDatabase commonDatabase = new CommonDatabase(MainActivity.this, name.toString(), true);
+                                queueList.clear();
+                                queueList = commonDatabase.readLimit(-1, null);
+                                commonDatabase.close();
+                            }
+                            for (Song song : queueList) {
+                                mixList.add(song);
+                            }
+                        }
+                        return true;
+                    }
+                })
+                .alwaysCallMultiChoiceCallback()
+                .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
+                        dialog.clearSelectedIndices();
+                    }
+                })
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        if (mixList.size() > 0) {
+                            onShuffleRequested(mixList, true);
+                        }
+                    }
+                })
+                .positiveText("Play")
+                .negativeText(android.R.string.cancel)
+                .autoDismiss(true)
+                .dividerColor(accentcolor)
+                .build()
+                .show();
     }
 
     @Override
@@ -331,6 +404,10 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         }
         Extras.getInstance().saveSeekServices(0);
         musicXService.setPlaylistandShufle(songList, play);
+    }
+
+    public MusicXService getMusicXService() {
+        return musicXService;
     }
 
     @Override
@@ -517,44 +594,40 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (Extras.getInstance().getDownloadedArtwork()){
-                    if (ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()).exists()) {
-                        if (ArtworkUtils.getAlbumFileName(MainActivity.this, musicXService.getsongAlbumName()).equalsIgnoreCase(musicXService.getsongAlbumName())){
-                            mRequestManager.load(ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()))
-                                    .asBitmap()
-                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                    .skipMemoryCache(true)
-                                    .centerCrop()
-                                    .placeholder(R.mipmap.ic_launcher)
-                                    .error(R.mipmap.ic_launcher)
-                                    .format(DecodeFormat.PREFER_ARGB_8888)
-                                    .override(300, 300)
-                                    .listener(GlidePalette.with(ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()).getAbsolutePath())
-                                            .intoCallBack(new BitmapPalette.CallBack() {
-                                                @Override
-                                                public void onPaletteLoaded(@Nullable Palette palette) {
-                                                    int color[] = Helper.getAvailableColor(MainActivity.this, palette);
-                                                    if (Extras.getInstance().artworkColor()) {
-                                                        colorMode(color[0]);
-                                                    } else {
-                                                        colorMode(accentcolor);
-                                                    }
-                                                }
-                                            }))
-                                    .into(new SimpleTarget<Bitmap>() {
-
+                if (Extras.getInstance().getDownloadedArtwork()) {
+                    mRequestManager.load(helper.loadAlbumImage(musicXService.getsongAlbumName()))
+                            .asBitmap()
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
+                            .centerCrop()
+                            .placeholder(R.mipmap.ic_launcher)
+                            .error(R.mipmap.ic_launcher)
+                            .format(DecodeFormat.PREFER_ARGB_8888)
+                            .override(300, 300)
+                            .listener(GlidePalette.with(ArtworkUtils.getAlbumCoverPath(MainActivity.this, musicXService.getsongAlbumName()).getAbsolutePath())
+                                    .intoCallBack(new BitmapPalette.CallBack() {
                                         @Override
-                                        public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                                            ArtworkUtils.blurPreferances(MainActivity.this, ArtworkUtils.drawableToBitmap(errorDrawable), BackgroundArt);
+                                        public void onPaletteLoaded(@Nullable Palette palette) {
+                                            int color[] = Helper.getAvailableColor(MainActivity.this, palette);
+                                            if (Extras.getInstance().artworkColor()) {
+                                                colorMode(color[0]);
+                                            } else {
+                                                colorMode(accentcolor);
+                                            }
                                         }
+                                    }))
+                            .into(new SimpleTarget<Bitmap>() {
 
-                                        @Override
-                                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                                            ArtworkUtils.blurPreferances(MainActivity.this, resource, BackgroundArt);
-                                        }
-                                    });
-                        }
-                    }
+                                @Override
+                                public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                                    ArtworkUtils.blurPreferances(MainActivity.this, ArtworkUtils.drawableToBitmap(errorDrawable), BackgroundArt);
+                                }
+
+                                @Override
+                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                    ArtworkUtils.blurPreferances(MainActivity.this, resource, BackgroundArt);
+                                }
+                            });
                 } else {
                     mRequestManager.load(ArtworkUtils.uri(musicXService.getsongAlbumID()))
                             .asBitmap()
@@ -628,9 +701,9 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     private void playpausetoggle() {
         if (musicXService != null) {
             if (musicXService.isPlaying()) {
-                playToggle.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.aw_ic_pause));
+                playToggle.setImageDrawable(pause);
             } else {
-                playToggle.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.aw_ic_play));
+                playToggle.setImageDrawable(play);
             }
         }
 

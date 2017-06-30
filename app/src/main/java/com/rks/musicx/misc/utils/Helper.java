@@ -26,7 +26,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.Media;
@@ -51,6 +50,7 @@ import android.transition.TransitionInflater;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -65,13 +65,16 @@ import android.widget.Toast;
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.rks.musicx.MusicXApplication;
 import com.rks.musicx.R;
 import com.rks.musicx.data.loaders.DefaultSongLoader;
 import com.rks.musicx.data.model.Album;
 import com.rks.musicx.data.model.Artist;
 import com.rks.musicx.data.model.Song;
-import com.rks.musicx.data.network.LyricsData;
+import com.rks.musicx.data.network.NetworkHelper;
 import com.rks.musicx.database.FavHelper;
+import com.rks.musicx.database.SaveQueueDatabase;
+import com.rks.musicx.interfaces.Action;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.rks.musicx.ui.fragments.AlbumFragment;
@@ -90,6 +93,9 @@ import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.TagOptionSingleton;
+import org.jaudiotagger.tag.id3.ID3v1Tag;
+import org.jaudiotagger.tag.id3.ID3v22Tag;
+import org.jaudiotagger.tag.id3.ID3v23Tag;
 import org.jaudiotagger.tag.id3.ID3v24Tag;
 
 import java.io.BufferedReader;
@@ -109,7 +115,6 @@ import java.util.regex.Pattern;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
-import static com.rks.musicx.R.string.file_size;
 import static com.rks.musicx.misc.utils.Constants.BlackTheme;
 import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 import static com.rks.musicx.misc.utils.Constants.Four;
@@ -245,7 +250,7 @@ public class Helper {
                         context.getText(R.string.file_path) +
                         data +
                         "\n\n" +
-                        context.getText(file_size) +
+                        context.getText(R.string.file_size) +
                         String.valueOf(String.format("%.2f", cal / 1024)) +
                         " MB";
                 new MaterialDialog.Builder(context)
@@ -303,7 +308,13 @@ public class Helper {
             if (audioFile != null) {
                 tag = audioFile.getTag();
             }
-            if (tag == null) {
+            if (tag instanceof ID3v1Tag) {
+                tag = new ID3v1Tag();
+            } else if (tag instanceof ID3v22Tag) {
+                tag = new ID3v22Tag();
+            } else if (tag instanceof ID3v23Tag) {
+                tag = new ID3v23Tag();
+            } else {
                 tag = new ID3v24Tag();
             }
             try {
@@ -376,10 +387,8 @@ public class Helper {
      * @param path
      * @return
      */
+    @NonNull
     public static String getInbuiltLyrics(String path) {
-        if (path == null) {
-            return null;
-        }
         File file = new File(path);
         if (file.exists()) {
             AudioFile audioFile = null;
@@ -393,19 +402,17 @@ public class Helper {
             if (audioFile != null) {
                 tag = audioFile.getTag();
             }
-            if (tag == null) {
-                tag = new ID3v24Tag();
-            }
             try {
-                return tag.getFirst(FieldKey.LYRICS);
+                if (tag != null) {
+                    return tag.getFirst(FieldKey.LYRICS);
+                } else {
+                    return "No Lyrics found";
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return "No Lyrics found";
-        } else {
-            Log.d("Helper", "File not found");
-            return null;
         }
+        return "";
     }
 
     /**
@@ -561,17 +568,25 @@ public class Helper {
         return temp;
     }
 
+    /**
+     * Theme Config
+     *
+     * @param context
+     * @return
+     */
     public static String getATEKey(Context context) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Boolean theme = sharedPreferences.getBoolean(DarkTheme, false);
-        Boolean blacktheme = sharedPreferences.getBoolean(BlackTheme, false);
+        if (MusicXApplication.getmPreferences() == null) {
+            return null;
+        }
+        Boolean theme = MusicXApplication.getmPreferences().getBoolean(DarkTheme, false);
+        Boolean blacktheme = MusicXApplication.getmPreferences().getBoolean(BlackTheme, false);
         if (theme) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
+            SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
             editor.putBoolean(BlackTheme, false);
             editor.apply();
             return DarkTheme;
         } else if (blacktheme) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
+            SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
             editor.putBoolean(DarkTheme, false);
             editor.apply();
             return BlackTheme;
@@ -761,11 +776,11 @@ public class Helper {
      */
     public static String getStoragePath() {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            String musicfolderpath = Environment.getExternalStorageDirectory().getPath();
+            String musicfolderpath = Environment.getExternalStorageDirectory().getAbsolutePath();
             Log.d("Helper", musicfolderpath);
             return musicfolderpath;
         } else {
-            return null;
+            return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath();
         }
     }
 
@@ -819,6 +834,67 @@ public class Helper {
         finalTimerString = finalTimerString + mp3Minutes + ":" + secondsString;
         // return timer string
         return finalTimerString;
+    }
+
+    /**
+     * Multi file delete
+     *
+     * @param id
+     * @param songLoaders
+     * @param fragment
+     * @param songList
+     * @param context
+     */
+    public static void multiDeleteTrack(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders, Fragment fragment, List<Song> songList, Context context) {
+        if (songList.size() == 0) {
+            return;
+        }
+        MaterialDialog.Builder dialog = new MaterialDialog.Builder(context);
+        dialog.title("Delete Tracks");
+        dialog.content(context.getString(R.string.delete_music));
+        dialog.positiveText(android.R.string.ok);
+        dialog.typeface(getFont(context), getFont(context));
+        dialog.onPositive(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                boolean confirm = false;
+                for (Song song : songList) {
+                    String path = song.getmSongPath();
+                    if (path != null) {
+                        File file = new File(path);
+                        if (file.exists()) {
+                            if (file.delete()) {
+                                confirm = true;
+                                MediaScannerConnection.scanFile(context, new String[]{file.getAbsolutePath()}, new String[]{"audio/*"}, new MediaScannerConnection.MediaScannerConnectionClient() {
+                                    @Override
+                                    public void onMediaScannerConnected() {
+
+                                    }
+
+                                    @Override
+                                    public void onScanCompleted(String s, Uri uri) {
+                                        fragment.getLoaderManager().restartLoader(id, null, songLoaders);
+                                    }
+                                });
+                            } else {
+                                confirm = false;
+                            }
+
+                        }
+                    }
+                }
+                if (confirm) {
+                    Log.e("Helper", "files are Deleted");
+                    Toast.makeText(context, "All Songs deleted", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.e("Helper", "files are not Deleted");
+                    fragment.getLoaderManager().restartLoader(id, null, songLoaders);
+                    Toast.makeText(context, "Failed to delete song", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        dialog.negativeText(R.string.cancel);
+        dialog.show();
     }
 
     public static int parseToInt(String maybeInt, int defaultValue) {
@@ -877,7 +953,7 @@ public class Helper {
      * @param <S>
      */
     public static <S> void startActivity(Activity context, Class<S> sClass) {
-        if (context == null) {
+        if (context == null){
             return;
         }
         Intent intent = new Intent(context, sClass);
@@ -903,7 +979,7 @@ public class Helper {
      * @param context
      * @return
      */
-    public static Typeface getFont(Context context) {
+    public static Typeface getFont(Context context){
         Typeface typeface = null;
         try {
             switch (Extras.getInstance().fontConfig()) {
@@ -972,7 +1048,7 @@ public class Helper {
                     break;
 
             }
-        } catch (Exception e) {
+        } catch (Exception e){
             e.printStackTrace();
         }
         return typeface;
@@ -985,7 +1061,7 @@ public class Helper {
      */
     public static Typeface getTypeface(Context context, String customFont) {
         Typeface tf = fontCache.get(customFont);
-        if (tf == null) {
+        if(tf == null) {
             try {
                 tf = Typeface.createFromAsset(context.getAssets(), customFont);
             } catch (Exception e) {
@@ -1000,7 +1076,7 @@ public class Helper {
      * Rotate view 360
      * @param view
      */
-    public static void rotateFab(@NonNull View view) {
+    public static void rotateFab(@NonNull View view){
         ViewCompat.animate(view).
                 rotation(360f).
                 withLayer().
@@ -1010,12 +1086,12 @@ public class Helper {
     }
 
     /**
-     * check activity present or not in the device
+     * check activity/class/package present or not in the device
      * @param context
      * @param intent
      * @return
      */
-    public static boolean isActivityPresent(Context context, Intent intent) {
+    public static boolean isActivityPresent(Context context, Intent intent){
         List<ResolveInfo> list = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
         return list.size() > 0;
     }
@@ -1026,7 +1102,7 @@ public class Helper {
      * @param v
      */
     public static void setColor(@NonNull Activity activity, int color, View v) {
-        if (activity.getWindow() == null) {
+        if (activity.getWindow() == null){
             return;
         }
         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
@@ -1040,9 +1116,13 @@ public class Helper {
         }
     }
 
+    /***
+     * Filter AudioFile Length
+     * @return
+     */
     public static String filterAudio() {
-        String filterAudio = null;
-        switch (Extras.getInstance().getAudioFilter()) {
+        String filterAudio = "15000";
+        switch (Extras.getInstance().getAudioFilter()){
             case Zero:
                 filterAudio = "30000"; //30sec
                 break;
@@ -1066,7 +1146,7 @@ public class Helper {
     }
 
     /**
-     *
+     * Set background color os actionmode using reflection
      * @param actionMode
      * @param color
      */
@@ -1078,6 +1158,7 @@ public class Helper {
             Object value = mContextView.get(standaloneActionMode);
             ((View) value).setBackground(new ColorDrawable(color));
         } catch (Throwable ignore) {
+            ignore.printStackTrace();
         }
     }
 
@@ -1088,6 +1169,9 @@ public class Helper {
      * @return
      */
     public static List<Song> getSongMetaData(Context context, String path) {
+        if (path == null) {
+            return null;
+        }
         List<Song> songList = new ArrayList<>();
         DefaultSongLoader defaultSongLoader = new DefaultSongLoader(context);
         defaultSongLoader.setProvider(true);
@@ -1105,6 +1189,121 @@ public class Helper {
     }
 
     /**
+     * ActionMode Config
+     *
+     * @param loaderCallbacks
+     * @param activity
+     * @param trackloader
+     * @param context
+     * @param fragment
+     * @param action
+     * @param songListAdapter
+     * @return
+     */
+    public static ActionMode.Callback getActionCallback(LoaderManager.LoaderCallbacks<List<Song>> loaderCallbacks, MainActivity activity, int trackloader, Context context, Fragment fragment, Action action, SongListAdapter songListAdapter) {
+        if (activity == null || songListAdapter == null || fragment == null) {
+            return null;
+        }
+        android.support.v7.view.ActionMode.Callback mActionModeCallback = new android.support.v7.view.ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(android.support.v7.view.ActionMode mode, Menu menu) {
+                MenuInflater menuInflater = mode.getMenuInflater();
+                menuInflater.inflate(R.menu.multi_select, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(android.support.v7.view.ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(android.support.v7.view.ActionMode mode, MenuItem item) {
+
+                switch (item.getItemId()) {
+                    case R.id.action_add_to_playlist:
+                        if (getSelectedSong(songListAdapter).size() > 0) {
+                            PlaylistHelper.PlaylistMultiChooser(fragment, context, getSelectedSong(songListAdapter));
+                        }
+                        break;
+                    case R.id.action_add_to_queue:
+                        if (getSelectedSong(songListAdapter).size() > 0) {
+                            try {
+                                for (Song song : getSelectedSong(songListAdapter)) {
+                                    activity.addToQueue(song);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                Toast.makeText(context, "Added to queue", Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
+                        break;
+                    case R.id.action_play:
+                        if (getSelectedSong(songListAdapter).size() > 0) {
+                            activity.onSongSelected(getSelectedSong(songListAdapter), 0);
+                        }
+                        break;
+                    case R.id.action_delete:
+                        if (getSelectedSong(songListAdapter).size() > 0) {
+                            multiDeleteTrack(trackloader, loaderCallbacks, fragment, getSelectedSong(songListAdapter), context);
+                        }
+                        break;
+                }
+                return true;
+            }
+
+            @Override
+            public void onDestroyActionMode(android.support.v7.view.ActionMode mode) {
+                action.clear();
+                songListAdapter.exitMultiselectMode();
+            }
+
+
+        };
+        return mActionModeCallback;
+    }
+
+    /**
+     * MultiSelection SongList
+     *
+     * @return
+     */
+    private static List<Song> getSelectedSong(SongListAdapter songListAdapter) {
+        if (songListAdapter == null || songListAdapter.getSelectedItems().size() == 0) {
+            return null;
+        }
+        List<Integer> selectedPos = songListAdapter.getSelectedItems();
+        List<Song> songList = new ArrayList<>();
+        int pos;
+        for (int i = selectedPos.size() - 1; i >= 0; i--) {
+            pos = selectedPos.get(i);
+            Song song = songListAdapter.getItem(pos);
+            songList.add(song);
+        }
+        return songList;
+    }
+
+    /**
+     * Return Saved QuequeList
+     *
+     * @param context
+     * @return
+     */
+    public static List<String> getSavedQueueList(Context context) {
+        List<String> queueList = new ArrayList<>();
+        SaveQueueDatabase queueDatabase = new SaveQueueDatabase(context, Constants.Queue_Store_TableName);
+        queueList = queueDatabase.readAll();
+        queueDatabase.close();
+        if (queueList.size() > 0) {
+            return queueList;
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Delete Track
      *
      * @param id
@@ -1114,6 +1313,7 @@ public class Helper {
      * @param path
      * @param context
      */
+    @SuppressLint("StringFormatInvalid")
     public void DeleteTrack(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders, Fragment fragment, String name, String path, Context context) {
         MaterialDialog.Builder dialog = new MaterialDialog.Builder(context);
         dialog.title(name);
@@ -1153,67 +1353,6 @@ public class Helper {
                     Log.d("Helper", "Path not found");
                 }
 
-            }
-        });
-        dialog.negativeText(R.string.cancel);
-        dialog.show();
-    }
-
-    /**
-     * Multi file delete
-     *
-     * @param id
-     * @param songLoaders
-     * @param fragment
-     * @param songList
-     * @param context
-     */
-    public void multiDeleteTrack(int id, LoaderManager.LoaderCallbacks<List<Song>> songLoaders, Fragment fragment, List<Song> songList, Context context) {
-        if (songList.size() == 0) {
-            return;
-        }
-        MaterialDialog.Builder dialog = new MaterialDialog.Builder(context);
-        dialog.title("Delete Tracks");
-        dialog.content(context.getString(R.string.delete_music));
-        dialog.positiveText(android.R.string.ok);
-        dialog.typeface(getFont(context), getFont(context));
-        dialog.onPositive(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                boolean confirm = false;
-                for (Song song : songList) {
-                    String path = song.getmSongPath();
-                    if (path != null) {
-                        File file = new File(path);
-                        if (file.exists()) {
-                            if (file.delete()) {
-                                confirm = true;
-                                MediaScannerConnection.scanFile(context, new String[]{file.getAbsolutePath()}, new String[]{"audio/*"}, new MediaScannerConnection.MediaScannerConnectionClient() {
-                                    @Override
-                                    public void onMediaScannerConnected() {
-
-                                    }
-
-                                    @Override
-                                    public void onScanCompleted(String s, Uri uri) {
-                                        fragment.getLoaderManager().restartLoader(id, null, songLoaders);
-                                    }
-                                });
-                            } else {
-                                confirm = false;
-                            }
-
-                        }
-                    }
-                }
-                if (confirm) {
-                    Log.e("Helper", "files are Deleted");
-                    Toast.makeText(context, "All Songs deleted", Toast.LENGTH_SHORT).show();
-                } else {
-                    Log.e("Helper", "files are not Deleted");
-                    fragment.getLoaderManager().restartLoader(id, null, songLoaders);
-                    Toast.makeText(context, "Failed to delete song", Toast.LENGTH_SHORT).show();
-                }
             }
         });
         dialog.negativeText(R.string.cancel);
@@ -1303,11 +1442,11 @@ public class Helper {
                         album.setYear(parseToInt(song.getYear(), 0));
                         album.setTrackCount(song.getTrackNumber());
                         album.setId(song.getAlbumId());
-                        activity.setFragment(AlbumFragment.newInstance(album));
+                        activity.setFragment(AlbumFragment.newInstance(album, activity.getMusicXService()));
                         break;
                     case R.id.go_to_artist:
                         Artist artist = new Artist(song.getArtistId(), song.getArtist(), song.getTrackNumber(), song.getTrackNumber());
-                        activity.setFragment(ArtistFragment.newInstance(artist));
+                        activity.setFragment(ArtistFragment.newInstance(artist, activity.getMusicXService()));
                         break;
                 }
                 return false;
@@ -1337,7 +1476,7 @@ public class Helper {
         searchLyrics.onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                LoadLyrics(songeditText.getText().toString(), artisteditText.getText().toString(), path, setlyrics);
+                LoadLyrics(context, songeditText.getText().toString(), artisteditText.getText().toString(), path, setlyrics);
             }
         });
         searchLyrics.negativeText(android.R.string.cancel);
@@ -1359,7 +1498,7 @@ public class Helper {
      * @param path
      * @param lrcView
      */
-    public void LoadLyrics(String title, String artist, String path, TextView lrcView) {
+    public void LoadLyrics(Context context, String title, String artist, String path, TextView lrcView) {
         if (title != null && artist != null) {
             File file = new File(loadLyrics(title));
             if (file.exists()) {
@@ -1370,8 +1509,8 @@ public class Helper {
                 }
             } else {
                 try {
-                    new LyricsData(context, title, artist, path, lrcView).execute("Executed");
-                } finally {
+                    NetworkHelper.downloadLyrics(context, artist, title, path, lrcView);
+                }finally {
                     lrcView.setText(getInbuiltLyrics(path));
                 }
             }
@@ -1380,7 +1519,7 @@ public class Helper {
             Log.d("Helper", "Title, Artist is null");
         }
     }
-
+    
     /**
      * Location Of Lyrics
      *
@@ -1516,6 +1655,7 @@ public class Helper {
         }
         return fileList;
     }
+
 
 }
 

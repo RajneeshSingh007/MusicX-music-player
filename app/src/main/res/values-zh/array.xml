@@ -42,17 +42,17 @@
     <string-array name="fontChoice">
         <item>RobotoLight</item>
         <item>Raleway</item>
-        <item>Cormorant</item>
+        <item>Knul</item>
         <item>CutiveMono</item>
         <item>Timber</item>
         <item>Snippet</item>
         <item>Trench</item>
-        <item>Espacio</item>
+        <item>Monad</item>
         <item>Rex</item>
         <item>Exodus</item>
         <item>Gogia</item>
         <item>Maven</item>
-        <item>Vetka</item>
+        <item>Vow</item>
         <item>Lombok</item>
         <item>Circled</item>
         <item>Franks</item>
@@ -101,15 +101,6 @@
         <item>0</item>
         <item>1</item>
         <item>2</item>
-    </string-array>
-
-    <string-array name="removetabsName">
-        <item>@string/recentlists</item>
-        <item>@string/folder</item>
-        <item>@string/titles</item>
-        <item>@string/albums</item>
-        <item>@string/artists</item>
-        <item>@string/playlists</item>
     </string-array>
 
     <string-array name="fadeDuration">

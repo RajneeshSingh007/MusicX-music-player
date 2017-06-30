@@ -31,7 +31,6 @@ public class Constants {
     public static final int OVERLAY_REQ = 1;
     public static final int WRITESETTINGS = 2;
     public static final int EQ = 3445;
-    public static final int IMAGECHOOSER = 2435;
 
     /*
     Sorting properties
@@ -89,13 +88,18 @@ public class Constants {
     public static final String PLAYINGVIEW_TRACK = "isplayingView3";
     public static final String SETTINGS_TRACK = "settings_track";
     public static final String HD_ARTWORK = "hd_artwork";
-    public static final String EXTRACT_FOLDER = "extract_folder";
     public static final String DONATION_TRACK = "donation_track";
-    public static final String QUEUE_NAME = "save_queue_name";
     public static final String DOWNLOADED_ARTWORK = "downloaded_artwork";
     public static final String REMOVE_TABLIST = "removeTablist";
     public static final String TAG_METADATA = "MetaData";
     public static final String AUDIO_FILTER = "audio_filter";
+
+    /**
+     * Files filter
+     */
+    public static final String fileExtensions[] = new String[]{
+            ".aac", ".mp3", ".wav", ".ogg", ".midi", ".3gp", ".mp4", ".m4a", ".amr", ".flac"
+    };
 
     /*
     Choices
@@ -117,8 +121,11 @@ public class Constants {
     public static final String RecentlyPlayed_TableName = "RecentlyPlayed";
     public static final String Queue_TableName = "QueuePlaylist";
     public static final String Fav_TableName = "Favorites";
+    public static final String Queue_Store_TableName = "QueueStore";
+
     public static final int DbVersion = 2;
     public static final String Separator = ",";
+
     public static final String DOWNLOAD_ARTWORK = "DownloadAlbum";
     public static final String DOWNLOAD_ARTWORK2 = "DownloadArtwork";
 
@@ -200,12 +207,7 @@ public class Constants {
     public static final String PLAY_SHORTCUTS = PACKAGENAME + "pause_shortcuts";
     public static final String SHORTCUTS_TYPES = PACKAGENAME + "shortcuts_type";
 
-    /**
-     * Files filter
-     */
-    public static final String fileExtensions[] = new String[]{
-            ".aac", ".mp3", ".wav", ".ogg", ".midi", ".3gp", ".mp4", ".m4a", ".amr", ".flac"
-    };
+
     /**
      * Permissions Array
      */
@@ -222,7 +224,6 @@ public class Constants {
      */
     public static String vagUrl = "http://api.vagalume.com.br/";
     public static String lastFmUrl = "http://ws.audioscrobbler.com/2.0/";
-
 
     /**
      * Database table
@@ -249,5 +250,17 @@ public class Constants {
                     DefaultColumn.ArtistAlbumCount + " INTEGER" + Separator +
                     DefaultColumn.ArtistTrackCount + " INTEGER" + " )";
         }
+    }
+
+    /**
+     * Database to store queueName
+     *
+     * @param tableName
+     * @return
+     */
+    public static String DefaultColumn(String tableName) {
+        return "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+                DefaultColumn._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + Separator +
+                DefaultColumn.QueueName + " TEXT" + " )";
     }
 }

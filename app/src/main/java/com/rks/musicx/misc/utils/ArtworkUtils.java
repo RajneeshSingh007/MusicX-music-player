@@ -383,16 +383,12 @@ public class ArtworkUtils {
      * @param palettework
      * @param bitmapwork
      */
-    public static void ArtworkLoader(Context context, int size, int bigsize, String album, String path, long key, palette palettework, bitmap bitmapwork) {
+    public static void ArtworkLoader(Context context, int size, int bigsize, String album, long key, palette palettework, bitmap bitmapwork) {
         if (Extras.getInstance().getDownloadedArtwork()){
             Helper helper = new Helper(context);
             loadArtwork(context, size, bigsize, helper.loadAlbumImage(album), palettework, bitmapwork);
         }else {
-            if (path == null){
-                loadArtwork(context, size, bigsize, key, palettework, bitmapwork);
-            }else {
-                loadArtwork(context, size, bigsize, path, palettework, bitmapwork);
-            }
+            loadArtwork(context, size, bigsize, key, palettework, bitmapwork);
         }
     }
 
@@ -405,16 +401,12 @@ public class ArtworkUtils {
      * @param palettework
      * @param imageView
      */
-    public static void ArtworkLoader(Context context, int size, int bigsize, String album, String path, long key, palette palettework, ImageView imageView) {
+    public static void ArtworkLoader(Context context, int size, int bigsize, String album, long key, palette palettework, ImageView imageView) {
         if (Extras.getInstance().getDownloadedArtwork()){
             Helper helper = new Helper(context);
             loadArtwork(context, size, bigsize, helper.loadAlbumImage(album), palettework, imageView);
         }else {
-            if (path == null){
-                loadArtwork(context, size, bigsize, key, palettework, imageView);
-            }else {
-                loadArtwork(context, size, bigsize, path, palettework, imageView);
-            }
+            loadArtwork(context, size, bigsize, key, palettework, imageView);
         }
     }
 
@@ -432,8 +424,7 @@ public class ArtworkUtils {
     }
 
     public static AsyncTask<Drawable, Void, Drawable> getBlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView, int scale) {
-        BlurArtwork blurArtwork = new BlurArtwork(context, radius, bitmap, imageView, scale);
-        return blurArtwork.execute();
+        return new BlurArtwork(context, radius, bitmap, imageView, scale).execute();
     }
 
     public static void blurPreferances(Context context, Bitmap blurBitmap, ImageView imageView) {

@@ -35,4 +35,6 @@ public interface DefaultColumn extends BaseColumns {
     String ArtistAlbumCount = "ArtistAlbumCount";
     String ArtistTrackCount = "ArtistTrackCount";
 
+    String QueueName = "QueueName";
+
 }

@@ -37,8 +37,11 @@ import com.kbeanie.imagechooser.api.ChosenImages;
 import com.kbeanie.imagechooser.api.ImageChooserListener;
 import com.kbeanie.imagechooser.api.ImageChooserManager;
 import com.rks.musicx.R;
+import com.rks.musicx.data.model.Album;
+import com.rks.musicx.data.model.Artist;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.database.CommonDatabase;
+import com.rks.musicx.database.SaveQueueDatabase;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.PlaylistHelper;
@@ -47,11 +50,11 @@ import com.rks.musicx.ui.activities.EqualizerActivity;
 import com.rks.musicx.ui.activities.PlayingActivity;
 import com.rks.musicx.ui.activities.SettingsActivity;
 import com.rks.musicx.ui.adapters.QueueAdapter;
+import com.rks.musicx.ui.fragments.AlbumFragment;
+import com.rks.musicx.ui.fragments.ArtistFragment;
 import com.rks.musicx.ui.fragments.TagEditorFragment;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 import static com.rks.musicx.misc.utils.Constants.ITEM_ADDED;
@@ -60,6 +63,7 @@ import static com.rks.musicx.misc.utils.Constants.ORDER_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.POSITION_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.QUEUE_CHANGED;
+import static com.rks.musicx.misc.utils.Constants.Queue_Store_TableName;
 import static com.rks.musicx.misc.utils.Constants.Queue_TableName;
 
 /*
@@ -391,7 +395,6 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         menuInflater.inflate(R.menu.playing_menu, popupMenu.getMenu());
         popupMenu.getMenu().findItem(R.id.action_share).setVisible(torf);
         popupMenu.getMenu().findItem(R.id.action_eq).setVisible(torf);
-        popupMenu.getMenu().findItem(R.id.action_savequeue).setVisible(false);
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -443,6 +446,22 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         getActivity().startActivity(intent);
                         break;
+                    case R.id.action_savequeue:
+                        saveQueue();
+                        break;
+                    case R.id.go_to_album:
+                        Album album = new Album();
+                        album.setId(getMusicXService().getsongAlbumID());
+                        album.setArtistName(getMusicXService().getsongArtistName());
+                        album.setTrackCount(getMusicXService().getsongNumber());
+                        album.setAlbumName(getMusicXService().getsongAlbumName());
+                        album.setYear(0);
+                        ((PlayingActivity) getActivity()).setFragment(AlbumFragment.newInstance(album, getMusicXService()));
+                        break;
+                    case R.id.go_to_artist:
+                        Artist artist = new Artist(getMusicXService().getArtistID(), getMusicXService().getsongArtistName(), getMusicXService().getsongNumber(), getMusicXService().getsongNumber());
+                        ((PlayingActivity) getActivity()).setFragment(ArtistFragment.newInstance(artist, getMusicXService()));
+                        break;
                 }
                 return false;
             }
@@ -451,10 +470,9 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
     }
 
     /**
-     * for next update
+     * Save Queue
      */
     private void saveQueue(){
-        List<String> queueName = new ArrayList<>();
         View view1 = LayoutInflater.from(getContext()).inflate(R.layout.create_playlist, new LinearLayout(getContext()), false);
         TextInputEditText editText = (TextInputEditText) view1.findViewById(R.id.playlist_name);
         TextInputLayout inputLayout = (TextInputLayout) view1.findViewById(R.id.inputlayout);
@@ -474,13 +492,21 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                         if (editText.getText() != null) {
-                            CommonDatabase commonDatabase = new CommonDatabase(getContext(), editText.getText().toString(), true);
-                            commonDatabase.add(musicXService.getPlayList());
-                            commonDatabase.close();
-                            queueName.add(editText.getText().toString());
-                            Extras.getInstance().saveQueueName(queueName);
-                            Toast.makeText(getContext(), "Saved Queue", Toast.LENGTH_SHORT).show();
-                            editText.getText().clear();
+                            if (musicXService.getPlayList().size() > 0) {
+                                SaveQueueDatabase saveQueueDatabase = new SaveQueueDatabase(getContext(), Queue_Store_TableName);
+                                boolean checkExistance = saveQueueDatabase.isExist(editText.getText().toString());
+                                if (checkExistance) {
+                                    Toast.makeText(getContext(), "Already " + editText.getText().toString() + " queue" + " exists", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    CommonDatabase commonDatabase = new CommonDatabase(getContext(), editText.getText().toString(), true);
+                                    commonDatabase.add(musicXService.getPlayList());
+                                    commonDatabase.close();
+                                    saveQueueDatabase.addQueueName(editText.getText().toString());
+                                    saveQueueDatabase.close();
+                                    Toast.makeText(getContext(), "Saved Queue", Toast.LENGTH_SHORT).show();
+                                }
+                                editText.getText().clear();
+                            }
                         }
                     }
                 })
@@ -529,6 +555,19 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                         break;
                     case R.id.action_share:
                         Helper.shareMusic(musicXService.getsongData(), getContext());
+                        break;
+                    case R.id.go_to_album:
+                        Album album = new Album();
+                        album.setId(getMusicXService().getsongAlbumID());
+                        album.setArtistName(getMusicXService().getsongArtistName());
+                        album.setTrackCount(getMusicXService().getsongNumber());
+                        album.setAlbumName(getMusicXService().getsongAlbumName());
+                        album.setYear(0);
+                        ((PlayingActivity) getActivity()).setFragment(AlbumFragment.newInstance(album, getMusicXService()));
+                        break;
+                    case R.id.go_to_artist:
+                        Artist artist = new Artist(getMusicXService().getArtistID(), getMusicXService().getsongArtistName(), getMusicXService().getsongNumber(), getMusicXService().getsongNumber());
+                        ((PlayingActivity) getActivity()).setFragment(ArtistFragment.newInstance(artist, getMusicXService()));
                         break;
                 }
                 return false;
