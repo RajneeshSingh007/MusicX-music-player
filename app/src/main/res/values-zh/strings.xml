@@ -87,7 +87,6 @@
     <string name="accent_color_summary">選擇強調色</string>
     <string name="custom">自定義</string>
     <string name="equalizer">均衡器</string>
-    <string name="unknown">unknown</string>
     <string name="services">服務</string>
     <string name="save_lyrics_summary">允許存儲/訪問離線歌詞</string>
     <string name="save_lyrics">保存歌詞</string>
@@ -143,8 +142,7 @@
     <string name="album_view_title">專輯視圖</string>
     <string name="list_artist_view_summary">列表視圖</string>
     <string name="artist_view_title">作曲家視圖</string>
-    <string name="vizualizer_color_summary">盡對皮膚4有效</string>中從albumart更改顏色
-    <string name="visualizer_color_title">可視化視圖顏色</string>
+    中從albumart更改顏色
     <string name ="color_adaptive_summary">在播放視圖</string>中從albumart更改顏色
     <string name ="color_adaptive_title">顏色自適應</string>
     <string name ="widget_color_summary">設置背景色透明</string>
@@ -173,4 +171,9 @@
     <string name="black_theme">黑色主題</string>
     <string name="black_theme_summary">在整個應用程序中應用黑色主題</string>
     <string name="shortcuts">快捷鍵</string>
+    <string name="action_rename">Rename</string>
+    <string name="clear_squeue">Clear Saved Queue</string>
+    <string name="clear_squeue_summary">Clear Saved Queue Database</string>
+    <string name="app_desc">Elegant Material Music Player</string>
+    <string name="default_dir">set current dir as default dir</string>
 </resources>

@@ -354,7 +354,7 @@ public class AudioWidget {
             }
             if (onWidgetStateChangedListener != null) {
                 onWidgetStateChangedListener.onWidgetStateChanged(State.REMOVED);
-                onWidgetStateChangedListener.onWidgetPositionChanged(100, 100);
+                // onWidgetStateChangedListener.onWidgetPositionChanged(100, 100);
             }
         }
     }
@@ -437,6 +437,49 @@ public class AudioWidget {
     @NonNull
     public Controller controller() {
         return controller;
+    }
+
+    public void setAlbumArt(@NonNull Bitmap bitmap) {
+        if (controller != null) {
+            controller.albumCoverBitmap(bitmap);
+        }
+    }
+
+    public void Pause() {
+        if (controller != null) {
+            controller.pause();
+        }
+    }
+
+    public void Start() {
+        if (controller != null) {
+            controller.start();
+        }
+    }
+
+    public void Stop() {
+        if (controller != null) {
+            controller.stop();
+        }
+    }
+
+    public void Pos(int pos) {
+        if (controller != null) {
+            controller.position(pos);
+        }
+    }
+
+    public void cleanUp() {
+        if (controller != null) {
+            controller.onControlsClickListener(null);
+            controller.onWidgetStateChangedListener(null);
+        }
+    }
+
+    public void Dur(int dur) {
+        if (controller != null) {
+            controller.duration(dur);
+        }
     }
 
     private void show(View view, int left, int top) {

@@ -32,20 +32,23 @@ public class FavoritesLoader extends BaseAsyncTaskLoader<List<Song>> {
 
     private CommonDatabase commonDatabase;
     private String order = DefaultColumn._ID + " DESC";
+    private int limit;
 
-    public FavoritesLoader(Context context) {
+    public FavoritesLoader(Context context, int limit) {
         super(context);
         commonDatabase = new CommonDatabase(context, Constants.Fav_TableName, true);
+        this.limit = limit;
     }
 
     @Override
     public List<Song> loadInBackground() {
-        List<Song> songList = commonDatabase.readLimit(-1, order);
+        List<Song> songList = commonDatabase.readLimit(limit, order);
         commonDatabase.close();
         return songList;
     }
 
     public void clearDb() {
         commonDatabase.removeAll();
+        commonDatabase.close();
     }
 }

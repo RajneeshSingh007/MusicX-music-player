@@ -22,6 +22,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.rks.musicx.interfaces.changeAlbumArt;
+
 import java.io.File;
 
 /**
@@ -37,7 +39,7 @@ public class updateAlbumArt extends AsyncTask<Void, Void, Void> {
     private changeAlbumArt changeAlbumArt;
 
 
-    public updateAlbumArt(String artrowkpath, String filePath, Context context, long albumID, com.rks.musicx.misc.widgets.changeAlbumArt changeAlbumArt) {
+    public updateAlbumArt(String artrowkpath, String filePath, Context context, long albumID, com.rks.musicx.interfaces.changeAlbumArt changeAlbumArt) {
         this.artrowkpath = artrowkpath;
         this.filePath = filePath;
         this.context = context;

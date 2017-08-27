@@ -152,7 +152,7 @@ public abstract class BaseActivity extends ATEActivity {
                 Helper.getCalligraphy(this, "Vow.ttf");
                 break;
             case "13":
-                Helper.getCalligraphy(this,"Lombok.otf");
+                Helper.getCalligraphy(this, "Nunito.ttf");
                 break;
             case "14":
                 Helper.getCalligraphy(this,"Circled.ttf");
@@ -207,35 +207,31 @@ public abstract class BaseActivity extends ATEActivity {
     @Override
     public String getATEKey() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        Boolean theme = sharedPreferences.getBoolean(DarkTheme, false);
-        Boolean blacktheme = sharedPreferences.getBoolean(BlackTheme, false);
-        if (theme) {
+        if (Extras.getInstance().getDarkTheme()) {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(BlackTheme, false);
-            editor.apply();
+            editor.putBoolean(LightTheme, false);
+            editor.commit();
             return DarkTheme;
-        } else if (blacktheme) {
+        } else if (Extras.getInstance().getBlackTheme()) {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(DarkTheme, false);
-            editor.apply();
+            editor.putBoolean(LightTheme, false);
+            editor.commit();
             return BlackTheme;
         } else {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(DarkTheme, false);
             editor.putBoolean(BlackTheme, false);
-            editor.apply();
+            editor.commit();
             return LightTheme;
         }
     }
 
     public int getStyleTheme() {
-        // Overrides what's set in the current ATE Config
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        Boolean darktheme = sharedPreferences.getBoolean(DarkTheme, false);
-        Boolean blacktheme = sharedPreferences.getBoolean(BlackTheme, false);
-        if (darktheme) {
+        if (Extras.getInstance().getDarkTheme()) {
             return R.style.AppThemeNormalDark;
-        } else if (blacktheme) {
+        } else if (Extras.getInstance().getBlackTheme()) {
             return R.style.AppThemeNormalBlack;
         } else {
             return R.style.AppThemeNormalLight;

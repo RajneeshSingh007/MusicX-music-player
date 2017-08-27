@@ -42,20 +42,15 @@ public class MediaSession {
             return;
         }
         MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
-        if (META_CHANGED.equals(what) || PLAYSTATE_CHANGED.equals(what)) {
-            if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
-                mediaSessionCompat.setPlaybackState(new PlaybackStateCompat.Builder()
-                        .setState(PlaybackStateCompat.STATE_PLAYING, musicXService.getPlayerPos(), 1.0f)
-                        .setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PAUSE
-                                | PlaybackStateCompat.ACTION_PLAY_PAUSE |
-                                PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS).build());
-            } else {
-                mediaSessionCompat.setPlaybackState(new PlaybackStateCompat.Builder()
-                        .setState(PlaybackStateCompat.STATE_PAUSED, 0, 0f)
-                        .setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PAUSE
-                                | PlaybackStateCompat.ACTION_PLAY_PAUSE |
-                                PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS).build());
-            }
+        if (what.equals(PLAYSTATE_CHANGED) || what.equals(META_CHANGED)) {
+            int state = MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying() ? PlaybackStateCompat.STATE_PAUSED : PlaybackStateCompat.STATE_PLAYING;
+            mediaSessionCompat.setPlaybackState(new PlaybackStateCompat.Builder()
+                    .setState(state, musicXService.getPlayerPos(), 1.0f)
+                    .setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PAUSE
+                            | PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                            PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
+                    .build());
+
             builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, musicXService.getsongTitle());
             builder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, musicXService.getDuration());
             builder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicXService.getsongArtistName());
@@ -83,7 +78,6 @@ public class MediaSession {
                     });
                 }
             });
-
         }
     }
 }

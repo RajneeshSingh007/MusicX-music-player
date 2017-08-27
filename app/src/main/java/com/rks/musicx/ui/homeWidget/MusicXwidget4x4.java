@@ -30,7 +30,6 @@ import static com.rks.musicx.misc.utils.Constants.ACTION_NEXT;
 import static com.rks.musicx.misc.utils.Constants.ACTION_PLAYINGVIEW;
 import static com.rks.musicx.misc.utils.Constants.ACTION_PREVIOUS;
 import static com.rks.musicx.misc.utils.Constants.ACTION_TOGGLE;
-import static com.rks.musicx.misc.utils.Constants.META_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
 
 /*
@@ -63,7 +62,7 @@ public class MusicXwidget4x4 extends AppWidgetProvider {
         return sInstance;
     }
 
-    public void musicxWidgetUpdate(MusicXService musicXService, int updatdeID[]) {
+    public void musicxWidgetUpdate(MusicXService musicXService, int updatdeID[], String what) {
         if (musicXService == null) {
             return;
         }
@@ -74,10 +73,17 @@ public class MusicXwidget4x4 extends AppWidgetProvider {
         remoteViews.setOnClickPendingIntent(R.id.item_view, pendInt);
         remoteViews.setTextViewText(R.id.title, musicXService.getsongTitle());
         remoteViews.setTextViewText(R.id.artist, musicXService.getsongArtistName());
+        if (what.equals(PLAYSTATE_CHANGED)) {
+            if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
+                remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
+            } else {
+                remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
+            }
+        }
         handler.post(new Runnable() {
             @Override
             public void run() {
-                ArtworkUtils.ArtworkLoader(musicXService, 300, 600, musicXService.getsongAlbumName(), musicXService.getsongAlbumID(), new palette() {
+                ArtworkUtils.ArtworkLoader(musicXService, 300, 300, musicXService.getsongAlbumName(), musicXService.getsongAlbumID(), new palette() {
                     @Override
                     public void palettework(Palette palette) {
                         int colors[] = Helper.getAvailableColor(musicXService, palette);
@@ -106,7 +112,7 @@ public class MusicXwidget4x4 extends AppWidgetProvider {
             }
         });
         FavHelper favHelper = new FavHelper(musicXService);
-        if (favHelper.isFavorite(Extras.getInstance().getSongId(musicXService.getsongId()))) {
+        if (favHelper.isFavorite(musicXService.getsongId())) {
             remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite);
         } else {
             remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite_outline);
@@ -169,24 +175,7 @@ public class MusicXwidget4x4 extends AppWidgetProvider {
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(musicXService);
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(musicXService, this.getClass()));
             if (appWidgetIds.length > 0) {
-                musicxWidgetUpdate(musicXService, appWidgetIds);
-                FavHelper favHelper = new FavHelper(musicXService);
-                RemoteViews remoteViews = new RemoteViews(musicXService.getPackageName(), R.layout.bigwidget);
-                if (PLAYSTATE_CHANGED.equals(what)) {
-                    if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
-                        remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
-                    } else {
-                        remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
-                    }
-                }
-                if (META_CHANGED.equals(what)) {
-                    if (favHelper.isFavorite(Extras.getInstance().getSongId(musicXService.getsongId()))) {
-                        remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite);
-                    } else {
-                        remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite_outline);
-                    }
-                }
-                pushUpdate(musicXService, appWidgetIds, remoteViews);
+                musicxWidgetUpdate(musicXService, appWidgetIds, what);
             }
 
         }

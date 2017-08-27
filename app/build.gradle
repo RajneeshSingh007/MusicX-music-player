@@ -24,17 +24,17 @@ android {
             storePassword 'myStorePassword'
         }
     }
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
 
     defaultConfig {
         applicationId "com.rks.musicx"
         minSdkVersion 21
-        targetSdkVersion 25
-        versionCode 63
-        versionName '1.4.3'
+        targetSdkVersion 26
+        versionCode 67
+        versionName '1.4.7'
         vectorDrawables.useSupportLibrary = true
-        renderscriptTargetApi 25
+        renderscriptTargetApi 26
         renderscriptSupportModeEnabled true
         signingConfig signingConfigs.config
         multiDexEnabled true
@@ -62,13 +62,13 @@ android {
             minSdkVersion 21
             proguardFile 'E:/AndroidDevelopment/AppDevelopment/appDev/MusicX/app/proguard-rules.pro'
             signingConfig signingConfigs.config
-            targetSdkVersion 25
+            targetSdkVersion 26
         }
     }
 
 }
 ext {
-    supportVersion = "25.3.1"
+    supportVersion = "26.0.0-alpha1"
 }
 
 repositories {
@@ -79,14 +79,7 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':library')
     compile project(':play_widget')
-    /*
-                Dialog
-                 */
     compile files('libs/jaudiotagger.jar')
-
-    /*
-                Google Package
-                 */
     //noinspection GradleCompatible
     compile "com.android.support:support-v4:${supportVersion}"
     compile "com.android.support:support-vector-drawable:${supportVersion}"
@@ -97,37 +90,35 @@ dependencies {
     compile "com.android.support:palette-v7:${supportVersion}"
     compile "com.android.support:percent:${supportVersion}"
     compile "com.android.support:preference-v14:${supportVersion}"
-    /*
-                ScrollView
-                 */
-    compile 'com.simplecityapps:recyclerview-fastscroll:1.0.16'
-    /*
-                Intro
-                 */
-    compile 'com.github.paolorotolo:appintro:4.0.0'
-
-    /*
-                ImageLoader
-                */
-    compile 'com.github.bumptech.glide:glide:3.8.0'
-    compile 'jp.wasabeef:glide-transformations:2.0.2'
-    /*
-                Custom fonts
-                 */
-    compile 'uk.co.chrisjenx:calligraphy:2.3.0'
-    compile 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.7.2'
-    compile 'com.github.deano2390:MaterialShowcaseView:1.1.0'
-    compile 'com.kbeanie:image-chooser-library:1.5.8@aar'
-    compile 'com.github.codekidX:storage-chooser:1.0.33'
-    compile ('com.afollestad.material-dialogs:commons:0.9.4.5@aar'){
+    compile('com.afollestad.material-dialogs:commons:0.9.4.5@aar') {
         transitive = true
     }
-    compile ('com.afollestad.material-dialogs:core:0.9.4.5@aar'){
+    compile('com.afollestad.material-dialogs:core:0.9.4.5@aar') {
         transitive = true
     }
-    compile 'org.solovyev.android:checkout:1.0.0'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
     }
+    compile 'com.simplecityapps:recyclerview-fastscroll:1.0.16'
+    compile 'com.github.apl-devs:appintro:v4.2.0'
+    compile 'com.github.bumptech.glide:glide:3.8.0'
+    compile 'jp.wasabeef:glide-transformations:2.0.2'
+    compile 'uk.co.chrisjenx:calligraphy:2.3.0'
+    compile 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.7.2'
+    compile 'com.github.deano2390:MaterialShowcaseView:1.1.0'
+    compile 'com.kbeanie:image-chooser-library:1.6.0@aar'
+    compile 'com.github.codekidX:storage-chooser:1.0.33'
+    compile 'org.solovyev.android:checkout:1.0.1'
     compile 'com.amitshekhar.android:android-networking:1.0.0'
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        def requested = details.requested
+        if (requested.group == 'com.android.support') {
+            if (!requested.name.startsWith("multidex")) {
+                details.useVersion '25.3.0'
+            }
+        }
+    }
 }

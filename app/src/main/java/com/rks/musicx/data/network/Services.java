@@ -19,6 +19,6 @@ package com.rks.musicx.data.network;
 public interface Services {
 
     String lastFmApi = "658dd0ee3563543f1087e014b74be8a6";
-    String lyricsApi = "b8308eb4f31bb04e4644e8c2a467bb37";
+    //String lyricsApi = "b8308eb4f31bb04e4644e8c2a467bb37";
 
 }

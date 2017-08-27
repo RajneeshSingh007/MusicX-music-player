@@ -3,6 +3,7 @@ package com.rks.musicx.base;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -40,12 +41,14 @@ public abstract class BaseRecyclerViewAdapter<TData, TViewHolder extends Recycle
         this.context = context.getApplicationContext();
         this.inflater = LayoutInflater.from(context);
         data = new ArrayList<>();
+        notifyDataSetChanged();
     }
 
     public BaseRecyclerViewAdapter(@NonNull final Context context, @NonNull List<TData> data) {
         this.context = context.getApplicationContext();
         this.inflater = LayoutInflater.from(context);
         this.data = new ArrayList<>(data);
+        notifyDataSetChanged();
     }
 
     protected Context getContext() {
@@ -57,20 +60,38 @@ public abstract class BaseRecyclerViewAdapter<TData, TViewHolder extends Recycle
         return data.size();
     }
 
-    public TData getItem(int position) throws ArrayIndexOutOfBoundsException {
+    public TData getItem(int position) {
+        if (data.size() < 0 || data.size() == 0) {
+            return null;
+        }
         return data.get(position);
     }
 
     public boolean add(TData object) {
-        return data.add(object);
+        if (object != null) {
+            return data.add(object);
+        } else {
+            Log.e("Adapter", "null data");
+            return false;
+        }
     }
 
     public boolean remove(TData object) {
-        return data.remove(object);
+        if (object != null) {
+            return data.remove(object);
+        } else {
+            Log.e("Adapter", "null data");
+            return false;
+        }
     }
 
     public TData remove(int position) {
-        return data.remove(position);
+        if (position < data.size()) {
+            return data.remove(position);
+        } else {
+            Log.e("Adapter", "null pos");
+            return null;
+        }
     }
 
     public void clear() {
@@ -82,11 +103,17 @@ public abstract class BaseRecyclerViewAdapter<TData, TViewHolder extends Recycle
     }
 
     public void addDataList(List<TData> tDataList) {
+        if (tDataList == null) {
+            return;
+        }
         data = tDataList;
         notifyDataSetChanged();
     }
 
     public List<TData> getSnapshot() {
+        if (data == null) {
+            return null;
+        }
         return data;
     }
 
@@ -104,13 +131,21 @@ public abstract class BaseRecyclerViewAdapter<TData, TViewHolder extends Recycle
 
     public void triggerOnItemClickListener(int position, View view) {
         if (mOnItemClickListener != null) {
-            mOnItemClickListener.onItemClick(position, view);
+            if (position < data.size()) {
+                mOnItemClickListener.onItemClick(position, view);
+            } else {
+                Log.e("Adapter", "pos_error");
+            }
         }
     }
 
     public void triggerOnLongClickListener(int pos) {
         if (onLongClickListener != null) {
-            onLongClickListener.onLongItemClick(pos);
+            if (pos < data.size()) {
+                onLongClickListener.onLongItemClick(pos);
+            } else {
+                Log.e("Adapter", "pos_error");
+            }
         }
     }
 

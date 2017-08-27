@@ -66,19 +66,18 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  */
 public class DonationActivity extends BaseActivity implements ATEActivityThemeCustomizer {
 
-    private FastScrollRecyclerView rv;
-    private ActivityCheckout mCheckout;
-    private InventoryCallback mInventoryCallback;
-
     /**
      * Product Id
      */
 
-    private static String DONATION1 = "your_product_id1";
-    private static String DONATION2 = "your_product_id2";
-    private static String DONATION3 = "your_product_id3";
-    private static String DONATION4 = "your_product_id4";
-	private static String DONATION5 = "your_product_id5";
+    private static String DONATION1 = "";
+    private static String DONATION2 = "";
+    private static String DONATION3 = "";
+    private static String DONATION4 = "";
+    private static String DONATION5 = "";
+    private FastScrollRecyclerView rv;
+    private ActivityCheckout mCheckout;
+    private InventoryCallback mInventoryCallback;
 
     private static List<String> getInAppSkus() {
         final List<String> skus = new ArrayList<>();
@@ -119,24 +118,6 @@ public class DonationActivity extends BaseActivity implements ATEActivityThemeCu
         reloadInventory();
     }
 
-    private static class InventoryCallback implements Inventory.Callback {
-        private final Adapter mAdapter;
-
-        public InventoryCallback(Adapter adapter) {
-            mAdapter = adapter;
-        }
-
-        @Override
-        public void onLoaded(@Nonnull Inventory.Products products) {
-            final Inventory.Product product = products.get(ProductTypes.IN_APP);
-            if (!product.supported) {
-                // billing is not supported, user can't purchase anything
-                return;
-            }
-            mAdapter.update(product);
-        }
-    }
-
     private void reloadInventory() {
         final Inventory.Request request = Inventory.Request.create();
         // load purchase info
@@ -168,6 +149,7 @@ public class DonationActivity extends BaseActivity implements ATEActivityThemeCu
             @Override
             public void onError(int response, @Nonnull Exception e) {
                 reloadInventory();
+                e.printStackTrace();
             }
         };
     }
@@ -181,12 +163,50 @@ public class DonationActivity extends BaseActivity implements ATEActivityThemeCu
         });
     }
 
-
     private void purchase(Sku sku) {
         final RequestListener<Purchase> listener = makeRequestListener();
         mCheckout.startPurchaseFlow(sku, null, listener);
     }
 
+    @StyleRes
+    @Override
+    public int getActivityTheme() {
+        return getStyleTheme();
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        this.onBackPressed();
+        return super.onOptionsItemSelected(item);
+    }
+
+    private static class InventoryCallback implements Inventory.Callback {
+        private final Adapter mAdapter;
+
+        public InventoryCallback(Adapter adapter) {
+            mAdapter = adapter;
+        }
+
+        @Override
+        public void onLoaded(@Nonnull Inventory.Products products) {
+            final Inventory.Product product = products.get(ProductTypes.IN_APP);
+            if (!product.supported) {
+                // billing is not supported, user can't purchase anything
+                return;
+            }
+            mAdapter.update(product);
+        }
+    }
 
     private class Adapter extends RecyclerView.Adapter<ViewHolder> {
         private final LayoutInflater mInflater = LayoutInflater.from(DonationActivity.this);
@@ -298,29 +318,5 @@ public class DonationActivity extends BaseActivity implements ATEActivityThemeCu
             }
             mAdapter.onClick(mSku);
         }
-    }
-
-
-    @StyleRes
-    @Override
-    public int getActivityTheme() {
-        return getStyleTheme();
-    }
-
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        this.onBackPressed();
-        return super.onOptionsItemSelected(item);
     }
 }

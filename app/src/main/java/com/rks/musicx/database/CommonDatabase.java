@@ -62,10 +62,10 @@ public class CommonDatabase extends SQLiteOpenHelper implements DefaultColumn{
     public void add(Song song) {
         sqLiteDatabase = getWritableDatabase();
         try {
-           addSongMetaData(sqLiteDatabase, song);
-       }finally {
-           sqLiteDatabase.close();
-       }
+            addSongMetaData(sqLiteDatabase, song);
+        } finally {
+            sqLiteDatabase.close();
+        }
     }
 
     private void addSongMetaData(SQLiteDatabase sqLiteDatabase, Song song) {
@@ -155,84 +155,53 @@ public class CommonDatabase extends SQLiteOpenHelper implements DefaultColumn{
         return artistList;
     }
 
+    public Cursor check(SQLiteDatabase sqLiteDatabase, int limit, String sortOrder) {
+        Cursor cursor;
+        if (limit > 0) {
+            cursor = sqLiteDatabase.query(getTableName(), null, null, null, null, null, sortOrder, String.valueOf(limit));
+        } else {
+            cursor = sqLiteDatabase.query(getTableName(), null, null, null, null, null, sortOrder);
+        }
+        return cursor;
+    }
+
     public List<Song> readLimit(int limit, String sortOrder) {
         sqLiteDatabase = getReadableDatabase();
         try {
-            Cursor cursor;
-            if (limit > 0) {
-                cursor = sqLiteDatabase.query(getTableName(), null, null, null, null, null, sortOrder, String.valueOf(limit));
-                if (cursor != null && cursor.moveToFirst()) {
+            Cursor cursor = check(sqLiteDatabase, limit, sortOrder);
+            if (cursor != null && cursor.moveToFirst()) {
 
-                    int idCol = cursor.getColumnIndex(SongId);
-                    int titleCol = cursor.getColumnIndex(SongTitle);
-                    int artistCol = cursor.getColumnIndex(SongArtist);
-                    int albumCol = cursor.getColumnIndex(SongAlbum);
-                    int albumIdCol = cursor.getColumnIndex(SongAlbumId);
-                    int trackCol = cursor.getColumnIndex(SongNumber);
-                    int datacol = cursor.getColumnIndex(SongPath);
-                    do {
-                        /**
-                         * @return songs metadata
-                         */
-                        long id = cursor.getLong(idCol);
-                        String title = cursor.getString(titleCol);
-                        String artist = cursor.getString(artistCol);
-                        String album = cursor.getString(albumCol);
-                        long albumId = cursor.getLong(albumIdCol);
-                        int track = cursor.getInt(trackCol);
-                        String mSongPath = cursor.getString(datacol);
+                int idCol = cursor.getColumnIndex(SongId);
+                int titleCol = cursor.getColumnIndex(SongTitle);
+                int artistCol = cursor.getColumnIndex(SongArtist);
+                int albumCol = cursor.getColumnIndex(SongAlbum);
+                int albumIdCol = cursor.getColumnIndex(SongAlbumId);
+                int trackCol = cursor.getColumnIndex(SongNumber);
+                int datacol = cursor.getColumnIndex(SongPath);
+                do {
+                    /**
+                     * @return songs metadata
+                     */
+                    long id = cursor.getLong(idCol);
+                    String title = cursor.getString(titleCol);
+                    String artist = cursor.getString(artistCol);
+                    String album = cursor.getString(albumCol);
+                    long albumId = cursor.getLong(albumIdCol);
+                    int track = cursor.getInt(trackCol);
+                    String mSongPath = cursor.getString(datacol);
 
-                        Song song = new Song();
+                    Song song = new Song();
 
-                        song.setAlbum(album);
-                        song.setmSongPath(mSongPath);
-                        song.setArtist(artist);
-                        song.setId(id);
-                        song.setAlbumId(albumId);
-                        song.setTrackNumber(track);
-                        song.setTitle(title);
-                        songList.add(song);
-                    } while (cursor.moveToNext());
-                    cursor.close();
-                }
-            } else {
-                cursor = sqLiteDatabase.query(getTableName(), null, null, null, null, null, sortOrder);
-                if (cursor != null && cursor.moveToFirst()) {
-
-                    int idCol = cursor.getColumnIndex(SongId);
-                    int titleCol = cursor.getColumnIndex(SongTitle);
-                    int artistCol = cursor.getColumnIndex(SongArtist);
-                    int albumCol = cursor.getColumnIndex(SongAlbum);
-                    int albumIdCol = cursor.getColumnIndex(SongAlbumId);
-                    int trackCol = cursor.getColumnIndex(SongNumber);
-                    int datacol = cursor.getColumnIndex(SongPath);
-
-                    do {
-                        /**
-                         * @return songs metadata
-                         */
-                        long id = cursor.getLong(idCol);
-                        String title = cursor.getString(titleCol);
-                        String artist = cursor.getString(artistCol);
-                        String album = cursor.getString(albumCol);
-                        long albumId = cursor.getLong(albumIdCol);
-                        int track = cursor.getInt(trackCol);
-                        String mSongPath = cursor.getString(datacol);
-
-                        Song song = new Song();
-
-                        song.setAlbum(album);
-                        song.setmSongPath(mSongPath);
-                        song.setArtist(artist);
-                        song.setId(id);
-                        song.setAlbumId(albumId);
-                        song.setTrackNumber(track);
-                        song.setTitle(title);
-                        songList.add(song);
-                    } while (cursor.moveToNext());
-                    cursor.close();
-                }
-
+                    song.setAlbum(album);
+                    song.setmSongPath(mSongPath);
+                    song.setArtist(artist);
+                    song.setId(id);
+                    song.setAlbumId(albumId);
+                    song.setTrackNumber(track);
+                    song.setTitle(title);
+                    songList.add(song);
+                } while (cursor.moveToNext());
+                cursor.close();
             }
         }finally {
             sqLiteDatabase.close();
@@ -260,10 +229,10 @@ public class CommonDatabase extends SQLiteOpenHelper implements DefaultColumn{
     public void delete(long songId) {
         sqLiteDatabase = getWritableDatabase();
         try {
-           sqLiteDatabase.delete(getTableName(), SongId + "= ?", new String[]{String.valueOf(songId)});
-       }finally {
-           sqLiteDatabase.close();
-       }
+            sqLiteDatabase.delete(getTableName(), SongId + "= ?", new String[]{String.valueOf(songId)});
+        } finally {
+            sqLiteDatabase.close();
+        }
     }
 
     public String getTableName() {

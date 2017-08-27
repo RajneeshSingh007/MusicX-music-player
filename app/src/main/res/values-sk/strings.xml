@@ -12,7 +12,7 @@
   ~ limitations under the License.
   -->
 
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
   <string name="app_name">MusicX</string>
   <string name="titles">Skladby</string>
   <string name="albums">Albumy</string>
@@ -101,8 +101,7 @@
   <string name="accent_color_summary">Zmeniť sekundárnu farbu témy</string>
   <string name="custom">vlastné</string>
   <string name="equalizer">Ekvalizér</string>
-  <string name="unknown">neznáme</string>
-  <string name="services">Služby</string>
+    <string name="services">Služby</string>
   <string name="save_lyrics_summary">Povoliť ukladanie offline textov</string>
   <string name="save_lyrics">Uložiť Text</string>
   <string name="not_available_below_m">Nedostupné pre zariadenia s nižším Androidom ako 6.0 Marshmallow.</string>
@@ -157,9 +156,7 @@
   <string name = "album_view_title"> Zobrazenie albumu </string>
   <string name = "list_artist_view_summary"> Zobrazenie zoznamu interpretov </string>
   <string name = "artist_view_title"> Zobrazenie interpreta </string>
-  <string name = "vizualizer_color_summary"> Zmena farby z albumartu v playView4 </string>
-  <string name = "visualizer_color_title"> Farba Visualizer </string>
-  <string name = "color_adaptive_summary"> zmena farby z albumartu v prehrávaní zobrazení </string>
+    <string name="color_adaptive_summary"> zmena farby z albumartu v prehrávaní zobrazení </string>
   <string name = "color_adaptive_title"> Farba Adaptive </string>
   <string name = "widget_color_summary"> nastaviť transparentnú farbu pozadia </string>
   <string name = "widget_color_title"> Farba aplikácie HomeScreen Widget </string>
@@ -185,5 +182,10 @@
   <string name = "save_queue"> Uložiť frontu </string>
   <string name = "audio_filter_title"> Audio filter </string>
   <string name = "shortcuts"> skratky </string>
+    <string name="action_rename">Rename</string>
+    <string name="clear_squeue">Clear Saved Queue</string>
+    <string name="clear_squeue_summary">Clear Saved Queue Database</string>
+    <string name="app_desc">Elegant Material Music Player</string>
+    <string name="default_dir">set current dir as default dir</string>
 
 </resources>

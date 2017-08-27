@@ -30,11 +30,12 @@ import com.kbeanie.imagechooser.api.ImageChooserManager;
 import com.rks.musicx.R;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.interfaces.bitmap;
+import com.rks.musicx.interfaces.changeAlbumArt;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
-import com.rks.musicx.misc.widgets.changeAlbumArt;
+import com.rks.musicx.misc.utils.LyricsHelper;
 import com.rks.musicx.misc.widgets.updateAlbumArt;
 
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
@@ -64,7 +65,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
     private Toolbar toolbar;
     private FloatingActionButton saveTags;
     private ImageView albumArtwork;
-    private String finalPath, mediaPath, path;
+    private String finalPath;
     private ChosenImage chosenImages;
     private ImageChooserManager imageChooserManager;
     private MediaScannerConnection mediaScannerConnection;
@@ -116,7 +117,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
         song.setId(songid);
         song.setAlbumId(id);
         song.setYear(year);
-        song.setLyrics(Helper.getInbuiltLyrics(path));
+        song.setLyrics(LyricsHelper.getInbuiltLyrics(path));
         mTitleEditText.setText(song.getTitle());
         mArtistEditText.setText(song.getArtist());
         mAlbumEditText.setText(song.getAlbum());
@@ -197,7 +198,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
         imageChooserManager = new ImageChooserManager(this, ChooserType.REQUEST_PICK_PICTURE, true);
         imageChooserManager.setImageChooserListener(this);
         try {
-            mediaPath = imageChooserManager.choose();
+            finalPath = imageChooserManager.choose();
         } catch (Exception e) {
            e.printStackTrace();
         }
@@ -211,7 +212,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
             if (imageChooserManager == null) {
                 imageChooserManager = new ImageChooserManager(this, requestCode, true);
                 imageChooserManager.setImageChooserListener(this);
-                imageChooserManager.reinitialize(mediaPath);
+                imageChooserManager.reinitialize(finalPath);
             }
             imageChooserManager.submit(requestCode, data);
         }
@@ -278,6 +279,14 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
     }
 
     @Override
+    public void onStop() {
+        if (updatealbumArt != null) {
+            updatealbumArt.cancel(true);
+        }
+        super.onStop();
+    }
+
+    @Override
     public void onDestroy() {
         if (updatealbumArt != null){
             updatealbumArt.cancel(true);
@@ -305,9 +314,6 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
         protected void onPostExecute(Boolean b) {
             super.onPostExecute(b);
             if (b) {
-                if(song == null){
-                    return;
-                }
                 Toast.makeText(context, "Tag Edit Success", Toast.LENGTH_SHORT).show();
                 mediaScannerConnection = new MediaScannerConnection(getContext(),
                         new MediaScannerConnection.MediaScannerConnectionClient() {
@@ -321,7 +327,7 @@ public class TagEditorFragment extends Fragment implements ImageChooserListener 
                             }
                         });
             } else {
-                Toast.makeText(getContext(), "Tag Edit Failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Tag Edit Failed", Toast.LENGTH_SHORT).show();
             }
         }
     }

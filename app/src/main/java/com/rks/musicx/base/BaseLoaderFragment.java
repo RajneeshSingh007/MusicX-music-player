@@ -94,7 +94,7 @@ public abstract class BaseLoaderFragment extends Fragment implements LoaderManag
             return recentlyPlayedLoader;
         }
         if (isFav() && id == favloader){
-            FavoritesLoader favoritesLoader = new FavoritesLoader(getContext());
+            FavoritesLoader favoritesLoader = new FavoritesLoader(getContext(), getLimit());
             return favoritesLoader;
         }
         return null;

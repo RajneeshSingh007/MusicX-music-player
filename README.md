@@ -10,6 +10,7 @@
 # Features
 - Floating widget let you enjoy your music anywhere.
 - 4 beautiful, cool playing views.
+- Search Millions of lyrics.
 - Lyrics support, save lyrics for offline.
 - Powerful equalizer with bass, virtualizer, reverb and loudness.
 - Folder view, browse and play music easily.

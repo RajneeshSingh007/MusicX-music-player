@@ -43,6 +43,9 @@ public class CircleVisualizerFFTView extends View {
     private int mCenterX;
     private int mCenterY;
     private int mDrawStartY;
+    private int[] mColors;
+    private int mStrokeWidth = 10;
+    private boolean mRotateColor = false;
 
     public CircleVisualizerFFTView(Context context) {
         this(context, null);

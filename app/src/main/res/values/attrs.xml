@@ -14,6 +14,12 @@
 <resources>
 
     <attr name="ate_key" format="string"/>
+    <attr name="cardStyle" format="reference" />
+    <attr name="accentColor" format="reference" />
+    <attr name="iconColor" format="reference" />
+    <attr name="windowBackground" format="reference" />
+    <attr name="stateSelector" format="reference" />
+    <attr name="toolbar_popup_theme" format="reference" />
 
     <declare-styleable name="CircularSeekBar">
         <attr name="circle_progress" format="integer"/>
@@ -77,5 +83,11 @@
     </declare-styleable>
 
     <attr name="fontPath" format="string"/>
+
+    <attr name="main_background" format="color" />
+    <attr name="card_background" format="color" />
+    <attr name="ripple_color" format="color" />
+
+    <attr name="toolbar_icon" format="color" />
 
 </resources>

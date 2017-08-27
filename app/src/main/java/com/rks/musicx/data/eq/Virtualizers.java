@@ -29,7 +29,6 @@ import static com.rks.musicx.misc.utils.Constants.Virtualizer_STRENGTH;
 public class Virtualizers {
 
     private static Virtualizer virtualizer = null;
-    private static short virtualstr;
 
     public Virtualizers() {
     }
@@ -54,10 +53,10 @@ public class Virtualizers {
 
     public static void setVirtualizerStrength(short strength) {
         if (virtualizer != null && virtualizer.getStrengthSupported() && strength >= 0) {
-            virtualstr = strength;
             try {
-                if (virtualstr <= Virtualizer_STRENGTH) {
+                if (strength <= Virtualizer_STRENGTH) {
                     virtualizer.setStrength(strength);
+                    saveVirtual(strength);
                 }
             } catch (IllegalArgumentException e) {
                 Log.e("Virtualizers", "Virtualizers effect not supported");
@@ -79,19 +78,12 @@ public class Virtualizers {
         }
     }
 
-    public static void saveVirtual() {
-        if (virtualizer == null) {
-            return;
-        }
+    public static void saveVirtual(Short virtualstr) {
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
-        editor.putInt(VIRTUAL_BOOST, virtualstr);
+        int str = (int) virtualstr;
+        editor.putInt(VIRTUAL_BOOST, str);
         editor.apply();
     }
-
-    public static short getVirtualStrength() {
-        return virtualstr;
-    }
-
 
     public static void setEnabled(boolean enabled) {
         if (virtualizer != null) {

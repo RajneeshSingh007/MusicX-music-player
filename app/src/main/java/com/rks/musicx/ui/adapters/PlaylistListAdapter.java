@@ -71,8 +71,20 @@ public class PlaylistListAdapter extends BaseRecyclerViewAdapter<Playlist, Playl
     }
 
     @Override
-    public Playlist getItem(int position) throws ArrayIndexOutOfBoundsException {
-        return data.size() > 0 ? data.get(position) : null;
+    public int getItemCount() {
+        return (null != data ? data.size() : 0);
+    }
+
+    @Override
+    public Playlist getItem(int position) {
+        if (data == null || data.size() < 0 || data.size() == 0) {
+            return null;
+        }
+        if (position < data.size() && position >= 0) {
+            return data.get(position);
+        } else {
+            return null;
+        }
     }
 
     class PlaylistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

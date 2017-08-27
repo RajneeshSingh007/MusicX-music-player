@@ -3,6 +3,7 @@ package com.rks.musicx.ui.fragments;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -19,7 +20,9 @@ import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
+import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.interfaces.RefreshData;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
@@ -59,14 +62,25 @@ public class RecentlyAddedFragment extends BaseLoaderFragment implements SearchV
     private BaseRecyclerViewAdapter.OnItemClickListener onClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
+
             switch (view.getId()) {
                 case R.id.album_artwork:
                 case R.id.item_view:
                     ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
                     break;
                 case R.id.menu_button:
-                    helper.showMenu(false, trackloader, RecentlyAddedFragment.this, RecentlyAddedFragment.this,
-                            ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                    Song song = songListAdapter.getItem(position);
+                    helper.showMenu(false, new RefreshData() {
+                        @Override
+                        public void refresh() {
+                            getLoaderManager().restartLoader(trackloader, null, RecentlyAddedFragment.this);
+                        }
+
+                        @Override
+                        public Fragment currentFrag() {
+                            return RecentlyAddedFragment.this;
+                        }
+                    }, ((MainActivity) getActivity()), view, getContext(), song);
                     break;
             }
         }
@@ -213,17 +227,51 @@ public class RecentlyAddedFragment extends BaseLoaderFragment implements SearchV
         searchView.setOnQueryTextListener(this);
         searchView.setQueryHint("Search song");
         menu.findItem(R.id.grid_view).setVisible(false);
-        menu.findItem(R.id.menu_sort_by).setVisible(false);
+        menu.findItem(R.id.default_folder).setVisible(false);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Extras extras = Extras.getInstance();
         if (getActivity() == null){
             return false;
         }
         switch (item.getItemId()) {
             case R.id.shuffle_all:
-                ((MainActivity) getActivity()).onShuffleRequested(songList, true);
+                if (songListAdapter.getSnapshot().size() > 0) {
+                    ((MainActivity) getActivity()).onShuffleRequested(songListAdapter.getSnapshot(), true);
+                }
+                break;
+            case R.id.menu_sort_by_az:
+                extras.setSongSortOrder(SortOrder.SongSortOrder.SONG_A_Z);
+                load();
+                break;
+            case R.id.menu_sort_by_za:
+                extras.setSongSortOrder(SortOrder.SongSortOrder.SONG_Z_A);
+                load();
+                break;
+            case R.id.menu_sort_by_year:
+                extras.setSongSortOrder(SortOrder.SongSortOrder.SONG_YEAR);
+                load();
+                break;
+            case R.id.menu_sort_by_artist:
+                extras.setSongSortOrder(SortOrder.SongSortOrder.SONG_ARTIST);
+                load();
+                break;
+            case R.id.menu_sort_by_album:
+                extras.setSongSortOrder(SortOrder.SongSortOrder.SONG_ALBUM);
+                load();
+                break;
+            case R.id.menu_sort_by_duration:
+                extras.setSongSortOrder(SortOrder.SongSortOrder.SONG_DURATION);
+                load();
+                break;
+            case R.id.menu_sort_by_date:
+                extras.setSongSortOrder(SortOrder.SongSortOrder.SONG_DATE);
+                load();
+                break;
+            case R.id.menu_refresh:
+                load();
                 break;
         }
         return super.onOptionsItemSelected(item);

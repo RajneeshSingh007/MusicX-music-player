@@ -12,7 +12,7 @@
   ~ limitations under the License.
   -->
 
-<resources xmlns:tools="http://schemas.android.com/tools" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources>
     <string name="app_name">MusicX</string>
     <string name="titles">Şarkılar</string>
     <string name="albums">Albümler</string>
@@ -102,7 +102,6 @@
     <string name="accent_color_summary">Vurgu rengini değiştir</string>
     <string name="custom">özel</string>
     <string name="equalizer">Ekolayzer</string>
-    <string name="unknown">Bilinmiyor</string>
     <string name="services">Hizmetler</string>
     <string name="save_lyrics_summary">Çevrimdışı şarkı sözlerini kaydetmeye / erişime izin ver</string>
     <string name="save_lyrics">Şarkı Sözünü Kaydet</string>
@@ -158,8 +157,6 @@
     <string name = "album_view_title"> Albüm Görünümü </string>
     <string name = "list_artist_view_summary"> Sanatçı görünümünü listele </string>
     <string name = "artist_view_title"> Sanatçı Görünümü </string>
-    <string name = "vizualizer_color_summary"> playingView4\'te albumart\'taki rengi değiştirin </string>
-    <string name = "visualizer_color_title"> Görüntüleyici Rengi </string>
     <string name = "color_adaptive_summary"> görünümleri oynarken albumart\'ın rengini değiştirin </string>
     <string name = "color_adaptive_title"> Renk Uyarlamalı </string>
     <string name = "widget_color_summary"> arka plan rengini şeffaf olarak ayarla </string>
@@ -186,4 +183,9 @@
     <string name = "download_artwork_title"> Resmi İndir İndir </string>
     <string name="download_artwork_summary">İndirilen resmi görüntüle</string>
     <string name="shortcuts">kısayollar</string>
+    <string name="action_rename">Rename</string>
+    <string name="clear_squeue">Clear Saved Queue</string>
+    <string name="clear_squeue_summary">Clear Saved Queue Database</string>
+    <string name="app_desc">Elegant Material Music Player</string>
+    <string name="default_dir">set current dir as default dir</string>
 </resources>

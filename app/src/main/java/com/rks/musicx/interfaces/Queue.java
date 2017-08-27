@@ -1,4 +1,4 @@
-package com.rks.musicx.misc.widgets;
+package com.rks.musicx.interfaces;
 
 /*
  * ©2017 Rajneesh Singh
@@ -14,9 +14,10 @@ package com.rks.musicx.misc.widgets;
  */
 
 /**
- * Created by Coolalien on 5/6/2017.
+ * Created by Coolalien on 8/19/2017.
  */
-public interface changeAlbumArt {
+public interface Queue {
 
-    void onPostWork();
+    void clearStuff();
+
 }

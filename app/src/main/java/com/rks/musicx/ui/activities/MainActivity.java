@@ -14,8 +14,10 @@ import android.graphics.drawable.Drawable;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -52,10 +54,13 @@ import com.palette.BitmapPalette;
 import com.palette.GlidePalette;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseActivity;
+import com.rks.musicx.data.model.Album;
+import com.rks.musicx.data.model.Artist;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.database.CommonDatabase;
 import com.rks.musicx.interfaces.MetaDatas;
 import com.rks.musicx.misc.utils.ArtworkUtils;
+import com.rks.musicx.misc.utils.Constants;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.Sleeptimer;
@@ -63,8 +68,11 @@ import com.rks.musicx.misc.utils.permissionManager;
 import com.rks.musicx.misc.widgets.ProgressBar;
 import com.rks.musicx.services.MusicXService;
 import com.rks.musicx.services.ShortcutsHandler;
+import com.rks.musicx.ui.fragments.AlbumFragment;
+import com.rks.musicx.ui.fragments.ArtistFragment;
 import com.rks.musicx.ui.fragments.FavFragment;
 import com.rks.musicx.ui.fragments.MainFragment;
+import com.rks.musicx.ui.fragments.TagEditorFragment;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -73,14 +81,22 @@ import java.util.List;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 import static android.os.Build.VERSION_CODES.M;
+import static com.rks.musicx.misc.utils.Constants.ALBUM_ARTIST;
+import static com.rks.musicx.misc.utils.Constants.ALBUM_ID;
+import static com.rks.musicx.misc.utils.Constants.ALBUM_NAME;
+import static com.rks.musicx.misc.utils.Constants.ALBUM_TRACK_COUNT;
 import static com.rks.musicx.misc.utils.Constants.EQ;
 import static com.rks.musicx.misc.utils.Constants.ITEM_ADDED;
 import static com.rks.musicx.misc.utils.Constants.META_CHANGED;
+import static com.rks.musicx.misc.utils.Constants.NAV;
 import static com.rks.musicx.misc.utils.Constants.ORDER_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.OVERLAY_REQ;
 import static com.rks.musicx.misc.utils.Constants.PERMISSIONS_REQ;
 import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.POSITION_CHANGED;
+import static com.rks.musicx.misc.utils.Constants.SHOW_ALBUM;
+import static com.rks.musicx.misc.utils.Constants.SHOW_ARTIST;
+import static com.rks.musicx.misc.utils.Constants.SHOW_TAG;
 import static com.rks.musicx.misc.utils.Constants.WRITESETTINGS;
 
 /*
@@ -102,9 +118,9 @@ import static com.rks.musicx.misc.utils.Constants.WRITESETTINGS;
 
 public class MainActivity extends BaseActivity implements MetaDatas, ATEActivityThemeCustomizer, NavigationView.OnNavigationItemSelectedListener {
 
+    private static Handler songProgressHandler;
     private MusicXService musicXService;
     private int primarycolor, accentcolor;
-    private Intent mServiceIntent;
     private String ateKey;
     private boolean mService = false;
     private NavigationView mNavigationView;
@@ -117,10 +133,11 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     private RelativeLayout songDetail;
     private ImageView BackgroundArt;
     private RequestManager mRequestManager;
-    private Handler songProgressHandler;
     private Helper helper;
     private Drawable pause, play;
     private RelativeLayout logoLayout;
+    private Intent intent;
+    private ProgressRunnable progressRunnable;
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -128,12 +145,12 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             musicXService = binder.getService();
             mService = true;
             if (musicXService != null) {
-                MiniPlayerUpdate();
+                PlayingView();
             }
-            if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
-                Uri data = getIntent().getData();
+            Intent filterIntent = getIntent();
+            if (filterIntent != null) {
+                Uri data = filterIntent.getData();
                 if (data != null) {
-                    getIntent().setData(null);
                     try {
                         openFile(data);
                     } catch (Exception ignored) {
@@ -158,15 +175,34 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             }
             String action = intent.getAction();
             if (action.equals(PLAYSTATE_CHANGED)) {
-                updateconfig();
+                playpausetoggle();
             } else if (action.equals(META_CHANGED)) {
                 miniplayerview();
+                finalProgress();
+            }
+        }
+    };
+    private View.OnClickListener onClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (musicXService == null) {
+                return;
+            }
+            switch (view.getId()) {
+                case R.id.quick_play_pause_toggle:
+                    musicXService.toggle();
+                    break;
             }
         }
     };
 
     private void finalProgress() {
-        songProgressHandler.postDelayed(new ProgressRunnable(this), 1000);
+        songProgressHandler.post(progressRunnable);
+    }
+
+    private void removeProgress() {
+        songProgressHandler.removeCallbacks(progressRunnable);
+        songProgressHandler.removeCallbacksAndMessages(null);
     }
 
     /**
@@ -183,6 +219,8 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     @Override
     protected void onStart() {
         super.onStart();
+        Intent intent = new Intent(this, MusicXService.class);
+        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
         IntentFilter filter = new IntentFilter();
         filter.addAction(META_CHANGED);
         filter.addAction(PLAYSTATE_CHANGED);
@@ -190,8 +228,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         filter.addAction(ITEM_ADDED);
         filter.addAction(ORDER_CHANGED);
         registerReceiver(broadcastReceiver, filter);
-        Intent intent = new Intent(this, MusicXService.class);
-        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     public DrawerLayout getDrawerLayout() {
@@ -246,26 +282,28 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(MainActivity.this, PlayingActivity.class);
-                startActivity(i);
+                startActivityForResult(i, NAV);
             }
         });
         logoLayout = (RelativeLayout) mNavigationHeader.findViewById(R.id.logolayout);
         logoLayout.setBackgroundColor(primarycolor);
         mRequestManager = Glide.with(MainActivity.this);
         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
+            SongArtist.setTextColor(Color.WHITE);
             SongTitle.setTextColor(Color.WHITE);
-            SongArtist.setTextColor(ContextCompat.getColor(this, R.color.darkthemeTextColor));
         } else {
+            SongArtist.setTextColor(Color.WHITE);
             SongTitle.setTextColor(Color.WHITE);
-            SongArtist.setTextColor(Color.LTGRAY);
         }
         ShortcutsHandler.create(MainActivity.this);
         SongTitle.setTypeface(Helper.getFont(MainActivity.this));
         SongArtist.setTypeface(Helper.getFont(MainActivity.this));
-        songProgressHandler = new Handler();
+        songProgressHandler = new Handler(Looper.getMainLooper());
+        progressRunnable = new ProgressRunnable(MainActivity.this);
         helper = new Helper(this);
         pause = ContextCompat.getDrawable(MainActivity.this, R.drawable.aw_ic_pause);
         play = ContextCompat.getDrawable(MainActivity.this, R.drawable.aw_ic_play);
+        playToggle.setOnClickListener(onClick);
     }
 
     @Override
@@ -406,10 +444,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         musicXService.setPlaylistandShufle(songList, play);
     }
 
-    public MusicXService getMusicXService() {
-        return musicXService;
-    }
-
     @Override
     public void addToQueue(Song song) {
         if (musicXService != null) {
@@ -461,17 +495,52 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         }
         if (requestCode == EQ) {
             Intent intent = new Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
-            if (intent.getAction() != null && Helper.isActivityPresent(MainActivity.this, intent)){
-                if (musicXService == null){
+            if (intent.getAction() != null && Helper.isActivityPresent(MainActivity.this, intent)) {
+                if (musicXService == null) {
                     return;
                 }
                 intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, musicXService.audioSession());
                 intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, this.getPackageName());
                 intent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
                 sendBroadcast(intent);
-            }else {
+            } else {
                 Log.d("MainActivity", "Error");
             }
+        }
+        if (requestCode == NAV && resultCode == RESULT_OK) {
+            intent = data;
+        }
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        if (intent != null) {
+            Bundle bundle = intent.getExtras();
+            if (intent.getAction().equals(SHOW_ALBUM)) {
+                long id = bundle.getLong(ALBUM_ID);
+                String title = bundle.getString(ALBUM_NAME);
+                String artist = bundle.getString(ALBUM_ARTIST);
+                int trackCount = bundle.getInt(ALBUM_TRACK_COUNT);
+                Album album = new Album();
+                album.setId(id);
+                album.setArtistName(artist);
+                album.setTrackCount(trackCount);
+                album.setAlbumName(title);
+                album.setYear(0);
+                Log.e("Move", "Go_to_AlbumFrag");
+                setFragment(AlbumFragment.newInstance(album));
+            } else if (intent.getAction().equals(SHOW_ARTIST)) {
+                long id = bundle.getLong(Constants.ARTIST_ARTIST_ID);
+                String name = bundle.getString(Constants.ARTIST_NAME);
+                Artist artist = new Artist(id, name, 0, 0);
+                Log.e("Move", "Go_to_ArtistFrag");
+                setFragment(ArtistFragment.newInstance(artist));
+            } else if (intent.getAction().equals(SHOW_TAG)) {
+                setFragment(TagEditorFragment.getInstance());
+                Log.e("Move", "Go_to_TagFrag");
+            }
+            intent = null;
         }
     }
 
@@ -486,22 +555,28 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
     protected void onResume() {
         super.onResume();
         if (!mService) {
-            mServiceIntent = new Intent(this, MusicXService.class);
-            bindService(mServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
-            startService(mServiceIntent);
-            IntentFilter filter = new IntentFilter();
+            Intent intent = new Intent(this, MusicXService.class);
+            bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+            startService(intent);
+            /*IntentFilter filter = new IntentFilter();
             filter.addAction(META_CHANGED);
             filter.addAction(PLAYSTATE_CHANGED);
             filter.addAction(POSITION_CHANGED);
             filter.addAction(ITEM_ADDED);
             filter.addAction(ORDER_CHANGED);
-            registerReceiver(broadcastReceiver, filter);
+            registerReceiver(broadcastReceiver, filter);*/
         } else {
             if (musicXService != null) {
-                MiniPlayerUpdate();
+                PlayingView();
             }
         }
         Glide.get(this).clearMemory();
+    }
+
+    private void PlayingView() {
+        miniplayerview();
+        playpausetoggle();
+        finalProgress();
     }
 
     @Override
@@ -510,7 +585,9 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         if (mService) {
             unbindService(mServiceConnection);
             mService = false;
+            musicXService = null;
             unregisterReceiver(broadcastReceiver);
+            removeProgress();
         }
     }
 
@@ -539,7 +616,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
      NavigationView Selection
      */
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         mDrawerLayout.closeDrawers();
         mDrawerLayout.postDelayed(new Runnable() {
             @Override
@@ -562,6 +639,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                         Helper.startActivity(MainActivity.this, EqualizerActivity.class);
                         break;
                     case R.id.action_settings:
+                        Extras.getInstance().setNaviSettings(false);
                         Helper.startActivity(MainActivity.this, SettingsActivity.class);
                         break;
                     case R.id.action_donation:
@@ -573,7 +651,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
                     case R.id.shares:
                         Intent intent = new Intent(Intent.ACTION_SEND);
                         intent.setAction(Intent.ACTION_SEND);
-                        intent.putExtra(Intent.EXTRA_TEXT, "Hey check out my app at: https://play.google.com/store/apps/details?id=com.rks.musicx");
+                        intent.putExtra(Intent.EXTRA_TEXT, "Hey check out MusicX music player app at: https://play.google.com/store/apps/details?id=com.rks.musicx");
                         intent.setType("text/plain");
                         startActivity(Intent.createChooser(intent, getString(R.string.Shares)));
                         break;
@@ -676,25 +754,15 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
         if (musicXService != null) {
             String title = musicXService.getsongTitle();
             String artist = musicXService.getsongArtistName();
-            playToggle.setOnClickListener(v -> musicXService.toggle());
             SongTitle.setText(title);
             SongTitle.setEllipsize(TextUtils.TruncateAt.MARQUEE);
             SongArtist.setText(artist);
             int duration = musicXService.getDuration();
             if (duration != -1) {
                 songProgress.setMax(duration);
-                updateProgress();
             }
             backgroundArt();
             Helper.rotateFab(playToggle);
-        }
-    }
-
-    private void MiniPlayerUpdate() {
-        miniplayerview();
-        playpausetoggle();
-        if (musicXService.isPlaying()) {
-            finalProgress();
         }
     }
 
@@ -707,15 +775,6 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             }
         }
 
-    }
-
-    private void updateconfig() {
-        playpausetoggle();
-        if (musicXService.isPlaying()) {
-            finalProgress();
-        } else {
-            songProgressHandler.removeCallbacks(new ProgressRunnable(this));
-        }
     }
 
     @Override
@@ -736,6 +795,7 @@ public class MainActivity extends BaseActivity implements MetaDatas, ATEActivity
             MainActivity mainActivity = activityWeakReference.get();
             if (mainActivity != null)
                 mainActivity.updateProgress();
+            songProgressHandler.postDelayed(ProgressRunnable.this, 1000);
         }
     }
 

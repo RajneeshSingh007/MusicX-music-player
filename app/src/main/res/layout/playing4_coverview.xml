@@ -13,10 +13,20 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
+
+    <com.rks.musicx.misc.widgets.CircleVisualizerFFTView
+        android:id="@+id/vizualview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="4dp" />
 
     <FrameLayout
         android:id="@+id/albumViews"
@@ -28,69 +38,15 @@
         android:layout_gravity="center"
         android:gravity="center">
 
-        <com.rks.musicx.misc.widgets.CircleVisualizerFFTView
-            android:id="@+id/vizualview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            app:paddingEnd="4dp"
-            app:paddingStart="4dp"/>
-
         <com.rks.musicx.misc.widgets.CircleImageView
             android:id="@+id/album_cover"
             android:layout_width="250dp"
             android:layout_height="250dp"
             android:layout_gravity="center"
             android:clickable="true"
-            android:padding="20dp"
+            android:padding="25dp"
             android:src="@mipmap/ic_launcher"/>
 
-
-        <FrameLayout
-            android:id="@+id/playtoggle"
-            android:layout_width="75dp"
-            android:layout_height="75dp"
-            android:layout_gravity="center"
-            android:clickable="true">
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/play_pause_toggle"
-                style="@style/FabStyle"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:layout_gravity="center"
-                android:clickable="true"
-                android:scaleType="fitCenter"
-                android:src="@drawable/aw_ic_play"
-                android:tag="bg_tint_accent_color"
-                app:borderWidth="0dp"/>
-
-        </FrameLayout>
-
     </FrameLayout>
-
-    <ImageView
-        android:id="@+id/prev"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/albumViews"
-        android:layout_centerInParent="true"
-        android:layout_gravity="center"
-        android:layout_marginStart="4dp"
-        android:background="@drawable/ripple"
-        android:src="@drawable/aw_ic_prev"
-        android:tint="@android:color/white"/>
-
-    <ImageView
-        android:id="@+id/next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/albumViews"
-        android:layout_centerInParent="true"
-        android:layout_gravity="center"
-        android:layout_marginEnd="4dp"
-        android:background="@drawable/ripple"
-        android:src="@drawable/aw_ic_next"
-        android:tint="@android:color/white"/>
 
 </RelativeLayout>

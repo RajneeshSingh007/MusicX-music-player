@@ -12,7 +12,7 @@
   ~ limitations under the License.
   -->
 
-<resources xmlns:tools="http://schemas.android.com/tools" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources>
     <string name="app_name">MusicX</string>
     <string name="titles">שירים</string>
     <string name="albums">אלבומים</string>
@@ -102,7 +102,6 @@
     <string name="accent_color_summary">שנה צבע כתב מודגש בערכת הנושא</string>
     <string name="custom">ידני</string>
     <string name="equalizer">אקוולייזר</string>
-    <string name="unknown">לא ידוע</string>
     <string name="services">שירותים</string>
     <string name="save_lyrics_summary">אפשר שמירת מילים לשירים לגישה בעת אי חיבור לרשת</string>
     <string name="save_lyrics">שמור מילים לשירים</string>
@@ -158,8 +157,6 @@
     <string name = "album_view_title"> תצוגת אלבום </string>
     <string name = "list_artist_view_summary"> תצוגת אמן </string>
     <string name = "artist_view_title"> תצוגת אמן </string>
-    <string name = "vizualizer_color_summary"> שינוי צבע מ- albumart ב- playView4 </string>
-    <string name = "visualizer_color_title"> צבע Visualizer </string>
     <string name = "color_adaptive_summary"> שינוי צבע מ- albumart בהפעלת תצוגות </string>
     <string name = "color_adaptive_title"> צבע הסתגלות </string>
     <string name = "widget_color_summary"> הגדרת צבע רקע שקוף </string>
@@ -186,4 +183,9 @@
     <string name = "save_queue"> שמור תור </string>
     <string name="audio_filter_title">מסנן אודיו</string>
     <string name="shortcuts">קיצורי דרך</string>
+    <string name="action_rename">Rename</string>
+    <string name="clear_squeue">Clear Saved Queue</string>
+    <string name="clear_squeue_summary">Clear Saved Queue Database</string>
+    <string name="app_desc">Elegant Material Music Player</string>
+    <string name="default_dir">set current dir as default dir</string>
 </resources>

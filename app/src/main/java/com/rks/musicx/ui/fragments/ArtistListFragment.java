@@ -6,10 +6,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
-import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -69,17 +67,15 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
     private BaseRecyclerViewAdapter.OnItemClickListener OnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
-            Artist artist = artistListAdapter.getItem(position);
-            if (((MainActivity) getActivity()).getMusicXService() == null) {
-                return;
-            }
             switch (view.getId()) {
                 case R.id.album_artwork:
                 case R.id.item_view:
-                    if (artistListAdapter.getSnapshot().size() > 0 && position < artistListAdapter.getSnapshot().size()) {
-                        Fragment fragments = ArtistFragment.newInstance(artist, ((MainActivity) getActivity()).getMusicXService());
+                    int pos = position;
+                    if (pos < artistListAdapter.getSnapshot().size() && pos >= 0) {
+                        Artist artist = artistListAdapter.getItem(pos);
+                        Fragment fragments = ArtistFragment.newInstance(artist);
                         ImageView listartwork = (ImageView) view.findViewById(R.id.album_artwork);
-                        fragTransition(fragments, listartwork, "TransitionArtwork");
+                        fragTransition(fragments, listartwork, "TransitionArtwork" + pos);
                     }
                     break;
             }
@@ -88,8 +84,7 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
 
 
     private void fragTransition(Fragment fragment, ImageView imageView, String transition) {
-        ViewCompat.setTransitionName(imageView, transition);
-        Helper.setFragmentTransition(getActivity(), ArtistListFragment.this, fragment, new Pair<View, String>(imageView, transition));
+        Helper.setFragmentTransition(((MainActivity) getActivity()), ArtistListFragment.this, fragment, imageView, transition, "artistdetail");
     }
 
     @Override
@@ -139,6 +134,9 @@ public class ArtistListFragment extends BaseRefreshFragment implements LoaderMan
             case R.id.byfour:
                 Extras.getInstance().setArtistGrid(4);
                 loadGridView();
+                load();
+                break;
+            case R.id.menu_refresh:
                 load();
                 break;
         }

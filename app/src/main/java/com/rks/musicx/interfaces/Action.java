@@ -13,10 +13,16 @@ package com.rks.musicx.interfaces;
  * limitations under the License.
  */
 
+import android.support.v4.app.Fragment;
+
 /**
  * Created by Coolalien on 6/27/2017.
  */
 public interface Action {
 
     void clear();
+
+    Fragment currentFrag();
+
+    void refresh();
 }

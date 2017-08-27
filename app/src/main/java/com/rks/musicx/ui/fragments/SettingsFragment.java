@@ -26,18 +26,19 @@ import com.codekidlabs.storagechooser.StorageChooserView;
 import com.rks.musicx.R;
 import com.rks.musicx.data.loaders.FavoritesLoader;
 import com.rks.musicx.data.loaders.RecentlyPlayedLoader;
+import com.rks.musicx.database.SaveQueueDatabase;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.SettingsActivity;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import static android.os.Build.VERSION_CODES.M;
 import static com.rks.musicx.misc.utils.Constants.BlackTheme;
 import static com.rks.musicx.misc.utils.Constants.BlurView;
 import static com.rks.musicx.misc.utils.Constants.ClearFav;
+import static com.rks.musicx.misc.utils.Constants.ClearQueue;
 import static com.rks.musicx.misc.utils.Constants.ClearRecently;
 import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 import static com.rks.musicx.misc.utils.Constants.FADETRACK;
@@ -77,8 +78,8 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
     private RecentlyPlayedLoader recentlyPlayedLoader;
     private int accentcolor;
     private ATECheckBoxPreference headsetConfig, phoneConfig;
-    private List<Integer> integerList = new ArrayList<>();
     private Helper helper;
+    private SaveQueueDatabase queueDatabase;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -90,7 +91,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         blurseek = (ATEListPreference) findPreference(BlurView);
         if (blurseek.getValue() == null)
             blurseek.setValue(Three);
-        favoritesLoader = new FavoritesLoader(getActivity());
+        favoritesLoader = new FavoritesLoader(getActivity(), -1);
         recentlyPlayedLoader = new RecentlyPlayedLoader(getActivity(), -1);
         headsetConfig = (ATECheckBoxPreference) findPreference(SaveHeadset);
         headsetConfig.setChecked(true);
@@ -108,6 +109,202 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
 
     public void invalidateSettings() {
         mAteKey = ((SettingsActivity) getActivity()).getATEKey();
+        clearStuff();
+        uiChanges();
+        ATEPreference picker = (ATEPreference) findPreference("directory_picker");
+        picker.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                StorageChooserView.setScSecondaryActionColor(accentcolor);
+                StorageChooser chooser = new StorageChooser.Builder()
+                        .withActivity((SettingsActivity) getActivity())
+                        .withFragmentManager(((SettingsActivity) getActivity()).getSupportFragmentManager())
+                        .setDialogTitle("Storage Chooser")
+                        .build();
+                chooser.show();
+                chooser.setOnSelectListener(new StorageChooser.OnSelectListener() {
+                    @Override
+                    public void onSelect(String path) {
+                        Log.e("PATH", path);
+                        Extras.getInstance().saveFolderPath(path);
+                    }
+                });
+                return true;
+            }
+        });
+
+        ATEPreference removeTabs = (ATEPreference) findPreference(REMOVETABS);
+        removeTabs.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                try {
+                    Toast.makeText(((SettingsActivity) getActivity()), "slide left to remove tab/Select ok without selection to restore all tabs", Toast.LENGTH_LONG).show();
+                    Extras.getInstance().getmPreferences().edit().remove(REMOVE_TABLIST).commit();
+                } finally {
+                    TabRemoveFragment tabRemoveFragment = new TabRemoveFragment();
+                    tabRemoveFragment.show(getActivity().getFragmentManager(), null);
+                }
+                return true;
+            }
+        });
+
+
+        ATECheckBoxPreference hqArtwork = (ATECheckBoxPreference) findPreference(HQ_ARTISTARTWORK);
+        File file = new File(Helper.getAlbumArtworkLocation());
+        File file1 = new File(Helper.getArtistArtworkLocation());
+
+        if (hqArtwork.isChecked()) {
+            try {
+                Helper.deleteRecursive(getActivity(), file);
+                Helper.deleteRecursive(getActivity(), file1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                Helper.createAppDir(".AlbumArtwork");
+                Helper.createAppDir(".ArtistArtwork");
+            }
+        } else {
+            try {
+                Helper.deleteRecursive(getActivity(), file);
+                Helper.deleteRecursive(getActivity(), file1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                Helper.createAppDir(".AlbumArtwork");
+                Helper.createAppDir(".ArtistArtwork");
+            }
+        }
+        ATECheckBoxPreference fadePref = (ATECheckBoxPreference) findPreference(FADETRACK);
+        if (fadePref.isChecked()) {
+            Extras.getInstance().saveFadeTrack(true);
+        } else {
+            Extras.getInstance().saveFadeTrack(false);
+        }
+    }
+
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object o) {
+        return false;
+    }
+
+    @Override
+    public boolean onPreferenceClick(Preference preference) {
+        return false;
+    }
+
+
+    /**
+     * Clear db
+     */
+    private void clearStuff() {
+
+        ATEPreference atePreference = (ATEPreference) findPreference(ClearFav);
+        atePreference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                new MaterialDialog.Builder(getActivity())
+                        .title(R.string.clear_favdb)
+                        .autoDismiss(true)
+                        .content(R.string.clear_favdb_summary)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                favoritesLoader.clearDb();
+                            }
+                        })
+                        .positiveText(android.R.string.ok)
+                        .negativeText(android.R.string.cancel)
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .buttonRippleColor(accentcolor)
+                        .build()
+                        .show();
+                return true;
+            }
+        });
+
+        ATEPreference atesPreference = (ATEPreference) findPreference(ClearQueue);
+        atesPreference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                new MaterialDialog.Builder(getActivity())
+                        .title(R.string.clear_squeue)
+                        .autoDismiss(true)
+                        .content(R.string.clear_squeue_summary)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                List<String> queueList = Helper.getSavedQueueList(getActivity());
+                                if (queueList != null) {
+                                    for (String name : queueList) {
+                                        Log.e("Settings", name);
+                                        queueDatabase = new SaveQueueDatabase(getActivity(), name);
+                                        queueDatabase.removeAll();
+                                        queueDatabase.close();
+                                        boolean delete = getActivity().deleteDatabase(name);
+                                        if (delete) {
+                                            Log.e("Settings", name + " : deleted");
+                                        } else {
+                                            Log.e("Settings", name + " : failed");
+                                        }
+                                    }
+                                }
+                            }
+                        })
+                        .positiveText(android.R.string.ok)
+                        .negativeText(android.R.string.cancel)
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .buttonRippleColor(accentcolor)
+                        .build()
+                        .show();
+                return true;
+            }
+        });
+
+        ATEPreference atePreferences = (ATEPreference) findPreference(ClearRecently);
+        atePreferences.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                new MaterialDialog.Builder(getActivity())
+                        .title(R.string.clear_recentplayeddb)
+                        .autoDismiss(true)
+                        .content(R.string.clear_recentplayeddb)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                recentlyPlayedLoader.clearDb();
+                            }
+                        })
+                        .positiveText(android.R.string.ok)
+                        .negativeText(android.R.string.cancel)
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .buttonRippleColor(accentcolor)
+                        .build()
+                        .show();
+                return true;
+            }
+        });
+    }
+
+
+    /**
+     * Ui Changes
+     */
+    private void uiChanges() {
         ATEColorPreference primaryColorPref = (ATEColorPreference) findPreference("primary_color");
         primaryColorPref.setColor(Config.primaryColor(getActivity(), mAteKey), Color.BLACK);
         primaryColorPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -138,6 +335,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                 // Marks both theme configs as changed so MainActivity restarts itself on return
                 Config.markChanged(getActivity(), LightTheme);
                 Config.markChanged(getActivity(), DarkTheme);
+                Config.markChanged(getActivity(), BlackTheme);
                 // The dark_theme preference value gets saved by Android in the default PreferenceManager.
                 // It's used in getATEKey() of both the Activities.
                 getActivity().recreate();
@@ -150,6 +348,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                 // Marks both theme configs as changed so MainActivity restarts itself on return
                 Config.markChanged(getActivity(), LightTheme);
                 Config.markChanged(getActivity(), DarkTheme);
+                Config.markChanged(getActivity(), BlackTheme);
                 // The dark_theme preference value gets saved by Android in the default PreferenceManager.
                 // It's used in getATEKey() of both the Activities.
                 getActivity().recreate();
@@ -189,27 +388,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                 return true;
             }
         });
-        ATEPreference picker = (ATEPreference) findPreference("directory_picker");
-        picker.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                StorageChooserView.setScSecondaryActionColor(accentcolor);
-                StorageChooser chooser = new StorageChooser.Builder()
-                        .withActivity((SettingsActivity) getActivity())
-                        .withFragmentManager(((SettingsActivity) getActivity()).getSupportFragmentManager())
-                        .setDialogTitle("Storage Chooser")
-                        .build();
-                chooser.show();
-                chooser.setOnSelectListener(new StorageChooser.OnSelectListener() {
-                    @Override
-                    public void onSelect(String path) {
-                        Log.e("PATH", path);
-                        Extras.getInstance().saveFolderPath(path);
-                    }
-                });
-                return true;
-            }
-        });
+
         final ATECheckBoxPreference statusBarPref = (ATECheckBoxPreference) findPreference("colored_status_bar");
         final ATECheckBoxPreference navBarPref = (ATECheckBoxPreference) findPreference("colored_nav_bar");
 
@@ -242,122 +421,5 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
             navBarPref.setEnabled(false);
             navBarPref.setSummary(R.string.not_available_below_lollipop);
         }
-
-        ATEPreference removeTabs = (ATEPreference) findPreference(REMOVETABS);
-        removeTabs.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                try {
-                    Toast.makeText(((SettingsActivity) getActivity()), "slide left to remove tab/Select ok without selection to restore all tabs", Toast.LENGTH_LONG).show();
-                    Extras.getInstance().getmPreferences().edit().remove(REMOVE_TABLIST).commit();
-                } finally {
-                    TabRemoveFragment tabRemoveFragment = new TabRemoveFragment();
-                    tabRemoveFragment.show(getActivity().getFragmentManager(), null);
-                }
-                return true;
-            }
-        });
-
-        ATEPreference atePreference = (ATEPreference) findPreference(ClearFav);
-        atePreference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                new MaterialDialog.Builder(getActivity())
-                        .title(R.string.clear_favdb)
-                        .autoDismiss(true)
-                        .content(R.string.clear_favdb_summary)
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                favoritesLoader.clearDb();
-                            }
-                        })
-                        .positiveText(android.R.string.ok)
-                        .negativeText(android.R.string.cancel)
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .buttonRippleColor(accentcolor)
-                        .build()
-                        .show();
-                return true;
-            }
-        });
-        ATEPreference atePreferences = (ATEPreference) findPreference(ClearRecently);
-        atePreferences.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                new MaterialDialog.Builder(getActivity())
-                        .title(R.string.clear_recentplayeddb)
-                        .autoDismiss(true)
-                        .content(R.string.clear_recentplayeddb)
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                recentlyPlayedLoader.clearDb();
-                            }
-                        })
-                        .positiveText(android.R.string.ok)
-                        .negativeText(android.R.string.cancel)
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .buttonRippleColor(accentcolor)
-                        .build()
-                        .show();
-                return true;
-            }
-        });
-        ATECheckBoxPreference hqArtwork = (ATECheckBoxPreference) findPreference(HQ_ARTISTARTWORK);
-        File file = new File(helper.getAlbumArtworkLocation());
-        File file1 = new File(helper.getArtistArtworkLocation());
-
-        if (hqArtwork.isChecked()){
-            try {
-                if (file.isDirectory() && file1.isDirectory() ){
-                    Helper.deleteRecursive(file);
-                    Helper.deleteRecursive(file1);
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }finally {
-                Helper.createAppDir(".AlbumArtwork");
-                Helper.createAppDir(".ArtistArtwork");
-            }
-        }else {
-            try {
-                if (file.isDirectory() && file1.isDirectory() ){
-                    Helper.deleteRecursive(file);
-                    Helper.deleteRecursive(file1);
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }finally {
-                Helper.createAppDir(".AlbumArtwork");
-                Helper.createAppDir(".ArtistArtwork");
-            }
-        }
-        ATECheckBoxPreference fadePref = (ATECheckBoxPreference) findPreference(FADETRACK);
-        if (fadePref.isChecked()){
-            Extras.getInstance().getmPreferences().edit().putBoolean(FADETRACK, true).commit();
-        }else {
-            Extras.getInstance().getmPreferences().edit().putBoolean(FADETRACK, false).commit();
-        }
-    }
-
-    @Override
-    public boolean onPreferenceChange(Preference preference, Object o) {
-        return false;
-    }
-
-    @Override
-    public boolean onPreferenceClick(Preference preference) {
-        return false;
     }
 }

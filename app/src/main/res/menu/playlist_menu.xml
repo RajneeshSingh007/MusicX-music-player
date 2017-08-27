@@ -12,8 +12,12 @@
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto"
-    >
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_playlist_rename"
+        android:title="@string/action_rename"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_playlist_delete"

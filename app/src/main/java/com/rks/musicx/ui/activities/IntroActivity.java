@@ -5,10 +5,10 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.github.paolorotolo.appintro.AppIntro;
-import com.rks.musicx.ui.fragments.FirstIntro;
-import com.rks.musicx.ui.fragments.FourthIntro;
-import com.rks.musicx.ui.fragments.SecondIntro;
-import com.rks.musicx.ui.fragments.ThirdIntro;
+import com.rks.musicx.ui.fragments.Intro.FirstIntro;
+import com.rks.musicx.ui.fragments.Intro.FourthIntro;
+import com.rks.musicx.ui.fragments.Intro.SecondIntro;
+import com.rks.musicx.ui.fragments.Intro.ThirdIntro;
 
 /*
  * Created by Coolalien on 6/28/2016.

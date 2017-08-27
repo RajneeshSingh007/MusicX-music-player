@@ -23,7 +23,7 @@ public class MediaPlayerSingleton {
 
     private static MediaPlayerSingleton instance = null;
 
-    private final MediaPlayer sMediaPlayer;
+    private MediaPlayer sMediaPlayer;
 
     protected MediaPlayerSingleton() {
         sMediaPlayer = new MediaPlayer();

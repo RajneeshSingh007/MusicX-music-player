@@ -62,8 +62,9 @@ public class Equalizers {
     public static short[] getBandLevelRange() {
         if (equalizer != null) {
             return equalizer.getBandLevelRange();
+        } else {
+            return null;
         }
-        return null;
     }
 
     public static short getPresetNo(){
@@ -136,4 +137,5 @@ public class Equalizers {
         editor.putInt(BAND_LEVEL + band, bandLevel);
         editor.commit();
     }
+
 }

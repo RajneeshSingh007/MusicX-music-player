@@ -29,7 +29,6 @@ import static com.rks.musicx.misc.utils.Constants.PRESET_BOOST;
 public class Reverb {
 
     private static PresetReverb presetReverb = null;
-    private static short str;
     private static int audioID = 0;
 
     public Reverb() {
@@ -61,10 +60,10 @@ public class Reverb {
 
     public static void setPresetReverbStrength(short strength) {
         if (presetReverb != null && strength >= 0) {
-            str = strength;
             try {
-                if (str > 0) {
+                if (strength > 0) {
                     presetReverb.setPreset(strength);
+                    saveReverb(strength);
                 }
             } catch (IllegalArgumentException e) {
                 Log.e("Reverb", "Reverb effect not supported");
@@ -79,19 +78,12 @@ public class Reverb {
     }
 
 
-    public static void saveReverb() {
-        if (presetReverb == null) {
-            return;
-        }
+    public static void saveReverb(short str) {
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
-        editor.putInt(PRESET_BOOST, str);
+        int strength = (int) str;
+        editor.putInt(PRESET_BOOST, strength);
         editor.apply();
     }
-
-    public static short getStr() {
-        return str;
-    }
-
 
     public static void setEnabled(boolean enabled) {
         if (presetReverb != null) {

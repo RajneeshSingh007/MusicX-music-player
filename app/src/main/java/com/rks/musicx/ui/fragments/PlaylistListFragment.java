@@ -1,30 +1,24 @@
 package com.rks.musicx.ui.fragments;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.PopupMenu;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.base.BaseRefreshFragment;
 import com.rks.musicx.data.loaders.PlaylistLoaders;
 import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.model.Playlist;
+import com.rks.musicx.interfaces.RefreshPlaylist;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
-import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.PlaylistHelper;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.PlaylistListAdapter;
@@ -61,18 +55,22 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
             if (getActivity() == null) {
                 return;
             }
-            Playlist playlist = playlistAdapter.getItem(position);
-            switch (view.getId()) {
-                case R.id.item_view:
-                    if (playlistAdapter.getSnapshot().size() > 0 && position < playlistAdapter.getSnapshot().size()) {
-                        Extras.getInstance().savePlaylistId(playlist.getId());
-                        PlaylistFragment fragment = PlaylistFragment.newInstance(playlist);
-                        ((MainActivity) getActivity()).setFragment(fragment);
-                    }
-                    break;
-                case R.id.delete_playlist:
-                    showMenu(view, playlistAdapter.getItem(position));
-                    break;
+            if (position < playlistAdapter.getItemCount()) {
+                Playlist playlist = playlistAdapter.getItem(position);
+                switch (view.getId()) {
+                    case R.id.item_view:
+                        if (playlistAdapter.getSnapshot().size() > 0 && position < playlistAdapter.getSnapshot().size()) {
+                            if (playlist.getId() != 0) {
+                                Extras.getInstance().savePlaylistId(playlist.getId());
+                                PlaylistFragment fragment = PlaylistFragment.newInstance(playlist);
+                                ((MainActivity) getActivity()).setFragment(fragment);
+                            }
+                        }
+                        break;
+                    case R.id.delete_playlist:
+                        showMenu(view, playlistAdapter.getItem(position));
+                        break;
+                }
             }
         }
     };
@@ -88,22 +86,23 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_playlist_delete:
-                        MaterialDialog.Builder builder = new MaterialDialog.Builder(getContext());
-                        builder.title(playlist.getName());
-                        builder.content(getContext().getString(R.string.deleteplaylist));
-                        builder.positiveText(R.string.delete);
-                        builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+                        PlaylistHelper.deletePlaylistDailog(getContext(), playlist.getName(), new RefreshPlaylist() {
                             @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                PlaylistHelper.deletePlaylist(getContext(), playlist.getName());
-                                Toast.makeText(getContext(), playlist.getName() + " Deleted", Toast.LENGTH_SHORT).show();
+                            public void refresh() {
                                 load();
                             }
                         });
-                        builder.typeface(Helper.getFont(getContext()), Helper.getFont(getContext()));
-                        builder.negativeText(R.string.cancel);
-                        builder.show();
                         break;
+
+                    case R.id.action_playlist_rename:
+                        PlaylistHelper.showRenameDialog(getContext(), new RefreshPlaylist() {
+                            @Override
+                            public void refresh() {
+                                load();
+                            }
+                        }, playlist.getId());
+                        break;
+
                 }
                 return false;
             }
@@ -123,7 +122,12 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
         Extras extras = Extras.getInstance();
         switch (item.getItemId()) {
             case R.id.action_create_playlist:
-                showCreatePlaylistDialog();
+                PlaylistHelper.showCreatePlaylistDialog(getContext(), new RefreshPlaylist() {
+                    @Override
+                    public void refresh() {
+                        load();
+                    }
+                });
                 break;
             case R.id.menu_sort_by_az:
                 extras.setPlaylistSortOrder(SortOrder.PlaylistSortOrder.PLAYLIST_A_Z);
@@ -137,33 +141,11 @@ public class PlaylistListFragment extends BaseRefreshFragment implements LoaderC
                 extras.setPlaylistSortOrder(SortOrder.PlaylistSortOrder.PLAYLIST_DATE_MODIFIED);
                 load();
                 break;
+            case R.id.menu_refresh:
+                load();
+                break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void showCreatePlaylistDialog() {
-        View layout = LayoutInflater.from(getContext()).inflate(R.layout.create_playlist, null);
-        MaterialDialog.Builder createplaylist = new MaterialDialog.Builder(getContext());
-        createplaylist.title(R.string.create_playlist);
-        createplaylist.positiveText(android.R.string.ok);
-        TextInputEditText editText = (TextInputEditText) layout.findViewById(R.id.playlist_name);
-        createplaylist.onPositive(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                PlaylistHelper.createPlaylist(getContext().getContentResolver(), editText.getText().toString());
-                load();
-            }
-        });
-        createplaylist.negativeText(android.R.string.cancel);
-        createplaylist.onNegative(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                createplaylist.autoDismiss(true);
-            }
-        });
-        createplaylist.typeface(Helper.getFont(getContext()), Helper.getFont(getContext()));
-        createplaylist.customView(layout, false);
-        createplaylist.show();
     }
 
 

@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -38,7 +39,6 @@ import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
-import static com.rks.musicx.data.eq.BassBoosts.setBassBoostStrength;
 import static com.rks.musicx.misc.utils.Constants.BAND_LEVEL;
 import static com.rks.musicx.misc.utils.Constants.BASS_BOOST;
 import static com.rks.musicx.misc.utils.Constants.LOUD_BOOST;
@@ -76,9 +76,10 @@ public class EqFragment extends Fragment {
     private ArrayAdapter<String> arrayAdapter;
     private ViewPager effectpager;
     private List<View> viewList;
-    private View blg, rb;
+    private View eqView, eqViews;
     private PlayingPagerAdapter playingPagerAdapter;
     private int gain;
+    private float inc;
     private short str,virtualstr,presetreverb;
 
     @Nullable
@@ -92,20 +93,20 @@ public class EqFragment extends Fragment {
     private void setupInstace(View rootView) {
         switchCompat = (SwitchCompat) rootView.findViewById(R.id.switch_button);
         effectpager = (ViewPager) rootView.findViewById(R.id.effect_pager);
-        blg = LayoutInflater.from(getContext()).inflate(R.layout.blg, null);
-        bassBoost = (EqView) blg.findViewById(R.id.bassboost);
-        virtualizerBoost = (EqView) blg.findViewById(R.id.virtualizerboost);
-        loudnessBoost = (EqView) blg.findViewById(R.id.loudboost);
+        eqView = LayoutInflater.from(getContext()).inflate(R.layout.eq_view, new LinearLayout(getContext()), false);
+        bassBoost = (EqView) eqView.findViewById(R.id.bassboost);
+        virtualizerBoost = (EqView) eqView.findViewById(R.id.virtualizerboost);
+        loudnessBoost = (EqView) eqView.findViewById(R.id.loudboost);
 
-        rb = LayoutInflater.from(getContext()).inflate(R.layout.rb, null);
-        reverb = (EqView) rb.findViewById(R.id.reverb);
+        eqViews = LayoutInflater.from(getContext()).inflate(R.layout.eq_views, new LinearLayout(getContext()), false);
+        reverb = (EqView) eqViews.findViewById(R.id.reverb);
 
         /**
          * Pager config
          */
         viewList = new ArrayList<>(2);
-        viewList.add(blg);
-        viewList.add(rb);
+        viewList.add(eqView);
+        viewList.add(eqViews);
         playingPagerAdapter = new PlayingPagerAdapter(viewList);
         effectpager.setAdapter(playingPagerAdapter);
         switchEq();
@@ -138,7 +139,9 @@ public class EqFragment extends Fragment {
         sequence.start();
     }
 
-
+    /**
+     * Switch Config
+     */
     private void switchEq() {
         if (switchCompat != null) {
             switchCompat.setChecked(Extras.getInstance().geteqSwitch());
@@ -158,6 +161,11 @@ public class EqFragment extends Fragment {
         }
     }
 
+    /**
+     * Enable/Disable
+     *
+     * @param onoroff
+     */
     private void enableDisable(Boolean onoroff) {
         Equalizers.setEnabled(onoroff);
         BassBoosts.setEnabled(onoroff);
@@ -166,41 +174,55 @@ public class EqFragment extends Fragment {
         Reverb.setEnabled(onoroff);
     }
 
+    /**
+     * Presets
+     * @param rootView
+     */
     private void initPresets(View rootView) {
         appCompatSpinner = (AppCompatSpinner) rootView.findViewById(R.id.presets_spinner);
-        arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item);
-        if (getPresetNames() == null) {
+        List<String> presetList = getPresetNames();
+        if (presetList == null || presetList.size() == 0) {
             return;
         }
+        arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        for (int presets=0; presets < getPresetNames().size(); presets++){
-            arrayAdapter.add(getPresetNames().get(presets));
+        for (int presets = 0; presets < presetList.size(); presets++) {
+            arrayAdapter.add(presetList.get(presets));
             appCompatSpinner.setAdapter(arrayAdapter);
         }
         int presetPos = Extras.getInstance().getPresetPos();
-        if (presetPos < getPresetNames().size()){
+        if (presetPos < presetList.size()){
             appCompatSpinner.setSelection(presetPos);
         }
         appCompatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position < getPresetNames().size()) {
+                if (position < presetList.size()){
                     Extras.getInstance().savePresetPos(position);
-                    if (position < Equalizers.getPresetNo()) {
-                        short presetPosition = (short) position;
-                        Equalizers.usePreset(presetPosition);
-                        for (short i = 0; i < Equalizers.getNumberOfBands(); i++) {
-                            final short[] range = Equalizers.getBandLevelRange();
-                            if (range != null) {
-                                seekBarFinal[i].setProgress(Equalizers.getBandLevel(i) - range[0]);
+                    short presetNo = Equalizers.getPresetNo();
+                    short bandNo = Equalizers.getNumberOfBands();
+                    if (presetNo != -1 && bandNo != -1) {
+                        if (position < presetNo) {
+                            short presetPosition = (short) position;
+                            Equalizers.usePreset(presetPosition);
+                            for (short i = 0; i < bandNo; i++) {
+                                final short[] range = Equalizers.getBandLevelRange();
+                                short level = Equalizers.getBandLevel(i);
+                                if (range != null) {
+                                    if (i < seekBarFinal.length) {
+                                        seekBarFinal[i].setProgress(level - range[0]);
+                                    }
+                                }
                             }
-                        }
-                    } else {
-                        Log.d(TAG, "Error buddy");
-                        for (int i = 0; i < Equalizers.getNumberOfBands(); i++) {
-                            final short[] range = Equalizers.getBandLevelRange();
-                            if (range != null) {
-                                seekBarFinal[i].setProgress(Extras.getInstance().saveEq().getInt(BAND_LEVEL + i, 0) - range[0]);
+                        } else {
+                            Log.d(TAG, "Error buddy");
+                            for (int i = 0; i < bandNo; i++) {
+                                final short[] range = Equalizers.getBandLevelRange();
+                                if (range != null) {
+                                    if (i < seekBarFinal.length) {
+                                        seekBarFinal[i].setProgress(Extras.getInstance().saveEq().getInt(BAND_LEVEL + i, 0) - range[0]);
+                                    }
+                                }
                             }
                         }
                     }
@@ -219,11 +241,13 @@ public class EqFragment extends Fragment {
     private List<String> getPresetNames() {
         List<String> presets = new ArrayList<>();
         short presetsNo = Equalizers.getPresetNo();
-        for (short n = 0; n < presetsNo; n++) {
-            presets.add(Equalizers.getPresetNames(n));
-            Log.d(TAG, String.valueOf(n) + String.valueOf(presets.get(n)));
+        if (presetsNo != 0) {
+            for (short n = 0; n < presetsNo; n++) {
+                presets.add(Equalizers.getPresetNames(n));
+                Log.d(TAG, String.valueOf(n) + String.valueOf(presets.get(n)));
+            }
+            presets.add(getString(R.string.custom));
         }
-        presets.add(getString(R.string.custom));
         return presets;
     }
 
@@ -232,19 +256,21 @@ public class EqFragment extends Fragment {
             @Override
             public void onProgressChanged(int progress) {
                 str = (short) (((float) 1000 / 20) * (progress));
-                setBassBoostStrength(str);
+                BassBoosts.setBassBoostStrength(str);
+
             }
 
         });
         int savedBass = (Extras.getInstance().saveEq().getInt(BASS_BOOST, 0) * 20) / 1000;
         if (savedBass > 0) {
             bassBoost.setProgress(savedBass);
+            BassBoosts.setBassBoostStrength((short) savedBass);
         }else {
             bassBoost.setProgress(1);
         }
+        bassBoost.getTextPaint().setTypeface(Helper.getFont(getContext()));
         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
             bassBoost.getTextPaint().setColor(ContextCompat.getColor(getContext(), R.color.white));
-            bassBoost.getTextPaint().setTypeface(com.afollestad.materialdialogs.util.TypefaceHelper.get(getContext(), Extras.getInstance().getTypeface()));
         }
         bassBoost.setLabel(getString(R.string.Bass));
     }
@@ -262,9 +288,11 @@ public class EqFragment extends Fragment {
         int saveReverb = (Extras.getInstance().saveEq().getInt(PRESET_BOOST, 0) * 20 ) / 6;
         if (saveReverb > 0) {
             reverb.setProgress(saveReverb);
+            Reverb.setPresetReverbStrength((short) saveReverb);
         } else {
             reverb.setProgress(1);
         }
+        reverb.getTextPaint().setTypeface(Helper.getFont(getContext()));
         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
             reverb.getTextPaint().setColor(ContextCompat.getColor(getContext(), R.color.white));
         }
@@ -284,9 +312,11 @@ public class EqFragment extends Fragment {
         int saveVirtual = (Extras.getInstance().saveEq().getInt(VIRTUAL_BOOST, 0)  * 20) / 1000;
         if ( saveVirtual > 0) {
             virtualizerBoost.setProgress(saveVirtual);
+            Virtualizers.setVirtualizerStrength((short) saveVirtual);
         } else {
             virtualizerBoost.setProgress(1);
         }
+        virtualizerBoost.getTextPaint().setTypeface(Helper.getFont(getContext()));
         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
             virtualizerBoost.getTextPaint().setColor(ContextCompat.getColor(getContext(), R.color.white));
         }
@@ -305,15 +335,16 @@ public class EqFragment extends Fragment {
         int saveLoud = (Extras.getInstance().saveEq().getInt(LOUD_BOOST, 0) * 20 ) / 100;
         if (saveLoud > 0) {
             loudnessBoost.setProgress(saveLoud);
+            Loud.setLoudnessEnhancerGain(saveLoud);
         } else {
             loudnessBoost.setProgress(1);
         }
+        loudnessBoost.getTextPaint().setTypeface(Helper.getFont(getContext()));
         loudnessBoost.setLabel(getString(R.string.loudness));
         if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
             loudnessBoost.getTextPaint().setColor(ContextCompat.getColor(getContext(), R.color.white));
         }
     }
-
 
 
     private void initEq(View rootView) {
@@ -383,7 +414,12 @@ public class EqFragment extends Fragment {
                                 if (bandLevel != null) {
                                     int  level = seekbar.getProgress() + bandLevel[0];
                                     Equalizers.setBandLevel(eqbands, (short) level);
-                                    appCompatSpinner.setSelection(Equalizers.getPresetNo());
+                                    int presetNo = Equalizers.getPresetNo();
+                                    if (presetNo != 0) {
+                                        appCompatSpinner.setSelection(Equalizers.getPresetNo());
+                                    } else {
+                                        appCompatSpinner.setSelection(0);
+                                    }
                                     Equalizers.savePrefs(eqbands, level);
                                 }
                             }
@@ -408,14 +444,6 @@ public class EqFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        BassBoosts.saveBass();
-        Loud.saveLoudnessEnhancer();
-        Virtualizers.saveVirtual();
-        Reverb.saveReverb();
-    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {

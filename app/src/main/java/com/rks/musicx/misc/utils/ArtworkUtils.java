@@ -34,8 +34,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.rks.musicx.misc.utils.Constants.BlurView;
-
 /*
  * Created by Coolalien on 6/28/2016.
  */
@@ -423,13 +421,12 @@ public class ArtworkUtils {
         loadArtwork(context, size, bigsize, path, palettework, imageView);
     }
 
-    public static AsyncTask<Drawable, Void, Drawable> getBlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView, int scale) {
+    private static AsyncTask<Drawable, Void, Drawable> getBlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView, int scale) {
         return new BlurArtwork(context, radius, bitmap, imageView, scale).execute();
     }
 
     public static void blurPreferances(Context context, Bitmap blurBitmap, ImageView imageView) {
-        String blurView = Extras.getInstance().getmPreferences().getString(BlurView, Constants.Two);
-        switch (blurView) {
+        switch (Extras.getInstance().getBlurView()) {
             case Constants.Zero:
                 getBlurArtwork(context, radius(), blurBitmap, imageView, 1);
                 break;
@@ -454,8 +451,7 @@ public class ArtworkUtils {
 
     public static int radius() {
         int radius = 1;
-        String blurView = Extras.getInstance().getmPreferences().getString(BlurView, Constants.Zero);
-        switch (blurView) {
+        switch (Extras.getInstance().getBlurView()) {
             case Constants.Zero:
                 radius = 5;
                 return radius;
@@ -502,52 +498,56 @@ public class ArtworkUtils {
      * @param bitmap
      * @return
      */
-    private static Bitmap optimizeBitmap(@NonNull Bitmap bitmap, int size) {
-        // convert bitmap into inputStream
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        // bitmap compress
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-        // bytes into array
-        InputStream is = new ByteArrayInputStream(stream.toByteArray());
-        BufferedInputStream imageFileStream = new BufferedInputStream(is);
-        try {
-            // Phase 1: Get a reduced size image. In this part we will do a rough scale down
-            int sampleSize = 1;
-            if (size> 0 && size > 0) {
-                final BitmapFactory.Options decodeBoundsOptions = new BitmapFactory.Options();
-                decodeBoundsOptions.inJustDecodeBounds = true;
-                imageFileStream.mark(64 * 1024);
-                BitmapFactory.decodeStream(imageFileStream, null, decodeBoundsOptions);
-                imageFileStream.reset();
-                final int originalWidth = decodeBoundsOptions.outWidth;
-                final int originalHeight = decodeBoundsOptions.outHeight;
-                // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
-                sampleSize = Math.max(1, Math.max(originalWidth /size, originalHeight / size));
-            }
-            BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
-            decodeBitmapOptions.inSampleSize = sampleSize;
-            //decodeBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565; // Uses 2-bytes instead of default 4 per pixel
-
-            // Get the roughly scaled-down image
-            Bitmap bmp = BitmapFactory.decodeStream(imageFileStream, null, decodeBitmapOptions);
-
-            // Phase 2: Get an exact-size image - no dimension will exceed the desired value
-            float ratio = Math.min((float)size/ (float)bmp.getWidth(), (float)size/ (float)bmp.getHeight());
-            int w =(int) ((float)bmp.getWidth() * ratio);
-            int h =(int) ((float)bmp.getHeight() * ratio);
-
-            // finally scaled bitmap
-            return Bitmap.createScaledBitmap(bmp, w,h, true);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+    public static Bitmap optimizeBitmap(@NonNull Bitmap bitmap, int size) {
+        if (!bitmap.isRecycled()) {
+            // convert bitmap into inputStream
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            // bitmap compress
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            // bytes into array
+            InputStream is = new ByteArrayInputStream(stream.toByteArray());
+            BufferedInputStream imageFileStream = new BufferedInputStream(is);
             try {
-                imageFileStream.close();
-            } catch (IOException ignored) {
+                // Phase 1: Get a reduced size image. In this part we will do a rough scale down
+                int sampleSize = 1;
+                if (size > 0 && size > 0) {
+                    final BitmapFactory.Options decodeBoundsOptions = new BitmapFactory.Options();
+                    decodeBoundsOptions.inJustDecodeBounds = true;
+                    imageFileStream.mark(64 * 1024);
+                    BitmapFactory.decodeStream(imageFileStream, null, decodeBoundsOptions);
+                    imageFileStream.reset();
+                    final int originalWidth = decodeBoundsOptions.outWidth;
+                    final int originalHeight = decodeBoundsOptions.outHeight;
+                    // inSampleSize prefers multiples of 2, but we prefer to prioritize memory savings
+                    sampleSize = Math.max(1, Math.max(originalWidth / size, originalHeight / size));
+                }
+                BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
+                decodeBitmapOptions.inSampleSize = sampleSize;
+                //decodeBitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888; // Uses 2-bytes instead of default 4 per pixel
+
+                // Get the roughly scaled-down image
+                Bitmap bmp = BitmapFactory.decodeStream(imageFileStream, null, decodeBitmapOptions);
+
+                // Phase 2: Get an exact-size image - no dimension will exceed the desired value
+                float ratio = Math.min((float) size / (float) bmp.getWidth(), (float) size / (float) bmp.getHeight());
+                int w = (int) ((float) bmp.getWidth() * ratio);
+                int h = (int) ((float) bmp.getHeight() * ratio);
+
+                // finally scaled bitmap
+                return Bitmap.createScaledBitmap(bmp, w, h, true);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    imageFileStream.close();
+                } catch (IOException ignored) {
+                }
             }
+            return null;
+        } else {
+            return null;
         }
-        return null;
 
     }
 

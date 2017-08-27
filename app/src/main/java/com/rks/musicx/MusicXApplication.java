@@ -53,7 +53,7 @@ public class MusicXApplication extends Application {
         @Override
         public String getPublicKey() {
             final String s = "use your key";
-            return Encryption.xor(s, "decryption string");
+            return Encryption.xor(s, "dummy");
         }
     });
     private MusicXApplication instance;
@@ -119,4 +119,5 @@ public class MusicXApplication extends Application {
     public Billing getmBilling() {
         return mBilling;
     }
+
 }

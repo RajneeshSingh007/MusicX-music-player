@@ -31,6 +31,8 @@ public class Constants {
     public static final int OVERLAY_REQ = 1;
     public static final int WRITESETTINGS = 2;
     public static final int EQ = 3445;
+    public static final int NAV = 56660;
+    public static final int IMAGE_PICKER = 25350;
 
     /*
     Sorting properties
@@ -65,13 +67,13 @@ public class Constants {
     public static final String SaveHeadset = "save_headset";
     public static final String ClearFav = "clear_favdb";
     public static final String ClearRecently = "clear_recentdb";
+    public static final String ClearQueue = "clear_queuedb";
     public static final String SAVE_DATA = "save_internet";
     public static final String HIDE_NOTIFY = "hide_notification";
     public static final String HIDE_LOCKSCREEEN = "hide_lockscreenMedia";
     public static final String REORDER_TAB = "tab_selection";
     public static final String RESTORE_LASTTAB = "restore_lasttab";
     public static final String HQ_ARTISTARTWORK = "hqartist_artwork";
-    public static final String VIZCOLOR = "vizualizer_color";
     public static final String EQSWITCH = "eqswitch";
     public static final String ARTWORKCOLOR = "artwork_adaptive";
     public static final String FOLDERPATH = "folderpath";
@@ -88,11 +90,11 @@ public class Constants {
     public static final String PLAYINGVIEW_TRACK = "isplayingView3";
     public static final String SETTINGS_TRACK = "settings_track";
     public static final String HD_ARTWORK = "hd_artwork";
-    public static final String DONATION_TRACK = "donation_track";
     public static final String DOWNLOADED_ARTWORK = "downloaded_artwork";
     public static final String REMOVE_TABLIST = "removeTablist";
     public static final String TAG_METADATA = "MetaData";
     public static final String AUDIO_FILTER = "audio_filter";
+    public static final String NAV_SETTINGS = "nav_settings";
 
     /**
      * Files filter
@@ -109,6 +111,7 @@ public class Constants {
     public static final String Two = "2";
     public static final String Three = "3";
     public static final String Four = "4";
+    public static final String Five = "5";
     /*
     Theming Properties
      */
@@ -207,6 +210,9 @@ public class Constants {
     public static final String PLAY_SHORTCUTS = PACKAGENAME + "pause_shortcuts";
     public static final String SHORTCUTS_TYPES = PACKAGENAME + "shortcuts_type";
 
+    public static final String SHOW_ALBUM = "show_album";
+    public static final String SHOW_ARTIST = "show_artist";
+    public static final String SHOW_TAG = "show_tag";
 
     /**
      * Permissions Array
@@ -222,8 +228,19 @@ public class Constants {
     /**
      * network link
      */
-    public static String vagUrl = "http://api.vagalume.com.br/";
     public static String lastFmUrl = "http://ws.audioscrobbler.com/2.0/";
+
+    public static String vagUrl = "https://www.vagalume.com.br/";
+    public static String indicineUrl = "http://www.indicine.com/";
+    public static String lyricsedUrl = "http://lyricsed.com/";
+    public static String songlyricsUrl = "http://www.songlyrics.com/";
+    public static String atozUrl = "http://www.azlyrics.com/lyrics/";
+    public static String metroUrl = "http://www.metrolyrics.com/";
+    public static String directUrl = "https://www.directlyrics.com/";
+    public static String hindigeetUrl = "http://www.hindigeetmala.net/";
+    public static String lyricsondemandUrl = "https://www.lyricsondemand.com/";
+    public static String absolutelyricsUrl = "http://www.absolutelyrics.com/lyrics/view/";
+    public static String lyricsbogieUrl = "https://www.lyricsbogie.com/movies/";
 
     /**
      * Database table
@@ -232,7 +249,7 @@ public class Constants {
      * @return
      */
     public static String DefaultColumn(String tableName, boolean torf) {
-        if (torf){
+        if (torf) {
             return "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
                     DefaultColumn._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + Separator +
                     DefaultColumn.SongId + " INTEGER UNIQUE" + Separator +
@@ -242,7 +259,7 @@ public class Constants {
                     DefaultColumn.SongAlbumId + " INTEGER" + Separator +
                     DefaultColumn.SongNumber + " INTEGER" + Separator +
                     DefaultColumn.SongPath + " TEXT" + " )";
-        }else {
+        } else {
             return "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
                     DefaultColumn._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + Separator +
                     DefaultColumn.ArtistId + " INTEGER UNIQUE" + Separator +
@@ -254,7 +271,6 @@ public class Constants {
 
     /**
      * Database to store queueName
-     *
      * @param tableName
      * @return
      */

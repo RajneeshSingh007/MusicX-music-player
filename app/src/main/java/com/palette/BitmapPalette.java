@@ -194,10 +194,12 @@ public abstract class BitmapPalette {
     protected void start(@NonNull final Bitmap bitmap) {
         final boolean skipCache = this.skipCache;
         if (!skipCache) {
-            Palette palette = CACHE.get(url);
-            if (palette != null) {
-                apply(palette, true);
-                return;
+            if (url != null) {
+                Palette palette = CACHE.get(url);
+                if (palette != null) {
+                    apply(palette, true);
+                    return;
+                }
             }
         }
         Palette.Builder builder = new Palette.Builder(bitmap);
@@ -208,9 +210,13 @@ public abstract class BitmapPalette {
             @Override
             public void onGenerated(Palette palette) {
                 if (!skipCache) {
-                    CACHE.put(url, palette);
+                    if (url != null && palette != null) {
+                        CACHE.put(url, palette);
+                    }
                 }
-                apply(palette, false);
+                if (palette != null) {
+                    apply(palette, false);
+                }
             }
         });
     }

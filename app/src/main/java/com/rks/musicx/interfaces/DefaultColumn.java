@@ -37,4 +37,6 @@ public interface DefaultColumn extends BaseColumns {
 
     String QueueName = "QueueName";
 
+    String dirPath = "DirPath";
+
 }

@@ -29,7 +29,6 @@ import static com.rks.musicx.misc.utils.Constants.BASS_BOOST;
 public class BassBoosts {
 
     private static BassBoost bassBoost = null;
-    private static short str;
 
     public BassBoosts() {
     }
@@ -58,10 +57,10 @@ public class BassBoosts {
 
     public static void setBassBoostStrength(short strength) {
         if (bassBoost != null && bassBoost.getStrengthSupported() &&  strength >= 0) {
-            str = strength;
             try {
                 if (strength <= BASSBOOST_STRENGTH) {
-                    bassBoost.setStrength(str);
+                    bassBoost.setStrength(strength);
+                    saveBass(strength);
                 }
             } catch (IllegalArgumentException e) {
                 Log.e("BassBoosts", "Bassboost effect not supported");
@@ -76,30 +75,16 @@ public class BassBoosts {
     }
 
 
-    public static void saveBass() {
-        if (bassBoost == null) {
-            return;
-        }
+    public static void saveBass(short strength) {
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
+        int str = (int) strength;
         editor.putInt(BASS_BOOST, str);
-        editor.apply();
+        editor.commit();
     }
-
-    public static short getStr() {
-        return str;
-    }
-
 
     public static void setEnabled(boolean enabled) {
         if (bassBoost != null) {
             bassBoost.setEnabled(enabled);
         }
-    }
-
-    public static short getRounded() {
-        if (bassBoost == null) {
-            return 0;
-        }
-        return bassBoost.getRoundedStrength();
     }
 }

@@ -102,7 +102,7 @@ public class fontPreview extends ListPreference {
                         tf = Helper.getTypeface(getContext(), "Vow.ttf");
                         break;
                     case 13:
-                        tf = Helper.getTypeface(getContext(), "Lombok.otf");
+                        tf = Helper.getTypeface(getContext(), "Nunito.ttf");
                         break;
                     case 14:
                         tf = Helper.getTypeface(getContext(), "Circled.ttf");

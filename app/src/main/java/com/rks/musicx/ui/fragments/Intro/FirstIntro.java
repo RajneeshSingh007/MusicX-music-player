@@ -1,4 +1,4 @@
-package com.rks.musicx.ui.fragments;
+package com.rks.musicx.ui.fragments.Intro;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,6 +13,7 @@ import com.rks.musicx.R;
  * Created by Coolalien on 6/28/2016.
  */
 
+
 /*
  * ©2017 Rajneesh Singh
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,12 +27,12 @@ import com.rks.musicx.R;
  * limitations under the License.
  */
 
-public class FourthIntro extends Fragment {
+public class FirstIntro extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fourth_intro, container, false);
-        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getContext(), R.color.MaterialGrey));
+        View v = inflater.inflate(R.layout.intro1, container, false);
+        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryDarkDarkTheme));
         return v;
     }
 }

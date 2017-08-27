@@ -15,12 +15,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.afollestad.appthemeengine.Config;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Extras;
+import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.SimpleItemTouchHelperCallback;
 import com.rks.musicx.misc.widgets.CircleImageView;
 
@@ -66,14 +68,28 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
         return new QueueViewHolder(itemView);
     }
 
+    private void highLight(QueueViewHolder holder, int color, int specColor) {
+        if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
+            holder.SongTitle.setTextColor(color);
+        } else {
+            holder.SongTitle.setTextColor(color);
+            if (Extras.getInstance().getPlayingViewTrack()) {
+                holder.SongTitle.setTextColor(specColor);
+            }
+        }
+    }
+
     @Override
     public void onBindViewHolder(QueueViewHolder holder, int position) {
         Song song = getItem(position);
+        int accentColor = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
         if (mLayoutId == R.layout.song_list) {
             if (position == pos) {
                 holder.itemView.setSelected(true);
+                highLight(holder, accentColor, accentColor);
             } else {
                 holder.itemView.setSelected(false);
+                highLight(holder, Color.WHITE, Color.BLACK);
             }
             holder.SongTitle.setText(song.getTitle());
             holder.SongArtist.setText(song.getArtist());
@@ -93,16 +109,13 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
                 }
             });
             if (Extras.getInstance().getDarkTheme() || Extras.getInstance().getBlackTheme()) {
-                holder.SongTitle.setTextColor(Color.WHITE);
                 holder.SongArtist.setTextColor(ContextCompat.getColor(getContext(), R.color.darkthemeTextColor));
                 holder.menu.getDrawable().setTint(Color.WHITE);
             } else {
                 holder.menu.getDrawable().setTint(Color.WHITE);
-                holder.SongTitle.setTextColor(Color.WHITE);
                 holder.SongArtist.setTextColor(Color.WHITE);
                 if (Extras.getInstance().getPlayingViewTrack()){
                     holder.menu.getDrawable().setTint(ContextCompat.getColor(getContext(), R.color.MaterialGrey));
-                    holder.SongTitle.setTextColor(Color.BLACK);
                     holder.SongArtist.setTextColor(Color.DKGRAY);
                 }
             }
@@ -113,6 +126,24 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
                 public void palettework(Palette palette) {
                 }
             }, holder.queueArtworkgrid);
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return (null != data ? data.size() : 0);
+    }
+
+    public void setSelection(int position) {
+        int oldSelection = pos;
+        pos = position;
+
+        if (oldSelection >= 0 && oldSelection < data.size()) {
+            notifyItemChanged(oldSelection);
+        }
+
+        if (pos >= 0 && pos < data.size()) {
+            notifyItemChanged(pos);
         }
     }
 
@@ -139,8 +170,15 @@ public class QueueAdapter extends BaseRecyclerViewAdapter<Song, QueueAdapter.Que
     }
 
     @Override
-    public Song getItem(int position) throws ArrayIndexOutOfBoundsException {
-        return super.getItem(position);
+    public Song getItem(int position) {
+        if (data == null || data.size() < 0 || data.size() == 0) {
+            return null;
+        }
+        if (position < data.size() && position >= 0) {
+            return data.get(position);
+        } else {
+            return null;
+        }
     }
 
     public class QueueViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, SimpleItemTouchHelperCallback.ItemTouchHelperViewHolder {

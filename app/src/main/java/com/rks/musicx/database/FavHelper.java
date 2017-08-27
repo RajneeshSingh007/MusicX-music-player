@@ -50,8 +50,10 @@ public class FavHelper {
             defaultSongLoader.setQueryTable2(new String[]{String.valueOf(songId)});
             defaultSongLoader.setSelection(MediaStore.Audio.Media._ID + "= ?");
             defaultSongLoader.setQueryTable(projection);
-            commonDatabase.add(defaultSongLoader.getSongData());
-            commonDatabase.close();
+            if (defaultSongLoader.getSongData() != null) {
+                commonDatabase.add(defaultSongLoader.getSongData());
+                commonDatabase.close();
+            }
         }
     }
 

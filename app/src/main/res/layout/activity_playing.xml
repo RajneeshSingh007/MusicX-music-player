@@ -12,15 +12,9 @@
   ~ limitations under the License.
   -->
 
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                 android:layout_width="match_parent"
-                                                 android:layout_height="match_parent">
-
-    <FrameLayout
-        android:id="@+id/playingcontainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-</android.support.design.widget.CoordinatorLayout>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/playingcontainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
 
 

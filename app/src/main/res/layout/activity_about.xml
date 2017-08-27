@@ -63,7 +63,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/app_bar_layout"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:weightSum="2">
 
 
             <android.support.v7.widget.CardView
@@ -74,8 +75,9 @@
                 android:layout_gravity="center"
                 android:layout_marginBottom="4dp"
                 android:layout_marginTop="4dp"
+                android:layout_weight="1"
                 android:elevation="@dimen/toolbarelevation"
-                app:cardElevation="5dp">
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -90,15 +92,15 @@
 
                     <TextView
                         android:id="@+id/about_app_title"
+                        fontPath="Header.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:padding="5dp"
                         android:textColor="@color/white"
                         android:textSize="50sp"
-                        fontPath="Header.ttf"
-                        tools:ignore="MissingPrefix"
                         android:textStyle="bold"
+                        tools:ignore="MissingPrefix"
                         />
 
                     <TextView
@@ -132,238 +134,206 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp"
+                android:layout_weight="1"
                 android:elevation="@dimen/toolbarelevation"
-                app:cardCornerRadius="2dp"
-                app:cardElevation="5dp">
+                app:cardElevation="4dp">
 
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                     <LinearLayout
-                        android:id="@+id/guideDetail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/developerInfo"
-                        android:layout_toEndOf="@+id/avatar"
-                        android:gravity="center"
-                        android:layout_marginTop="2dp"
-                        android:orientation="horizontal"
-                        android:padding="2dp">
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:id="@+id/guide_detail"
-                            android:layout_width="wrap_content"
+                        <com.rks.musicx.misc.widgets.CircleImageView
+                            android:id="@+id/avatar"
+                            android:layout_width="96dp"
+                            android:layout_height="96dp"
+                            android:layout_gravity="center"
+                            android:padding="10dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/user"
+                            app:border_color="@color/white"
+                            app:border_width="4dp" />
+
+                        <LinearLayout
+                            android:id="@+id/developerInfo"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:clickable="true"
-                            android:padding="4dp"
-                            android:text="Guide"
-                            android:textColor="?attr/accentColor"
-                            android:textSize="18sp"/>
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="4dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:gravity="center"
+                                android:orientation="horizontal"
+                                android:padding="4dp">
+
+                                <TextView
+                                    android:id="@+id/developer"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:gravity="center"
+                                    android:paddingStart="4dp"
+                                    android:text="Developer : "
+                                    android:textColor="@color/white"
+                                    android:textSize="20sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/developer_name"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:gravity="center"
+                                    android:padding="4dp"
+                                    android:text="Name"
+                                    android:textColor="@color/white"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold" />
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:gravity="center"
+                                android:orientation="horizontal"
+                                android:padding="4dp">
+
+                                <TextView
+                                    android:id="@+id/tester"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:gravity="center"
+                                    android:padding="4dp"
+                                    android:text="Tester :"
+                                    android:textColor="@color/white"
+                                    android:textSize="20sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/testerName"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:gravity="center"
+                                    android:padding="4dp"
+                                    android:text="@string/testerName"
+                                    android:textColor="@color/white"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
-
                     <LinearLayout
-                        android:id="@+id/changelogs"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/guideDetail"
-                        android:layout_marginTop="4dp"
-                        android:layout_toEndOf="@+id/avatar"
-                        android:gravity="center"
-                        android:orientation="horizontal"
-                        android:padding="2dp">
-
-                        <TextView
-                            android:id="@+id/changelogs_detail"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:clickable="true"
-                            android:padding="4dp"
-                            android:text="ChangeLogs"
-                            android:textColor="?attr/accentColor"
-                            android:textSize="18sp"/>
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/privacy"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@+id/changelogs"
-                        android:layout_marginTop="4dp"
-                        android:layout_toEndOf="@+id/avatar"
-                        android:gravity="center"
-                        android:orientation="horizontal"
-                        android:padding="2dp">
-
-                        <TextView
-                            android:id="@+id/privacy_detail"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:clickable="true"
-                            android:padding="4dp"
-                            android:text="Privacy"
-                            android:textColor="@color/white"
-                            android:textSize="18sp"/>
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/supportDetail"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_alignStart="@+id/privacy"
-                        android:layout_below="@+id/privacy"
-                        android:layout_marginStart="6dp"
-                        android:gravity="center"
-                        android:orientation="horizontal"
-                        android:padding="2dp">
-
-                        <TextView
-                            android:id="@+id/Support"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:clickable="true"
-                            android:padding="4dp"
-                            android:text="Feedback : "
-                            android:textColor="@color/white"
-                            android:textSize="18sp"/>
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/contact_detail"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center"
                             android:clickable="true"
+                            android:gravity="center"
                             android:padding="4dp"
                             android:text="contact"
-                            android:textColor="@color/white"
-                            android:textSize="18sp"/>
+                            android:textColor="?attr/accentColor"
+                            android:textSize="18sp" />
 
-                    </LinearLayout>
+                        <TextView
+                            android:id="@+id/guide_detail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:clickable="true"
+                            android:gravity="center"
+                            android:padding="4dp"
+                            android:text="Guide"
+                            android:textColor="?attr/accentColor"
+                            android:textSize="18sp" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_alignStart="@+id/changelogs"
-                        android:layout_below="@+id/supportDetail"
-                        android:gravity="center"
-                        android:orientation="horizontal"
-                        android:padding="2dp">
+                        <TextView
+                            android:id="@+id/changelogs_detail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:clickable="true"
+                            android:gravity="center"
+                            android:padding="4dp"
+                            android:text="ChangeLogs"
+                            android:textColor="?attr/accentColor"
+                            android:textSize="18sp" />
+
+                        <TextView
+                            android:id="@+id/privacy_detail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:clickable="true"
+                            android:gravity="center"
+                            android:padding="4dp"
+                            android:text="Privacy"
+                            android:textColor="?attr/accentColor"
+                            android:textSize="18sp" />
+
+                        <TextView
+                            android:id="@+id/lyrics_api"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:clickable="true"
+                            android:gravity="center"
+                            android:padding="4dp"
+                            android:text="LyricsApi"
+                            android:textColor="?attr/accentColor"
+                            android:textSize="18sp" />
 
                         <TextView
                             android:id="@+id/licenses_detail"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center"
                             android:clickable="true"
+                            android:gravity="center"
                             android:padding="4dp"
                             android:text="Licenses"
                             android:textColor="?attr/accentColor"
-                            android:textSize="18sp"/>
-
+                            android:textSize="18sp" />
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_above="@+id/changelogs"
-                        android:layout_gravity="center"
-                        android:layout_marginBottom="25dp"
-                        android:layout_toEndOf="@+id/avatar"
-                        android:gravity="center_horizontal"
-                        android:orientation="horizontal"
-                        android:padding="2dp">
 
-                        <TextView
-                            android:id="@+id/tester"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:gravity="center"
-                            android:padding="4dp"
-                            android:text="Tester :"
-                            android:textColor="@color/white"
-                            android:textSize="20sp"/>
+                </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/testerName"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:gravity="center"
-                            android:padding="4dp"
-                            android:textStyle="bold"
-                            android:text="@string/testerName"
-                            android:textColor="@color/white"
-                            android:textSize="18sp"/>
-
-                    </LinearLayout>
-
-                    <com.rks.musicx.misc.widgets.CircleImageView
-                        android:id="@+id/avatar"
-                        android:layout_width="96dp"
-                        android:layout_height="96dp"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentTop="true"
-                        android:padding="10dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/user"
-                        app:border_color="@color/white"
-                        app:border_width="4dp"/>
-
-                    <LinearLayout
-                        android:id="@+id/developerInfo"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_alignBottom="@+id/avatar"
-                        android:layout_alignParentEnd="true"
-                        android:layout_alignStart="@+id/supportDetail"
-                        android:layout_marginBottom="25dp"
-                        android:gravity="center_horizontal"
-                        android:orientation="horizontal"
-                        android:padding="2dp">
-
-                        <TextView
-                            android:id="@+id/developer"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:paddingStart="2dp"
-                            android:text="Developer :"
-                            android:textColor="@color/white"
-                            android:textSize="20sp"
-                            />
-
-                        <TextView
-                            android:id="@+id/developer_name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:padding="4dp"
-                            android:text="Name"
-                            android:textStyle="bold"
-                            android:textColor="@color/white"
-                            android:textSize="18sp"/>
-
-                    </LinearLayout>
-                </RelativeLayout>
-
-
+                <TextView
+                    android:id="@+id/appcr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center"
+                    android:gravity="bottom|center"
+                    android:text="@string/appcr"
+                    android:textColor="@color/white"
+                    android:textSize="16sp" />
             </android.support.v7.widget.CardView>
 
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/appcr"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerInParent="true"
-            android:layout_gravity="bottom"
-            android:gravity="bottom"
-            android:text="@string/appcr"
-            android:textColor="@color/white"
-            android:textSize="16sp"/>
     </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

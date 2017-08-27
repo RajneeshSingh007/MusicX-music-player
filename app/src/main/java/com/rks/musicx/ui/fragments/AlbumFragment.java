@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -14,14 +15,15 @@ import com.rks.musicx.R;
 import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Album;
+import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.NetworkHelper;
+import com.rks.musicx.interfaces.RefreshData;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
-import com.rks.musicx.services.MusicXService;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
@@ -48,9 +50,9 @@ import static com.rks.musicx.misc.utils.Constants.ALBUM_YEAR;
  * limitations under the License.
  */
 
+
 public class AlbumFragment extends BaseLoaderFragment {
 
-    private static MusicXService musicXService;
     private ImageView artworkView;
     private Album mAlbum;
     private FastScrollRecyclerView rv;
@@ -59,33 +61,36 @@ public class AlbumFragment extends BaseLoaderFragment {
     private FloatingActionButton shuffle;
 
     private View.OnClickListener mOnClickListener = v -> {
-        if (musicXService == null) {
-            return;
-        }
         switch (v.getId()) {
             case R.id.shuffle_fab:
-                musicXService.setPlaylistandShufle(songListAdapter.getSnapshot(), true);
-                Extras.getInstance().saveSeekServices(0);
+                ((MainActivity) getActivity()).onShuffleRequested(songListAdapter.getSnapshot(), true);
                 break;
         }
     };
 
     private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = (position, view) -> {
-        if (musicXService == null) {
-            return;
-        }
         switch (view.getId()) {
             case R.id.item_view:
-                musicXService.setPlaylist(songListAdapter.getSnapshot(), position, true);
-                Extras.getInstance().saveSeekServices(0);
+                ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
                 break;
             case R.id.menu_button:
-                helper.showMenu(false, trackloader, this, AlbumFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                Song song = songListAdapter.getItem(position);
+                helper.showMenu(false, new RefreshData() {
+                    @Override
+                    public void refresh() {
+                        getLoaderManager().restartLoader(trackloader, null, AlbumFragment.this);
+                    }
+
+                    @Override
+                    public Fragment currentFrag() {
+                        return AlbumFragment.this;
+                    }
+                }, ((MainActivity) getActivity()), view, getContext(), song);
                 break;
         }
     };
 
-    public static AlbumFragment newInstance(Album album, MusicXService musicXServices) {
+    public static AlbumFragment newInstance(Album album) {
         AlbumFragment fragment = new AlbumFragment();
         Bundle args = new Bundle();
         args.putLong(ALBUM_ID, album.getId());
@@ -94,7 +99,6 @@ public class AlbumFragment extends BaseLoaderFragment {
         args.putInt(ALBUM_YEAR, album.getYear());
         args.putInt(ALBUM_TRACK_COUNT, album.getTrackCount());
         fragment.setArguments(args);
-        musicXService = musicXServices;
         return fragment;
     }
 
@@ -142,7 +146,7 @@ public class AlbumFragment extends BaseLoaderFragment {
         helper = new Helper(getContext());
         int colorAccent = Config.accentColor(getContext(), Helper.getATEKey(getContext()));
         rv.setPopupBgColor(colorAccent);
-        if (getActivity() == null){
+        if (getActivity() == null || getActivity().getWindow() == null) {
             return;
         }
         Helper.setColor(getActivity(), colorAccent, toolbar);
@@ -151,7 +155,7 @@ public class AlbumFragment extends BaseLoaderFragment {
 
     @Override
     protected String filter() {
-        return MediaStore.Audio.Media.ALBUM_ID + "=?";
+        return MediaStore.Audio.Media.ALBUM_ID + " = ?";
     }
 
     @Override
@@ -161,7 +165,7 @@ public class AlbumFragment extends BaseLoaderFragment {
 
     @Override
     protected String sortOder() {
-        return MediaStore.Audio.Media.DATE_MODIFIED;
+        return MediaStore.Audio.Media.TRACK;
     }
 
     @Override
@@ -202,6 +206,9 @@ public class AlbumFragment extends BaseLoaderFragment {
     }
 
 
+    /**
+     * Set AlbumCover
+     */
     private void AlbumCover() {
         if (!Extras.getInstance().saveData()){
             NetworkHelper.downloadAlbumArtwork(getContext(), mAlbum.getArtistName(), mAlbum.getArtistName());
@@ -210,13 +217,14 @@ public class AlbumFragment extends BaseLoaderFragment {
             @Override
             public void palettework(Palette palette) {
                 final int[] colors = Helper.getAvailableColor(getContext(), palette);
-                if (getActivity() == null) {
+                if (getActivity() == null || getActivity().getWindow() == null) {
                     return;
                 }
                 Helper.setColor(getActivity(), colors[0], toolbar);
-                Helper.animateViews(getContext(), toolbar, colors[0]);
+                // Helper.animateViews(getContext(), toolbar, colors[0]);
             }
         },artworkView);
+        artworkView.setTransitionName("TransitionArtwork");
     }
 
 }

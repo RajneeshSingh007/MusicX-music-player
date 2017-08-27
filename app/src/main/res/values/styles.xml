@@ -13,13 +13,6 @@
 
 <resources>
 
-    <attr name="cardStyle" format="reference"/>
-    <attr name="accentColor" format="reference"/>
-    <attr name="iconColor" format="reference"/>
-    <attr name="windowBackground" format="reference"/>
-    <attr name="stateSelector" format="reference"/>
-    <attr name="toolbar_popup_theme" format="reference"/>
-
     <style name="ThemeBaseLight" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryLight</item>
@@ -27,7 +20,7 @@
         <item name="android:windowActionBarOverlay">true</item>
         <item name="accentColor">@color/colorAccent</item>
         <item name="iconColor">@android:color/black</item>
-        <item name="cardStyle">@style/CardView.Light</item>
+        <item name="cardStyle">@style/cardStyleLight</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
         <item name="toolbar_popup_theme">?toolbar_popup_theme</item>
         <item name="windowBackground">@color/lightBg</item>
@@ -43,7 +36,7 @@
         <item name="colorPrimary">@color/colorPrimaryDarkTheme</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDarkDarkTheme</item>
         <item name="colorAccent">@color/colorAccentDarkTheme</item>
-        <item name="cardStyle">@style/CardView.Dark</item>
+        <item name="cardStyle">@style/cardStyleDark</item>
         <item name="accentColor">@color/colorAccentDarkTheme</item>
         <item name="iconColor">@android:color/white</item>
         <item name="android:windowBackground">@color/darkBg</item>
@@ -68,7 +61,7 @@
         <item name="android:windowBackground">@color/colorPrimaryBlack</item>
         <item name="windowBackground">@color/colorPrimaryBlack</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
-        <item name="cardStyle">@style/CardView.Dark</item>
+        <item name="cardStyle">@style/cardStyleBlack</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">?attr/colorPrimary</item>
         <item name="android:actionModeCloseDrawable">@drawable/ic_close_black_24dp</item>
@@ -82,6 +75,21 @@
     <style name="AppThemeNormalDark" parent="ThemeBaseDark"/>
     <style name="AppThemeNormalBlack" parent="ThemeBaseBlack"/>
 
+    <style name="cardStyleLight" parent="CardView">
+        <item name="cardBackgroundColor">@color/white</item>
+        <item name="cardElevation">8dp</item>
+    </style>
+
+    <style name="cardStyleDark" parent="CardView">
+        <item name="cardBackgroundColor">@color/MaterialGrey</item>
+        <item name="cardElevation">8dp</item>
+    </style>
+
+    <style name="cardStyleBlack" parent="CardView">
+        <item name="cardBackgroundColor">@android:color/black</item>
+        <item name="cardElevation">8dp</item>
+    </style>
+
     <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
         <item name="spinBars">true</item>
         <item name="color">@android:color/white</item>
@@ -94,6 +102,12 @@
         <item name="elevation">8dp</item>
         <item name="pressedTranslationZ">12dp</item>
         <item name="rippleColor">?attr/accentColor</item>
+    </style>
+
+
+    <style name="ButtonStyle">
+        <item name="colorControlNormal">?android:attr/textColorSecondary</item>
+        <item name="colorControlHighlight">?attr/ripple_color</item>
     </style>
 
 </resources>

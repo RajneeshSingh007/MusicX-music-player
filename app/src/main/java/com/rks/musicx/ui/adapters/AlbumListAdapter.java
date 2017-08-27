@@ -82,6 +82,7 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
                     animator.start();
                 }
             }
+            holder.AlbumArtwork.setTransitionName("TransitionArtwork" + position);
             holder.AlbumName.setText(albums.getAlbumName());
             holder.ArtistName.setText(albums.getArtistName());
             ArtworkUtils.ArtworkLoader(getContext(), 300, 600, albums.getAlbumName(), albums.getId(), new palette() {
@@ -89,8 +90,8 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
                 public void palettework(Palette palette) {
                     final int[] colors = Helper.getAvailableColor(getContext(), palette);
                     holder.backgroundColor.setBackgroundColor(colors[0]);
-                    holder.AlbumName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
-                    holder.ArtistName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
+                    holder.AlbumName.setTextColor(Helper.getTitleTextColor(colors[0]));
+                    holder.ArtistName.setTextColor(Helper.getTitleTextColor(colors[0]));
                     Helper.animateViews(getContext(), holder.backgroundColor, colors[0]);
                 }
             }, holder.AlbumArtwork);
@@ -112,8 +113,20 @@ public class AlbumListAdapter extends BaseRecyclerViewAdapter<Album, AlbumListAd
     }
 
     @Override
-    public Album getItem(int position) throws ArrayIndexOutOfBoundsException {
-        return data.size() > 0 ? data.get(position) : null;
+    public Album getItem(int position) {
+        if (data == null || data.size() < 0 || data.size() == 0) {
+            return null;
+        }
+        if (position < data.size() && position >= 0) {
+            return data.get(position);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return (null != data ? data.size() : 0);
     }
 
     @NonNull

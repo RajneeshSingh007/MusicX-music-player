@@ -1,6 +1,5 @@
 package com.rks.musicx.base;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -31,32 +31,37 @@ import android.widget.Toast;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
+import com.cleveroad.audiowidget.SmallBang;
 import com.kbeanie.imagechooser.api.ChooserType;
 import com.kbeanie.imagechooser.api.ChosenImage;
 import com.kbeanie.imagechooser.api.ChosenImages;
 import com.kbeanie.imagechooser.api.ImageChooserListener;
 import com.kbeanie.imagechooser.api.ImageChooserManager;
 import com.rks.musicx.R;
-import com.rks.musicx.data.model.Album;
-import com.rks.musicx.data.model.Artist;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.database.CommonDatabase;
 import com.rks.musicx.database.SaveQueueDatabase;
+import com.rks.musicx.interfaces.Queue;
+import com.rks.musicx.misc.utils.Constants;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
+import com.rks.musicx.misc.utils.LyricsHelper;
 import com.rks.musicx.misc.utils.PlaylistHelper;
+import com.rks.musicx.services.MediaPlayerSingleton;
 import com.rks.musicx.services.MusicXService;
-import com.rks.musicx.ui.activities.EqualizerActivity;
 import com.rks.musicx.ui.activities.PlayingActivity;
-import com.rks.musicx.ui.activities.SettingsActivity;
 import com.rks.musicx.ui.adapters.QueueAdapter;
-import com.rks.musicx.ui.fragments.AlbumFragment;
-import com.rks.musicx.ui.fragments.ArtistFragment;
-import com.rks.musicx.ui.fragments.TagEditorFragment;
 
 import java.lang.ref.WeakReference;
 
+import static android.app.Activity.RESULT_OK;
 import static android.content.Context.BIND_AUTO_CREATE;
+import static com.rks.musicx.misc.utils.Constants.ALBUM_ARTIST;
+import static com.rks.musicx.misc.utils.Constants.ALBUM_ID;
+import static com.rks.musicx.misc.utils.Constants.ALBUM_NAME;
+import static com.rks.musicx.misc.utils.Constants.ALBUM_TRACK_COUNT;
+import static com.rks.musicx.misc.utils.Constants.ARTIST_ARTIST_ID;
+import static com.rks.musicx.misc.utils.Constants.ARTIST_NAME;
 import static com.rks.musicx.misc.utils.Constants.ITEM_ADDED;
 import static com.rks.musicx.misc.utils.Constants.META_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.ORDER_CHANGED;
@@ -64,7 +69,9 @@ import static com.rks.musicx.misc.utils.Constants.PLAYSTATE_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.POSITION_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.QUEUE_CHANGED;
 import static com.rks.musicx.misc.utils.Constants.Queue_Store_TableName;
-import static com.rks.musicx.misc.utils.Constants.Queue_TableName;
+import static com.rks.musicx.misc.utils.Constants.SHOW_ALBUM;
+import static com.rks.musicx.misc.utils.Constants.SHOW_ARTIST;
+import static com.rks.musicx.misc.utils.Constants.SHOW_TAG;
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -86,18 +93,14 @@ import static com.rks.musicx.misc.utils.Constants.Queue_TableName;
 public abstract class BasePlayingFragment extends Fragment implements ImageChooserListener {
 
     private static Handler handler;
-    public boolean isalbumArtChanged;
     private MusicXService musicXService;
-    private Intent mServiceIntent;
     private boolean mServiceBound = false;
     private String finalPath;
     private ChosenImage chosenImages;
     private ImageChooserManager imageChooserManager;
-    private String mediaPath;
-    private Helper helper;
     private int size;
-    private CommonDatabase commonDatabase;
     private Drawable shuffleOff, shuffleOn, repeatAll, repeatOne, noRepeat;
+    private SmallBang mSmallBang;
 
 
     /**
@@ -148,10 +151,6 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         }
     };
 
-    public static Handler getHandler() {
-        return handler;
-    }
-
     protected abstract void reload();
 
     protected abstract void playbackConfig();
@@ -180,20 +179,23 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
 
     protected abstract void updateProgress();
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(setLayout(), container, false);
         ui(rootView);
         function();
-        helper = new Helper(getContext());
         size = getResources().getDimensionPixelSize(R.dimen.cover_size);
-        commonDatabase = new CommonDatabase(getContext(), Queue_TableName, true);
-        handler = new Handler();
+        handler = new Handler(Looper.getMainLooper());
         shuffleOff = ContextCompat.getDrawable(getContext(), R.drawable.shuf_off);
         shuffleOn = ContextCompat.getDrawable(getContext(), R.drawable.shuf_on);
         repeatOne = ContextCompat.getDrawable(getContext(), R.drawable.rep_one);
         repeatAll = ContextCompat.getDrawable(getContext(), R.drawable.rep_all);
         noRepeat = ContextCompat.getDrawable(getContext(), R.drawable.rep_no);
+        if (getActivity() == null) {
+            return null;
+        }
+        mSmallBang = SmallBang.attach2Window(getActivity());
         return rootView;
     }
 
@@ -202,17 +204,6 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         super.onStart();
         if (getActivity() == null) {
             return;
-        }
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(META_CHANGED);
-        filter.addAction(PLAYSTATE_CHANGED);
-        filter.addAction(POSITION_CHANGED);
-        filter.addAction(ITEM_ADDED);
-        filter.addAction(ORDER_CHANGED);
-        try {
-            getActivity().registerReceiver(broadcastReceiver, filter);
-        } catch (Exception e) {
-            // already registered
         }
         Intent intent = new Intent(getActivity(), MusicXService.class);
         getActivity().bindService(intent, serviceConnection, BIND_AUTO_CREATE);
@@ -225,9 +216,9 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
             return;
         }
         if (!mServiceBound) {
-            mServiceIntent = new Intent(getActivity(), MusicXService.class);
-            getActivity().bindService(mServiceIntent, serviceConnection, BIND_AUTO_CREATE);
-            getActivity().startService(mServiceIntent);
+            Intent intent = new Intent(getActivity(), MusicXService.class);
+            getActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+            getActivity().startService(intent);
             IntentFilter filter = new IntentFilter();
             filter.addAction(META_CHANGED);
             filter.addAction(PLAYSTATE_CHANGED);
@@ -286,6 +277,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         Extras.getInstance().getThemevalue(getActivity());
     }
 
+
     @Override
     public void onImageChosen(ChosenImage chosenImage) {
         chosenImages = chosenImage;
@@ -302,6 +294,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         });
     }
 
+
     @Override
     public void onError(String s) {
         Log.d("BaseFragment", s);
@@ -316,11 +309,11 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(getClass().getName(), requestCode + "");
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
+        if (resultCode == RESULT_OK) {
             if (imageChooserManager == null) {
                 imageChooserManager = new ImageChooserManager(this, requestCode, true);
                 imageChooserManager.setImageChooserListener(this);
-                imageChooserManager.reinitialize(mediaPath);
+                imageChooserManager.reinitialize(finalPath);
             }
             imageChooserManager.submit(requestCode, data);
         }
@@ -349,7 +342,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         imageChooserManager = new ImageChooserManager(this, ChooserType.REQUEST_PICK_PICTURE, true);
         imageChooserManager.setImageChooserListener(this);
         try {
-            mediaPath = imageChooserManager.choose();
+            finalPath = imageChooserManager.choose();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -381,12 +374,25 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         }
     }
 
+
+    private void goToMain(String action, Bundle data) {
+        if (getActivity() == null) {
+            return;
+        }
+        Intent i = new Intent(action);
+        if (data != null) {
+            i.putExtras(data);
+        }
+        getActivity().setResult(RESULT_OK, i);
+        getActivity().finish();
+    }
+
     /**
      * Playing Menu
      *
      * @param view
      */
-    public void playingMenu(QueueAdapter queueAdapter, View view, boolean torf) {
+    public void playingMenu(Queue queue, View view, boolean torf) {
         if (getActivity() == null) {
             return;
         }
@@ -400,32 +406,21 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.clear_queue:
-                        if (queueAdapter.getSnapshot().size() > 0) {
-                            queueAdapter.clear();
-                            queueAdapter.notifyDataSetChanged();
-                            musicXService.clearQueue();
-                            try {
-                                commonDatabase.removeAll();
-                            }finally {
-                                commonDatabase.close();
-                            }
-                            Toast.makeText(getContext(), "Cleared Queue", Toast.LENGTH_SHORT).show();
-                        }
+                        queue.clearStuff();
                         break;
                     case R.id.action_changeArt:
                         pickupArtwork();
-                        isalbumArtChanged = false;
                         break;
                     case R.id.action_playlist:
                         PlaylistHelper.PlaylistChooser(BasePlayingFragment.this, getContext(), musicXService.getsongId());
                         break;
                     case R.id.action_lyrics:
-                        helper.searchLyrics(getContext(), musicXService.getsongTitle(), musicXService.getsongArtistName(), musicXService.getsongData(), lyricsView());
+                        LyricsHelper.searchLyrics(getContext(), musicXService.getsongTitle(), musicXService.getsongArtistName(), musicXService.getsongAlbumName(), musicXService.getsongData(), lyricsView());
                         break;
                     case R.id.action_edit_tags:
                         Extras.getInstance().saveMetaData(musicXService.getCurrentSong());
-                        ((PlayingActivity) getActivity()).setFragment(TagEditorFragment.getInstance());
-                        queueAdapter.notifyDataSetChanged();
+                        Bundle tag = new Bundle();
+                        goToMain(SHOW_TAG, tag);
                         break;
                     case R.id.action_ringtone:
                         Helper.setRingTone(getContext(), musicXService.getsongData());
@@ -434,33 +429,31 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                         Helper.detailMusic(getContext(), musicXService.getsongTitle(), musicXService.getsongAlbumName(), musicXService.getsongArtistName(), musicXService.getsongNumber(), musicXService.getsongData());
                         break;
                     case R.id.action_eq:
-                        Intent i = new Intent(getContext(), EqualizerActivity.class);
-                        getContext().startActivity(i);
+                        ((PlayingActivity) getActivity()).returnEq();
                         break;
                     case R.id.action_share:
-                        Helper.shareMusic(musicXService.getsongData(), getContext());
+                        Helper.shareMusic(musicXService.getsongId(), getContext());
                         break;
                     case R.id.action_settings:
-                        Intent intent = new Intent(getContext(), SettingsActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        getActivity().startActivity(intent);
+                        ((PlayingActivity) getActivity()).returnSettings();
                         break;
                     case R.id.action_savequeue:
                         saveQueue();
                         break;
                     case R.id.go_to_album:
-                        Album album = new Album();
-                        album.setId(getMusicXService().getsongAlbumID());
-                        album.setArtistName(getMusicXService().getsongArtistName());
-                        album.setTrackCount(getMusicXService().getsongNumber());
-                        album.setAlbumName(getMusicXService().getsongAlbumName());
-                        album.setYear(0);
-                        ((PlayingActivity) getActivity()).setFragment(AlbumFragment.newInstance(album, getMusicXService()));
+                        Bundle data = new Bundle();
+                        data.putLong(ALBUM_ID, getMusicXService().getsongAlbumID());
+                        data.putString(ALBUM_NAME, getMusicXService().getsongAlbumName());
+                        data.putString(ALBUM_ARTIST, getMusicXService().getsongArtistName());
+                        data.putInt(ALBUM_TRACK_COUNT, getMusicXService().getsongNumber());
+                        goToMain(SHOW_ALBUM, data);
+                        Log.e("Move", "Go_to_Main");
                         break;
                     case R.id.go_to_artist:
-                        Artist artist = new Artist(getMusicXService().getArtistID(), getMusicXService().getsongArtistName(), getMusicXService().getsongNumber(), getMusicXService().getsongNumber());
-                        ((PlayingActivity) getActivity()).setFragment(ArtistFragment.newInstance(artist, getMusicXService()));
+                        Bundle data1 = new Bundle();
+                        data1.putLong(ARTIST_ARTIST_ID, getMusicXService().getArtistID());
+                        data1.putString(ARTIST_NAME, getMusicXService().getsongArtistName());
+                        goToMain(SHOW_ARTIST, data1);
                         break;
                 }
                 return false;
@@ -468,6 +461,7 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         });
         popupMenu.show();
     }
+
 
     /**
      * Save Queue
@@ -492,21 +486,12 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                         if (editText.getText() != null) {
-                            if (musicXService.getPlayList().size() > 0) {
-                                SaveQueueDatabase saveQueueDatabase = new SaveQueueDatabase(getContext(), Queue_Store_TableName);
-                                boolean checkExistance = saveQueueDatabase.isExist(editText.getText().toString());
-                                if (checkExistance) {
-                                    Toast.makeText(getContext(), "Already " + editText.getText().toString() + " queue" + " exists", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    CommonDatabase commonDatabase = new CommonDatabase(getContext(), editText.getText().toString(), true);
-                                    commonDatabase.add(musicXService.getPlayList());
-                                    commonDatabase.close();
-                                    saveQueueDatabase.addQueueName(editText.getText().toString());
-                                    saveQueueDatabase.close();
-                                    Toast.makeText(getContext(), "Saved Queue", Toast.LENGTH_SHORT).show();
-                                }
-                                editText.getText().clear();
-                            }
+                            String tableName = editText.getText().toString();
+                            tableName = tableName.replace(" ", "");
+                            tableName = tableName.trim();
+                            saveQueueInfo(tableName);
+                        } else {
+                            dialog.dismiss();
                         }
                     }
                 })
@@ -514,6 +499,35 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                 .build()
                 .show();
     }
+
+    /**
+     * Save info in the db
+     * @param tableName
+     */
+    private void saveQueueInfo(String tableName) {
+        if (musicXService == null) {
+            return;
+        }
+        if (musicXService.getPlayList().size() > 0) {
+            SaveQueueDatabase saveQueueDatabase = new SaveQueueDatabase(getContext(), Queue_Store_TableName);
+            boolean checkExistance = saveQueueDatabase.isExist(tableName);
+            if (checkExistance) {
+                Toast.makeText(getContext(), "Already " + tableName + " queue" + " exists", Toast.LENGTH_SHORT).show();
+            } else {
+                if (musicXService.getPlayList().size() > 0) {
+                    CommonDatabase commonDatabase = new CommonDatabase(getContext(), tableName, true);
+                    commonDatabase.add(musicXService.getPlayList());
+                    commonDatabase.close();
+                    saveQueueDatabase.addQueueName(tableName);
+                    saveQueueDatabase.close();
+                    Toast.makeText(getContext(), "Saved Queue", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "Queue is empty", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
 
     /**
      * Queue Menu
@@ -544,8 +558,8 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                         break;
                     case R.id.action_edit_tags:
                         Extras.getInstance().saveMetaData(queue);
-                        ((PlayingActivity) getActivity()).setFragment(TagEditorFragment.getInstance());
-                        queueAdapter.notifyDataSetChanged();
+                        Bundle tag = new Bundle();
+                        goToMain(SHOW_TAG, tag);
                         break;
                     case R.id.action_ringtone:
                         Helper.setRingTone(getContext(), queue.getmSongPath());
@@ -554,20 +568,21 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
                         Helper.detailMusic(getContext(), queue.getTitle(), queue.getAlbum(), queue.getArtist(), queue.getTrackNumber(), queue.getmSongPath());
                         break;
                     case R.id.action_share:
-                        Helper.shareMusic(musicXService.getsongData(), getContext());
+                        Helper.shareMusic(musicXService.getsongId(), getContext());
                         break;
                     case R.id.go_to_album:
-                        Album album = new Album();
-                        album.setId(getMusicXService().getsongAlbumID());
-                        album.setArtistName(getMusicXService().getsongArtistName());
-                        album.setTrackCount(getMusicXService().getsongNumber());
-                        album.setAlbumName(getMusicXService().getsongAlbumName());
-                        album.setYear(0);
-                        ((PlayingActivity) getActivity()).setFragment(AlbumFragment.newInstance(album, getMusicXService()));
+                        Bundle data = new Bundle();
+                        data.putLong(ALBUM_ID, queue.getAlbumId());
+                        data.putString(ALBUM_NAME, queue.getAlbum());
+                        data.putString(ALBUM_ARTIST, queue.getArtist());
+                        data.putInt(ALBUM_TRACK_COUNT, queue.getTrackNumber());
+                        goToMain(SHOW_ALBUM, data);
                         break;
                     case R.id.go_to_artist:
-                        Artist artist = new Artist(getMusicXService().getArtistID(), getMusicXService().getsongArtistName(), getMusicXService().getsongNumber(), getMusicXService().getsongNumber());
-                        ((PlayingActivity) getActivity()).setFragment(ArtistFragment.newInstance(artist, getMusicXService()));
+                        Bundle data1 = new Bundle();
+                        data1.putLong(ARTIST_ARTIST_ID, queue.getArtistId());
+                        data1.putString(ARTIST_NAME, queue.getArtist());
+                        goToMain(SHOW_ARTIST, data1);
                         break;
                 }
                 return false;
@@ -587,6 +602,44 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
         handler.removeCallbacksAndMessages(null);
     }
 
+    /**
+     * Like Animation
+     *
+     * @param view
+     */
+    public void like(View view) {
+        mSmallBang.bang(view);
+        mSmallBang.setmListener(new SmallBang.SmallBangListener() {
+            @Override
+            public void onAnimationStart() {
+                Helper.rotationAnim(view);
+            }
+
+            @Override
+            public void onAnimationEnd() {
+            }
+        });
+    }
+
+    public void metaChangedBroadcast() {
+        if (getActivity() == null) {
+            return;
+        }
+        Intent intent = new Intent(Constants.META_CHANGED);
+        if (Constants.META_CHANGED.equals(intent.getAction())) {
+            getActivity().sendBroadcast(intent);
+            Log.e("BasePlay", "BroadCast");
+        }
+    }
+
+    public int audioSessionID() {
+        int audioID = MediaPlayerSingleton.getInstance().getMediaPlayer().getAudioSessionId();
+        if (audioID == 0) {
+            return 0;
+        }
+        return audioID;
+    }
+
     private static class ProgressRunnable implements Runnable {
 
         private final WeakReference<BasePlayingFragment> baseLoaderWeakReference;
@@ -604,6 +657,5 @@ public abstract class BasePlayingFragment extends Fragment implements ImageChoos
             handler.postDelayed(ProgressRunnable.this,1000);
         }
     }
-
 
 }

@@ -3,7 +3,6 @@ package com.rks.musicx.ui.activities;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.StyleRes;
-import android.support.v7.widget.CardView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
@@ -40,8 +39,7 @@ import static com.rks.musicx.misc.utils.Constants.DEVELOPER_NAME;
 
 public class AboutActivity extends BaseActivity implements ATEActivityThemeCustomizer {
 
-    private TextView privacy, appcr, tester, testerName, guide_detail, support, licenses_detail, about_app_title, about_app_disc, about_app_ver, developer, developer_name, contact_detail, changeslog;
-    private CardView AboutApp, AboutDev;
+    private TextView privacy, appcr, tester, testerName, guide_detail, licenses_detail, about_app_title, about_app_disc, about_app_ver, developer, developer_name, contact_detail, changeslog, lyrics;
     private int accentcolor;
 
     @Override
@@ -57,16 +55,14 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
         developer = (TextView) findViewById(R.id.developer);
         developer_name = (TextView) findViewById(R.id.developer_name);
         contact_detail = (TextView) findViewById(R.id.contact_detail);
-        AboutApp = (CardView) findViewById(R.id.about_app_card);
-        AboutDev = (CardView) findViewById(R.id.about_developer);
         licenses_detail = (TextView) findViewById(R.id.licenses_detail);
         changeslog = (TextView) findViewById(R.id.changelogs_detail);
-        support = (TextView) findViewById(R.id.Support);
         guide_detail = (TextView) findViewById(R.id.guide_detail);
         testerName = (TextView) findViewById(R.id.testerName);
         tester = (TextView) findViewById(R.id.tester);
         appcr = (TextView) findViewById(R.id.appcr);
         privacy = (TextView) findViewById(R.id.privacy_detail);
+        lyrics = (TextView) findViewById(R.id.lyrics_api);
     }
 
     @Override
@@ -75,9 +71,11 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
         setSupportActionBar(toolbar);
         licenses_detail.setOnClickListener(v -> Helper.Licenses(AboutActivity.this));
         about_app_title.setText(getString(R.string.app_name));
-        about_app_disc.setText("Elegant Material Music Player");
+        about_app_disc.setText(R.string.app_desc);
         guide_detail.setOnClickListener(view -> Helper.GuidLines(AboutActivity.this));
-        contact_detail.setText(Html.fromHtml("<a href=\"mailto:developerrajneeshsingh@gmail.com\">Mail us</a>"));
+        lyrics.setOnClickListener(view -> Helper.LyricsApi(AboutActivity.this));
+        lyrics.setText("LyricsApi");
+        contact_detail.setText(Html.fromHtml("<a href=\"mailto:developerrajneeshsingh@gmail.com\">Feedback</a>"));
         contact_detail.setMovementMethod(LinkMovementMethod.getInstance());
         about_app_ver.setText("v." + BuildConfig.VERSION_NAME);
         developer_name.setText(DEVELOPER_NAME);
@@ -96,7 +94,6 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
             about_app_ver.setTextColor(Color.WHITE);
             developer.setTextColor(Color.WHITE);
             developer_name.setTextColor(Color.WHITE);
-            support.setTextColor(Color.WHITE);
             tester.setTextColor(Color.WHITE);
             appcr.setTextColor(Color.WHITE);
             testerName.setTextColor(Color.WHITE);
@@ -107,7 +104,6 @@ public class AboutActivity extends BaseActivity implements ATEActivityThemeCusto
             about_app_ver.setTextColor(Color.BLACK);
             developer.setTextColor(Color.BLACK);
             developer_name.setTextColor(Color.BLACK);
-            support.setTextColor(Color.BLACK);
             tester.setTextColor(Color.BLACK);
             appcr.setTextColor(Color.BLACK);
             testerName.setTextColor(Color.BLACK);

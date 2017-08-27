@@ -15,6 +15,7 @@ import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.afollestad.materialdialogs.color.ColorChooserDialog;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseActivity;
+import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.ui.fragments.SettingsFragment;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -85,23 +86,37 @@ public class SettingsActivity extends BaseActivity implements ColorChooserDialog
         return getStyleTheme();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        returnHome();
+    }
+
+
+    /**
+     * Launch mainAcivity
+     */
+    public void returnHome() {
+        if (Extras.getInstance().getNavSettings()) {
+            Intent intent = new Intent(this, PlayingActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        } else {
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        }
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        this.onBackPressed();
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
     }
 }

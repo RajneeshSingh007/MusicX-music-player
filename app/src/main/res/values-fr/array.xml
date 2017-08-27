@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ ©2017 Rajneesh Singh
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <string-array name="blurChoice">
+        <item>20%</item>
+        <item>40%</item>
+        <item>60%</item>
+        <item>80%</item>
+        <item>100%</item>
+    </string-array>
+    <string-array name="selectedblur">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="playingChoice">
+        <item>PlayingView1</item>
+        <item>PlayingView2</item>
+        <item>PlayingView3</item>
+        <item>PlayingView4</item>
+        <item>PlayingView5</item>
+        <item>PlayingView6</item>
+    </string-array>
+    <string-array name="selectedPlayingView">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="fontChoice">
+        <item>RobotoLight</item>
+        <item>Raleway</item>
+        <item>Knul</item>
+        <item>CutiveMono</item>
+        <item>Timber</item>
+        <item>Snippet</item>
+        <item>Trench</item>
+        <item>Monad</item>
+        <item>Rex</item>
+        <item>Exodus</item>
+        <item>Gogia</item>
+        <item>Maven</item>
+        <item>Vow</item>
+        <item>Nunito</item>
+        <item>Circled</item>
+        <item>Franks</item>
+        <item>Mountain</item>
+        <item>Jakarta</item>
+        <item>Abyssopelagic</item>
+        <item>Tesla</item>
+        <item>System Default</item>
+    </string-array>
+    <string-array name="selectedFont">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
+        <item>20</item>
+    </string-array>
+    <string-array name="light_status_mode_entries">
+        <item>Off, status bar icons will be white</item>
+        <item>On, status bar icons will be black</item>
+        <item>Auto, status bar icons will be black if primary color is light</item>
+    </string-array>
+
+    <string-array name="light_toolbar_mode_entries">
+        <item>Off, toolbar text/icons will be white</item>
+        <item>On, toolbar text/icons will be black</item>
+        <item>Auto, toolbar text/icons will be black if primary color is light</item>
+    </string-array>
+
+    <string-array name="light_status_mode_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="fadeDuration">
+        <item>1 second</item>
+        <item>3 second</item>
+        <item>5 second</item>
+    </string-array>
+    <string-array name="fadeDurationChoice">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="audioFilter">
+        <item>30 second</item>
+        <item>1 min</item>
+        <item>2 min</item>
+        <item>3 min</item>
+        <item>4 min</item>
+        <item>5 min</item>
+    </string-array>
+
+    <string-array name="audioFilterChoice">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+</resources>

@@ -53,4 +53,5 @@
 
     <dimen name="pw_progress_line_view_touch_radius">16dp</dimen>
     <dimen name="cover_size">60dp</dimen>
+
 </resources>

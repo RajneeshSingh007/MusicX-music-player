@@ -12,7 +12,7 @@
   ~ limitations under the License.
   -->
 
-<resources xmlns:tools="http://schemas.android.com/tools" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources>
     <string name="app_name">MusicX</string>
     <string name="titles">Músicas</string>
     <string name="albums">Álbuns</string>
@@ -102,7 +102,6 @@
     <string name="accent_color_summary">Muda a cor de ênfase do tema</string>
     <string name="custom">customizado</string>
     <string name="equalizer">Equalizador</string>
-    <string name="unknown">desconhecido</string>
     <string name="services">Serviços</string>
     <string name="save_lyrics_summary">Permite acessar/salvar as letras offline</string>
     <string name="save_lyrics">Salvar Letras</string>
@@ -158,8 +157,6 @@
     <string name = "album_view_title"> Vista do Álbum </string>
     <string name = "list_artist_view_summary"> Listar exibição do artista </string>
     <string name = "artist_view_title"> Exibição do artista </string>
-    <string name = "vizualizer_color_summary"> Mude a cor da albumart em playView4 </string>
-    <string name = "visualizer_color_title"> Visualizer Color </string>
     <string name = "color_adaptive_summary"> altera a cor da albumart ao reproduzir as vistas </string>
     <string name = "color_adaptive_title"> Color Adaptive </string>
     <string name = "widget_color_summary"> definir cor de fundo transparente </string>
@@ -186,4 +183,9 @@
     <string name = "save_queue"> Save Queue </string>
     <string name = "audio_filter_title"> Filtro de Áudio </string>
     <string name = "shortcuts"> atalhos </string>
+    <string name="action_rename">Rename</string>
+    <string name="clear_squeue">Clear Saved Queue</string>
+    <string name="clear_squeue_summary">Clear Saved Queue Database</string>
+    <string name="app_desc">Elegant Material Music Player</string>
+    <string name="default_dir">set current dir as default dir</string>
 </resources>

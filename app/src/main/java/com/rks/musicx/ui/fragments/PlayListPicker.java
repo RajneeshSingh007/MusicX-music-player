@@ -3,7 +3,6 @@ package com.rks.musicx.ui.fragments;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -14,15 +13,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 
 import com.afollestad.appthemeengine.Config;
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.loaders.PlaylistLoaders;
 import com.rks.musicx.data.model.Playlist;
+import com.rks.musicx.interfaces.RefreshPlaylist;
 import com.rks.musicx.interfaces.playlistPicked;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
@@ -63,7 +62,12 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
     private View.OnClickListener mOnClickListener = v -> {
         switch (v.getId()) {
             case R.id.create_playlist:
-                showCreatePlaylistDialog();
+                PlaylistHelper.showCreatePlaylistDialog(getContext(), new RefreshPlaylist() {
+                    @Override
+                    public void refresh() {
+                        load();
+                    }
+                });
                 break;
         }
     };
@@ -84,33 +88,6 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
         }
     };
 
-    private void showCreatePlaylistDialog() {
-        View layout = LayoutInflater.from(getContext()).inflate(R.layout.create_playlist, null);
-        MaterialDialog.Builder createplaylist = new MaterialDialog.Builder(getContext());
-        TextInputEditText editText = (TextInputEditText) layout.findViewById(R.id.playlist_name);
-        createplaylist.title(R.string.create_playlist);
-        createplaylist.positiveText(android.R.string.ok);
-        createplaylist.onPositive(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                PlaylistHelper.createPlaylist(getContext().getContentResolver(), editText.getText().toString());
-                Toast.makeText(getContext(), "Playlist Created", Toast.LENGTH_LONG).show();
-                refresh();
-            }
-        });
-        createplaylist.negativeText(android.R.string.cancel);
-        createplaylist.onNegative(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                createplaylist.autoDismiss(true);
-            }
-        });
-        createplaylist.typeface(Helper.getFont(getContext()), Helper.getFont(getContext()));
-        createplaylist.customView(layout, false);
-        createplaylist.show();
-
-    }
-
     private void showMenu(View view, Playlist playlist) {
         PopupMenu popup = new PopupMenu(getActivity(), view);
         MenuInflater inflater = popup.getMenuInflater();
@@ -121,22 +98,23 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_playlist_delete:
-                        MaterialDialog.Builder builder = new MaterialDialog.Builder(getContext());
-                        builder.title(playlist.getName());
-                        builder.content(getContext().getString(R.string.deleteplaylist));
-                        builder.positiveText(R.string.delete);
-                        builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+                        PlaylistHelper.deletePlaylistDailog(getContext(), playlist.getName(), new RefreshPlaylist() {
                             @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                PlaylistHelper.deletePlaylist(getContext(), playlist.getName());
-                                Toast.makeText(getContext(), playlist.getName() + " Deleted", Toast.LENGTH_SHORT).show();
-                                refresh();
+                            public void refresh() {
+                                load();
                             }
                         });
-                        builder.typeface(Helper.getFont(getContext()), Helper.getFont(getContext()));
-                        builder.negativeText(R.string.cancel);
-                        builder.show();
                         break;
+
+                    case R.id.action_playlist_rename:
+                        PlaylistHelper.showRenameDialog(getContext(), new RefreshPlaylist() {
+                            @Override
+                            public void refresh() {
+                                load();
+                            }
+                        }, playlist.getId());
+                        break;
+
                 }
                 return false;
             }
@@ -152,7 +130,7 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        View rootView = LayoutInflater.from(getActivity()).inflate(R.layout.playlist_picker, null);
+        View rootView = LayoutInflater.from(getContext()).inflate(R.layout.playlist_picker, new LinearLayout(getContext()), false);
 
         rv = (RecyclerView) rootView.findViewById(R.id.rv);
 
@@ -176,13 +154,14 @@ public class PlayListPicker extends DialogFragment implements LoaderManager.Load
     }
 
 
-    public void refresh() {
+    public void load() {
         getLoaderManager().restartLoader(playlistLoader, null, this);
     }
 
     public void setPicked(playlistPicked listener) {
         onPlaylistPicked = listener;
     }
+
 
     @Override
     public Loader<List<Playlist>> onCreateLoader(int id, Bundle args) {

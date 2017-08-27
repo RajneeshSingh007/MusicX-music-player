@@ -56,7 +56,7 @@ public class PlaylistLoader extends BaseAsyncTaskLoader<List<Song>> {
             return null;
         }
         if (PermissionChecker.checkCallingOrSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED) {
-            Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylistId), sProjection, null, null, sortorder);
+            Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylistId), sProjection, "", null, sortorder);
             if (cursor != null && cursor.moveToFirst()) {
                 int idCol = cursor.getColumnIndex(MediaStore.Audio.Playlists.Members.AUDIO_ID);
                 if (idCol == -1) {

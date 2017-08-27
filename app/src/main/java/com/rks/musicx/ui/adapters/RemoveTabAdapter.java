@@ -75,13 +75,25 @@ public class RemoveTabAdapter extends BaseRecyclerViewAdapter<String, RemoveTabA
     }
 
     @Override
+    public int getItemCount() {
+        return (null != data ? data.size() : 0);
+    }
+
+    @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
         return false;
     }
 
     @Override
-    public String getItem(int position) throws ArrayIndexOutOfBoundsException {
-        return data.size() > 0 ? data.get(position) : null;
+    public String getItem(int position) {
+        if (data == null || data.size() < 0 || data.size() == 0) {
+            return null;
+        }
+        if (position < data.size() && position >= 0) {
+            return data.get(position);
+        } else {
+            return null;
+        }
     }
 
     @Override

@@ -83,6 +83,7 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
                     animator.start();
                 }
             }
+            holder.ArtistsArtwork.setTransitionName("TransitionArtworks" + position);
             holder.ArtistName.setText(getContext().getResources().getQuantityString(R.plurals.albums_count, artists.getAlbumCount(), artists.getAlbumCount()));
             holder.AlbumCount.setText(artists.getName());
             ArtworkUtils.ArtworkLoader(getContext(), 300, 600, helper.loadArtistImage(artists.getName()), new palette() {
@@ -90,8 +91,8 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
                 public void palettework(Palette palette) {
                     final int[] colors = Helper.getAvailableColor(getContext(), palette);
                     holder.backgroundColor.setBackgroundColor(colors[0]);
-                    holder.ArtistName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
-                    holder.AlbumCount.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
+                    holder.ArtistName.setTextColor(Helper.getTitleTextColor(colors[0]));
+                    holder.AlbumCount.setTextColor(Helper.getTitleTextColor(colors[0]));
                     Helper.animateViews(getContext(), holder.backgroundColor, colors[0]);
                 }
             }, holder.ArtistsArtwork);
@@ -115,8 +116,21 @@ public class ArtistListAdapter extends BaseRecyclerViewAdapter<Artist, ArtistLis
     }
 
     @Override
-    public Artist getItem(int position) throws ArrayIndexOutOfBoundsException {
-        return data.size() > 0 ? data.get(position) : null;
+    public Artist getItem(int position) {
+        if (data == null || data.size() < 0 || data.size() == 0) {
+            return null;
+        }
+        if (position < data.size() && position >= 0) {
+            return data.get(position);
+        } else {
+            return null;
+        }
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return (null != data ? data.size() : 0);
     }
 
     @NonNull

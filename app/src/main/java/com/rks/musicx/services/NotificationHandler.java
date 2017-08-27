@@ -19,7 +19,6 @@ import com.rks.musicx.database.FavHelper;
 import com.rks.musicx.interfaces.bitmap;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.ArtworkUtils;
-import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.PlayingActivity;
 
@@ -77,25 +76,25 @@ public class NotificationHandler {
         smallremoteView.setTextViewText(R.id.small_title, musicXService.getsongTitle());
         smallremoteView.setTextViewText(R.id.small_artist, musicXService.getsongArtistName());
         FavHelper favHelper = new FavHelper(musicXService);
-        if (favHelper.isFavorite(Extras.getInstance().getSongId(musicXService.getsongId()))) {
+        if (favHelper.isFavorite(musicXService.getsongId())) {
             remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite);
         } else {
             remoteViews.setImageViewResource(R.id.action_favorite, R.drawable.ic_action_favorite_outline);
         }
-        if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
+        if (musicXService.isPlaying()) {
             builder.setSmallIcon(R.drawable.aw_ic_play);
+            builder.setOngoing(true);
         } else {
             builder.setSmallIcon(R.drawable.aw_ic_pause);
+            builder.setOngoing(false);
         }
-        if (PLAYSTATE_CHANGED.equals(what)) {
+        if (what.equals(PLAYSTATE_CHANGED)) {
             if (MediaPlayerSingleton.getInstance().getMediaPlayer().isPlaying()) {
-                remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
-                smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_pause);
-                builder.setOngoing(true);
-            } else {
                 remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_play);
                 smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_play);
-                builder.setOngoing(false);
+            } else {
+                remoteViews.setImageViewResource(R.id.toggle, R.drawable.aw_ic_pause);
+                smallremoteView.setImageViewResource(R.id.small_toggle, R.drawable.aw_ic_pause);
             }
         }
         handler.post(new Runnable() {
@@ -129,31 +128,23 @@ public class NotificationHandler {
                 });
             }
         });
-        controls(remoteViews, musicXService);
-        controlsSmall(smallremoteView, musicXService);
-        //NotificationManagerCompat.from(musicXService).notify(notificationID, builder.build());
+        controls(remoteViews, smallremoteView, musicXService);
     }
 
-    private static void controls(RemoteViews remoteViews, Context context) {
-        PendingIntent toggleIntent = PendingIntent.getService(context, 0, new Intent(context, MusicXService.class).setAction(ACTION_TOGGLE), 0);
-        PendingIntent nextIntent = PendingIntent.getService(context, 0, new Intent(context, MusicXService.class).setAction(ACTION_NEXT), 0);
-        PendingIntent previousIntent = PendingIntent.getService(context, 0, new Intent(context, MusicXService.class).setAction(ACTION_PREVIOUS), 0);
-        PendingIntent savefavIntent = PendingIntent.getService(context, 0, new Intent(context, MusicXService.class).setAction(ACTION_FAV), 0);
+    private static void controls(RemoteViews remoteViews, RemoteViews smallViews, MusicXService musicXService) {
+        PendingIntent toggleIntent = PendingIntent.getService(musicXService, 0, new Intent(musicXService, MusicXService.class).setAction(ACTION_TOGGLE), 0);
+        PendingIntent nextIntent = PendingIntent.getService(musicXService, 0, new Intent(musicXService, MusicXService.class).setAction(ACTION_NEXT), 0);
+        PendingIntent previousIntent = PendingIntent.getService(musicXService, 0, new Intent(musicXService, MusicXService.class).setAction(ACTION_PREVIOUS), 0);
+        PendingIntent savefavIntent = PendingIntent.getService(musicXService, 0, new Intent(musicXService, MusicXService.class).setAction(ACTION_FAV), 0);
 
         remoteViews.setOnClickPendingIntent(R.id.toggle, toggleIntent);
         remoteViews.setOnClickPendingIntent(R.id.next, nextIntent);
         remoteViews.setOnClickPendingIntent(R.id.prev, previousIntent);
         remoteViews.setOnClickPendingIntent(R.id.action_favorite, savefavIntent);
-    }
 
-    private static void controlsSmall(RemoteViews remoteViews, Context context) {
-        PendingIntent toggleIntent = PendingIntent.getService(context, 0, new Intent(context, MusicXService.class).setAction(ACTION_TOGGLE), 0);
-        PendingIntent nextIntent = PendingIntent.getService(context, 0, new Intent(context, MusicXService.class).setAction(ACTION_NEXT), 0);
-        PendingIntent previousIntent = PendingIntent.getService(context, 0, new Intent(context, MusicXService.class).setAction(ACTION_PREVIOUS), 0);
-
-        remoteViews.setOnClickPendingIntent(R.id.small_toggle, toggleIntent);
-        remoteViews.setOnClickPendingIntent(R.id.small_next, nextIntent);
-        remoteViews.setOnClickPendingIntent(R.id.small_prev, previousIntent);
+        smallViews.setOnClickPendingIntent(R.id.small_toggle, toggleIntent);
+        smallViews.setOnClickPendingIntent(R.id.small_next, nextIntent);
+        smallViews.setOnClickPendingIntent(R.id.small_prev, previousIntent);
     }
 
     public static int[] getAvailableColor(Context context, Palette palette) {

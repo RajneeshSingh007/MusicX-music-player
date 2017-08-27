@@ -1,12 +1,18 @@
 package com.rks.musicx.data.loaders;
 
+import android.Manifest;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.v4.content.PermissionChecker;
+import android.util.Log;
 
 import com.rks.musicx.data.model.Song;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Created by Coolalien on 6/28/2016.
@@ -30,6 +36,7 @@ public class DefaultSongLoader {
     Context context;
     private String[] queryTable, queryTable2;
     private Song song = new Song();
+    private List<Song> songList = new ArrayList<>();
     private Uri uri;
     private boolean provider;
     private SQLiteDatabase sqLiteDatabase;
@@ -43,39 +50,43 @@ public class DefaultSongLoader {
 
     public Song getSongData() {
         if (provider) {
-            cursor = context.getContentResolver().query(uri, queryTable, selection, queryTable2, SortOrder);
-            if (cursor != null && cursor.moveToFirst()) {
-                int idCol = cursor.getColumnIndex(MediaStore.Audio.Media._ID);
-                int titleCol = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
-                int artistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
-                int albumCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
-                int albumIdCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
-                int trackCol = cursor.getColumnIndex(MediaStore.Audio.Media.TRACK);
-                int datacol = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+            if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED) {
+                cursor = context.getContentResolver().query(uri, queryTable, selection, queryTable2, SortOrder);
+                if (cursor != null && cursor.moveToFirst()) {
+                    int idCol = cursor.getColumnIndex(MediaStore.Audio.Media._ID);
+                    int titleCol = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
+                    int artistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
+                    int albumCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
+                    int albumIdCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
+                    int trackCol = cursor.getColumnIndex(MediaStore.Audio.Media.TRACK);
+                    int datacol = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
 
-                /**
-                 * @return songs metadata
-                 */
-                long id = cursor.getLong(idCol);
-                String title = cursor.getString(titleCol);
-                String artist = cursor.getString(artistCol);
-                String album = cursor.getString(albumCol);
-                long albumId = cursor.getLong(albumIdCol);
-                int track = cursor.getInt(trackCol);
-                String mSongPath = cursor.getString(datacol);
+                    /**
+                     * @return songs metadata
+                     */
+                    long id = cursor.getLong(idCol);
+                    String title = cursor.getString(titleCol);
+                    String artist = cursor.getString(artistCol);
+                    String album = cursor.getString(albumCol);
+                    long albumId = cursor.getLong(albumIdCol);
+                    int track = cursor.getInt(trackCol);
+                    String mSongPath = cursor.getString(datacol);
 
-                song.setAlbum(album);
-                song.setmSongPath(mSongPath);
-                song.setArtist(artist);
-                song.setId(id);
-                song.setAlbumId(albumId);
-                song.setTrackNumber(track);
-                song.setTitle(title);
+                    song.setAlbum(album);
+                    song.setmSongPath(mSongPath);
+                    song.setArtist(artist);
+                    song.setId(id);
+                    song.setAlbumId(albumId);
+                    song.setTrackNumber(track);
+                    song.setTitle(title);
+                    songList.add(song);
+                }
+                if (cursor != null) {
+                    cursor.close();
+                }
+            } else {
+                Log.e("DefaultSongLoader", "No read permissions");
             }
-            if (cursor != null) {
-                cursor.close();
-            }
-
         } else {
             cursor = sqLiteDatabase.query(dbtable, queryTable, selection, queryTable2, groupby, having, SortOrder, limit);
             if (cursor != null && cursor.moveToFirst()) {
@@ -105,6 +116,7 @@ public class DefaultSongLoader {
                 song.setAlbumId(albumId);
                 song.setTrackNumber(track);
                 song.setTitle(title);
+                songList.add(song);
             }
             if (cursor != null) {
                 cursor.close();
@@ -169,6 +181,10 @@ public class DefaultSongLoader {
         return provider;
     }
 
+    public void setProvider(boolean provider) {
+        this.provider = provider;
+    }
+
     public SQLiteDatabase getSqLiteDatabase() {
         return sqLiteDatabase;
     }
@@ -217,56 +233,52 @@ public class DefaultSongLoader {
         this.cursor = cursor;
     }
 
-    public void setSongAlbum(String songAlbum) {
-        this.songAlbum = songAlbum;
-    }
-
-    public void setSongAlbumId(String songAlbumId) {
-        this.songAlbumId = songAlbumId;
-    }
-
-    public void setSongArtist(String songArtist) {
-        this.songArtist = songArtist;
-    }
-
-    public void setSongTitle(String songTitle) {
-        this.songTitle = songTitle;
-    }
-
-    public void setSongTrack(String songTrack) {
-        this.songTrack = songTrack;
+    public String getSongId() {
+        return songId;
     }
 
     public void setSongId(String songId) {
         this.songId = songId;
     }
 
-    public void setProvider(boolean provider) {
-        this.provider = provider;
-    }
-
-    public String getSongId() {
-        return songId;
-    }
-
     public String getSongTitle() {
         return songTitle;
+    }
+
+    public void setSongTitle(String songTitle) {
+        this.songTitle = songTitle;
     }
 
     public String getSongArtist() {
         return songArtist;
     }
 
+    public void setSongArtist(String songArtist) {
+        this.songArtist = songArtist;
+    }
+
     public String getSongTrack() {
         return songTrack;
+    }
+
+    public void setSongTrack(String songTrack) {
+        this.songTrack = songTrack;
     }
 
     public String getSongAlbum() {
         return songAlbum;
     }
 
+    public void setSongAlbum(String songAlbum) {
+        this.songAlbum = songAlbum;
+    }
+
     public String getSongAlbumId() {
         return songAlbumId;
+    }
+
+    public void setSongAlbumId(String songAlbumId) {
+        this.songAlbumId = songAlbumId;
     }
 
     public String getLimit() {
@@ -275,5 +287,14 @@ public class DefaultSongLoader {
 
     public void setLimit(String limit) {
         this.limit = limit;
+    }
+
+
+    public List<Song> getSongList() {
+        return songList;
+    }
+
+    public void setSongList(List<Song> songList) {
+        this.songList = songList;
     }
 }

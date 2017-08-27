@@ -29,7 +29,6 @@ import static com.rks.musicx.misc.utils.Constants.LOUD_BOOST;
 public class Loud {
 
     private static LoudnessEnhancer loudnessEnhancer = null;
-    private static int Gain;
 
     public Loud() {
     }
@@ -54,10 +53,10 @@ public class Loud {
 
     public static void setLoudnessEnhancerGain(int gain) {
         if (loudnessEnhancer != null && gain >= 0) {
-            Gain = gain;
             try {
-                if (Gain <= GAIN_MAX) {
-                    loudnessEnhancer.setTargetGain(Gain);
+                if (gain <= GAIN_MAX) {
+                    loudnessEnhancer.setTargetGain(gain);
+                    saveLoudnessEnhancer(gain);
                 }
             } catch (IllegalArgumentException e) {
                 Log.e("Loud", "Loud effect not supported");
@@ -80,17 +79,10 @@ public class Loud {
     }
 
 
-    public static void saveLoudnessEnhancer() {
-        if (loudnessEnhancer == null) {
-            return;
-        }
+    public static void saveLoudnessEnhancer(int Gain) {
         SharedPreferences.Editor editor = Extras.getInstance().saveEq().edit();
         editor.putInt(LOUD_BOOST, Gain);
         editor.apply();
-    }
-
-    public static int getGain() {
-        return Gain;
     }
 
     public static void setEnabled(boolean enabled) {

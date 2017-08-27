@@ -1,4 +1,4 @@
-package com.rks.musicx.ui.fragments;
+package com.rks.musicx.ui.fragments.Intro;
 
 
 import android.graphics.Color;

@@ -5,16 +5,16 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.database.DatabaseUtilsCompat;
-import android.support.v4.view.ViewCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,8 +35,12 @@ import com.rks.musicx.data.loaders.AlbumLoader;
 import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.model.Album;
 import com.rks.musicx.data.model.Artist;
+import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.NetworkHelper;
 import com.rks.musicx.data.network.Services;
+import com.rks.musicx.interfaces.Action;
+import com.rks.musicx.interfaces.ExtraCallback;
+import com.rks.musicx.interfaces.RefreshData;
 import com.rks.musicx.interfaces.palette;
 import com.rks.musicx.misc.utils.ArtworkUtils;
 import com.rks.musicx.misc.utils.Constants;
@@ -46,9 +50,10 @@ import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.GestureListerner;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.StartSnapHelper;
-import com.rks.musicx.services.MusicXService;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.AlbumListAdapter;
+import com.rks.musicx.ui.adapters.FolderAdapter;
+import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import org.json.JSONException;
@@ -79,7 +84,6 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
 public class ArtistFragment extends BaseLoaderFragment {
 
-    private static MusicXService musicXService;
     private final int albumLoaders = 4;
     public String selection;
     private FastScrollRecyclerView rv;
@@ -93,18 +97,86 @@ public class ArtistFragment extends BaseLoaderFragment {
     private RecyclerView albumrv;
     private AlbumListAdapter albumListAdapter;
     private String[] selectionArgs;
-    private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = (position, view) -> {
-        if (musicXService == null) {
-            return;
+    private android.support.v7.view.ActionMode mActionMode;
+
+    private BaseRecyclerViewAdapter.OnLongClickListener onLongClick = new BaseRecyclerViewAdapter.OnLongClickListener() {
+        @Override
+        public void onLongItemClick(int position) {
+            mActionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(Helper.getActionCallback(((MainActivity) getActivity()), getContext(), new Action() {
+                @Override
+                public void clear() {
+                    if (mActionMode != null) {
+                        mActionMode.setTitle("");
+                        mActionMode.finish();
+                        mActionMode = null;
+                    }
+                    songListAdapter.exitMultiselectMode();
+                }
+
+                @Override
+                public Fragment currentFrag() {
+                    return ArtistFragment.this;
+                }
+
+                @Override
+                public void refresh() {
+                    getLoaderManager().restartLoader(trackloader, null, ArtistFragment.this);
+                }
+            }, true, new ExtraCallback() {
+                @Override
+                public SongListAdapter songlistAdapter() {
+                    return songListAdapter;
+                }
+
+                @Override
+                public FolderAdapter folderAdapter() {
+                    return null;
+                }
+            }));
+            Helper.setActionModeBackgroundColor(mActionMode, Config.primaryColor(getContext(), Helper.getATEKey(getContext())));
+            if (position > 0) {
+                if (mActionMode != null) {
+                    mActionMode.setTitle(position + " selected");
+                }
+            } else {
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
+            }
         }
-        switch (view.getId()) {
-            case R.id.item_view:
-                musicXService.setPlaylist(songListAdapter.getSnapshot(), position, true);
-                Extras.getInstance().saveSeekServices(0);
-                break;
-            case R.id.menu_button:
-                helper.showMenu(false, trackloader, this, ArtistFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
-                break;
+    };
+
+    private BaseRecyclerViewAdapter.OnItemClickListener mOnClick = (position, view) -> {
+        if (songListAdapter.isMultiselect()) {
+            if (position > 0) {
+                if (mActionMode != null) {
+                    mActionMode.setTitle(position + " selected");
+                }
+            } else {
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
+            }
+        } else {
+            switch (view.getId()) {
+                case R.id.item_view:
+                    ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
+                    break;
+                case R.id.menu_button:
+                    Song song = songListAdapter.getItem(position);
+                    helper.showMenu(false, new RefreshData() {
+                        @Override
+                        public void refresh() {
+                            getLoaderManager().restartLoader(trackloader, null, ArtistFragment.this);
+                        }
+
+                        @Override
+                        public Fragment currentFrag() {
+                            return ArtistFragment.this;
+                        }
+                    }, ((MainActivity) getActivity()), view, getContext(), song);
+                    break;
+            }
         }
     };
 
@@ -115,8 +187,7 @@ public class ArtistFragment extends BaseLoaderFragment {
                 case R.id.album_artwork:
                 case R.id.item_view:
                     ImageView Listartwork = (ImageView) view.findViewById(R.id.album_artwork);
-                    fragTransition(albumListAdapter.getItem(position), Listartwork, "TransitionArtwork");
-                    rv.smoothScrollToPosition(position);
+                    fragTransition(albumListAdapter.getItem(position), Listartwork, "TransitionArtwork" + position);
                     break;
             }
         }
@@ -124,13 +195,9 @@ public class ArtistFragment extends BaseLoaderFragment {
 
 
     private View.OnClickListener mOnClickListener = v -> {
-        if (musicXService == null) {
-            return;
-        }
         switch (v.getId()) {
             case R.id.shuffle_fab:
-                musicXService.setPlaylistandShufle(songListAdapter.getSnapshot(), true);
-                Extras.getInstance().saveSeekServices(0);
+                ((MainActivity) getActivity()).onShuffleRequested(songListAdapter.getSnapshot(), true);
                 break;
         }
     };
@@ -147,7 +214,7 @@ public class ArtistFragment extends BaseLoaderFragment {
                     selection = DatabaseUtilsCompat.concatenateWhere(selection, MediaStore.Audio.Albums.ARTIST + " = ?");
                     selectargs = DatabaseUtilsCompat.appendSelectionArgs(selectargs, new String[]{artist.getName()});
                 }
-                albumLoader.setSortOrder(MediaStore.Audio.Albums.FIRST_YEAR);
+                albumLoader.setSortOrder(Extras.getInstance().getArtistAlbumSort());
                 albumLoader.filterartistsong(selection, selectargs);
                 return albumLoader;
             }
@@ -170,7 +237,7 @@ public class ArtistFragment extends BaseLoaderFragment {
 
     };
 
-    public static ArtistFragment newInstance(Artist artist, MusicXService musicXServices) {
+    public static ArtistFragment newInstance(Artist artist) {
         ArtistFragment fragment = new ArtistFragment();
         Bundle args = new Bundle();
         args.putLong(Constants.ARTIST_ARTIST_ID, artist.getId());
@@ -178,16 +245,11 @@ public class ArtistFragment extends BaseLoaderFragment {
         args.putInt(Constants.ARTIST_ALBUM_COUNT, artist.getAlbumCount());
         args.putInt(Constants.ARTIST_TRACK_COUNT, artist.getTrackCount());
         fragment.setArguments(args);
-        musicXService = musicXServices;
         return fragment;
     }
 
     private void fragTransition(Album album, ImageView imageView, String transition) {
-        ViewCompat.setTransitionName(imageView, transition);
-        if (((MainActivity) getActivity()).getMusicXService() == null) {
-            return;
-        }
-        Helper.setFragmentTransition(getActivity(), ArtistFragment.this, AlbumFragment.newInstance(album, ((MainActivity) getActivity()).getMusicXService()), new Pair<View, String>(imageView, "TransitionArtwork"));
+        Helper.setFragmentTransition(((MainActivity) getActivity()), ArtistFragment.this, AlbumFragment.newInstance(album), imageView, transition, "albumdetail");
     }
 
 
@@ -231,7 +293,7 @@ public class ArtistFragment extends BaseLoaderFragment {
         toolbar.setTitle(artist.getName());
         toolbar.setTitleTextColor(Color.WHITE);
         helper = new Helper(getContext());
-        if (getActivity() == null){
+        if (getActivity() == null || getActivity().getWindow() == null) {
             return;
         }
         Helper.setColor(getActivity(), colorAccent, toolbar);
@@ -408,9 +470,17 @@ public class ArtistFragment extends BaseLoaderFragment {
         rv.setHasFixedSize(true);
 
         songListAdapter.setOnItemClickListener(mOnClick);
+        songListAdapter.setOnLongClickListener(onLongClick);
         albumListAdapter.setOnItemClickListener(mOnClickAlbum);
 
         loadTrak();
+        if (((MainActivity) getActivity()) != null) {
+            AppCompatActivity appCompatActivity = ((MainActivity) getActivity());
+            if (appCompatActivity != null && appCompatActivity.getSupportActionBar() != null) {
+                appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                appCompatActivity.setSupportActionBar(toolbar);
+            }
+        }
     }
 
     @Override
@@ -463,10 +533,10 @@ public class ArtistFragment extends BaseLoaderFragment {
                     return;
                 }
                 Helper.setColor(getActivity(), colors[0], toolbar);
-                Helper.animateViews(getContext(), toolbar, colors[0]);
+                // Helper.animateViews(getContext(), toolbar, colors[0]);
             }
         }, artworkView);
-
+        artworkView.setTransitionName("TransitionArtworks");
     }
 
     private void artistBio() {
@@ -540,19 +610,19 @@ public class ArtistFragment extends BaseLoaderFragment {
                 reload();
                 break;
             case R.id.z_to_a:
-                extras.setAlbumSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_Z_A);
+                extras.setArtistAlbumSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_Z_A);
                 reload();
                 break;
             case R.id.album_no_songs:
-                extras.setAlbumSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_NUMBER_OF_SONGS);
+                extras.setArtistAlbumSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_NUMBER_OF_SONGS);
                 reload();
                 break;
             case R.id.album_year:
-                extras.setAlbumSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_YEAR);
+                extras.setArtistAlbumSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_YEAR);
                 reload();
                 break;
             case R.id.last_year:
-                extras.setAlbumSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_YEAR_LAST);
+                extras.setArtistAlbumSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_YEAR_LAST);
                 reload();
                 break;
         }

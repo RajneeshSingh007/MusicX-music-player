@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.os.Environment;
 
 import com.afollestad.appthemeengine.ATE;
 import com.rks.musicx.MusicXApplication;
@@ -23,8 +24,8 @@ import static com.rks.musicx.misc.utils.Constants.ARTIST_SORT_ORDER;
 import static com.rks.musicx.misc.utils.Constants.ARTWORKCOLOR;
 import static com.rks.musicx.misc.utils.Constants.AUDIO_FILTER;
 import static com.rks.musicx.misc.utils.Constants.BlackTheme;
+import static com.rks.musicx.misc.utils.Constants.BlurView;
 import static com.rks.musicx.misc.utils.Constants.CURRENTPOS;
-import static com.rks.musicx.misc.utils.Constants.DONATION_TRACK;
 import static com.rks.musicx.misc.utils.Constants.DOWNLOADED_ARTWORK;
 import static com.rks.musicx.misc.utils.Constants.DarkTheme;
 import static com.rks.musicx.misc.utils.Constants.EQSWITCH;
@@ -42,11 +43,13 @@ import static com.rks.musicx.misc.utils.Constants.HQ_ARTISTARTWORK;
 import static com.rks.musicx.misc.utils.Constants.KEY_POSITION_X;
 import static com.rks.musicx.misc.utils.Constants.KEY_POSITION_Y;
 import static com.rks.musicx.misc.utils.Constants.LightTheme;
+import static com.rks.musicx.misc.utils.Constants.NAV_SETTINGS;
 import static com.rks.musicx.misc.utils.Constants.PLAYER_POS;
 import static com.rks.musicx.misc.utils.Constants.PLAYINGSTATE;
 import static com.rks.musicx.misc.utils.Constants.PLAYINGVIEW_TRACK;
 import static com.rks.musicx.misc.utils.Constants.PLAYLIST_ID;
 import static com.rks.musicx.misc.utils.Constants.PLAYLIST_SORT_ORDER;
+import static com.rks.musicx.misc.utils.Constants.PREF_AUTO_PAUSE;
 import static com.rks.musicx.misc.utils.Constants.PRESET_POS;
 import static com.rks.musicx.misc.utils.Constants.REMOVE_TABLIST;
 import static com.rks.musicx.misc.utils.Constants.REORDER_TAB;
@@ -70,7 +73,6 @@ import static com.rks.musicx.misc.utils.Constants.SaveLyrics;
 import static com.rks.musicx.misc.utils.Constants.SaveTelephony;
 import static com.rks.musicx.misc.utils.Constants.TRYPEFACE_PATH;
 import static com.rks.musicx.misc.utils.Constants.TextFonts;
-import static com.rks.musicx.misc.utils.Constants.VIZCOLOR;
 import static com.rks.musicx.misc.utils.Constants.WIDGETTRACK;
 import static com.rks.musicx.misc.utils.Constants.WIDGET_COLOR;
 
@@ -131,6 +133,10 @@ public class Extras {
         return getmPreferences().getBoolean(DarkTheme, false);
     }
 
+    public boolean getLighTheme() {
+        return getmPreferences().getBoolean(LightTheme, false);
+    }
+
     public boolean getBlackTheme() {
         return getmPreferences().getBoolean(BlackTheme, false);
     }
@@ -174,8 +180,8 @@ public class Extras {
         putString(ARTIST_ALBUM_SORT, value);
     }
 
-    public String getArtistAlbumSort(String value) {
-        return MusicXApplication.getmPreferences().getString(ARTIST_ALBUM_SORT, value);
+    public String getArtistAlbumSort() {
+        return MusicXApplication.getmPreferences().getString(ARTIST_ALBUM_SORT, SortOrder.ArtistAlbumSortOrder.ALBUM_A_Z);
     }
 
     public void setPlaylistSortOrder(String value) {
@@ -192,7 +198,7 @@ public class Extras {
         SharedPreferences.Editor sharededitor = MusicXApplication.getmPreferences().edit();
         sharededitor.putInt(KEY_POSITION_X, pos);
         sharededitor.putInt(KEY_POSITION_Y, pos);
-        sharededitor.apply();
+        sharededitor.commit();
     }
 
     public int getwidgetPositionX() {
@@ -269,10 +275,6 @@ public class Extras {
         return MusicXApplication.getmPreferences().getBoolean(HQ_ARTISTARTWORK, false);
     }
 
-    public boolean vizColor() {
-        return MusicXApplication.getmPreferences().getBoolean(VIZCOLOR, false);
-    }
-
     public boolean artworkColor() {
         return MusicXApplication.getmPreferences().getBoolean(ARTWORKCOLOR, false);
     }
@@ -301,6 +303,18 @@ public class Extras {
         return MusicXApplication.getmPreferences().getString(AUDIO_FILTER, "0");
     }
 
+    public String getBlurView() {
+        return MusicXApplication.getmPreferences().getString(BlurView, "2");
+    }
+
+    /////////// Fade Track ///////////
+
+    public void saveFadeTrack(boolean value) {
+        SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
+        editor.putBoolean(FADETRACK, value);
+        editor.commit();
+    }
+
     ////////////////// folder pref //////////////////
 
     public void saveFolderPath(String path) {
@@ -311,7 +325,7 @@ public class Extras {
 
 
     public String getFolderPath() {
-        return MusicXApplication.getmPreferences().getString(FOLDERPATH, null);
+        return MusicXApplication.getmPreferences().getString(FOLDERPATH, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getPath());
     }
 
     //////////////////// eq switch track //////////////////
@@ -384,6 +398,10 @@ public class Extras {
 
     public String getSongPath(String path) {
         return MusicXApplication.getmPreferences().getString(SONG_PATH, path);
+    }
+
+    public boolean getHeadset() {
+        return Extras.getInstance().getmPreferences().getBoolean(PREF_AUTO_PAUSE, false);
     }
 
     //////////////////// Save Metadata pref ////////////////////////
@@ -581,16 +599,14 @@ public class Extras {
         return MusicXApplication.getmPreferences().getBoolean(PLAYINGVIEW_TRACK, false);
     }
 
-    /////////// Donation Track /////////////
-
-    public void donationTrack(boolean torf){
+    public void setNaviSettings(boolean value) {
         SharedPreferences.Editor editor = MusicXApplication.getmPreferences().edit();
-        editor.putBoolean(DONATION_TRACK, torf);
+        editor.putBoolean(NAV_SETTINGS, value);
         editor.commit();
     }
 
-    public Boolean getDonationTrack(){
-        return MusicXApplication.getmPreferences().getBoolean(DONATION_TRACK, false);
+    public Boolean getNavSettings() {
+        return MusicXApplication.getmPreferences().getBoolean(NAV_SETTINGS, false);
     }
 
 

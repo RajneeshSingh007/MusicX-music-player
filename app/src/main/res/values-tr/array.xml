@@ -32,12 +32,16 @@
         <item>PlayingView2</item>
         <item>PlayingView3</item>
         <item>PlayingView4</item>
+        <item>PlayingView5</item>
+        <item>PlayingView6</item>
     </string-array>
     <string-array name="selectedPlayingView">
         <item>0</item>
         <item>1</item>
         <item>2</item>
         <item>3</item>
+        <item>4</item>
+        <item>5</item>
     </string-array>
     <string-array name="fontChoice">
         <item>RobotoLight</item>
@@ -53,7 +57,7 @@
         <item>Gogia</item>
         <item>Maven</item>
         <item>Vow</item>
-        <item>Lombok</item>
+        <item>Nunito</item>
         <item>Circled</item>
         <item>Franks</item>
         <item>Mountain</item>

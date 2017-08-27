@@ -2,6 +2,7 @@ package com.rks.musicx.ui.fragments;
 
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -22,12 +23,16 @@ import com.rks.musicx.data.model.Song;
 import com.rks.musicx.data.network.NetworkHelper;
 import com.rks.musicx.database.CommonDatabase;
 import com.rks.musicx.interfaces.Action;
+import com.rks.musicx.interfaces.ExtraCallback;
+import com.rks.musicx.interfaces.RefreshData;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.misc.utils.ItemOffsetDecoration;
 import com.rks.musicx.ui.activities.MainActivity;
+import com.rks.musicx.ui.adapters.FolderAdapter;
+import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.List;
@@ -61,7 +66,7 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
     private BaseRecyclerViewAdapter.OnLongClickListener onLongClick = new BaseRecyclerViewAdapter.OnLongClickListener() {
         @Override
         public void onLongItemClick(int position) {
-            mActionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(Helper.getActionCallback(SongListFragment.this, ((MainActivity) getActivity()), trackloader, getContext(), SongListFragment.this, new Action() {
+            mActionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(Helper.getActionCallback(((MainActivity) getActivity()), getContext(), new Action() {
                 @Override
                 public void clear() {
                     if (mActionMode != null) {
@@ -69,8 +74,29 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
                         mActionMode.finish();
                         mActionMode = null;
                     }
+                    songListAdapter.exitMultiselectMode();
                 }
-            }, songListAdapter));
+
+                @Override
+                public Fragment currentFrag() {
+                    return SongListFragment.this;
+                }
+
+                @Override
+                public void refresh() {
+                    getLoaderManager().restartLoader(trackloader, null, SongListFragment.this);
+                }
+            }, true, new ExtraCallback() {
+                @Override
+                public SongListAdapter songlistAdapter() {
+                    return songListAdapter;
+                }
+
+                @Override
+                public FolderAdapter folderAdapter() {
+                    return null;
+                }
+            }));
             Helper.setActionModeBackgroundColor(mActionMode, Config.primaryColor(getContext(), Helper.getATEKey(getContext())));
             if (position > 0) {
                 if (mActionMode != null) {
@@ -88,6 +114,7 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
 
         @Override
         public void onItemClick(int position, View view) {
+
             if (songListAdapter.isMultiselect()) {
                 if (position > 0) {
                     if (mActionMode != null) {
@@ -106,7 +133,18 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
                             Extras.getInstance().saveSeekServices(0);
                             break;
                         case R.id.menu_button:
-                            helper.showMenu(false, trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                            Song song = songListAdapter.getItem(position);
+                            helper.showMenu(false, new RefreshData() {
+                                @Override
+                                public void refresh() {
+                                    getLoaderManager().restartLoader(trackloader, null, SongListFragment.this);
+                                }
+
+                                @Override
+                                public Fragment currentFrag() {
+                                    return SongListFragment.this;
+                                }
+                            }, ((MainActivity) getActivity()), view, getContext(), song);
                             break;
 
                     }
@@ -118,7 +156,18 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
                             Extras.getInstance().saveSeekServices(0);
                             break;
                         case R.id.menu_button:
-                            helper.showMenu(false, trackloader, SongListFragment.this, SongListFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                            Song song = songListAdapter.getItem(position);
+                            helper.showMenu(false, new RefreshData() {
+                                @Override
+                                public void refresh() {
+                                    getLoaderManager().restartLoader(trackloader, null, SongListFragment.this);
+                                }
+
+                                @Override
+                                public Fragment currentFrag() {
+                                    return SongListFragment.this;
+                                }
+                            }, ((MainActivity) getActivity()), view, getContext(), song);
                             break;
 
                     }
@@ -139,6 +188,7 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
         } else {
             menu.findItem(R.id.grid_view).setVisible(false);
         }
+        menu.findItem(R.id.default_folder).setVisible(false);
     }
 
     @Override
@@ -196,6 +246,9 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
                 loadGridView();
                 load();
                 break;
+            case R.id.menu_refresh:
+                load();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -209,7 +262,6 @@ public class SongListFragment extends BaseLoaderFragment implements SearchView.O
         Extras.getInstance().getThemevalue(getActivity());
         downloadArtwork();
     }
-
 
     private void loadTrak() {
         getLoaderManager().initLoader(trackloader, null, this);

@@ -1,13 +1,15 @@
 package com.rks.musicx.ui.fragments;
 
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,23 +17,28 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.afollestad.appthemeengine.Config;
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.rks.musicx.R;
-import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
+import com.rks.musicx.base.BaseRefreshFragment;
 import com.rks.musicx.data.loaders.FolderLoader;
 import com.rks.musicx.data.loaders.SortOrder;
 import com.rks.musicx.data.model.Folder;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.interfaces.Action;
+import com.rks.musicx.interfaces.ExtraCallback;
+import com.rks.musicx.interfaces.RefreshData;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
 import com.rks.musicx.ui.activities.MainActivity;
 import com.rks.musicx.ui.adapters.FolderAdapter;
+import com.rks.musicx.ui.adapters.SongListAdapter;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
 
 
@@ -52,24 +59,45 @@ import java.util.List;
  * limitations under the License.
  */
 
-public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQueryTextListener{
+public class FolderFragment extends BaseRefreshFragment implements SearchView.OnQueryTextListener {
 
 
     private final int folderloader = 2;
     private FastScrollRecyclerView folderrv;
-    private Folder currentDir;
-    private FolderAdapter fileadapter;
+    private FolderAdapter folderAdapter;
     private Helper helper;
     private SearchView searchView;
     private android.support.v7.view.ActionMode mActionMode;
+    private File currentPath;
+    private LoaderManager.LoaderCallbacks<List<Folder>> folderLoader = new LoaderManager.LoaderCallbacks<List<Folder>>() {
+        @Override
+        public Loader<List<Folder>> onCreateLoader(int id, Bundle args) {
+            FolderLoader folderLoader = new FolderLoader(getContext(), getCurrentPath());
+            if (id == folderloader) {
+                return folderLoader;
+            }
+            return null;
+        }
 
-    /**
-     * onLongClick
-     */
+        @Override
+        public void onLoadFinished(Loader<List<Folder>> loader, List<Folder> data) {
+            if (data == null) {
+                return;
+            }
+            folderAdapter.clear();
+            folderAdapter.addDataList(data);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<Folder>> loader) {
+            loader.reset();
+            folderAdapter.notifyDataSetChanged();
+        }
+    };
     private BaseRecyclerViewAdapter.OnLongClickListener onLongClick = new BaseRecyclerViewAdapter.OnLongClickListener() {
         @Override
         public void onLongItemClick(int position) {
-            mActionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(Helper.getActionCallback(FolderFragment.this, ((MainActivity) getActivity()), trackloader, getContext(), FolderFragment.this, new Action() {
+            mActionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(Helper.getActionCallback(((MainActivity) getActivity()), getContext(), new Action() {
                 @Override
                 public void clear() {
                     if (mActionMode != null) {
@@ -77,8 +105,30 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
                         mActionMode.finish();
                         mActionMode = null;
                     }
+                    folderAdapter.exitMultiselectMode();
                 }
-            }, songListAdapter));
+
+                @Override
+                public Fragment currentFrag() {
+                    return FolderFragment.this;
+                }
+
+                @Override
+                public void refresh() {
+                    getLoaderManager().restartLoader(folderloader, null, folderLoader);
+                }
+            }, false, new ExtraCallback() {
+                @Override
+                public SongListAdapter songlistAdapter() {
+                    return null;
+                }
+
+                @Override
+                public FolderAdapter folderAdapter() {
+                    return folderAdapter;
+                }
+            }));
+
             Helper.setActionModeBackgroundColor(mActionMode, Config.primaryColor(getContext(), Helper.getATEKey(getContext())));
             if (position > 0) {
                 if (mActionMode != null) {
@@ -91,14 +141,14 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
             }
         }
     };
-
     /**
-     * Single Click
+     * Folder click
      */
-    private BaseRecyclerViewAdapter.OnItemClickListener songOnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
+    private BaseRecyclerViewAdapter.OnItemClickListener onClik = new BaseRecyclerViewAdapter.OnItemClickListener() {
+
         @Override
         public void onItemClick(int position, View view) {
-            if (songListAdapter.isMultiselect()) {
+            if (folderAdapter.isMultiselect()) {
                 if (position > 0) {
                     if (mActionMode != null) {
                         mActionMode.setTitle(position + " selected");
@@ -109,72 +159,72 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
                     }
                 }
             } else {
-                switch (view.getId()) {
-                    case R.id.item_view:
-                        ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
-                        Extras.getInstance().saveSeekServices(0);
-                        break;
-                    case R.id.menu_button:
-                        helper.showMenu(false, trackloader, FolderFragment.this, FolderFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
-                        break;
+                if (position >= 0 && position < folderAdapter.getItemCount()) {
+                    Folder folder = folderAdapter.getItem(position);
+                    currentPath = folder.getFile();
+                    switch (view.getId()) {
+                        case R.id.item_view:
+                            if (currentPath != null) {
+                                if (currentPath.isDirectory()) {
+                                    if (!currentPath.getAbsolutePath().equals("/")) {
+                                        getLoaderManager().restartLoader(folderloader, null, folderLoader);
+                                    } else {
+                                        Toast.makeText(getContext(), "No directory found", Toast.LENGTH_SHORT).show();
+                                    }
+                                } else {
+                                    int index = Helper.getIndex(currentPath.getAbsolutePath(), folder.getSongList());
+                                    if (index > -1) {
+                                        ((MainActivity) getActivity()).onSongSelected(folder.getSongList(), index);
+                                        Extras.getInstance().saveSeekServices(0);
+                                    }
+                                    Log.e("Folder", currentPath.getName() + " ---> " + String.valueOf(position));
+                                }
+                            }
+                            break;
+                        case R.id.menu_button:
+                            if (currentPath != null) {
+                                if (currentPath.isDirectory()) {
+                                    Helper.showFolderMenu(getContext(), view, currentPath, new RefreshData() {
+                                        @Override
+                                        public void refresh() {
+                                            String storagePath = Extras.getInstance().getFolderPath();
+                                            if (storagePath != null) {
+                                                currentPath = new File(storagePath);
+                                            } else {
+                                                currentPath = new File(Helper.getStoragePath());
+                                            }
+                                            getLoaderManager().restartLoader(folderloader, null, folderLoader);
+                                        }
 
-                }   
-            }
-        }
-    };
+                                        @Override
+                                        public Fragment currentFrag() {
+                                            return FolderFragment.this;
+                                        }
+                                    });
+                                } else {
+                                    int index = Helper.getIndex(currentPath.getAbsolutePath(), folder.getSongList());
+                                    if (index > -1) {
+                                        Song song = folder.getSongList().get(index);
+                                        helper.showMenu(false, new RefreshData() {
+                                            @Override
+                                            public void refresh() {
+                                                getLoaderManager().restartLoader(folderloader, null, folderLoader);
+                                            }
 
-    private LoaderManager.LoaderCallbacks<List<Folder>> folderLoaderCallback = new LoaderManager.LoaderCallbacks<List<Folder>>() {
-        @Override
-        public Loader<List<Folder>> onCreateLoader(int id, Bundle args) {
-            FolderLoader folderLoader = new FolderLoader(getContext(), getCurrentDir());
-            if (id == folderloader) {
-                return folderLoader;
-            }
-            return null;
-        }
-
-        @Override
-        public void onLoadFinished(Loader<List<Folder>> loader, List<Folder> data) {
-            if (data == null) {
-                return;
-            }
-            fileadapter.clear();
-            fileadapter.addDataList(data);
-        }
-
-        @Override
-        public void onLoaderReset(Loader<List<Folder>> loader) {
-            loader.reset();
-            fileadapter.notifyDataSetChanged();
-        }
-    };
-
-    /**
-     * Folder click
-     */
-    private BaseRecyclerViewAdapter.OnItemClickListener onClik = new BaseRecyclerViewAdapter.OnItemClickListener() {
-
-        @Override
-        public void onItemClick(int position, View view) {
-            switch (view.getId()) {
-                case R.id.item_view:
-                    if (fileadapter.getSnapshot().size() > 0) {
-                        adapterLoader(fileadapter.getItem(position));
+                                            @Override
+                                            public Fragment currentFrag() {
+                                                return FolderFragment.this;
+                                            }
+                                        }, ((MainActivity) getActivity()), view, getContext(), song);
+                                    }
+                                }
+                            }
+                            break;
                     }
-                    break;
+                }
             }
         }
     };
-
-
-    private void adapterLoader(Folder folderModel) {
-        currentDir = new Folder(folderModel.getPath());
-        if (currentDir.isDirectory()){
-            getLoaderManager().restartLoader(folderloader, null, folderLoaderCallback);
-        }
-        getLoaderManager().restartLoader(trackloader, null, FolderFragment.this);
-        folderrv.setAdapter(songListAdapter);
-    }
 
     @Override
     protected int setLayout() {
@@ -188,78 +238,37 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
 
     @Override
     protected void funtion() {
-        String storagePath = Extras.getInstance().getFolderPath();
-        if (storagePath == null) {
-            currentDir = new Folder(Helper.getStoragePath());
-        } else {
-            currentDir = new Folder(storagePath);
-        }
         String atekey = Helper.getATEKey(getContext());
         int colorAccent = Config.accentColor(getContext(), atekey);
         folderrv.setPopupBgColor(colorAccent);
         folderrv.setItemAnimator(new DefaultItemAnimator());
         helper = new Helper(getContext());
         setHasOptionsMenu(true);
-        songList = new ArrayList<>();
-        background();
-    }
-
-
-    @Override
-    protected String filter() {
-        return MediaStore.Audio.Media.DATA + " like ? ";
-    }
-
-    @Override
-    protected String[] argument() {
-        return new String[]{
-                "%" + currentDir.getPath() + "%"
-        };
-    }
-
-    @Override
-    protected String sortOder() {
-        return Extras.getInstance().getSongSortOrder();
-    }
-
-    @Override
-    protected void background() {
-        fileadapter = new FolderAdapter(getContext());
+        String storagePath = Extras.getInstance().getFolderPath();
+        if (storagePath != null) {
+            currentPath = new File(storagePath);
+        } else {
+            currentPath = new File(Helper.getStoragePath());
+        }
+        folderAdapter = new FolderAdapter(getContext());
+        folderrv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
+        folderAdapter.setOnItemClickListener(onClik);
+        folderAdapter.setOnLongClickListener(onLongClick);
+        folderrv.setHasFixedSize(true);
         CustomLayoutManager customLayoutManager = new CustomLayoutManager(getContext());
         customLayoutManager.setSmoothScrollbarEnabled(true);
         folderrv.setLayoutManager(customLayoutManager);
-        folderrv.addItemDecoration(new DividerItemDecoration(getContext(), 75, false));
-        fileadapter.setOnItemClickListener(onClik);
-        folderrv.setHasFixedSize(true);
+        folderrv.setAdapter(folderAdapter);
         initLoader();
-        songListAdapter.setOnLongClickListener(onLongClick);
-        songListAdapter.setOnItemClickListener(songOnClick);
-        folderrv.setAdapter(fileadapter);
-        getLoaderManager().initLoader(folderloader, null, folderLoaderCallback);
     }
 
-    @Override
-    protected boolean isTrack() {
-        return true;
-    }
-
-    @Override
-    protected boolean isRecentPlayed() {
-        return false;
-    }
-
-    @Override
-    protected boolean isFav() {
-        return false;
-    }
-
-    @Override
-    protected int getLimit() {
-        return 0;
-    }
 
     private void initLoader() {
-        getLoaderManager().initLoader(trackloader, null, this);
+        getLoaderManager().initLoader(folderloader, null, folderLoader);
+    }
+
+    public File getCurrentPath() {
+        return currentPath;
     }
 
     @Override
@@ -272,11 +281,6 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
     }
 
 
-    public Folder getCurrentDir() {
-        return currentDir;
-    }
-
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
@@ -285,14 +289,17 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
         searchView.setOnQueryTextListener(this);
         searchView.setQueryHint("Search song");
         menu.findItem(R.id.grid_view).setVisible(false);
+        menu.findItem(R.id.default_folder).setVisible(true);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.shuffle_all:
-                if (songListAdapter.getSnapshot().size() > 0) {
-                    ((MainActivity) getActivity()).onShuffleRequested(songListAdapter.getSnapshot(), true);
+                if (folderAdapter.getSongList().size() > 0) {
+                    ((MainActivity) getActivity()).onShuffleRequested(folderAdapter.getSongList(), true);
+                } else {
+                    Toast.makeText(getContext(), "Empty Data", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.menu_sort_by_az:
@@ -323,15 +330,53 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
                 Extras.getInstance().setSongSortOrder(SortOrder.SongSortOrder.SONG_DATE);
                 load();
                 break;
+            case R.id.default_folder:
+                setDefaultFolder();
+                load();
+                break;
+            case R.id.menu_refresh:
+                load();
+                break;
 
         }
         return super.onOptionsItemSelected(item);
     }
 
+    private void setDefaultFolder() {
+        new MaterialDialog.Builder(getContext())
+                .title(R.string.default_dir)
+                .negativeText(android.R.string.cancel)
+                .positiveText(android.R.string.ok)
+                .autoDismiss(true)
+                .typeface(Helper.getFont(getContext()), Helper.getFont(getContext()))
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        if (getCurrentPath() != null) {
+                            if (getCurrentPath().isDirectory()) {
+                                try {
+                                    Log.e("FolderFragment", getCurrentPath().getAbsolutePath());
+                                    Extras.getInstance().saveFolderPath(getCurrentPath().getAbsolutePath());
+                                } catch (Exception e) {
+                                    // ignored
+                                }
+                            }
+                        }
+                    }
+                })
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
+                    }
+                })
+                .build()
+                .show();
+    }
+
     @Override
     public void load() {
-        getLoaderManager().restartLoader(trackloader, null, this);
-        getLoaderManager().restartLoader(folderloader, null, folderLoaderCallback);
+        getLoaderManager().restartLoader(folderloader, null, folderLoader);
     }
 
     @Override
@@ -341,10 +386,9 @@ public class FolderFragment extends BaseLoaderFragment implements SearchView.OnQ
 
     @Override
     public boolean onQueryTextChange(String newText) {
-
-        final List<Song> filterlist = helper.filter(songList, newText);
-        if (filterlist.size() > 0) {
-            songListAdapter.setFilter(filterlist);
+        final List<Folder> folderList = helper.filterFolder(getContext(), folderAdapter.getSnapshot(), newText);
+        if (folderList.size() > 0) {
+            folderAdapter.setFilter(folderList);
             return true;
         } else {
             Toast.makeText(getContext(), "No data found...", Toast.LENGTH_SHORT).show();

@@ -14,36 +14,34 @@ package com.rks.musicx.data.network;
  */
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
 import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.DownloadListener;
 import com.androidnetworking.interfaces.JSONObjectRequestListener;
+import com.androidnetworking.interfaces.StringRequestListener;
 import com.rks.musicx.misc.utils.Constants;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
+import com.rks.musicx.misc.utils.LyricsHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+
 
 /**
  * Created by Coolalien on 6/27/2017.
  */
 public class NetworkHelper {
+
 
     /**
      * DownloadArtwork
@@ -53,54 +51,49 @@ public class NetworkHelper {
      * @param artistName
      */
     public static void downloadAlbumArtwork(Context context, String albumName, String artistName) {
+        File file = new File(Helper.getAlbumArtworkLocation(), albumName + ".jpeg");
         AndroidNetworking.get(Constants.lastFmUrl + "?method=album.getinfo&format=json&api_key=" + Services.lastFmApi)
                 .addQueryParameter("album", albumName)
                 .addQueryParameter("artist", artistName)
                 .setTag("AlbumArtwork")
                 .setPriority(Priority.MEDIUM)
-                .setBitmapConfig(Bitmap.Config.ARGB_8888)
-                .setImageScaleType(ImageView.ScaleType.FIT_CENTER)
                 .build()
                 .getAsJSONObject(new JSONObjectRequestListener() {
                     @Override
                     public void onResponse(JSONObject response) {
                         if (response.length() > 0) {
-                            Helper helper = new Helper(context);
-                            File file = new File(helper.getAlbumArtworkLocation(), albumName + ".jpeg");
                             try {
                                 JSONObject json = response.getJSONObject("album");
                                 JSONArray jsonObject = json.getJSONArray("image");
+                                JSONObject exLarge = jsonObject.getJSONObject(3);
+                                String exLargeUrl = exLarge.getString("#text");
+                                JSONObject large = jsonObject.getJSONObject(2);
+                                String largeUrl = large.getString("#text");
                                 if (!file.exists()) {
-                                    if (Extras.getInstance().hqArtistArtwork()) {
-                                        JSONObject jsonObject1 = jsonObject.getJSONObject(4);
-                                        if (jsonObject1 != null) {
-                                            String url = jsonObject1.getString("#text");
-                                            if (url != null) {
-                                                saveFileBg(url, file);
-                                                Log.e("kool_mega", url);
-                                            }
-                                        }
-                                    } else {
-                                        JSONObject jsonObject1 = jsonObject.getJSONObject(3);
-                                        if (jsonObject1 != null) {
-                                            String url = jsonObject1.getString("#text");
-                                            if (url != null) {
-                                                saveFileBg(url, file);
-                                                Log.e("kool_extralarge", url);
-                                            }
-                                        }
-                                    }
+                                    AndroidNetworking.download(Extras.getInstance().hqArtistArtwork() ? exLargeUrl : largeUrl, Helper.getAlbumArtworkLocation(), albumName + ".jpeg")
+                                            .setPriority(Priority.HIGH)
+                                            .build()
+                                            .startDownload(new DownloadListener() {
+                                                @Override
+                                                public void onDownloadComplete() {
+                                                    Log.d("NetworkLyricsHelper", "Success");
+                                                }
+
+                                                @Override
+                                                public void onError(ANError anError) {
+
+                                                }
+                                            });
                                 }
                             } catch (JSONException e) {
-                                e.printStackTrace();
+                                // ignored
                             }
-                            Log.e("kool", response.optString("url"));
                         }
                     }
 
                     @Override
                     public void onError(ANError anError) {
-                        Log.e("Failed", "no data");
+                        // ignored
                     }
                 });
     }
@@ -112,159 +105,693 @@ public class NetworkHelper {
      * @param artistName
      */
     public static void downloadArtistArtwork(Context context, String artistName) {
+        File file = new File(Helper.getArtistArtworkLocation(), artistName + ".jpeg");
         AndroidNetworking.get(Constants.lastFmUrl + "?method=artist.getinfo&format=json&api_key=" + Services.lastFmApi)
                 .addQueryParameter("artist", artistName)
                 .setTag("ArtistArtwork")
                 .setPriority(Priority.MEDIUM)
-                .setBitmapConfig(Bitmap.Config.ARGB_8888)
-                .setImageScaleType(ImageView.ScaleType.FIT_CENTER)
                 .build()
                 .getAsJSONObject(new JSONObjectRequestListener() {
                     @Override
                     public void onResponse(JSONObject response) {
                         if (response.length() > 0) {
-                            Helper helper = new Helper(context);
-                            File file = new File(helper.getArtistArtworkLocation(), artistName + ".jpeg");
                             try {
                                 JSONObject json = response.getJSONObject("artist");
                                 JSONArray jsonObject = json.getJSONArray("image");
+                                JSONObject exLarge = jsonObject.getJSONObject(3);
+                                String exLargeUrl = exLarge.getString("#text");
+                                JSONObject large = jsonObject.getJSONObject(2);
+                                String largeUrl = large.getString("#text");
                                 if (!file.exists()) {
-                                    if (Extras.getInstance().hqArtistArtwork()) {
-                                        JSONObject jsonObject1 = jsonObject.getJSONObject(4);
-                                        if (jsonObject1 != null) {
-                                            String url = jsonObject1.getString("#text");
-                                            if (url != null) {
-                                                saveFileBg(url, file);
-                                                Log.e("kool_mega", url);
-                                            }
-                                        }
-                                    } else {
-                                        JSONObject jsonObject1 = jsonObject.getJSONObject(3);
-                                        if (jsonObject1 != null) {
-                                            String url = jsonObject1.getString("#text");
-                                            if (url != null) {
-                                                saveFileBg(url, file);
-                                                Log.e("kool_extralarge", url);
-                                            }
-                                        }
-                                    }
+                                    AndroidNetworking.download(Extras.getInstance().hqArtistArtwork() ? exLargeUrl : largeUrl, Helper.getArtistArtworkLocation(), artistName + ".jpeg")
+                                            .setPriority(Priority.HIGH)
+                                            .build()
+                                            .startDownload(new DownloadListener() {
+                                                @Override
+                                                public void onDownloadComplete() {
+                                                    Log.d("NetworkLyricsHelper", "Success");
+                                                }
+
+                                                @Override
+                                                public void onError(ANError anError) {
+
+                                                }
+                                            });
                                 }
                             } catch (JSONException e) {
-                                e.printStackTrace();
+                                // ignored
                             }
-                            Log.e("kool", response.optString("url"));
                         }
                     }
 
                     @Override
                     public void onError(ANError anError) {
-                        Log.e("Failed", "no data");
+                        // ignored
                     }
                 });
     }
 
 
     /**
-     * DownloadArtistArtwork
+     * Fetch Lyrics from vag
+     * @param context
+     * @param artistName
+     * @param songName
+     * @param path
+     * @param lyrics
+     * @8Search
+     */
+    public static void vagLyrics(Context context, String artistName, String songName, String album, String path, TextView lyrics) {
+        String url = Constants.vagUrl + queryLyrics(artistName, "-") + "/" + queryLyrics(songName, "-") + ".html";
+        AndroidNetworking.get(url)
+                .setPriority(Priority.HIGH)
+                .build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (!response.isEmpty()) {
+                            String scrapStart = "<div itemprop=description>";
+                            String scrapEnd = "<div id=lyrFoot>";
+                            if (response.contains(scrapStart) && response.contains(scrapEnd)) {
+                                int start = response.indexOf(scrapStart);
+                                int end = response.indexOf(scrapEnd);
+                                if (start >= 0 && end >= 0) {
+                                    String fin = TextUtils.substring(response, start, end);
+                                    if (fin.length() > 0) {
+                                        // other unwanted stuff clearance
+                                        fin = fin
+                                                .trim()
+                                                .replace("<div id=lyrFoot>", "")
+                                                .replace("<div itemprop=description>", "")
+                                                .replace("<hr>", "")
+                                                .replace("<i>", "")
+                                                .replace("</i>", "")
+                                                .replaceAll("<a.*?</a>", "")
+                                                .replace("<br/>", "\n")
+                                                .replace("</div>", "");
+                                        // set lyrics
+                                        setLyrics(context, songName, path, fin, lyrics);
+                                        Log.e("NetworkHelper", "lyrics from Vag");
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        metroLyrics(context, artistName, songName, album, path, lyrics);
+                    }
+                });
+    }
+
+    /**
+     * Fetch Lyrics from metro
+     * @param context
+     * @param artistName
+     * @param songName
+     * @param path
+     * @param lyrics
+     * @9Search
+     */
+    public static void metroLyrics(Context context, String artistName, String songName, String album, String path, TextView lyrics) {
+        String url = Constants.metroUrl + queryLyrics(songName, "-") + "-lyrics-" + queryLyrics(artistName, "-") + ".html";
+        AndroidNetworking.get(url)
+                .setPriority(Priority.HIGH)
+                .build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (!response.isEmpty()) {
+                            String scrapStart = "<div id=\"lyrics-body-text\" class=\"js-lyric-text\">";
+                            String scrapEnd = "<p class=\"writers\">";
+                            if (response.contains(scrapStart) && response.contains(scrapEnd)) {
+                                int start = response.indexOf(scrapStart);
+                                int end = response.indexOf(scrapEnd);
+                                if (start >= 0 && end >= 0) {
+                                    String fin = TextUtils.substring(response, start, end);
+                                    if (fin.length() > 0) {
+                                        // other unwanted stuff clearance
+                                        fin = fin
+                                                .trim()
+                                                .replace("<div id=\"lyrics-body-text\" class=\"js-lyric-text\">", "")
+                                                .replace("<p class='verse'>", "\n")
+                                                .replace("<br>", "")
+                                                .replace("<i>", "")
+                                                .replace("</i>", "")
+                                                .replaceAll("<a.*?</a>", "")
+                                                .replace("</p>", "\n")
+                                                .replace("</div>", "");
+                                        // set lyrics
+                                        setLyrics(context, songName, path, fin, lyrics);
+                                        Log.e("NetworkHelper", "lyrics from Metro");
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        directLyrics(context, artistName, songName, album, path, lyrics);
+                    }
+                });
+    }
+
+    /**
+     * Fetch Lyrics from atoz
+     * @param context
+     * @param artistName
+     * @param songName
+     * @param path
+     * @param lyrics
+     * @5Search
+     */
+    public static void atozLyrics(Context context, String artistName, String songName, String album, String path, TextView lyrics) {
+        String url = Constants.atozUrl + queryLyrics(artistName, "") + "/" + queryLyrics(songName, "") + ".html";
+        AndroidNetworking.get(url)
+                .setPriority(Priority.HIGH)
+                .build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (!response.isEmpty()) {
+                            String scrapStart = "<div>";
+                            String scrapEnd = "<div class=\"noprint\">";
+                            if (response.contains(scrapStart) && response.contains(scrapEnd)) {
+                                String fin = TextUtils.substring(response, response.indexOf(scrapStart), response.indexOf(scrapEnd));
+                                if (fin.length() > 0) {
+                                    // other unwanted stuff clearance
+                                    fin = fin
+                                            .trim()
+                                            .replaceAll("<!--.*?-->", "")
+                                            .replace("<div>", "")
+                                            .replace("<b>", "")
+                                            .replace("</b>", "")
+                                            .replace("<br>", "")
+                                            .replace("<i>", "")
+                                            .replace("</i>", "")
+                                            .replaceAll("<a.*?</a>", "")
+                                            .replace("</div>", "");
+                                    // set lyrics
+                                    setLyrics(context, songName, path, fin, lyrics);
+                                    Log.e("NetworkHelper", "lyrics from AtoZ");
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        lyricsondemandLyrics(context, artistName, songName, album, path, lyrics);
+                    }
+                });
+    }
+
+    /**
+     * Fetch Lyrics from songLyrics
      *
      * @param context
      * @param artistName
+     * @param songName
+     * @param path
+     * @param lyrics
+     * @3Search
      */
-    public static void downloadLyrics(Context context, String artistName, String songName, String path, TextView lyrics) {
-        Helper helper = new Helper(context);
-        AndroidNetworking.get(Constants.vagUrl + "search.php?" + "apikey=" + Services.lyricsApi)
-                .addQueryParameter("art", artistName)
-                .addQueryParameter("mus", songName)
-                .setTag("DownloadLyrics")
-                .setPriority(Priority.MEDIUM)
+    public static void songsLyrics(Context context, String artistName, String songName, String album, String path, TextView lyrics) {
+        String url = Constants.songlyricsUrl + queryLyrics(artistName, "-") + "/" + queryLyrics(songName, "-") + "-lyrics" + "/";
+        AndroidNetworking.get(url)
+                .setPriority(Priority.HIGH)
                 .build()
-                .getAsJSONObject(new JSONObjectRequestListener() {
+                .getAsString(new StringRequestListener() {
                     @Override
-                    public void onResponse(JSONObject response) {
-                        if (response.length() > 0) {
-                            String savePath = helper.loadLyrics(songName);
-                            try {
-                                JSONArray jsonObject = response.getJSONArray("mus");
-                                JSONObject object = jsonObject.getJSONObject(0);
-                                if (object != null) {
-                                    String finallyLoaded = object.getString("text");
-                                    Log.e("lyrics", finallyLoaded);
-                                    if (finallyLoaded != null) {
-                                        if (Extras.getInstance().saveLyrics()) {
-                                            Helper.saveLyrics(savePath, finallyLoaded);
-                                        }
-                                        lyrics.setText(finallyLoaded);
-                                    }
+                    public void onResponse(String response) {
+                        if (!response.isEmpty()) {
+                            String scrapStart = "<div id=\"songLyricsDiv-outer\">";
+                            String scrapEnd = "<div itemscope itemtype=\"http://schema.org/MusicRecording\">";
+                            if (response.contains(scrapStart) && response.contains(scrapEnd)) {
+                                String fin = TextUtils.substring(response, response.indexOf(scrapStart), response.indexOf(scrapEnd));
+                                if (fin.length() > 0) {
+                                    // other unwanted stuff clearance
+                                    fin = fin
+                                            .trim()
+                                            .replace("<div id=\"songLyricsDiv-outer\">", "")
+                                            .replaceAll("<p id=\"songLyricsDiv\"  class=\"songLyricsV14 iComment-text\">", "")
+                                            .replace("<br />", "")
+                                            .replaceAll("<a.*?</a>", "")
+                                            .replace("<i>", "")
+                                            .replace("</i>", "")
+                                            .replace("<br>", "")
+                                            .replace("</div>", "")
+                                            .replace("</p>", "");
+                                    // set lyrics
+                                    setLyrics(context, songName, path, fin, lyrics);
+                                    Log.e("NetworkHelper", "lyrics from SongLyrics");
                                 }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
                             }
-                            Log.e("kool", response.optString("url"));
                         }
                     }
 
                     @Override
                     public void onError(ANError anError) {
-                        Log.e("Failed", "no data");
+                        lyricsbogieLyrics(context, artistName, songName, album, path, lyrics);
                     }
                 });
     }
 
     /**
-     * Save file async
+     * Fetch Lyrics from lyricsondemand
      *
-     * @param sUrl
-     * @param file
+     * @param context
+     * @param artistName
+     * @param songName
+     * @param path
+     * @param lyrics
+     * @6Search
      */
-    public static void saveFileBg(String sUrl, File file) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                saveFile(sUrl, file);
-                return null;
-            }
-        }.execute();
+    public static void lyricsondemandLyrics(Context context, String artistName, String songName, String album, String path, TextView lyrics) {
+        char firstLetter = artistName.charAt(0);
+        String gotFirstChar = String.valueOf(firstLetter)
+                .toLowerCase();
+        String extraStuff = "lyrics";
+        String url = Constants.lyricsondemandUrl + gotFirstChar + "/" + queryLyrics(artistName, "") + extraStuff + "/" + queryLyrics(songName, "") + extraStuff + ".html";
+        AndroidNetworking.get(url)
+                .setPriority(Priority.HIGH)
+                .build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (!response.isEmpty()) {
+                            String scrapStart = "<div class=\"lcontent\" >";
+                            String scrapEnd = "<div id=\"lfcredits\">";
+                            if (response.contains(scrapStart) && response.contains(scrapEnd)) {
+                                String fin = TextUtils.substring(response, response.indexOf(scrapStart), response.indexOf(scrapEnd));
+                                if (fin.length() > 0) {
+                                    // other unwanted stuff clearance
+                                    fin = fin
+                                            .trim()
+                                            .replace("<div class=\"lcontent\" >", "")
+                                            .replace("</div>", "")
+                                            .replace("<br />", "\n")
+                                            .replace("<i>", "")
+                                            .replace("</i>", "")
+                                            .replaceAll("<!--.*?-->", "");
+                                    // set lyrics
+                                    setLyrics(context, songName, path, fin, lyrics);
+                                    Log.e("NetworkHelper", "lyrics from LyricsOnDemand");
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        absolutesLyrics(context, artistName, songName, album, path, lyrics);
+                    }
+                });
     }
 
     /**
-     * Save files
+     * Fetch Lyrics from absolutelyrics
      *
-     * @param sUrl
-     * @param file
+     * @param context
+     * @param artistName
+     * @param songName
+     * @param path
+     * @param lyrics
+     * @7Search
      */
-    public static void saveFile(String sUrl, File file) {
-        InputStream input = null;
-        OutputStream output = null;
-        HttpURLConnection connection = null;
-        try {
-            URL url = new URL(sUrl);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.connect();
-            Log.i("DownloadTask", "Response " + connection.getResponseCode());
-            input = connection.getInputStream();
-            output = new FileOutputStream(file, false);
+    public static void absolutesLyrics(Context context, String artistName, String songName, String album, String path, TextView lyrics) {
+        String url = Constants.absolutelyricsUrl + queryLyrics(artistName, "_") + "/" + queryLyrics(songName, "_");
+        AndroidNetworking.get(url)
+                .setPriority(Priority.HIGH)
+                .build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (!response.isEmpty()) {
+                            String scrapStart = "<p id=\"view_lyrics\">";
+                            String scrapEnd = "<div id=\"view_lyricsinfo\">";
+                            if (response.contains(scrapStart) && response.contains(scrapEnd)) {
+                                String fin = TextUtils.substring(response, response.indexOf(scrapStart), response.indexOf(scrapEnd));
+                                if (fin.length() > 0) {
+                                    // other unwanted stuff clearance
+                                    fin = fin
+                                            .trim()
+                                            .replace("<p id=\"view_lyrics\">", "")
+                                            .replace("</p>", "")
+                                            .replace("<br />", "\n")
+                                            .replace("<i>", "")
+                                            .replace("</i>", "")
+                                            .replace("<script language=JavaScript>", "")
+                                            .replace("</script>", "")
+                                            .replaceAll("document.write(.*)", "")
+                                            .replaceAll("<!--.*?-->", "");
 
-            byte data[] = new byte[8096];
-            int count;
-            while ((count = input.read(data)) != -1) {
-                output.write(data, 0, count);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (output != null)
-                    output.close();
-                if (input != null)
-                    input.close();
-            } catch (IOException ignored) {
-                ignored.printStackTrace();
-            }
+                                    // set lyrics
+                                    setLyrics(context, songName, path, fin, lyrics);
+                                    Log.e("NetworkHelper", "lyrics from Absolute");
+                                }
+                            }
+                        }
+                    }
 
-            if (connection != null)
-                connection.disconnect();
-        }
+                    @Override
+                    public void onError(ANError anError) {
+                        vagLyrics(context, artistName, songName, album, path, lyrics);
+                    }
+                });
     }
 
+    /**
+     * Fetch Lyrics from indicine
+     *
+     * @param context
+     * @param artistName
+     * @param songName
+     * @param path
+     * @param lyrics
+     * @1Search
+     */
+    public static void indicineLyrics(Context context, String artistName, String songName, String album, String path, TextView lyrics) {
+        String url = Constants.indicineUrl + "movies/lyrics/" + queryLyrics(songName, "-") + "-lyrics-" + queryLyrics(album, "-") + "/";
+        AndroidNetworking.get(url)
+                .setPriority(Priority.HIGH)
+                .build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (!response.isEmpty()) {
+                            String scrapStart = "<div class=\"lyrics\">";
+                            String scrapEnd = "<a title=\"Hindi Lyrics\" href=\"http://www.indicine.com/hindi-lyrics/\"";
+                            if (response.contains(scrapStart) && response.contains(scrapEnd)) {
+                                String fin = TextUtils.substring(response, response.indexOf(scrapStart), response.indexOf(scrapEnd));
+                                if (fin.length() > 0) {
+                                    // other unwanted stuff clearance
+                                    fin = fin
+                                            .trim()
+                                            .replace("<div class=\"lyrics\">", "")
+                                            .replace("<h2>", "")
+                                            .replace("</h2>", "")
+                                            .replace("<h1>", "")
+                                            .replace("</h1>", "")
+                                            .replace("<i>", "")
+                                            .replace("</i>", "")
+                                            .replaceAll("<a.*?</a>", "")
+                                            .replace(queryLyrics(songName, " "), "")
+                                            .replace("<br />", "")
+                                            .replace("<p>", "")
+                                            .replace("</p>", "\n")
+                                            .replace("&#8217;", "'")
+                                            .replace("&#8230", "")
+                                            .replace("</div>", "")
+                                            .replace("</div>", "\n");
+                                    StringBuffer buffer = new StringBuffer(fin);
+                                    String start = "<div style=\"float: right;\">";
+                                    String end = "</iframe>";
+                                    if (fin.contains(start) && fin.contains(end)) {
+                                        int removeStart = fin.indexOf(start);
+                                        int removeEnd = fin.indexOf(end);
+                                        buffer = buffer.replace(removeStart, removeEnd, "");
+                                        String filter = buffer.toString();
+                                        filter = filter.replace(end, "");
+                                        // set lyrics
+                                        setLyrics(context, songName, path, filter, lyrics);
+                                        Log.e("NetworkHelper", "lyrics from Indicine");
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        lyricsedLyrics(context, artistName, songName, album, path, lyrics);
+                    }
+                });
+    }
+
+    /**
+     * Fetch Lyrics from lyricsed
+     *
+     * @param context
+     * @param artistName
+     * @param songName
+     * @param album
+     * @param path
+     * @param lyrics
+     * @2Search
+     */
+    public static void lyricsedLyrics(Context context, String artistName, String songName, String album, String path, TextView lyrics) {
+        String url = Constants.lyricsedUrl + queryLyrics(songName, "-") + "-song-lyrics-" + queryLyrics(album, "-") + "/";
+        AndroidNetworking.get(url)
+                .setPriority(Priority.HIGH)
+                .build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (!response.isEmpty()) {
+                            String scrapStart = "<div class=\"entry\">";
+                            String scrapEnd = "<span style=\"display:none\">";
+                            if (response.contains(scrapStart) && response.contains(scrapEnd)) {
+                                String fin = TextUtils.substring(response, response.indexOf(scrapStart), response.indexOf(scrapEnd));
+                                if (fin.length() > 0) {
+                                    // other unwanted stuff clearance
+
+                                    fin = fin
+                                            .trim()
+                                            .replace("<div class=\"entry\">", "")
+                                            .replace("<h2>", "")
+                                            .replace("</h2>", "")
+                                            .replace("<br />", "")
+                                            .replace("<p>", "")
+                                            .replace("<i>", "")
+                                            .replace("</i>", "")
+                                            .replace("</p>", "\n")
+                                            .replace("&#8217;", "'")
+                                            .replace("&#8230;", "...")
+                                            .replace("<em>", " ")
+                                            .replace("</em>", " ")
+                                            .replaceAll("<a.*?</a>", "")
+                                            .replaceAll("<!--.*?-->", "");
+                                    StringBuffer buffer = new StringBuffer(fin);
+                                    String start = "<strong>";
+                                    String end = "</span>";
+                                    if (fin.contains(start) && fin.contains(end)) {
+                                        int removeStart = fin.indexOf(start);
+                                        int removeEnd = fin.indexOf(end);
+                                        buffer = buffer.replace(removeStart, removeEnd, "");
+                                        String filter = buffer.toString();
+                                        filter = filter
+                                                .replace("</div>", "\n")
+                                                .replace(end, "");
+                                        // set lyrics
+                                        setLyrics(context, songName, path, filter, lyrics);
+                                        Log.e("NetworkHelper", "lyrics from Lyricssed");
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        songsLyrics(context, artistName, songName, album, path, lyrics);
+                    }
+                });
+    }
+
+    /**
+     * Fetch Lyrics from lyricsbogie
+     *
+     * @param context
+     * @param artistName
+     * @param songName
+     * @param album
+     * @param path
+     * @param lyrics
+     * @4Search
+     */
+    public static void lyricsbogieLyrics(Context context, String artistName, String songName, String album, String path, TextView lyrics) {
+        String url = Constants.lyricsbogieUrl + queryLyrics(album, "-") + "/" + queryLyrics(songName, "-") + ".html";
+        AndroidNetworking.get(url)
+                .setPriority(Priority.HIGH)
+                .build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (!response.isEmpty()) {
+                            String scrapStart = "<div id=\"lyricsDiv\" class=\"left\">";
+                            String scrapEnd = "<div class=\"right\">";
+                            if (response.contains(scrapStart) && response.contains(scrapEnd)) {
+                                String fin = TextUtils.substring(response, response.indexOf(scrapStart), response.indexOf(scrapEnd));
+                                if (fin.length() > 0) {
+                                    // other unwanted stuff clearance
+                                    fin = fin
+                                            .trim()
+                                            .replace("<div id=\"lyricsDiv\" class=\"left\">", "")
+                                            .replace("<p id=\"view_lyrics\">", "")
+                                            .replace("</blockquote>", "")
+                                            .replace("<i>", "")
+                                            .replace("</i>", "")
+                                            .replace("<br/>", "\n")
+                                            .replace("<blockquote>", "")
+                                            .replace("<p>", "")
+                                            .replace("</div>", "")
+                                            .replace("</p>", "\n\n");
+
+                                    // set lyrics
+                                    setLyrics(context, songName, path, fin, lyrics);
+                                    Log.e("NetworkHelper", "lyrics from LyricsBoogie");
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        atozLyrics(context, artistName, songName, album, path, lyrics);
+                    }
+                });
+    }
+
+    /**
+     * Fetch Lyrics from HindiGeet
+     *
+     * @param context
+     * @param artistName
+     * @param songName
+     * @param album
+     * @param path
+     * @param lyrics
+     * @11Search
+     */
+    public static void HindiGeetLyrics(Context context, String artistName, String songName, String album, String path, TextView lyrics) {
+        String url = Constants.hindigeetUrl + "song/" + queryLyrics(songName, "_") + ".html";
+        AndroidNetworking.get(url)
+                .setPriority(Priority.HIGH)
+                .build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (!response.isEmpty()) {
+                            String scrapStart = "<pre>";
+                            String scrapEnd = "</pre>";
+                            if (response.contains(scrapStart) && response.contains(scrapEnd)) {
+                                String fin = TextUtils.substring(response, response.indexOf(scrapStart), response.indexOf(scrapEnd));
+                                if (fin.length() > 0) {
+                                    // other unwanted stuff clearance
+                                    fin = fin
+                                            .trim()
+                                            .replace("<pre>", "")
+                                            .replace("</pre>", "");
+                                    // set lyrics
+                                    setLyrics(context, songName, path, fin, lyrics);
+                                    Log.e("NetworkHelper", "lyrics from HindiGeet");
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        lyrics.setText(LyricsHelper.getInbuiltLyrics(path));
+                    }
+                });
+    }
+
+    /**
+     * Fetch Lyrics from directLyrics
+     *
+     * @param context
+     * @param artistName
+     * @param songName
+     * @param album
+     * @param path
+     * @param lyrics
+     * @10Search
+     */
+    public static void directLyrics(Context context, String artistName, String songName, String album, String path, TextView lyrics) {
+        String url = Constants.directUrl + queryLyrics(artistName, "-") + queryLyrics(songName, "-") + "-lyrics.html";
+        AndroidNetworking.get(url)
+                .setPriority(Priority.HIGH)
+                .build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (!response.isEmpty()) {
+                            String scrapStart = "<div class=\"lyrics lyricsselect\">";
+                            String scrapEnd = "<ul class=\"menu\">";
+                            if (response.contains(scrapStart) && response.contains(scrapEnd)) {
+                                String fin = TextUtils.substring(response, response.indexOf(scrapStart), response.indexOf(scrapEnd));
+                                if (fin.length() > 0) {
+                                    // other unwanted stuff clearance
+                                    fin = fin.trim()
+                                            .replace(scrapStart, "")
+                                            .replace("<br>", "")
+                                            .replace("</p>", "\n")
+                                            .replace("<p>", "")
+                                            .replace("<hr>", "")
+                                            .replace("<i>", "")
+                                            .replace("</i>", "")
+                                            .replaceAll("<a.*?</a>", "")
+                                            .replace("<div class=\"ad\">", "")
+                                            .replace("</div>", "")
+                                            .replace("<ins id=\"lyrics-inline-300x250\">", "")
+                                            .replace("</ins>", "");
+                                    StringBuffer buffer = new StringBuffer(fin);
+                                    String start = "<script>";
+                                    String end = "</script>";
+                                    if (fin.contains(start) && fin.contains(end)) {
+                                        int removeStart = fin.indexOf(start);
+                                        int removeEnd = fin.indexOf(end);
+                                        buffer = buffer.replace(removeStart, removeEnd, "");
+                                        String filter = buffer.toString();
+                                        filter = filter.replace(end, "");
+                                        // set lyrics
+                                        setLyrics(context, songName, path, filter, lyrics);
+                                        Log.e("NetworkHelper", "lyrics from Direct");
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        HindiGeetLyrics(context, artistName, songName, album, path, lyrics);
+                    }
+                });
+    }
+
+    @NonNull
+    private static String queryLyrics(String all, String replaceWord) {
+        return all
+                .trim()
+                .replaceAll("[\\\\/:*?\"<>|]", "")
+                //  .replaceAll("[^A-Za-z0-9\\[\\]]", replaceWord)
+                .replaceAll("\\s+", replaceWord)
+                .toLowerCase();
+    }
+
+    private static void setLyrics(Context context, String songName, String path, String lyrics, TextView lrcView) {
+        if (lrcView == null) {
+            return;
+        }
+        String savePath = LyricsHelper.saveLyrics(songName);
+        File file = new File(savePath);
+        Log.e("Path", savePath);
+        if (Extras.getInstance().saveLyrics()) {
+            if (!file.exists()) {
+                LyricsHelper.writeLyrics(savePath, lyrics);
+            }
+        }
+        try {
+            LyricsHelper.insertLyrics(path, lyrics);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        lrcView.setText(lyrics);
+    }
 
 }

@@ -4,10 +4,8 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
-import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -62,13 +60,14 @@ public class AlbumListFragment extends BaseRefreshFragment implements LoaderCall
     private BaseRecyclerViewAdapter.OnItemClickListener OnClick = new BaseRecyclerViewAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position, View view) {
-            Album album = albumListAdapter.getItem(position);
             switch (view.getId()) {
                 case R.id.album_artwork:
                 case R.id.item_view:
-                    if (albumListAdapter.getSnapshot().size() > 0 && position < albumListAdapter.getSnapshot().size()) {
+                    int pos = position;
+                    if (pos >= 0 && pos < albumListAdapter.getSnapshot().size()) {
+                        Album album = albumListAdapter.getItem(pos);
                         ImageView Listartwork = (ImageView) view.findViewById(R.id.album_artwork);
-                        fragTransition(album, Listartwork, "TransitionArtwork");
+                        fragTransition(album, Listartwork, "TransitionArtwork" + pos);
                     }
                     break;
             }
@@ -76,11 +75,7 @@ public class AlbumListFragment extends BaseRefreshFragment implements LoaderCall
     };
 
     private void fragTransition(Album album, ImageView imageView, String transition) {
-        ViewCompat.setTransitionName(imageView, transition);
-        if (((MainActivity) getActivity()).getMusicXService() == null) {
-            return;
-        }
-        Helper.setFragmentTransition(getActivity(), AlbumListFragment.this, AlbumFragment.newInstance(album, ((MainActivity) getActivity()).getMusicXService()), new Pair<View, String>(imageView, transition));
+        Helper.setFragmentTransition(((MainActivity) getActivity()), AlbumListFragment.this, AlbumFragment.newInstance(album), imageView, transition, "albumdetail");
     }
 
     @Override
@@ -134,6 +129,9 @@ public class AlbumListFragment extends BaseRefreshFragment implements LoaderCall
             case R.id.byfour:
                 Extras.getInstance().setAlbumGrid(4);
                 loadGridView();
+                load();
+                break;
+            case R.id.menu_refresh:
                 load();
                 break;
         }
@@ -241,8 +239,4 @@ public class AlbumListFragment extends BaseRefreshFragment implements LoaderCall
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
 }

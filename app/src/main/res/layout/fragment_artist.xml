@@ -22,12 +22,14 @@
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@android:color/transparent"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:titleEnabled="false">
 
@@ -48,9 +50,9 @@
             android:id="@+id/artistview_bio"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+              android:layout_marginTop="?attr/actionBarSize"
             android:background="@color/bgcolor"
-            android:visibility="gone"
-            android:layout_marginTop="?attr/actionBarSize">
+              android:visibility="gone">
 
             <ScrollView
               android:layout_width="match_parent"
@@ -62,9 +64,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:textSize="16sp"
                 android:text="Loading...."
-                android:textColor="@color/white"/>
+                  android:textColor="@color/white"
+                  android:textSize="16sp" />
             </ScrollView>
           </FrameLayout>
 
@@ -72,7 +74,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
+                android:background="@android:color/transparent"
                 app:layout_collapseMode="pin"
                 app:popupTheme="?attr/toolbar_popup_theme"/>
 
@@ -88,17 +90,17 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/artist_albumrv"
             android:layout_width="match_parent"
-            android:layout_marginTop="4dp"
             android:layout_height="wrap_content"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:scrollbars="none" />
+            android:layout_marginTop="4dp"
+            android:scrollbars="none"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
             android:id="@+id/songrv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fadeScrollbars="true"
             android:layout_marginTop="4dp"
+            android:fadeScrollbars="true"
             app:fastScrollAutoHide="true"
             app:fastScrollAutoHideDelay="1500"
             app:fastScrollPopupBackgroundSize="64dp"

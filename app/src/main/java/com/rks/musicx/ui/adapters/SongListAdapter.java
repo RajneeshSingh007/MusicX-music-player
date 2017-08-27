@@ -139,8 +139,8 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
                 public void palettework(Palette palette) {
                     final int[] colors = Helper.getAvailableColor(getContext(), palette);
                     holder.songView.setBackgroundColor(colors[0]);
-                    holder.SongTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent));
-                    holder.SongArtist.setTextColor(ContextCompat.getColor(getContext(), R.color.text_transparent2));
+                    holder.SongTitle.setTextColor(Helper.getTitleTextColor(colors[0]));
+                    holder.SongArtist.setTextColor(Helper.getTitleTextColor(colors[0]));
                     Helper.animateViews(getContext(), holder.itemView, colors[0]);
                 }
             }, holder.songGridArtwork);
@@ -172,6 +172,23 @@ public class SongListAdapter extends BaseRecyclerViewAdapter<Song, SongListAdapt
         data = new ArrayList<>();
         data.addAll(songList);
         notifyDataSetChanged();
+    }
+
+    @Override
+    public int getItemCount() {
+        return (null != data ? data.size() : 0);
+    }
+
+    @Override
+    public Song getItem(int position) {
+        if (data == null || data.size() < 0 || data.size() == 0) {
+            return null;
+        }
+        if (position < data.size() && position >= 0) {
+            return data.get(position);
+        } else {
+            return null;
+        }
     }
 
     public void exitMultiselectMode() {

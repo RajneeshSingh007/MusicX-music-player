@@ -134,12 +134,15 @@
 
             <TextView
                 android:id="@+id/lyrics"
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:text="Loading..."
-                android:textAlignment="center"
+                android:focusable="true"
+                android:gravity="center"
+                android:longClickable="true"
+                android:padding="4dp"
+                android:text="No Lyrics found..."
                 android:textColor="@color/white"
+                android:textIsSelectable="true"
                 android:textSize="16sp"/>
         </ScrollView>
 

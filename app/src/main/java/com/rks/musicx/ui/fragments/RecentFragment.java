@@ -3,6 +3,7 @@ package com.rks.musicx.ui.fragments;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -18,6 +19,7 @@ import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.loaders.RecentlyPlayedLoader;
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.interfaces.RefreshData;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.Extras;
 import com.rks.musicx.misc.utils.Helper;
@@ -59,13 +61,25 @@ public class RecentFragment extends BaseLoaderFragment {
 
         @Override
         public void onItemClick(int position, View view) {
+
             switch (view.getId()) {
                 case R.id.album_artwork:
                 case R.id.item_view:
                     ((MainActivity) getActivity()).onSongSelected(recentlyPlayed.getSnapshot(), position);
                     break;
                 case R.id.menu_button:
-                    helper.showMenu(false, recentloader, RecentFragment.this, RecentFragment.this, ((MainActivity) getActivity()), position, view, getContext(), recentlyPlayed);
+                    Song song = recentlyPlayed.getItem(position);
+                    helper.showMenu(false, new RefreshData() {
+                        @Override
+                        public void refresh() {
+                            getLoaderManager().restartLoader(recentloader, null, RecentFragment.this);
+                        }
+
+                        @Override
+                        public Fragment currentFrag() {
+                            return RecentFragment.this;
+                        }
+                    }, ((MainActivity) getActivity()), view, getContext(), song);
                     break;
             }
         }
@@ -81,7 +95,18 @@ public class RecentFragment extends BaseLoaderFragment {
                     ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
                     break;
                 case R.id.menu_button:
-                    helper.showMenu(false, trackloader, RecentFragment.this, RecentFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                    Song song = songListAdapter.getItem(position);
+                    helper.showMenu(false, new RefreshData() {
+                        @Override
+                        public void refresh() {
+                            getLoaderManager().restartLoader(trackloader, null, RecentFragment.this);
+                        }
+
+                        @Override
+                        public Fragment currentFrag() {
+                            return RecentFragment.this;
+                        }
+                    }, ((MainActivity) getActivity()), view, getContext(), song);
                     break;
             }
         }

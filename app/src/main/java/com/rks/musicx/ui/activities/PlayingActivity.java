@@ -10,10 +10,10 @@ import com.bumptech.glide.Glide;
 import com.rks.musicx.R;
 import com.rks.musicx.base.BaseActivity;
 import com.rks.musicx.misc.utils.Extras;
-import com.rks.musicx.ui.fragments.Playing1Fragment;
-import com.rks.musicx.ui.fragments.Playing2Fragment;
-import com.rks.musicx.ui.fragments.Playing3Fragment;
-import com.rks.musicx.ui.fragments.Playing4Fragment;
+import com.rks.musicx.ui.fragments.PlayingViews.Playing1Fragment;
+import com.rks.musicx.ui.fragments.PlayingViews.Playing2Fragment;
+import com.rks.musicx.ui.fragments.PlayingViews.Playing3Fragment;
+import com.rks.musicx.ui.fragments.PlayingViews.Playing4Fragment;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -77,7 +77,7 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
         } else if (playing4.equals(Three)) {
             Extras.getInstance().savePlayingViewTrack(false);
             setFragment(playing4Fragment);
-        }else {
+        } else {
             setFragment(playing1Fragment);
         }
     }
@@ -91,9 +91,38 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        returnHome();
+    }
+
+
+    /**
+     * Launch mainAcivity
+     */
+    public void returnHome() {
         Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+        finish();
+    }
+
+    /**
+     * Launch EqAcivity
+     */
+    public void returnEq() {
+        Intent intent = new Intent(this, EqualizerActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    /**
+     * Launch SettingsAcivity
+     */
+    public void returnSettings() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        Extras.getInstance().setNaviSettings(true);
+        finish();
     }
 
 
@@ -106,7 +135,7 @@ public class PlayingActivity extends BaseActivity implements ATEActivityThemeCus
 
     /*
     PlayingScreen Changing fragment Loader
-     */
+    */
     public void setFragment(Fragment f) {
         getSupportFragmentManager().beginTransaction().replace(R.id.playingcontainer, f).commit();
     }

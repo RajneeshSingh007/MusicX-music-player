@@ -1,6 +1,7 @@
 package com.rks.musicx.ui.fragments;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -18,6 +19,7 @@ import com.rks.musicx.base.BaseRefreshFragment;
 import com.rks.musicx.data.loaders.PlaylistLoader;
 import com.rks.musicx.data.model.Playlist;
 import com.rks.musicx.data.model.Song;
+import com.rks.musicx.interfaces.RefreshData;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
 import com.rks.musicx.misc.utils.Extras;
@@ -63,6 +65,9 @@ public class PlaylistFragment extends BaseRefreshFragment {
     private LoaderManager.LoaderCallbacks<List<Song>> playlistLoader = new LoaderCallbacks<List<Song>>() {
         @Override
         public Loader<List<Song>> onCreateLoader(int id, Bundle args) {
+            if (mPlaylist.getId() == 0) {
+                return null;
+            }
             PlaylistLoader playlistLoader = new PlaylistLoader(getContext(), mPlaylist.getId());
             if (id == trackloader) {
                 return playlistLoader;
@@ -87,12 +92,24 @@ public class PlaylistFragment extends BaseRefreshFragment {
     };
 
     private BaseRecyclerViewAdapter.OnItemClickListener mOnclick = (position, view) -> {
+
         switch (view.getId()) {
             case R.id.item_view:
                 ((MainActivity) getActivity()).onSongSelected(playlistViewAdapter.getSnapshot(), position);
                 break;
             case R.id.menu_button:
-                helper.showMenu(true, trackloader, playlistLoader, PlaylistFragment.this, ((MainActivity) getActivity()), position, view, getContext(), playlistViewAdapter);
+                Song song = playlistViewAdapter.getItem(position);
+                helper.showMenu(false, new RefreshData() {
+                    @Override
+                    public void refresh() {
+                        getLoaderManager().restartLoader(trackloader, null, playlistLoader);
+                    }
+
+                    @Override
+                    public Fragment currentFrag() {
+                        return PlaylistFragment.this;
+                    }
+                }, ((MainActivity) getActivity()), view, getContext(), song);
                 break;
         }
     };
@@ -114,7 +131,9 @@ public class PlaylistFragment extends BaseRefreshFragment {
         if (args != null) {
             long id = args.getLong(PARAM_PLAYLIST_ID);
             String name = args.getString(PARAM_PLAYLIST_NAME);
-            mPlaylist = new Playlist(id, name);
+            mPlaylist = new Playlist();
+            mPlaylist.setId(id);
+            mPlaylist.setName(name);
         }
     }
 

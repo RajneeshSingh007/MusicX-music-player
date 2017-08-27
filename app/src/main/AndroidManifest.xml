@@ -20,7 +20,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.BROADCAST_STICKY"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -64,9 +64,7 @@
         <!-- Services -->
         <service
             android:name=".services.MusicXService"
-            android:enabled="true"
-            android:exported="false"
-            android:stopWithTask="false"/>
+            android:enabled="true" />
 
         <!--- Receiver -->
         <receiver android:name=".ui.homeWidget.MusicxWidget4x2"
@@ -102,11 +100,8 @@
                 android:resource="@xml/musicxwidget5x5"/>
         </receiver>
 
-        <receiver
-            android:name=".services.MediaButtonReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
+        <receiver android:name=".services.MediaButtonReceiver">
+            <intent-filter android:priority="1001">
                 <action android:name="android.intent.action.MEDIA_BUTTON"/>
             </intent-filter>
         </receiver>
@@ -128,34 +123,11 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
+                <data android:scheme="content" />
                 <data android:scheme="file" />
                 <data android:mimeType="audio/*" />
-                <data android:mimeType="application/ogg" />
-                <data android:mimeType="application/x-ogg" />
-                <data android:mimeType="application/itunes" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" />
-                <data android:mimeType="audio/*" />
-                <data android:mimeType="application/ogg" />
-                <data android:mimeType="application/x-ogg" />
-                <data android:mimeType="application/itunes" />
-            </intent-filter>
-            <intent-filter android:priority="-1">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="content" />
-                <data android:mimeType="audio/*" />
-                <data android:mimeType="application/ogg" />
-                <data android:mimeType="application/x-ogg" />
-                <data android:mimeType="application/itunes" />
             </intent-filter>
         </activity>
 
@@ -194,6 +166,17 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="6352a699c9e586afdb2512798e97b88777c73fc7" />
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.rks.musicx.fileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
+
     </application>
 
 </manifest>

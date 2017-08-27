@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -330,8 +331,11 @@ class ExpandCollapseWidget extends ImageView implements PlaybackState.PlaybackSt
             } else {
                 drawable = drawables[i];
             }
-            drawable.setBounds(buttonBounds[i]);
-            drawable.draw(canvas);
+            Bitmap bitmap = DrawableUtils.drawableToBitmap(drawable);
+            if (bitmap != null && !bitmap.isRecycled()) {
+                drawable.setBounds(buttonBounds[i]);
+                drawable.draw(canvas);
+            }
         }
     }
 

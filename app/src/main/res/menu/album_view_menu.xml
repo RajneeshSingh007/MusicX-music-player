@@ -25,6 +25,10 @@
         app:showAsAction="always"/>
 
     <item
+        android:id="@+id/menu_refresh"
+        android:title="Refresh" />
+
+    <item
         android:id="@+id/menu_sort_by"
         android:title="@string/menu_sort_by"
         app:showAsAction="never">

@@ -1,6 +1,7 @@
 package com.rks.musicx.ui.fragments;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -17,6 +18,7 @@ import com.rks.musicx.base.BaseLoaderFragment;
 import com.rks.musicx.base.BaseRecyclerViewAdapter;
 import com.rks.musicx.data.model.Song;
 import com.rks.musicx.database.CommonDatabase;
+import com.rks.musicx.interfaces.RefreshData;
 import com.rks.musicx.misc.utils.Constants;
 import com.rks.musicx.misc.utils.CustomLayoutManager;
 import com.rks.musicx.misc.utils.DividerItemDecoration;
@@ -58,7 +60,18 @@ public class FavFragment extends BaseLoaderFragment implements SearchView.OnQuer
                 ((MainActivity) getActivity()).onSongSelected(songListAdapter.getSnapshot(), position);
                 break;
             case R.id.menu_button:
-                helper.showMenu(false, favloader, FavFragment.this, FavFragment.this, ((MainActivity) getActivity()), position, view, getContext(), songListAdapter);
+                Song song = songListAdapter.getItem(position);
+                helper.showMenu(false, new RefreshData() {
+                    @Override
+                    public void refresh() {
+                        getLoaderManager().restartLoader(trackloader, null, FavFragment.this);
+                    }
+
+                    @Override
+                    public Fragment currentFrag() {
+                        return FavFragment.this;
+                    }
+                }, ((MainActivity) getActivity()), view, getContext(), song);
                 break;
         }
     };
@@ -137,6 +150,8 @@ public class FavFragment extends BaseLoaderFragment implements SearchView.OnQuer
         searchView.setQueryHint("Search song");
         menu.findItem(R.id.grid_view).setVisible(false);
         menu.findItem(R.id.menu_sort_by).setVisible(false);
+        menu.findItem(R.id.default_folder).setVisible(false);
+        menu.findItem(R.id.menu_refresh).setVisible(false);
     }
 
     @Override
@@ -169,7 +184,7 @@ public class FavFragment extends BaseLoaderFragment implements SearchView.OnQuer
 
     @Override
     protected int getLimit() {
-        return 0;
+        return -1;
     }
 
     @Override

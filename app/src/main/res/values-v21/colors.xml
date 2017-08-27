@@ -34,8 +34,7 @@
     <color name="lightBg">#fafafa</color>
     <color name="darkBg">#1d1d1d</color>
     <color name="text_transparent">#dcffffff</color>
-    <color name="text_transparent2">#beffffff</color>
-  <color name="colorPrimaryDark">#0f4574</color>
+    <color name="colorPrimaryDark">#0f4574</color>
     <color name="memory_status_color">#3fa19f</color>
     <color name="memory_bar_color">#ff9c40</color>
     <color name="new_folder_color">#c14b84</color>
