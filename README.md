@@ -51,7 +51,7 @@ style="max_width:25%;">
 
 # Library
 <p>
-- <a href="https://github.com/RajneeshSingh007/MusicX-Music-Player/blob/master/app/src/main/assets/licenses.md"><b>Library List</b></a>
+- <a href="https://github.com/RajneeshSingh007/MusicX-Music-Player/blob/master/app/src/main/assets/licenses.html"><b>Library List</b></a>
  </p>
  
 # Contact 
@@ -59,7 +59,9 @@ style="max_width:25%;">
 
 # Api Provider 
 - Last.fm
-- Vagalume.br
+<p>
+- <a href="https://github.com/RajneeshSingh007/MusicX-Music-Player/blob/master/app/src/main/assets/Lyrics_api.html"><b>Lyrics Api</b></a>
+ </p>
 
 # Special Thanks
 - Also, Thanks To StackOverflow and Slack Developers.
@@ -68,13 +70,6 @@ style="max_width:25%;">
 - Feel free to fork this project and fix bugs.
 
 # License
-<pre>©2017 Rajneesh Singh 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-    http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.</pre>
+<p>
+- <a href="https://github.com/RajneeshSingh007/MusicX-Music-Player/blob/master/LICENSE.md"><b>Licenses</b></a>
+ </p>
