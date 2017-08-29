@@ -128,6 +128,8 @@ public class LyricsHelper {
                             lyrics = tag.getFirst(FieldKey.LYRICS);
                             //lyrics = lyrics.replaceAll("\n", "</br>");
                             return lyrics;
+                        } else {
+                            return "No Lyrics found";
                         }
                     }
                 } catch (CannotReadException | ReadOnlyFileException | InvalidAudioFrameException | TagException | IOException e) {

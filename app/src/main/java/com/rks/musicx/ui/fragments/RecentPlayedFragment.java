@@ -72,7 +72,7 @@ public class RecentPlayedFragment extends BaseLoaderFragment implements SearchVi
                     helper.showMenu(false, new RefreshData() {
                         @Override
                         public void refresh() {
-                            getLoaderManager().restartLoader(trackloader, null, RecentPlayedFragment.this);
+                            load();
                         }
 
                         @Override

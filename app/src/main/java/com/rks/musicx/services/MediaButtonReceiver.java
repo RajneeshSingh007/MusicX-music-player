@@ -26,6 +26,10 @@ import com.rks.musicx.misc.utils.Constants;
  * limitations under the License.
  */
 
+/**
+ * @ Thanks to phonograph for button fixes
+ */
+
 public class MediaButtonReceiver extends WakefulBroadcastReceiver {
 
     private static final int MSG_HEADSET_DOUBLE_CLICK_TIMEOUT = 2;
@@ -88,7 +92,7 @@ public class MediaButtonReceiver extends WakefulBroadcastReceiver {
         if (mWakeLock == null) {
             Context appContext = context.getApplicationContext();
             PowerManager pm = (PowerManager) appContext.getSystemService(Context.POWER_SERVICE);
-            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Phonograph headset button");
+            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Musicx headset button");
             mWakeLock.setReferenceCounted(false);
         }
         // Make sure we don't indefinitely hold the wake lock under any circumstances
