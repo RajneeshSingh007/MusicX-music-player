@@ -54,16 +54,7 @@ import java.io.InputStream;
 public class ArtworkUtils {
 
 
-    private static ArtworkUtils sInstance = null;
-
     public ArtworkUtils() {
-        if (sInstance == null){
-            sInstance = new ArtworkUtils();
-        }
-    }
-
-    public static ArtworkUtils getInstance() {
-        return sInstance;
     }
 
     /**
@@ -88,288 +79,151 @@ public class ArtworkUtils {
         return file;
     }
 
-    /**
-     * Artist artwork from musicx/.artistArtwork folder
-     * @param context
-     * @param artist
-     * @return
-     */
-    public static File getArtistCoverPath(Context context, String artist) {
-        String artistImagePath = new Helper(context).loadArtistImage(artist);
-        File file = new File(artistImagePath);
-        return file;
-    }
-
-    /**
-     * Return albumArtwork name
-     * @param context
-     * @param album
-     * @return
-     */
-    public static String getAlbumFileName(Context context, String album){
-        String filename = getAlbumCoverPath(context, album).getName();
-        int pos = filename.lastIndexOf(".");
-        String justName = pos > 0 ? filename.substring(0, pos) : filename;
-        return justName;
-    }
-
-    /**
-     * Return artistArtwork name
-     * @param context
-     * @param artist
-     * @return
-     */
-    public static String getArtistFileName(Context context, String artist){
-        String filename = getArtistCoverPath(context, artist).getName();
-        int pos = filename.lastIndexOf(".");
-        String justName = pos > 0 ? filename.substring(0, pos) : filename;
-        return justName;
+    private static int returnSize() {
+        int size;
+        if (Extras.getInstance().getHdArtwork()) {
+            size = 600;
+            return size;
+        } else {
+            size = 300;
+            return size;
+        }
     }
 
     /**
      * Bitmap Artwork with path
      * @param context
-     * @param size
-     * @param bigsize
      * @param path
      * @param palettework
      * @param bitmapwork
      * @return
      */
-    private static Target loadArtwork(Context context, int size, int bigsize, String path, palette palettework, bitmap bitmapwork) {
-        if (Extras.getInstance().getHdArtwork()){
-            return Glide.with(context)
-                    .load(path)
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .error(R.mipmap.ic_launcher)
-                    .format(DecodeFormat.PREFER_ARGB_8888)
-                    .fitCenter()
-                    .override(bigsize, bigsize)
-                    .listener(GlidePalette.with(path).intoCallBack(new BitmapPalette.CallBack() {
-                        @Override
-                        public void onPaletteLoaded(@Nullable Palette palette) {
-                            palettework.palettework(palette);
-                        }
-                    }))
-                    .into(new SimpleTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            bitmapwork.bitmapwork(optimizeBitmap(resource, bigsize));
-                        }
+    private static Target loadArtwork(Context context, String path, palette palettework, bitmap bitmapwork) {
+        return Glide.with(context)
+                .load(path)
+                .asBitmap()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.mipmap.ic_launcher)
+                .format(DecodeFormat.PREFER_ARGB_8888)
+                .fitCenter()
+                .override(returnSize(), returnSize())
+                .listener(GlidePalette.with(path).intoCallBack(new BitmapPalette.CallBack() {
+                    @Override
+                    public void onPaletteLoaded(@Nullable Palette palette) {
+                        palettework.palettework(palette);
+                    }
+                }))
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                        bitmapwork.bitmapwork(optimizeBitmap(resource, returnSize()));
+                    }
 
-                        @Override
-                        public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                            bitmapwork.bitmapfailed(drawableToBitmap(errorDrawable));
-                        }
+                    @Override
+                    public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                        bitmapwork.bitmapfailed(drawableToBitmap(errorDrawable));
+                    }
 
-                    });
-        }else {
-            return Glide.with(context)
-                    .load(path)
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .error(R.mipmap.ic_launcher)
-                    .format(DecodeFormat.PREFER_ARGB_8888)
-                    .fitCenter()
-                    .override(size, size)
-                    .listener(GlidePalette.with(path).intoCallBack(new BitmapPalette.CallBack() {
-                        @Override
-                        public void onPaletteLoaded(@Nullable Palette palette) {
-                            palettework.palettework(palette);
-                        }
-                    }))
-                    .into(new SimpleTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            bitmapwork.bitmapwork(optimizeBitmap(resource, size));
-                        }
-
-                        @Override
-                        public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                            bitmapwork.bitmapfailed(drawableToBitmap(errorDrawable));
-                        }
-
-                    });
-        }
+                });
     }
 
     /**
      * Bitmap Artwork with albumID
      * @param context
-     * @param size
-     * @param bigsize
      * @param key
      * @param palettework
      * @param bitmapwork
      * @return
      */
-    private static Target loadArtwork(Context context, int size, int bigsize, long key, palette palettework, bitmap bitmapwork) {
-        if (Extras.getInstance().getHdArtwork()){
-            return Glide.with(context)
-                    .load(uri(key))
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
-                    .override(bigsize, bigsize)
-                    .error(R.mipmap.ic_launcher)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .fitCenter()
-                    .format(DecodeFormat.PREFER_ARGB_8888)
-                    .listener(GlidePalette.with(uri(key).toString()).intoCallBack(new BitmapPalette.CallBack() {
-                        @Override
-                        public void onPaletteLoaded(@Nullable Palette palette) {
-                            palettework.palettework(palette);
-                        }
-                    }))
-                    .into(new SimpleTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            bitmapwork.bitmapwork(optimizeBitmap(resource, bigsize));
-                        }
+    private static Target loadArtwork(Context context, long key, palette palettework, bitmap bitmapwork) {
+        return Glide.with(context)
+                .load(uri(key))
+                .asBitmap()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .override(returnSize(), returnSize())
+                .error(R.mipmap.ic_launcher)
+                .placeholder(R.mipmap.ic_launcher)
+                .fitCenter()
+                .format(DecodeFormat.PREFER_ARGB_8888)
+                .listener(GlidePalette.with(uri(key).toString()).intoCallBack(new BitmapPalette.CallBack() {
+                    @Override
+                    public void onPaletteLoaded(@Nullable Palette palette) {
+                        palettework.palettework(palette);
+                    }
+                }))
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                        bitmapwork.bitmapwork(optimizeBitmap(resource, returnSize()));
+                    }
 
-                        @Override
-                        public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                            bitmapwork.bitmapfailed(drawableToBitmap(errorDrawable));
-                        }
+                    @Override
+                    public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                        bitmapwork.bitmapfailed(drawableToBitmap(errorDrawable));
+                    }
 
-                    });
-        }else {
-            return Glide.with(context)
-                    .load(uri(key))
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
-                    .override(size, size)
-                    .error(R.mipmap.ic_launcher)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .fitCenter()
-                    .format(DecodeFormat.PREFER_ARGB_8888)
-                    .listener(GlidePalette.with(uri(key).toString()).intoCallBack(new BitmapPalette.CallBack() {
-                        @Override
-                        public void onPaletteLoaded(@Nullable Palette palette) {
-                            palettework.palettework(palette);
-                        }
-                    }))
-                    .into(new SimpleTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            bitmapwork.bitmapwork(optimizeBitmap(resource, size));
-                        }
-
-                        @Override
-                        public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                            bitmapwork.bitmapfailed(drawableToBitmap(errorDrawable));
-                        }
-
-                    });
-        }
+                });
     }
 
 
     /**
      * Load Artwork
      * @param context
-     * @param size
-     * @param bigsize
      * @param key
      * @param palettework
      * @param imageView
      * @return
      */
-    private static Target loadArtwork(Context context, int size, int bigsize, long key, palette palettework, ImageView imageView) {
-        if (Extras.getInstance().getHdArtwork()){
-            return Glide.with(context)
-                    .load(uri(key))
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
-                    .override(bigsize, bigsize)
-                    .error(R.mipmap.ic_launcher)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .fitCenter()
-                    .format(DecodeFormat.PREFER_ARGB_8888)
-                    .listener(GlidePalette.with(uri(key).toString()).intoCallBack(new BitmapPalette.CallBack() {
-                        @Override
-                        public void onPaletteLoaded(@Nullable Palette palette) {
-                            palettework.palettework(palette);
-                        }
-                    }))
-                    .into(imageView);
-        }else {
-            return Glide.with(context)
-                    .load(uri(key))
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
-                    .override(size, size)
-                    .error(R.mipmap.ic_launcher)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .fitCenter()
-                    .format(DecodeFormat.PREFER_ARGB_8888)
-                    .listener(GlidePalette.with(uri(key).toString()).intoCallBack(new BitmapPalette.CallBack() {
-                        @Override
-                        public void onPaletteLoaded(@Nullable Palette palette) {
-                            palettework.palettework(palette);
-                        }
-                    }))
-                    .into(imageView);
-        }
+    private static Target loadArtwork(Context context, long key, palette palettework, ImageView imageView) {
+        return Glide.with(context)
+                .load(uri(key))
+                .asBitmap()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .override(returnSize(), returnSize())
+                .error(R.mipmap.ic_launcher)
+                .placeholder(R.mipmap.ic_launcher)
+                .fitCenter()
+                .format(DecodeFormat.PREFER_ARGB_8888)
+                .listener(GlidePalette.with(uri(key).toString()).intoCallBack(new BitmapPalette.CallBack() {
+                    @Override
+                    public void onPaletteLoaded(@Nullable Palette palette) {
+                        palettework.palettework(palette);
+                    }
+                }))
+                .into(imageView);
     }
 
 
     /**
      * Load Artwork
      * @param context
-     * @param size
-     * @param bigsize
      * @param path
      * @param palettework
      * @param imageView
      * @return
      */
-    private static Target loadArtwork(Context context, int size, int bigsize, String path, palette palettework, ImageView imageView) {
-        if (Extras.getInstance().getHdArtwork()){
-            return Glide.with(context)
-                    .load(path)
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .error(R.mipmap.ic_launcher)
-                    .format(DecodeFormat.PREFER_ARGB_8888)
-                    .fitCenter()
-                    .override(bigsize, bigsize)
-                    .listener(GlidePalette.with(path).intoCallBack(new BitmapPalette.CallBack() {
-                        @Override
-                        public void onPaletteLoaded(@Nullable Palette palette) {
-                            palettework.palettework(palette);
-                        }
-                    }))
-                    .into(imageView);
-        }else {
-            return Glide.with(context)
-                    .load(path)
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .error(R.mipmap.ic_launcher)
-                    .format(DecodeFormat.PREFER_ARGB_8888)
-                    .fitCenter()
-                    .override(size, size)
-                    .listener(GlidePalette.with(path).intoCallBack(new BitmapPalette.CallBack() {
-                        @Override
-                        public void onPaletteLoaded(@Nullable Palette palette) {
-                            palettework.palettework(palette);
-                        }
-                    }))
-                    .into(imageView);
-        }
+    private static Target loadArtwork(Context context, String path, palette palettework, ImageView imageView) {
+        return Glide.with(context)
+                .load(path)
+                .asBitmap()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.mipmap.ic_launcher)
+                .format(DecodeFormat.PREFER_ARGB_8888)
+                .fitCenter()
+                .override(returnSize(), returnSize())
+                .listener(GlidePalette.with(path).intoCallBack(new BitmapPalette.CallBack() {
+                    @Override
+                    public void onPaletteLoaded(@Nullable Palette palette) {
+                        palettework.palettework(palette);
+                    }
+                }))
+                .into(imageView);
     }
 
     /**
@@ -384,9 +238,9 @@ public class ArtworkUtils {
     public static void ArtworkLoader(Context context, int size, int bigsize, String album, long key, palette palettework, bitmap bitmapwork) {
         if (Extras.getInstance().getDownloadedArtwork()){
             Helper helper = new Helper(context);
-            loadArtwork(context, size, bigsize, helper.loadAlbumImage(album), palettework, bitmapwork);
+            loadArtwork(context, helper.loadAlbumImage(album), palettework, bitmapwork);
         }else {
-            loadArtwork(context, size, bigsize, key, palettework, bitmapwork);
+            loadArtwork(context, key, palettework, bitmapwork);
         }
     }
 
@@ -402,9 +256,9 @@ public class ArtworkUtils {
     public static void ArtworkLoader(Context context, int size, int bigsize, String album, long key, palette palettework, ImageView imageView) {
         if (Extras.getInstance().getDownloadedArtwork()){
             Helper helper = new Helper(context);
-            loadArtwork(context, size, bigsize, helper.loadAlbumImage(album), palettework, imageView);
+            loadArtwork(context, helper.loadAlbumImage(album), palettework, imageView);
         }else {
-            loadArtwork(context, size, bigsize, key, palettework, imageView);
+            loadArtwork(context, key, palettework, imageView);
         }
     }
 
@@ -418,7 +272,7 @@ public class ArtworkUtils {
      * @param imageView
      */
     public static void ArtworkLoader(Context context, int size, int bigsize,String path, palette palettework, ImageView imageView) {
-        loadArtwork(context, size, bigsize, path, palettework, imageView);
+        loadArtwork(context, path, palettework, imageView);
     }
 
     private static AsyncTask<Drawable, Void, Drawable> getBlurArtwork(Context context, int radius, Bitmap bitmap, ImageView imageView, int scale) {
