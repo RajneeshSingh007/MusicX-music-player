@@ -9,7 +9,7 @@
 
 # Features
 - Floating widget let you enjoy your music anywhere.
-- A prefect guided meditation music player.
+- The best guided meditation music player.
 - 4 beautiful, cool playing views.
 - Search Millions of lyrics.
 - Lyrics support, save lyrics for offline.
