@@ -1,7 +1,7 @@
 # MusicX Music Player
 
 # Introduction
-- Simple, Elegant, Beautiful Material Design Music Player
+- Soulfull, Simple, Elegant, Beautiful Material Design Music Player
 
 # Download
 
@@ -9,6 +9,7 @@
 
 # Features
 - Floating widget let you enjoy your music anywhere.
+- A prefect guided meditation music player.
 - 4 beautiful, cool playing views.
 - Search Millions of lyrics.
 - Lyrics support, save lyrics for offline.
